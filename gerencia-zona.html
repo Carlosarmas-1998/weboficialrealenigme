@@ -760,6 +760,15 @@ async function guardarCoordinador() {
       } catch(ve) { console.warn('vendedora entry:', ve); }
 
       suc.textContent = 'Coordinador asignado. Codigo: ' + codigo;
+      // Send welcome email
+      var coordEmail = document.getElementById('coordEmail').value.trim();
+      var coordNombre = document.getElementById('coordNombre').value.trim();
+      if (coordEmail) {
+        fetch(SB + '/functions/v1/send-welcome-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'coordinador', nombre: coordNombre, email: coordEmail, codigo: codigo })
+        }).catch(function(){});
+      }
     }
 
     setTimeout(function(){ cerrarModalCoord(); loadSectores(); }, 1200);

@@ -903,7 +903,8 @@
     // ═══════════════════════════════════════════════════════
     const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
-    const TASA_CAMBIO_CHECKOUT = 31.50;
+    const TASA_CAMBIO_CHECKOUT = 31.50; // HNL to EUR
+    const TASA_HNL_USD = 24.80; // HNL to USD (approx)
 
     // Stripe Checkout via Supabase Edge Function (secure, fixed prices)
     const STRIPE_CHECKOUT_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co/functions/v1/stripe-checkout';
@@ -1390,14 +1391,22 @@
         const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
 
         // Build items with FIXED prices for Stripe
+        // HNL is NOT supported by Stripe, so we convert to USD for Honduras payments
+        const stripeCurrency = moneda === 'EUR' ? 'eur' : 'usd';
         const stripeItems = cart.map(item => {
           const rawPrice = parseInt(item.price.replace(/\D/g, '')) || 0;
-          const priceInCurrency = moneda === 'EUR' ? psychologicalPrice(rawPrice / TASA_CAMBIO_CHECKOUT) : rawPrice;
+          let priceForStripe;
+          if (moneda === 'EUR') {
+            priceForStripe = psychologicalPrice(rawPrice / TASA_CAMBIO_CHECKOUT);
+          } else {
+            // Convert HNL to USD for Stripe (HNL not supported)
+            priceForStripe = Math.round((rawPrice / TASA_HNL_USD) * 100) / 100;
+          }
           return {
             name: item.name,
             ref: item.ref || '',
             qty: item.qty || 1,
-            price: priceInCurrency,
+            price: priceForStripe,
             image: item.img && item.img.startsWith('http') ? item.img : undefined
           };
         });
@@ -1413,7 +1422,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: stripeItems,
-            currency: moneda,
+            currency: stripeCurrency,
             customer_email: data.correo,
             customer_name: data.nombre,
             order_id: orderId,

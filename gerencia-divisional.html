@@ -734,6 +734,16 @@ async function guardarGerenteZona() {
     });
 
     suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
+    // Send welcome email
+    if (email) {
+      var deptoNombre = '';
+      var deptoSel = document.getElementById('gzDepto');
+      if (deptoSel.selectedIndex > 0) deptoNombre = deptoSel.options[deptoSel.selectedIndex].text;
+      fetch(SB + '/functions/v1/send-welcome-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'gerente_zona', nombre: nombre, email: email, codigo: codigo, zona: zonaNombre, departamento: deptoNombre })
+      }).catch(function(){});
+    }
     cancelFormGZ();
     document.getElementById('gzSuccess').textContent = suc.textContent;
     loadGerentesZona();

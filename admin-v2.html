@@ -1450,6 +1450,16 @@ async function crearGerenciaDivisional() {
       return;
     }
     showToast('Gerencia divisional creada exitosamente');
+    // Send welcome email
+    if (email) {
+      var deptoNombre = '';
+      var deptoSel = document.getElementById('gdDepto');
+      if (deptoSel.selectedIndex > 0) deptoNombre = deptoSel.options[deptoSel.selectedIndex].text;
+      fetch(SUPA_URL + '/functions/v1/send-welcome-email', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'gerencia_divisional', nombre: nombre, email: email, codigo: codigo, departamento: deptoNombre })
+      }).catch(function(){});
+    }
     document.getElementById('gdFormWrap').style.display = 'none';
     ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('gdDepto').value = '';
