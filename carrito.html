@@ -669,9 +669,8 @@
       </div>
 
       <div class="stripe-notice" id="stripe-notice-block">
-        <strong>AVISO STRIPE:</strong> Al hacer clic en "Pagar con Tarjeta", será redirigido a nuestra pasarela bancaria.<br><br>
-        Usted deberá ingresar manualmente el importe exacto de: <strong style="font-size: 0.8rem;" id="stripe-amount-notice">L 0</strong> para completar el pedido.<br>
-        <span id="stripe-currency-hint" style="font-size:0.55rem;color:var(--gris-suave);"></span>
+        <strong>PAGO SEGURO STRIPE:</strong> Al hacer clic en "Pagar con Tarjeta", será redirigido a la pasarela bancaria con el importe exacto de su pedido.<br>
+        <span style="font-size:0.6rem;color:var(--dorado);margin-top:4px;display:block;">Total a cobrar: <strong style="font-size: 0.8rem;" id="stripe-amount-notice">L 0</strong></span>
       </div>
 
       <div class="payment-methods">
@@ -906,9 +905,8 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
     const TASA_CAMBIO_CHECKOUT = 31.50;
 
-    // Stripe Payment Links (monto abierto = customer chooses price)
-    const STRIPE_LINK_HNL = 'https://buy.stripe.com/fZu00j1Ia3e37YueBm4sE09';
-    const STRIPE_LINK_EUR = 'https://buy.stripe.com/8x2dR9gD4bKz2Ea1OA4sE08';
+    // Stripe Checkout via Supabase Edge Function (secure, fixed prices)
+    const STRIPE_CHECKOUT_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co/functions/v1/stripe-checkout';
 
     function supaFetch(path, opts = {}) {
       return fetch(SUPABASE_URL + '/rest/v1' + path, {
@@ -1370,14 +1368,14 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // processStripeOrder — Guarda en Supabase + redirige a Stripe Payment Link
+    // processStripeOrder — Guarda en Supabase + crea Stripe Checkout Session segura
     // ═══════════════════════════════════════════════════════
     async function processStripeOrder() {
       const data = validateForm(); if(!data) return;
       const order = getOrderDetails();
       const btnStripe = document.querySelector('.btn-checkout.stripe');
       const originalText = btnStripe.innerHTML;
-      btnStripe.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span class="spinner-btn"></span>Procesando pedido...</span>';
+      btnStripe.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span class="spinner-btn"></span>Procesando pago seguro...</span>';
       btnStripe.style.pointerEvents = "none";
 
       const orderId = (typeof ENIGME !== 'undefined' && typeof ENIGME.generateOrderId === 'function')
@@ -1391,22 +1389,59 @@
         const displayTotal = moneda === 'EUR' ? totalEUR : totalHNL;
         const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
 
+        // Build items with FIXED prices for Stripe
+        const stripeItems = cart.map(item => {
+          const rawPrice = parseInt(item.price.replace(/\D/g, '')) || 0;
+          const priceInCurrency = moneda === 'EUR' ? psychologicalPrice(rawPrice / TASA_CAMBIO_CHECKOUT) : rawPrice;
+          return {
+            name: item.name,
+            ref: item.ref || '',
+            qty: item.qty || 1,
+            price: priceInCurrency,
+            image: item.img && item.img.startsWith('http') ? item.img : undefined
+          };
+        });
+
         // Save order items for receipt
         const orderItems = cart.map(item => ({
           name: item.name, ref: item.ref, qty: item.qty, price: parseInt(item.price.replace(/\D/g, ''))
         }));
 
-        // 1. Save to Supabase (goes directly to admin)
+        // 1. Create Stripe Checkout Session via Edge Function (SECURE - prices set server-side)
+        const checkoutRes = await fetch(STRIPE_CHECKOUT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: stripeItems,
+            currency: moneda,
+            customer_email: data.correo,
+            customer_name: data.nombre,
+            order_id: orderId,
+            shipping_address: data.direccion + ', ' + data.departamento
+          })
+        });
+
+        const checkoutData = await checkoutRes.json();
+
+        if (checkoutData.error) {
+          throw new Error(checkoutData.error);
+        }
+
+        if (!checkoutData.url) {
+          throw new Error('No se pudo crear la sesión de pago');
+        }
+
+        // 2. Save to Supabase
         await guardarPedidoEnSupabase(data, order, orderId, 'Stripe');
 
-        // 2. Save to local historial
+        // 3. Save to local historial
         guardarEnHistorial(data, order, 'tarjeta');
         const orderRecord = createOrderRecord(orderId, data.departamento, orderItems, order.totalGlobal, 'Tarjeta');
         const activeOrders = getActiveOrders();
         activeOrders.push(orderRecord);
         saveActiveOrders(activeOrders);
 
-        // 3. Email notification to admin
+        // 4. Email notification to admin (fire and forget)
         fetch("https://formsubmit.co/ajax/info@enigmeofficial.com", {
           method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
@@ -1418,37 +1453,20 @@
           })
         }).catch(() => {});
 
-        // 4. Save pending order for receipt display when returning + tracking
+        // 5. Save pending order for receipt on return
         localStorage.setItem('enigme_pending_order', JSON.stringify({
           orderId, nombre: data.nombre, moneda, displayTotal,
-          items: orderItems, totalHNL, totalEUR
+          items: orderItems, totalHNL, totalEUR,
+          stripe_session_id: checkoutData.sessionId
         }));
         localStorage.setItem('enigme_last_order_id', orderId);
 
-        // 5. Generate PDF receipt
-        if(typeof ENIGME !== 'undefined' && typeof ENIGME.generateOrderPDF === 'function') {
-          const pdfDoc = ENIGME.generateOrderPDF({
-            orderId, clientName: data.nombre, clientEmail: data.correo,
-            clientPhone: data.telefono, department: data.departamento,
-            address: data.direccion, items: orderItems,
-            total: displayTotal, paymentMethod: 'Stripe (' + moneda + ')',
-            date: new Date().toLocaleDateString('es', {day:'2-digit', month:'2-digit', year:'numeric'})
-          });
-          ENIGME.showPDFModal(pdfDoc);
-        }
-
-        // 6. Open Stripe Payment Link in new tab (correct currency)
-        const stripeLink = moneda === 'EUR' ? STRIPE_LINK_EUR : STRIPE_LINK_HNL;
-        setTimeout(() => {
-          window.open(stripeLink, '_blank');
-          // Show receipt on current page
-          setTimeout(() => { checkStripeReturn(); }, 500);
-        }, 1500); // Small delay to let PDF modal appear first
+        // 6. Redirect to Stripe Checkout (secure page with exact prices)
+        window.location.href = checkoutData.url;
 
       } catch (err) {
         console.error('Error procesando pedido:', err);
-        alert('Error de conexión. Verifique su internet e intente de nuevo.');
-      } finally {
+        alert('Error al procesar el pago: ' + (err.message || 'Verifique su internet e intente de nuevo.'));
         btnStripe.innerHTML = originalText;
         btnStripe.style.pointerEvents = "auto";
       }
@@ -1473,15 +1491,7 @@
     }
 
     function updateCurrencyHint() {
-      const moneda = getCartCurrency();
-      const hint = document.getElementById('stripe-currency-hint');
-      if (hint) {
-        if (moneda === 'EUR') {
-          hint.textContent = 'Sera redirigido a la pasarela en Euros (EUR)';
-        } else {
-          hint.textContent = 'Sera redirigido a la pasarela en Lempiras (HNL)';
-        }
-      }
+      // Currency hint no longer needed - Stripe Checkout handles it automatically
     }
 
     const lightbox = document.getElementById('lightbox');
