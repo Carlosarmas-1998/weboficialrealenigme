@@ -38,6 +38,21 @@
      2. PDF RECEIPT GENERATOR (jsPDF)
   ========================================================== */
 
+  // Psychological pricing: display prices ending in 9 (matches enigme-core.js)
+  function psychologicalPrice(price) {
+    var rounded = Math.round(price);
+    if (rounded <= 0) return price;
+    if (rounded < 10) return 9;
+    var lastDigit = rounded % 10;
+    if (lastDigit <= 4) {
+      var result = rounded - lastDigit - 1;
+      return result <= 0 ? 9 : result;
+    } else if (lastDigit >= 5 && lastDigit < 9) {
+      return rounded + (9 - lastDigit);
+    }
+    return rounded;
+  }
+
   function generateOrderPDF(orderData) {
     if (typeof window.jspdf === "undefined" && typeof window.jsPDF === "undefined") {
       alert("Error: jsPDF no est\u00e1 cargado. Aseg\u00farate de incluir la librer\u00eda.");
@@ -165,10 +180,11 @@
       doc.text(String(item.ref || "").substring(0, 12), colRef, y + 5);
       doc.text(String(item.name || "").substring(0, 38), colProd, y + 5);
       doc.text(String(item.qty || 1), colQty + 4, y + 5);
-      var unitPrice = parseFloat(item.price || 0) * currRate;
-      doc.text(currSymbol + " " + unitPrice.toLocaleString(currLocale, { minimumFractionDigits: 2 }), colUnit, y + 5);
+      var unitPriceRaw = parseFloat(item.price || 0) * currRate;
+      var unitPrice = (currRate !== 1) ? psychologicalPrice(unitPriceRaw) : unitPriceRaw;
+      doc.text(currSymbol + " " + unitPrice.toFixed(2), colUnit, y + 5);
       var subtotal = (item.qty || 1) * unitPrice;
-      doc.text(currSymbol + " " + subtotal.toLocaleString(currLocale, { minimumFractionDigits: 2 }), colSub, y + 5);
+      doc.text(currSymbol + " " + subtotal.toFixed(2), colSub, y + 5);
       y += 7;
 
       if (y > 250) {
