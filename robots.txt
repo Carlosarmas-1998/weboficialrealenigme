@@ -6,7 +6,6 @@ Allow: /boutique.html
 Allow: /plata.html
 Allow: /liquidacion.html
 Allow: /enigme.html
-Allow: /fundador.html
 Allow: /certificado.html
 Allow: /trabaja.html
 Allow: /contactos.html
@@ -30,4 +29,4 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 2
 
-Sitemap: https://enigmeofficial.com/sitemap.xml
+Sitemap: https://weboficialrealenigme.vercel.app/sitemap.xml
