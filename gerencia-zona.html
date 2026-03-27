@@ -76,6 +76,11 @@
     .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:0.75rem;transition:all .3s;}
     .react-btn:hover,.react-btn.reacted{background:rgba(203,170,99,0.15);border-color:var(--dorado);}
 
+    .msg-left{align-self:flex-start;max-width:75%;background:var(--surface);border:1px solid var(--borde);border-radius:4px 12px 12px 0;}
+    .msg-right{align-self:flex-end;max-width:75%;background:rgba(203,170,99,0.10);border:1px solid var(--dorado);border-radius:12px 4px 0 12px;}
+    .msg-sender{font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:600;}
+    .msg-right .msg-sender{color:var(--dorado);}
+
     .prof-card{background:rgba(203,170,99,0.08);border:1px solid var(--dorado);border-radius:4px;padding:14px;margin:10px 0;display:none;}
     .prof-card.visible{display:block;}
     .prof-card p{font-size:0.8rem;margin:2px 0;}.prof-card strong{color:var(--dorado);}
@@ -269,6 +274,18 @@
 
     <div class="stats-grid" id="resStats"></div>
 
+    <!-- COMISIONES -->
+    <div class="card" style="border-left:4px solid var(--dorado);">
+      <div class="card-title" style="display:flex;align-items:center;gap:8px;">&#128176; Comisiones de Zona (3% Venta Neta)</div>
+      <div class="stats-grid" id="resComisionStats"></div>
+      <div style="overflow-x:auto;margin-top:12px;">
+        <table>
+          <thead><tr><th>Sector</th><th>Coordinador</th><th>Venta Neta</th><th>Aporte Comisi&oacute;n (3%)</th></tr></thead>
+          <tbody id="resComisionTable"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Ventas por Sector</div>
       <div style="overflow-x:auto;">
@@ -293,9 +310,27 @@
 
   <!-- ══ TAB 5: MENSAJERÍA ══ -->
   <div class="tab-panel" id="panel-mensajeria">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mensajes de Gerencia Divisional</h2>
-    <div class="msg-feed" id="gzMsgFeed">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Conversaci&oacute;n con Gerencia Divisional</h2>
+
+    <div class="msg-feed" id="gzMsgFeed" style="display:flex;flex-direction:column;gap:12px;">
       <p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p>
+    </div>
+
+    <!-- Compose message -->
+    <div class="card" style="margin-top:16px;position:sticky;bottom:0;z-index:10;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <textarea id="gzMsgTexto" rows="3" placeholder="Escribe un mensaje a Gerencia Divisional..." style="width:100%;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;resize:vertical;background:var(--marfil);transition:border-color .3s;" onfocus="this.style.borderColor='var(--dorado)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+            &#128247; Adjuntar fotos (m&aacute;x 3)
+            <input type="file" id="gzMsgFotos" accept="image/*" multiple style="display:none;"/>
+          </label>
+          <div id="gzMsgFotosPreview" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+          <button class="btn" onclick="enviarMensajeZona()">Enviar</button>
+        </div>
+        <p id="gzMsgError" class="error-msg"></p>
+        <p id="gzMsgSuccess" class="success-msg"></p>
+      </div>
     </div>
   </div>
 
@@ -432,7 +467,7 @@ async function guardarSector() {
   var suc = document.getElementById('secSuccess');
   err.textContent = ''; suc.textContent = '';
 
-  if (sectores.length >= 15) { err.textContent = 'Máximo 15 sectores permitidos.'; return; }
+  if (sectores.length >= 14) { err.textContent = 'Máximo 14 sectores permitidos.'; return; }
 
   var nombre = document.getElementById('secNombre').value.trim();
   var dni = document.getElementById('secDni').value.trim();
@@ -837,6 +872,8 @@ async function loadResumen() {
     }
   });
 
+  var comisionTotal = totalNeto * 0.03;
+
   document.getElementById('resStats').innerHTML =
     '<div class="stat-card"><div class="stat-value">' + pedidos.length + '</div><div class="stat-label">Total Pedidos</div></div>' +
     '<div class="stat-card"><div class="stat-value">' + nombramientos.length + '</div><div class="stat-label">Nombramientos</div></div>' +
@@ -850,13 +887,23 @@ async function loadResumen() {
 
   var sectorLabels = [], sectorVentas = [];
   var rows = '';
+  var comisionRows = '';
   Object.keys(sectorStats).forEach(function(sId) {
     var s = sectorStats[sId];
     sectorLabels.push('S' + s.num);
     sectorVentas.push(s.bruta);
     rows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + (coordMap[sId] || '-') + '</td><td>' + s.pedidos + '</td><td>L ' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td>L ' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    var sectorComision = s.neta * 0.03;
+    comisionRows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + (coordMap[sId] || '-') + '</td><td>L ' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td style="color:var(--dorado);font-weight:600;">L ' + sectorComision.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
   document.getElementById('resTable').innerHTML = rows;
+
+  // Commission section
+  document.getElementById('resComisionStats').innerHTML =
+    '<div class="stat-card" style="border:2px solid var(--dorado);"><div class="stat-value" style="font-size:1.8rem;">L ' + comisionTotal.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Tu Comisi&oacute;n Total (3%)</div></div>' +
+    '<div class="stat-card"><div class="stat-value">L ' + totalNeto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta de Zona</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + sectores.length + '</div><div class="stat-label">Sectores Activos</div></div>';
+  document.getElementById('resComisionTable').innerHTML = comisionRows;
 
   // Charts
   renderResCharts(sectorLabels, sectorVentas, ano);
@@ -903,63 +950,175 @@ async function renderResCharts(sectorLabels, sectorVentas, ano) {
 }
 
 // ══════════════════════════════════════════
-// TAB 5: MENSAJERÍA (solo lectura + reacciones)
+// TAB 5: MENSAJERÍA (bidireccional)
 // ══════════════════════════════════════════
+
+// Photo preview for compose
+(function() {
+  setTimeout(function() {
+    var inp = document.getElementById('gzMsgFotos');
+    if (inp) inp.addEventListener('change', function() {
+      var prev = document.getElementById('gzMsgFotosPreview');
+      prev.innerHTML = '';
+      var files = this.files;
+      for (var i = 0; i < Math.min(files.length, 3); i++) {
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(files[i]);
+        img.style.cssText = 'width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--borde);';
+        prev.appendChild(img);
+      }
+    });
+  }, 300);
+})();
+
 async function loadMensajesGZ() {
   if (!session.gerencia_divisional_id) {
     document.getElementById('gzMsgFeed').innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin mensajes disponibles.</p>';
     return;
   }
 
-  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id)&order=created_at.desc');
-  if (mensajes.error) {
-    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.desc');
-  }
+  // Load divisional messages
+  var divMensajes = [];
+  try {
+    divMensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id)&order=created_at.asc');
+    if (divMensajes.error) {
+      divMensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.asc');
+    }
+  } catch(e) { divMensajes = []; }
+
+  // Load zona messages
+  var zonaMensajes = [];
+  try {
+    zonaMensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + session.id + '&gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_zona_fotos(*)&order=created_at.asc');
+    if (zonaMensajes.error) {
+      zonaMensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + session.id + '&gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.asc');
+      if (zonaMensajes.error) zonaMensajes = [];
+    }
+  } catch(e) { zonaMensajes = []; }
+
+  // Merge and sort by date
+  var allMsgs = [];
+  (Array.isArray(divMensajes) ? divMensajes : []).forEach(function(m) {
+    m._tipo = 'divisional';
+    allMsgs.push(m);
+  });
+  (Array.isArray(zonaMensajes) ? zonaMensajes : []).forEach(function(m) {
+    m._tipo = 'zona';
+    allMsgs.push(m);
+  });
+  allMsgs.sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
 
   var feed = document.getElementById('gzMsgFeed');
-  if (!mensajes.length) {
-    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes de Gerencia Divisional aún.</p>';
+  if (!allMsgs.length) {
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a&uacute;n. Inicia la conversaci&oacute;n.</p>';
     return;
   }
 
-  feed.innerHTML = mensajes.map(function(m) {
+  feed.innerHTML = allMsgs.map(function(m) {
+    var isZona = m._tipo === 'zona';
+    var cssClass = isZona ? 'msg-item msg-right' : 'msg-item msg-left';
+    var senderLabel = isZona ? 'T&uacute; (' + session.nombre + ')' : 'Gerencia Divisional';
+
     var fotos = '';
-    if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
+    if (!isZona && m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
       fotos = '<div class="msg-photos">' + m.mensajes_divisional_fotos.map(function(f) {
         return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
       }).join('') + '</div>';
     }
+    if (isZona && m.mensajes_zona_fotos && m.mensajes_zona_fotos.length) {
+      fotos = '<div class="msg-photos">' + m.mensajes_zona_fotos.map(function(f) {
+        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
+      }).join('') + '</div>';
+    }
 
-    var totalReactions = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
-    var yaReacciono = false;
-    if (m.mensajes_reacciones) {
-      m.mensajes_reacciones.forEach(function(r) { if (r.gerente_zona_id === session.id) yaReacciono = true; });
+    // Heart reactions (only for divisional messages)
+    var reactHtml = '';
+    if (!isZona) {
+      var totalReactions = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
+      var yaReacciono = false;
+      if (m.mensajes_reacciones) {
+        m.mensajes_reacciones.forEach(function(r) { if (r.gerente_zona_id === session.id) yaReacciono = true; });
+      }
+      var reactClass = yaReacciono ? 'react-btn reacted' : 'react-btn';
+      reactHtml = '<button class="' + reactClass + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')" ' + (yaReacciono ? 'title="Ya reaccionaste"' : '') + '>&#10084;&#65039; ' + totalReactions + '</button>';
     }
 
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    var reactClass = yaReacciono ? 'react-btn reacted' : 'react-btn';
 
-    return '<div class="msg-item">' +
-      '<div class="msg-text">' + m.texto.replace(/\n/g, '<br>') + '</div>' +
+    return '<div class="' + cssClass + '">' +
+      '<div class="msg-sender">' + senderLabel + '</div>' +
+      '<div class="msg-text">' + (m.texto || '').replace(/\n/g, '<br>') + '</div>' +
       fotos +
       '<div class="msg-meta">' +
         '<span>' + fecha + '</span>' +
-        '<div class="msg-reactions">' +
-          '<button class="' + reactClass + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')" ' + (yaReacciono ? 'title="Ya reaccionaste"' : '') + '>&#10084;&#65039; ' + totalReactions + '</button>' +
-        '</div>' +
+        '<div class="msg-reactions">' + reactHtml + '</div>' +
       '</div></div>';
   }).join('');
+
+  // Scroll to bottom
+  feed.scrollTop = feed.scrollHeight;
+}
+
+async function enviarMensajeZona() {
+  var err = document.getElementById('gzMsgError');
+  var suc = document.getElementById('gzMsgSuccess');
+  err.textContent = ''; suc.textContent = '';
+
+  var texto = document.getElementById('gzMsgTexto').value.trim();
+  if (!texto) { err.textContent = 'Escribe un mensaje.'; return; }
+  if (!session.gerencia_divisional_id) { err.textContent = 'No tienes una Gerencia Divisional asignada.'; return; }
+
+  try {
+    var msg = await apiPost('/rest/v1/mensajes_zona', {
+      gerente_zona_id: session.id,
+      gerencia_divisional_id: session.gerencia_divisional_id,
+      texto: texto
+    });
+
+    var msgId = msg[0] ? msg[0].id : null;
+
+    // Upload photos
+    if (msgId) {
+      var files = document.getElementById('gzMsgFotos').files;
+      for (var f = 0; f < Math.min(files.length, 3); f++) {
+        var file = files[f];
+        var ext = file.name.split('.').pop();
+        var path = 'mensajes_zona/' + msgId + '/' + (f + 1) + '.' + ext;
+        var upRes = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+          method: 'POST',
+          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
+          body: file
+        });
+
+        if (upRes.ok) {
+          var fotoUrl = SB + '/storage/v1/object/public/archivos-corporativos/' + path;
+          await apiPost('/rest/v1/mensajes_zona_fotos', {
+            mensaje_zona_id: msgId,
+            url_foto: fotoUrl
+          });
+        }
+      }
+    }
+
+    document.getElementById('gzMsgTexto').value = '';
+    document.getElementById('gzMsgFotos').value = '';
+    document.getElementById('gzMsgFotosPreview').innerHTML = '';
+    suc.textContent = 'Mensaje enviado.';
+    setTimeout(function() { suc.textContent = ''; }, 2000);
+    loadMensajesGZ();
+  } catch(e) {
+    err.textContent = e.message || 'Error al enviar mensaje.';
+    console.error(e);
+  }
 }
 
 async function toggleReaction(msgId, yaReacciono) {
   try {
     if (yaReacciono) {
-      // Remove reaction
       await fetch(SB + '/rest/v1/mensajes_reacciones?mensaje_id=eq.' + msgId + '&gerente_zona_id=eq.' + session.id, {
         method: 'DELETE', headers: H
       });
     } else {
-      // Add reaction
       await apiPost('/rest/v1/mensajes_reacciones', {
         mensaje_id: msgId,
         gerente_zona_id: session.id,

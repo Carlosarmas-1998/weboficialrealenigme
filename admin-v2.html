@@ -191,6 +191,7 @@
   <div class="nav-item" data-tab="gerencia" onclick="switchTab('gerencia')">Gerencia Div.</div>
   <div class="nav-item" data-tab="ventas_corp" onclick="switchTab('ventas_corp')">Ventas Corp.</div>
   <div class="nav-item" data-tab="msg_admin" onclick="switchTab('msg_admin')">Mensajer&iacute;a</div>
+  <div class="nav-item" data-tab="comisiones" onclick="switchTab('comisiones')">Comisiones</div>
   <div class="sidebar-footer">
     <button class="logout-btn" onclick="doLogout()">Cerrar Sesi&oacute;n</button>
   </div>
@@ -391,6 +392,45 @@
     <div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Ventas <em style="color:var(--gold);font-style:italic;">Web</em> (Tienda Online)</h3>
       <div class="stats-row" id="vcStatsWeb"></div>
+    </div>
+  </div>
+
+  <!-- TAB: COMISIONES -->
+  <div class="tab-content" id="tab-comisiones">
+    <div class="page-header">
+      <div class="page-title"><h1>Comis<em>iones</em></h1><p>Estructura de comisiones y distribuci&oacute;n</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="loadComisiones()"><span>Refrescar</span></button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="comisionesStats"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+      <div style="background:var(--surface);border:1px solid var(--border);padding:20px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;margin-bottom:12px;color:var(--gold);">Distribuci&oacute;n de Comisiones</div>
+        <div style="position:relative;height:320px;"><canvas id="chartComisionesPie"></canvas></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);padding:20px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;margin-bottom:12px;color:var(--gold);">Montos por Categor&iacute;a</div>
+        <div style="position:relative;height:320px;"><canvas id="chartComisionesBar"></canvas></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Estructura de <em style="color:var(--gold);font-style:italic;">Comisiones</em> (100%)</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concepto</th><th>Porcentaje</th><th>Monto (sobre venta neta total)</th></tr></thead>
+        <tbody id="comisionesEstructuraBody"></tbody>
+      </table></div>
+    </div>
+
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Desglose por <em style="color:var(--gold);font-style:italic;">Gerencia Divisional</em></h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Comisi&oacute;n GD (4%)</th><th>Comisi&oacute;n GZ (3%)</th><th>Comisi&oacute;n Asesoras (18%)</th><th>Comisi&oacute;n Ger. Gral. (7%)</th></tr></thead>
+        <tbody id="comisionesDesglose"></tbody>
+      </table></div>
     </div>
   </div>
 
@@ -755,28 +795,72 @@ async function loadPedidos() {
 }
 
 async function changePedidoStatus(id, newStatus, oldStatus) {
-  var result = await supaPatch('web_pedidos', id, { estado: newStatus });
-  if (result) {
-    // Insert history record
-    await supaPost('web_pedido_historial', {
-      pedido_id: id,
-      estado_anterior: oldStatus || null,
-      estado_nuevo: newStatus,
-      cambiado_por: 'admin'
+  try {
+    // Step 1: Update pedido status
+    var patchRes = await fetch(SUPA_URL + '/rest/v1/web_pedidos?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ estado: newStatus })
     });
-    // Insert notification
-    var pedido = cachedPedidos.find(function(p){ return p.id === id; });
-    var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + id;
-    await supaPost('web_notificaciones', {
-      pedido_codigo: codigo,
-      tipo: 'estado',
-      mensaje: 'Pedido ' + codigo + ' cambiado a: ' + newStatus,
-      leida: false
-    });
+    if (!patchRes.ok) {
+      var patchErr = await patchRes.text();
+      console.error('changePedidoStatus PATCH error:', patchRes.status, patchErr);
+      showToast('Error al actualizar estado: ' + patchRes.status, true);
+      return;
+    }
+    var patchData = await patchRes.json();
+    console.log('changePedidoStatus PATCH ok:', patchData);
+
+    // Step 2: Insert history record
+    try {
+      var histData = {
+        pedido_id: parseInt(id),
+        estado_anterior: oldStatus || null,
+        estado_nuevo: newStatus,
+        cambiado_por: 'admin'
+      };
+      var histRes = await fetch(SUPA_URL + '/rest/v1/web_pedido_historial', {
+        method: 'POST',
+        headers: supaHeaders(),
+        body: JSON.stringify(histData)
+      });
+      if (!histRes.ok) {
+        var histErr = await histRes.text();
+        console.warn('web_pedido_historial insert failed:', histRes.status, histErr);
+      } else {
+        console.log('web_pedido_historial insert ok');
+      }
+    } catch(histEx) {
+      console.warn('web_pedido_historial exception:', histEx);
+    }
+
+    // Step 3: Insert notification
+    try {
+      var pedido = cachedPedidos.find(function(p){ return p.id === id || p.id === parseInt(id); });
+      var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + id;
+      var notifRes = await fetch(SUPA_URL + '/rest/v1/web_notificaciones', {
+        method: 'POST',
+        headers: supaHeaders(),
+        body: JSON.stringify({
+          pedido_codigo: codigo,
+          tipo: 'estado',
+          mensaje: 'Pedido ' + codigo + ' cambiado a: ' + newStatus,
+          leida: false
+        })
+      });
+      if (!notifRes.ok) {
+        var notifErr = await notifRes.text();
+        console.warn('web_notificaciones insert failed:', notifRes.status, notifErr);
+      }
+    } catch(notifEx) {
+      console.warn('web_notificaciones exception:', notifEx);
+    }
+
     showToast('Estado actualizado: ' + newStatus);
     loadPedidos();
     loadNotificaciones();
-  } else {
+  } catch(e) {
+    console.error('changePedidoStatus exception:', e);
     showToast('Error al actualizar estado', true);
   }
 }
@@ -1300,7 +1384,7 @@ function renderGerencias() {
       '<td>' + (g.telefono || '-') + '</td>' +
       '<td>' + (g.dni || '-') + '</td>' +
       '<td>' + (g.departamento_id ? (deptosMap[g.departamento_id] || '-') : '-') + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:6px;"><input type="text" id="gdPw_' + g.id + '" value="' + esc(g.password_temporal || '') + '" style="width:120px;padding:4px 6px;font-size:.75rem;"/><button class="btn btn-sm" style="padding:3px 8px;font-size:.55rem;" onclick="changeGdPassword(\'' + g.id + '\')"><span>Cambiar</span></button></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:6px;"><input type="text" id="gdPw_' + g.id + '" value="' + esc(g.password_temporal || '') + '" style="width:120px;padding:4px 6px;font-size:.75rem;" onkeydown="if(event.key===\'Enter\')changeGdPassword(\'' + g.id + '\')"/><button class="btn btn-gold btn-sm" style="padding:3px 10px;font-size:.55rem;" onclick="changeGdPassword(\'' + g.id + '\')"><span>OK</span></button></div></td>' +
       '<td>' + estado + '</td>' +
       '<td><button class="btn" style="padding:4px 10px;font-size:.6rem;" onclick="toggleGerencia(\'' + g.id + '\',' + !g.activo + ')"><span>' + (g.activo ? 'Desactivar' : 'Activar') + '</span></button></td>' +
       '</tr>';
@@ -1344,9 +1428,25 @@ async function crearGerenciaDivisional() {
 async function changeGdPassword(id) {
   var input = document.getElementById('gdPw_' + id);
   var newPw = input ? input.value.trim() : '';
-  if (!newPw || newPw.length < 6) { showToast('La contraseña debe tener al menos 6 caracteres', true); return; }
-  var result = await supaPatch('gerencias_divisionales', id, { password_temporal: newPw });
-  if (result) { showToast('Contraseña actualizada'); } else { showToast('Error al cambiar contraseña', true); }
+  if (!newPw || newPw.length < 6) { showToast('La contrasena debe tener al menos 6 caracteres', true); return; }
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ password_temporal: newPw })
+    });
+    if (res.ok) {
+      showToast('Contrasena actualizada correctamente');
+      if (input) { input.style.borderColor = 'var(--success)'; setTimeout(function(){ input.style.borderColor = ''; }, 2000); }
+    } else {
+      var errData = await res.text();
+      console.error('changeGdPassword error:', res.status, errData);
+      showToast('Error al cambiar contrasena: ' + res.status, true);
+    }
+  } catch(e) {
+    console.error('changeGdPassword exception:', e);
+    showToast('Error de conexion al cambiar contrasena', true);
+  }
 }
 
 async function toggleGerencia(id, nuevoEstado) {
@@ -1367,6 +1467,7 @@ switchTab = function(tab) {
   origSwitchTab(tab);
   if (tab === 'gerencia') loadGerenciasDivisionales();
   if (tab === 'ventas_corp') loadVentasCorp();
+  if (tab === 'comisiones') loadComisiones();
   if (tab === 'msg_admin') loadMsgAdmin();
 };
 
@@ -1528,21 +1629,58 @@ async function renderAdminCharts(gStats, gerenteToGerencia, ano) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e8e0d4', font: { size: 11 } } } } }
   });
 
-  // 3. Tendencia: Corp vs Web por mes (line)
-  // Simplified: show corp by campaign + web total
+  // 3. Tendencia: Corp vs Web por mes (line) - also compute web sales by month
+  var webPedidos = await supaGet('web_pedidos', '&order=created_at.desc');
+  var monthLabels = [];
+  var corpByMonth = {};
+  var webByMonth = {};
+  var months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  for (var mi = 0; mi < 12; mi++) {
+    var label = months[mi] + ' ' + ano;
+    monthLabels.push(label);
+    corpByMonth[mi] = 0;
+    webByMonth[mi] = 0;
+  }
+  // Corp by month
+  var allPedCorp = await supaGet('pedidos', '&ano=eq.' + ano);
+  allPedCorp.forEach(function(p) {
+    var d = p.created_at ? new Date(p.created_at) : null;
+    if (d && d.getFullYear() === ano) {
+      corpByMonth[d.getMonth()] += parseFloat(p.subtotal_catalogo || 0);
+    }
+  });
+  // Web by month
+  webPedidos.forEach(function(p) {
+    var d = p.created_at ? new Date(p.created_at) : null;
+    if (d && d.getFullYear() === ano) {
+      var tot = parseFloat(p.total) || 0;
+      webByMonth[d.getMonth()] += tot;
+    }
+  });
+  var corpMonthData = monthLabels.map(function(l,idx){return corpByMonth[idx];});
+  var webMonthData = monthLabels.map(function(l,idx){return webByMonth[idx];});
+
   if (adminChartTendencia) adminChartTendencia.destroy();
   adminChartTendencia = new Chart(document.getElementById('adminChartTendencia'), {
     type: 'line',
     data: {
-      labels: campLabels,
+      labels: monthLabels,
       datasets: [{
         label: 'Venta Corp. (L)',
-        data: campVentas,
+        data: corpMonthData,
         borderColor: '#c9a96e',
         backgroundColor: 'rgba(201,169,110,0.1)',
         fill: true,
         tension: 0.3,
         pointBackgroundColor: '#c9a96e'
+      },{
+        label: 'Venta Web (L)',
+        data: webMonthData,
+        borderColor: '#5a8fa0',
+        backgroundColor: 'rgba(90,143,160,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: '#5a8fa0'
       }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#e8e0d4' } } }, scales: { x: { ticks: { color: '#6b6259' }, grid: { color: '#222' } }, y: { ticks: { color: '#6b6259' }, grid: { color: '#222' } } } }
@@ -1592,17 +1730,132 @@ async function loadGdMessages(gdId) {
   });
 
   feed.innerHTML = msgs.map(function(m) {
-    var isAdmin = m.gerencia_divisional_id !== gdId; // admin msgs won't have gdId... actually all msgs have gdId
-    // We'll distinguish by a field or just show all as feed
+    var emisor = (m.emisor || '').toUpperCase();
+    var isAdmin = emisor === 'ADMIN';
     var fotosHtml = '';
     if (fotoMap[m.id]) {
       fotosHtml = '<div style="display:flex;gap:6px;margin-top:6px;">' + fotoMap[m.id].map(function(u) {
         return '<img src="' + u + '" style="max-height:100px;border-radius:4px;cursor:pointer;" onclick="window.open(this.src)"/>';
       }).join('') + '</div>';
     }
-    return '<div class="chat-msg admin" style="max-width:90%;align-self:flex-start;">' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-meta">' + formatDate(m.created_at) + '</div></div>';
+    if (isAdmin) {
+      return '<div class="chat-msg admin" style="max-width:85%;align-self:flex-end;background:rgba(201,169,110,.15);color:var(--gold);border:1px solid rgba(201,169,110,.2);">' +
+        esc(m.texto).replace(/\n/g,'<br>') + fotosHtml +
+        '<div class="chat-meta" style="text-align:right;">Admin - ' + formatDate(m.created_at) + '</div></div>';
+    } else {
+      return '<div class="chat-msg cliente" style="max-width:85%;align-self:flex-start;background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border);">' +
+        esc(m.texto).replace(/\n/g,'<br>') + fotosHtml +
+        '<div class="chat-meta">Gerencia Div. - ' + formatDate(m.created_at) + '</div></div>';
+    }
   }).join('');
   feed.scrollTop = feed.scrollHeight;
+}
+
+// ========== COMISIONES ==========
+var chartComisionesPie = null, chartComisionesBar = null;
+
+var COMISION_ESTRUCTURA = [
+  { concepto: 'Gerencia Divisional', pct: 4, color: '#c9a96e' },
+  { concepto: 'Gerencia de Zona', pct: 3, color: '#6b9e78' },
+  { concepto: 'Gastos de Produccion', pct: 45, color: '#5a8fa0' },
+  { concepto: 'Gastos Varios', pct: 10, color: '#9e6b6b' },
+  { concepto: 'Comision Asesoras', pct: 18, color: '#b08fd0' },
+  { concepto: 'Comision Gerencia General', pct: 7, color: '#d0a84f' },
+  { concepto: 'Bienes de Empresa', pct: 13, color: '#8b7355' }
+];
+
+async function loadComisiones() {
+  var ano = new Date().getFullYear();
+  var gerencias = await supaGet('gerencias_divisionales', '&order=nombre');
+  var gerentes = await supaGet('gerentes_zona', '&select=id,nombre,gerencia_divisional_id');
+  var pedidos = await supaGet('pedidos', '&ano=eq.' + ano);
+
+  var gerenteToGerencia = {};
+  gerentes.forEach(function(g) { gerenteToGerencia[g.id] = g.gerencia_divisional_id; });
+
+  var gStats = {};
+  gerencias.forEach(function(gd) {
+    gStats[gd.id] = { nombre: gd.nombre, codigo: gd.codigo, neta: 0, gerentesCount: 0 };
+  });
+  gerentes.forEach(function(g) {
+    if (g.gerencia_divisional_id && gStats[g.gerencia_divisional_id]) {
+      gStats[g.gerencia_divisional_id].gerentesCount++;
+    }
+  });
+
+  var totalNeta = 0;
+  pedidos.forEach(function(p) {
+    var gdId = gerenteToGerencia[p.gerente_id];
+    var neta = parseFloat(p.total_venta_neta || 0);
+    if (gdId && gStats[gdId]) gStats[gdId].neta += neta;
+    totalNeta += neta;
+  });
+
+  // Stats row
+  document.getElementById('comisionesStats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GD (4%)</div><div class="stat-value">L' + (totalNeta*0.04).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GZ (3%)</div><div class="stat-value">L' + (totalNeta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. Asesoras (18%)</div><div class="stat-value">L' + (totalNeta*0.18).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (7%)</div><div class="stat-value">L' + (totalNeta*0.07).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+
+  // Estructura table
+  var estHtml = '';
+  var totalPct = 0;
+  COMISION_ESTRUCTURA.forEach(function(c) {
+    var monto = totalNeta * (c.pct / 100);
+    totalPct += c.pct;
+    estHtml += '<tr><td>' + esc(c.concepto) + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '%</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  });
+  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">' + totalPct + '%</td><td style="font-weight:500;color:var(--gold);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  document.getElementById('comisionesEstructuraBody').innerHTML = estHtml;
+
+  // Desglose per gerencia
+  var desHtml = '';
+  Object.keys(gStats).forEach(function(gdId) {
+    var s = gStats[gdId];
+    desHtml += '<tr>' +
+      '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
+      '<td>L' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.04).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.18).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.07).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '</tr>';
+  });
+  if (!desHtml) desHtml = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
+  document.getElementById('comisionesDesglose').innerHTML = desHtml;
+
+  // Pie chart
+  if (chartComisionesPie) chartComisionesPie.destroy();
+  chartComisionesPie = new Chart(document.getElementById('chartComisionesPie'), {
+    type: 'doughnut',
+    data: {
+      labels: COMISION_ESTRUCTURA.map(function(c){return c.concepto;}),
+      datasets: [{
+        data: COMISION_ESTRUCTURA.map(function(c){return c.pct;}),
+        backgroundColor: COMISION_ESTRUCTURA.map(function(c){return c.color;}),
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#e8e0d4', font: { size: 10 }, padding: 10 } } } }
+  });
+
+  // Bar chart - amounts per category
+  if (chartComisionesBar) chartComisionesBar.destroy();
+  chartComisionesBar = new Chart(document.getElementById('chartComisionesBar'), {
+    type: 'bar',
+    data: {
+      labels: COMISION_ESTRUCTURA.map(function(c){return c.concepto;}),
+      datasets: [{
+        label: 'Monto (L)',
+        data: COMISION_ESTRUCTURA.map(function(c){return totalNeta * (c.pct/100);}),
+        backgroundColor: COMISION_ESTRUCTURA.map(function(c){return c.color;}),
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#6b6259' }, grid: { color: '#222' } }, y: { ticks: { color: '#e8e0d4', font: { size: 10 } }, grid: { color: '#222' } } } }
+  });
 }
 
 async function sendAdminMsg() {
@@ -1615,6 +1868,7 @@ async function sendAdminMsg() {
   try {
     var msgData = await supaPost('mensajes_divisional', {
       gerencia_divisional_id: selectedGdId,
+      emisor: 'ADMIN',
       texto: texto
     });
 

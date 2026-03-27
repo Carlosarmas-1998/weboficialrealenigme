@@ -55,13 +55,24 @@
 
     .chart-container{position:relative;height:300px;margin:20px 0;}
 
-    .msg-feed{max-height:600px;overflow-y:auto;padding-right:8px;}
-    .msg-item{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:16px;margin-bottom:12px;}
-    .msg-text{font-size:0.85rem;line-height:1.7;margin-bottom:8px;}
-    .msg-photos{display:flex;gap:8px;margin-bottom:8px;}
-    .msg-photos img{max-width:200px;max-height:150px;border-radius:4px;object-fit:cover;cursor:pointer;}
-    .msg-meta{font-size:0.65rem;color:var(--gris);display:flex;justify-content:space-between;align-items:center;}
-    .msg-reactions{display:flex;align-items:center;gap:4px;font-size:0.75rem;}
+    /* ── CHAT STYLES ── */
+    .chat-container{display:flex;flex-direction:column;height:500px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);overflow:hidden;}
+    .chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .chat-bubble{max-width:75%;padding:12px 16px;border-radius:12px;font-size:0.85rem;line-height:1.6;position:relative;word-wrap:break-word;}
+    .chat-bubble.divisional{align-self:flex-end;background:var(--dorado);color:var(--carbon);border-bottom-right-radius:4px;}
+    .chat-bubble.admin{align-self:flex-start;background:var(--surface);color:var(--carbon);border:1px solid var(--borde);border-bottom-left-radius:4px;}
+    .chat-bubble .chat-sender{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;opacity:0.7;}
+    .chat-bubble .chat-time{font-size:0.6rem;opacity:0.6;margin-top:6px;text-align:right;}
+    .chat-bubble .chat-photos{display:flex;gap:6px;margin-top:8px;}
+    .chat-bubble .chat-photos img{max-width:180px;max-height:130px;border-radius:6px;object-fit:cover;cursor:pointer;}
+    .chat-input-bar{display:flex;gap:8px;padding:12px;background:var(--surface);border-top:1px solid var(--borde);align-items:flex-end;}
+    .chat-input-bar textarea{flex:1;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:none;min-height:44px;max-height:100px;outline:none;background:var(--marfil);border-radius:4px;}
+    .chat-input-bar textarea:focus{border-color:var(--dorado);}
+
+    /* ── COMISIONES CARD ── */
+    .comision-highlight{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);}
+    .comision-highlight .stat-value{color:var(--dorado);font-size:2.2rem;}
+    .comision-highlight .stat-label{color:rgba(250,249,246,0.7);}
 
     .multiselect{border:1px solid var(--borde);background:var(--marfil);max-height:180px;overflow-y:auto;padding:8px;}
     .multiselect label{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.8rem;cursor:pointer;}
@@ -84,6 +95,7 @@
       .container{padding:20px 12px;}
       .form-grid{grid-template-columns:1fr;}
       .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .chat-bubble{max-width:90%;}
     }
   </style>
 </head>
@@ -105,7 +117,7 @@
 
 <div class="container">
 
-  <!-- ══ TAB: GERENTES DE ZONA ══ -->
+  <!-- TAB: GERENTES DE ZONA -->
   <div class="tab-panel active" id="panel-gerentes">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Gerentes de Zona</h2>
@@ -133,7 +145,7 @@
       </div>
 
       <div style="margin-top:14px;">
-        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios (seleccione los que abarcará esta zona) *</label>
+        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios (seleccione los que abarcar&aacute; esta zona) *</label>
         <div class="multiselect" id="gzMunicipios">
           <p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>
         </div>
@@ -157,19 +169,44 @@
     </div>
   </div>
 
-  <!-- ══ TAB: DASHBOARD ══ -->
+  <!-- TAB: DASHBOARD -->
   <div class="tab-panel" id="panel-dashboard">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Dashboard por Campa&ntilde;a</h2>
       <div style="display:flex;gap:10px;align-items:center;">
         <select id="dashCampana" onchange="loadDashboard()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
-          <option value="">Seleccione campaña</option>
+          <option value="">Seleccione campa&ntilde;a</option>
         </select>
         <span id="dashAno" style="font-size:0.75rem;color:var(--gris);"></span>
       </div>
     </div>
 
     <div class="stats-grid" id="dashStats"></div>
+
+    <!-- COMISIONES SECTION -->
+    <div id="comisionesSection" style="display:none;">
+      <div class="card comision-highlight" style="margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;">
+          <div style="text-align:center;">
+            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Tu Comisi&oacute;n Divisional (4% Venta Neta)</div>
+            <div class="stat-value" id="comisionDivisional">L 0.00</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Total Comisiones Pagadas (GZ 3% + Divisional 4%)</div>
+            <div class="stat-value" id="totalComisiones" style="font-size:1.6rem;">L 0.00</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Comisiones por Gerente de Zona (3% Venta Neta de su Zona)</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Gerente</th><th>Zona</th><th>Venta Neta Zona</th><th>Comisi&oacute;n GZ (3%)</th></tr></thead>
+            <tbody id="comisionesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">Detalle por Gerente de Zona</div>
@@ -197,27 +234,25 @@
     </div>
   </div>
 
-  <!-- ══ TAB: MENSAJERÍA ══ -->
+  <!-- TAB: MENSAJERIA (BIDIRECTIONAL CHAT) -->
   <div class="tab-panel" id="panel-mensajeria">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;margin-bottom:20px;">Centro de Mensajer&iacute;a</h2>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerencia General</h2>
 
-    <div class="card">
-      <div class="card-title">Nuevo Mensaje</div>
-      <textarea class="textarea" id="msgTexto" placeholder="Escriba su mensaje para todos los gerentes de zona..."></textarea>
-      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-          Adjuntar Fotos (m&aacute;x 2)
+    <div class="chat-container">
+      <div class="chat-feed" id="chatFeed">
+        <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.85rem;">Cargando mensajes...</p>
+      </div>
+      <div class="chat-input-bar">
+        <label style="cursor:pointer;display:flex;align-items:center;padding:8px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);" title="Adjuntar fotos (max 2)">
+          &#128247;
           <input type="file" id="msgFotos" accept="image/*" multiple style="display:none;" onchange="previewFotos(this)"/>
         </label>
-        <div id="msgFotosPreview" style="display:flex;gap:8px;"></div>
-        <button class="btn" onclick="enviarMensaje()" style="margin-left:auto;">Enviar</button>
+        <div id="msgFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
+        <textarea id="msgTexto" placeholder="Escriba su mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensaje();}"></textarea>
+        <button class="btn" onclick="enviarMensaje()" style="white-space:nowrap;">Enviar</button>
       </div>
-      <p id="msgError" class="error-msg"></p>
     </div>
-
-    <div class="msg-feed" id="msgFeed">
-      <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.85rem;">Cargando mensajes...</p>
-    </div>
+    <p id="msgError" class="error-msg"></p>
   </div>
 
 </div>
@@ -239,6 +274,7 @@ var campanas = [];
 var chartComparativa = null;
 var chartDistribucion = null;
 var chartTendencia = null;
+var msgPollingInterval = null;
 
 // ── INIT ──
 (function init() {
@@ -253,6 +289,7 @@ var chartTendencia = null;
 })();
 
 function logout() {
+  if (msgPollingInterval) clearInterval(msgPollingInterval);
   localStorage.removeItem('enigme_gd_session');
   window.location.href = 'index.html';
 }
@@ -263,7 +300,20 @@ function switchTab(tab) {
   event.target.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'dashboard') loadDashboard();
-  if (tab === 'mensajeria') loadMensajes();
+  if (tab === 'mensajeria') {
+    loadMensajes();
+    startMsgPolling();
+  } else {
+    stopMsgPolling();
+  }
+}
+
+function startMsgPolling() {
+  stopMsgPolling();
+  msgPollingInterval = setInterval(loadMensajes, 8000);
+}
+function stopMsgPolling() {
+  if (msgPollingInterval) { clearInterval(msgPollingInterval); msgPollingInterval = null; }
 }
 
 // ── API HELPERS ──
@@ -303,17 +353,17 @@ async function loadMunicipiosDepto() {
   }).join('');
 }
 
-// ── CAMPAÑAS ──
+// ── CAMPANAS ──
 async function loadCampanas() {
   campanas = await api('/rest/v1/campanas?order=numero');
   var sel = document.getElementById('dashCampana');
   campanas.forEach(function(c) {
     var opt = document.createElement('option');
     opt.value = c.id;
-    opt.textContent = 'Campaña ' + c.numero;
+    opt.textContent = 'Campa\u00f1a ' + c.numero;
     sel.appendChild(opt);
   });
-  document.getElementById('dashAno').textContent = 'Año ' + new Date().getFullYear();
+  document.getElementById('dashAno').textContent = 'A\u00f1o ' + new Date().getFullYear();
 }
 
 // ══════════════════════════════════════════
@@ -335,20 +385,28 @@ async function loadGerentesZona() {
   renderGerentesZona();
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderGerentesZona() {
   var container = document.getElementById('listaGZ');
   if (!gerentes.length) {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gris);"><p style="font-size:0.9rem;">No hay gerentes de zona registrados</p><p style="font-size:0.75rem;margin-top:8px;">Haga clic en "+ Nuevo Gerente" para agregar el primero</p></div>';
     return;
   }
-  container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Código</th><th>Nombre</th><th>Zona</th><th>Teléfono</th><th>Email</th><th>Contraseña</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
+  container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>Zona</th><th>Tel\u00e9fono</th><th>Email</th><th>Contrase\u00f1a</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
     gerentes.map(function(g) {
       var zonaNombre = g.zonas ? g.zonas.nombre : '-';
       var estado = g.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
       var acciones = g.activo
         ? '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')">Dar de Baja</button>'
         : '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')">Dar de Alta</button>';
-      var pwField = '<div style="display:flex;gap:4px;align-items:center;"><input type="text" id="gzPw_' + g.id + '" value="' + (g.password_temporal || '') + '" style="width:100px;padding:4px 6px;border:1px solid var(--borde);font-size:0.75rem;background:var(--marfil);"/><button class="btn btn-sm" style="padding:3px 8px;font-size:0.55rem;" onclick="changeGzPassword(\'' + g.id + '\')">OK</button></div>';
+      var pwVal = escapeHtml(g.password_temporal || '');
+      var pwField = '<div style="display:flex;gap:4px;align-items:center;">' +
+        '<input type="text" id="gzPw_' + g.id + '" value="' + pwVal + '" style="width:100px;padding:4px 6px;border:1px solid var(--borde);font-size:0.75rem;background:var(--marfil);"/>' +
+        '<button class="btn btn-sm" style="padding:3px 8px;font-size:0.55rem;" onclick="changeGzPassword(\'' + g.id + '\')">OK</button></div>';
       return '<tr><td style="font-weight:600;color:var(--dorado);">' + g.codigo + '</td><td>' + g.nombre + '</td><td>' + zonaNombre + '</td><td>' + (g.telefono || '-') + '</td><td>' + (g.email || '-') + '</td><td>' + pwField + '</td><td>' + estado + '</td><td>' + acciones + '</td></tr>';
     }).join('') +
     '</tbody></table></div>';
@@ -358,10 +416,6 @@ async function guardarGerenteZona() {
   var err = document.getElementById('gzError');
   var suc = document.getElementById('gzSuccess');
   err.textContent = ''; suc.textContent = '';
-
-  // Check max 7
-  var activos = gerentes.filter(function(g){ return g.activo; });
-  if (false /* sin límite */) { err.textContent = 'Máximo 7 gerentes de zona activos permitidos.'; return; }
 
   var dni = document.getElementById('gzDni').value.trim();
   var nombre = document.getElementById('gzNombre').value.trim();
@@ -379,7 +433,7 @@ async function guardarGerenteZona() {
   if (!dni || !nombre || !telefono || !fechaNac || !cuenta || !banco || !direccion || !fechaIngreso || !deptoId || !zonaNombre || !gzPassword) {
     err.textContent = 'Complete todos los campos obligatorios (*).'; return;
   }
-  if (gzPassword.length < 6) { err.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  if (gzPassword.length < 6) { err.textContent = 'La contrase\u00f1a debe tener al menos 6 caracteres.'; return; }
 
   var municipiosSeleccionados = [];
   document.querySelectorAll('#gzMunicipios input[type="checkbox"]:checked').forEach(function(cb) {
@@ -389,8 +443,6 @@ async function guardarGerenteZona() {
 
   try {
     // 1. Generate code
-    var codeRes = await api('/rest/v1/rpc/generar_codigo_gerente_zona', { method: 'POST', headers: HJ, body: '{}' });
-    // Alternative: just call the function
     var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_gerente_zona', { method: 'POST', headers: HJ, body: '{}' });
     var codigo = await codeResp.json();
 
@@ -411,7 +463,7 @@ async function guardarGerenteZona() {
       method: 'POST', headers: HJ, body: JSON.stringify(zmData)
     });
 
-    // 4. Create gerente_zona
+    // 4. Create gerente_zona with password
     await apiPost('/rest/v1/gerentes_zona', {
       codigo: codigo,
       nombre: nombre,
@@ -437,7 +489,7 @@ async function guardarGerenteZona() {
       es_activa: true
     });
 
-    suc.textContent = 'Gerente de zona creado exitosamente. Código: ' + codigo;
+    suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
     // Reset form
     ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('gzDepto').value = '';
@@ -452,33 +504,32 @@ async function guardarGerenteZona() {
 async function changeGzPassword(id) {
   var input = document.getElementById('gzPw_' + id);
   var newPw = input ? input.value.trim() : '';
-  if (!newPw || newPw.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if (!newPw || newPw.length < 6) { alert('La contrase\u00f1a debe tener al menos 6 caracteres.'); return; }
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { password_temporal: newPw });
-  alert('Contraseña del gerente de zona actualizada.');
+  alert('Contrase\u00f1a del gerente de zona actualizada.');
 }
 
 async function bajaGerente(id) {
-  if (!confirm('¿Dar de baja a este gerente de zona? Los datos de venta se conservarán.')) return;
+  if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos de venta se conservar\u00e1n.')) return;
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false });
   loadGerentesZona();
 }
 
 async function altaGerente(id) {
-  var activos = gerentes.filter(function(g){ return g.activo; });
-  if (false /* sin límite */) { alert('Máximo 7 gerentes activos.'); return; }
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true });
   loadGerentesZona();
 }
 
 // ══════════════════════════════════════════
-// TAB 2: DASHBOARD
+// TAB 2: DASHBOARD + COMISIONES
 // ══════════════════════════════════════════
 async function loadDashboard() {
   var campanaId = document.getElementById('dashCampana').value;
   var ano = new Date().getFullYear();
   if (!campanaId) {
-    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">Seleccione una campaña</div></div>';
+    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">Seleccione una campa\u00f1a</div></div>';
     document.getElementById('dashTable').innerHTML = '';
+    document.getElementById('comisionesSection').style.display = 'none';
     return;
   }
 
@@ -486,6 +537,7 @@ async function loadDashboard() {
   var gerenteIds = gerentes.map(function(g){ return g.id; });
   if (!gerenteIds.length) {
     document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">No hay gerentes de zona</div></div>';
+    document.getElementById('comisionesSection').style.display = 'none';
     return;
   }
 
@@ -526,7 +578,28 @@ async function loadDashboard() {
     '<div class="stat-card"><div class="stat-value">L ' + totalBruta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Bruta</div></div>' +
     '<div class="stat-card"><div class="stat-value">L ' + totalNeta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta (-15%)</div></div>';
 
-  // Render table
+  // ── COMISIONES ──
+  // Divisional earns 4% of total NET sales of entire division
+  var comisionDivisional = totalNeta * 0.04;
+  var totalComisionesGZ = 0;
+
+  var comisionRows = '';
+  Object.keys(gerenteStats).forEach(function(gId) {
+    var s = gerenteStats[gId];
+    var netaGZ = s.neta;
+    var comisionGZ = netaGZ * 0.03;
+    totalComisionesGZ += comisionGZ;
+    comisionRows += '<tr><td>' + s.nombre + '</td><td>' + s.zona + '</td><td>L ' + netaGZ.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td style="font-weight:600;color:var(--dorado);">L ' + comisionGZ.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  });
+
+  var totalComisionesPagadas = comisionDivisional + totalComisionesGZ;
+
+  document.getElementById('comisionDivisional').textContent = 'L ' + comisionDivisional.toLocaleString('es-HN',{minimumFractionDigits:2});
+  document.getElementById('totalComisiones').textContent = 'L ' + totalComisionesPagadas.toLocaleString('es-HN',{minimumFractionDigits:2});
+  document.getElementById('comisionesTable').innerHTML = comisionRows;
+  document.getElementById('comisionesSection').style.display = 'block';
+
+  // Render detail table
   var rows = '';
   var gerenteLabels = [], gerenteVentas = [];
   Object.keys(gerenteStats).forEach(function(gId) {
@@ -623,7 +696,7 @@ async function renderCharts(campanaId, gerenteLabels, gerenteVentas, gerenteIds,
 }
 
 // ══════════════════════════════════════════
-// TAB 3: MENSAJERÍA
+// TAB 3: MENSAJERIA BIDIRECCIONAL (CHAT)
 // ══════════════════════════════════════════
 var fotoFiles = [];
 
@@ -634,10 +707,10 @@ function previewFotos(input) {
   preview.innerHTML = '';
   files.forEach(function(f) {
     var url = URL.createObjectURL(f);
-    preview.innerHTML += '<img src="' + url + '" style="max-height:60px;border-radius:4px;"/>';
+    preview.innerHTML += '<img src="' + url + '" style="max-height:40px;border-radius:4px;"/>';
   });
   if (input.files.length > 2) {
-    document.getElementById('msgError').textContent = 'Máximo 2 fotos. Se tomaron las primeras 2.';
+    document.getElementById('msgError').textContent = 'M\u00e1ximo 2 fotos. Se tomaron las primeras 2.';
   }
 }
 
@@ -648,10 +721,11 @@ async function enviarMensaje() {
   if (!texto) { errEl.textContent = 'Escriba un mensaje.'; return; }
 
   try {
-    // Create message
+    // Create message with emisor = DIVISIONAL
     var msg = await apiPost('/rest/v1/mensajes_divisional', {
       gerencia_divisional_id: session.id,
-      texto: texto
+      texto: texto,
+      emisor: 'DIVISIONAL'
     });
     var msgId = msg[0].id;
 
@@ -687,41 +761,46 @@ async function enviarMensaje() {
 }
 
 async function loadMensajes() {
-  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id,gerentes_zona(nombre))&order=created_at.desc');
+  // Load ALL messages for this gerencia_divisional_id, ordered chronologically (ASC for chat)
+  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*)&order=created_at.asc');
   // fallback
   if (mensajes.error) {
-    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
+    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&order=created_at.asc');
   }
 
-  var feed = document.getElementById('msgFeed');
-  if (!mensajes.length) {
-    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes aún. Escriba el primero.</p>';
+  var feed = document.getElementById('chatFeed');
+  if (!mensajes || !mensajes.length) {
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a\u00fan. Inicie la conversaci\u00f3n con Gerencia General.</p>';
     return;
   }
 
   feed.innerHTML = mensajes.map(function(m) {
-    var fotos = '';
+    // Determine sender: if emisor field exists use it, otherwise treat as DIVISIONAL (legacy)
+    var isAdmin = (m.emisor === 'ADMIN');
+    var bubbleClass = isAdmin ? 'admin' : 'divisional';
+    var senderLabel = isAdmin ? 'Gerencia General' : 'T\u00fa';
+
+    // Photos
+    var fotosHtml = '';
     if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
-      fotos = '<div class="msg-photos">' + m.mensajes_divisional_fotos.map(function(f) {
+      fotosHtml = '<div class="chat-photos">' + m.mensajes_divisional_fotos.map(function(f) {
         return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
       }).join('') + '</div>';
     }
-    var reacciones = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
-    var reactNames = '';
-    if (m.mensajes_reacciones && m.mensajes_reacciones.length) {
-      reactNames = m.mensajes_reacciones.map(function(r) {
-        return r.gerentes_zona ? r.gerentes_zona.nombre : 'Gerente';
-      }).join(', ');
-    }
+
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    return '<div class="msg-item">' +
-      '<div class="msg-text">' + m.texto.replace(/\n/g, '<br>') + '</div>' +
-      fotos +
-      '<div class="msg-meta">' +
-        '<span>' + fecha + '</span>' +
-        '<div class="msg-reactions" title="' + reactNames + '">&#10084;&#65039; ' + reacciones + '</div>' +
-      '</div></div>';
+    var textoSafe = escapeHtml(m.texto).replace(/\n/g, '<br>');
+
+    return '<div class="chat-bubble ' + bubbleClass + '">' +
+      '<div class="chat-sender">' + senderLabel + '</div>' +
+      textoSafe +
+      fotosHtml +
+      '<div class="chat-time">' + fecha + '</div>' +
+    '</div>';
   }).join('');
+
+  // Auto-scroll to bottom
+  feed.scrollTop = feed.scrollHeight;
 }
 </script>
 </body>
