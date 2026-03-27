@@ -192,17 +192,10 @@
         <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="gzDireccion" placeholder="Direcci&oacute;n completa"/></div>
         <div class="form-group"><label>Fecha de Ingreso *</label><input id="gzFechaIngreso" type="date"/></div>
         <div class="form-group">
-          <label>Departamento *</label>
-          <select id="gzDepto" onchange="loadMunicipiosDepto()">
-            <option value="">Seleccione...</option>
+          <label>Departamento * (se asigna departamento completo)</label>
+          <select id="gzDepto">
+            <option value="">Seleccione departamento...</option>
           </select>
-        </div>
-      </div>
-
-      <div style="margin-top:14px;">
-        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios de la Zona *</label>
-        <div class="multiselect" id="gzMunicipios">
-          <p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>
         </div>
       </div>
 
@@ -410,7 +403,7 @@
    ENIGME - GERENCIA DIVISIONAL - COMPLETE PANEL
    ================================================================ */
 var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 var H  = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
@@ -547,16 +540,7 @@ async function loadDepartamentos() {
   });
 }
 
-async function loadMunicipiosDepto() {
-  var deptoId = document.getElementById('gzDepto').value;
-  var container = document.getElementById('gzMunicipios');
-  if (!deptoId) { container.innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>'; return; }
-  municipiosCache = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&order=nombre');
-  if (!municipiosCache || municipiosCache.error) municipiosCache = [];
-  container.innerHTML = municipiosCache.map(function(m) {
-    return '<label><input type="checkbox" value="' + m.id + '"/> ' + esc(m.nombre) + '</label>';
-  }).join('');
-}
+// Municipios are auto-assigned based on department selection (entire department)
 
 /* ── CAMPANAS ── */
 async function loadCampanas() {
@@ -609,7 +593,6 @@ function clearGZForm() {
   document.getElementById('btnGuardarGZ').textContent = 'Guardar Gerente';
   ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzRtn','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
   document.getElementById('gzDepto').value = '';
-  document.getElementById('gzMunicipios').innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>';
   document.getElementById('gzError').textContent = '';
   document.getElementById('gzSuccess').textContent = '';
 }
@@ -686,11 +669,10 @@ async function guardarGerenteZona() {
   }
   if (gzPassword.length < 6) { err.textContent = 'La contrase\u00f1a debe tener al menos 6 caracteres.'; return; }
 
-  var municipiosSeleccionados = [];
-  document.querySelectorAll('#gzMunicipios input[type="checkbox"]:checked').forEach(function(cb) {
-    municipiosSeleccionados.push(parseInt(cb.value));
-  });
-  if (!municipiosSeleccionados.length) { err.textContent = 'Seleccione al menos un municipio.'; return; }
+  // Auto-get ALL municipios of the selected department
+  var allMunis = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&select=id');
+  var municipiosSeleccionados = (allMunis && !allMunis.error) ? allMunis.map(function(m){ return m.id; }) : [];
+  if (!municipiosSeleccionados.length) { err.textContent = 'No se encontraron municipios para este departamento.'; return; }
 
   try {
     // 1. Generate unique 6-char alphanumeric code

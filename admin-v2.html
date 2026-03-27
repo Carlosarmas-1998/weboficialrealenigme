@@ -329,14 +329,10 @@
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Tel&eacute;fono</label><input id="gdTelefono" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="+504..." /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">DNI</label><input id="gdDni" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="0000-0000-00000" /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Direcci&oacute;n</label><input id="gdDireccion" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Dirección exacta" /></div>
+        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">N&uacute;mero de Cuenta</label><input id="gdCuenta" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Número de cuenta bancaria" /></div>
+        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre del Banco</label><input id="gdBanco" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Ej: BAC, Ficohsa..." /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Contrase&ntilde;a Temporal *</label><input id="gdPassword" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Mín. 6 caracteres" /></div>
-        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Departamento</label><select id="gdDepto" onchange="loadGdMunicipios()" style="padding:8px;font-size:.85rem;"><option value="">Seleccione...</option></select></div>
-      </div>
-      <div style="margin-top:14px;">
-        <label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Municipios asignados</label>
-        <div id="gdMunicipios" style="background:var(--surface2);border:1px solid var(--border);max-height:160px;overflow-y:auto;padding:8px;">
-          <span style="color:var(--text-muted);font-size:.75rem;">Seleccione un departamento primero</span>
-        </div>
+        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Departamento (se asigna completo)</label><select id="gdDepto" style="padding:8px;font-size:.85rem;"><option value="">Seleccione...</option></select></div>
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;">
         <button class="btn btn-gold" onclick="crearGerenciaDivisional()"><span>Guardar</span></button>
@@ -497,7 +493,7 @@ var ADMIN_PASSWORD = 'Gusiteamo.1998';
 var WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
 var RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
 var SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 
 // ---- DATA CACHES ----
 var cachedPedidos = [];
@@ -1374,15 +1370,7 @@ async function loadGdDeptos() {
   gdDeptosLoaded = true;
 }
 
-async function loadGdMunicipios() {
-  var deptoId = document.getElementById('gdDepto').value;
-  var container = document.getElementById('gdMunicipios');
-  if (!deptoId) { container.innerHTML = '<span style="color:var(--text-muted);font-size:.75rem;">Seleccione un departamento primero</span>'; return; }
-  var munis = await supaGet('municipios', '&departamento_id=eq.' + deptoId + '&order=nombre');
-  container.innerHTML = munis.map(function(m) {
-    return '<label style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:.8rem;cursor:pointer;color:var(--text);"><input type="checkbox" value="' + m.id + '" style="accent-color:var(--gold);"/> ' + esc(m.nombre) + '</label>';
-  }).join('');
-}
+// Municipios no longer needed - departamento is assigned as a whole
 
 var deptosMap = {};
 
@@ -1430,7 +1418,10 @@ async function crearGerenciaDivisional() {
   var telefono = document.getElementById('gdTelefono').value.trim();
   var dni = document.getElementById('gdDni').value.trim();
   var direccion = document.getElementById('gdDireccion').value.trim();
+  var cuenta = document.getElementById('gdCuenta').value.trim();
+  var banco = document.getElementById('gdBanco').value.trim();
   var password = document.getElementById('gdPassword').value.trim();
+  var deptoId = document.getElementById('gdDepto').value;
   var errEl = document.getElementById('gdFormError');
   errEl.textContent = '';
 
@@ -1438,10 +1429,11 @@ async function crearGerenciaDivisional() {
   if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
 
   try {
+    var bodyData = { nombre: nombre, codigo: codigo, email: email || null, telefono: telefono || null, dni: dni || null, direccion: direccion || null, numero_cuenta: cuenta || null, nombre_banco: banco || null, password_temporal: password, activo: true, departamento_id: deptoId ? parseInt(deptoId) : null };
     var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales', {
       method: 'POST',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ nombre: nombre, codigo: codigo, email: email || null, telefono: telefono || null, dni: dni || null, direccion: direccion || null, password_temporal: password, activo: true, departamento_id: document.getElementById('gdDepto').value ? parseInt(document.getElementById('gdDepto').value) : null, municipios_ids: JSON.stringify(Array.from(document.querySelectorAll('#gdMunicipios input[type=checkbox]:checked')).map(function(cb){ return parseInt(cb.value); })) })
+      body: JSON.stringify(bodyData)
     });
     if (!res.ok) {
       var errData = await res.json();
@@ -1450,9 +1442,8 @@ async function crearGerenciaDivisional() {
     }
     showToast('Gerencia divisional creada exitosamente');
     document.getElementById('gdFormWrap').style.display = 'none';
-    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('gdDepto').value = '';
-    document.getElementById('gdMunicipios').innerHTML = '<span style="color:var(--text-muted);font-size:.75rem;">Seleccione un departamento primero</span>';
     loadGerenciasDivisionales();
   } catch(e) { errEl.textContent = 'Error de conexión.'; }
 }
