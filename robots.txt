@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /
+Allow: /catalogo.html
+Allow: /joyeria.html
+Allow: /boutique.html
+Allow: /plata.html
+Allow: /liquidacion.html
+Allow: /enigme.html
+Allow: /fundador.html
+Allow: /certificado.html
+Allow: /trabaja.html
+Allow: /contactos.html
+Allow: /soporte.html
+
+Disallow: /admin-v2.html
+Disallow: /order-form-v2.html
+Disallow: /soporte-enigme.html
+Disallow: /carrito.html
+Disallow: /favoritos.html
+Disallow: /ley.html
+Disallow: /sw.js
+Disallow: /enigme-core.js
+Disallow: /enigme-shared.js
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+Sitemap: https://enigmeofficial.com/sitemap.xml

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es-HN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1C1C1C" />
+  <link rel="apple-touch-icon" href="insignia.png" />
+  <link rel="icon" type="image/png" href="insignia.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Le Concierge | Contacto | La Casa ÈNIGME</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      /* PALETA HAUTE COUTURE ÈNIGME */
+      --blanco-dior: #FFFFFF;
+      --marfil: #FAF9F6;
+      --carbon: #1C1C1C;
+      --gris-suave: #888888;
+      --dorado: #CBAA63; 
+      --fondo-galeria: #FAFAFA;
+      --linea-fina: rgba(216, 195, 188, 0.4);
+      --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background-color: var(--marfil);
+      color: var(--carbon);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    button { background: none; border: none; font-family: inherit; cursor: pointer; outline: none; }
+
+    /* =========================================
+       ANIMACIÓN DE BOLSA VIP
+       ========================================= */
+    @keyframes bagWigglePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      5% { transform: scale(1.1) rotate(-8deg); }
+      10% { transform: scale(1.1) rotate(8deg); }
+      15% { transform: scale(1.1) rotate(-8deg); }
+      20% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.05); } 
+    }
+
+    /* =========================================
+       NAVBAR SUPER RESPONSIVO (ESTÁNDAR ÈNIGME)
+       ========================================= */
+    .navbar {
+      width: 100%; padding: clamp(15px, 2.5vw, 25px) 5vw;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--linea-fina); background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
+    }
+
+    .brand-nav { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 2.5vw, 1.8rem); letter-spacing: 0.35em; color: var(--carbon); font-weight: 500; text-align: center; position: absolute; left: 50%; transform: translateX(-50%); }
+    .nav-group { display: flex; gap: clamp(10px, 2vw, 20px); align-items: center; }
+    
+    .dropdown { position: relative; display: inline-block; }
+    .dropbtn { font-size: clamp(0.6rem, 1.6vw, 0.75rem); letter-spacing: 3px; text-transform: uppercase; color: var(--carbon); font-weight: 700 !important; display: flex; align-items: center; gap: 5px; padding: 10px 0; background: transparent; border: none; cursor: pointer; font-family: inherit;}
+    .dropbtn svg { width: 12px; height: 12px; transition: transform 0.3s; fill: currentColor;}
+    .dropdown:hover .dropbtn svg { transform: rotate(180deg); }
+
+    .dropdown-content { position: absolute; top: 100%; left: 0; background-color: var(--blanco-dior); min-width: 220px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); border: 1px solid var(--linea-fina); border-top: 2px solid var(--dorado); opacity: 0; visibility: hidden; transform: translateY(15px); transition: all 0.3s ease; display: flex; flex-direction: column; z-index: 9999; }
+    .dropdown-content::before { content: ''; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; background: transparent; }
+    .dropdown:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateY(0); }
+    .dropdown.active .dropdown-content { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
+    .dropdown.active .dropbtn svg { transform: rotate(180deg); }
+    .dropdown-content a { color: var(--carbon) !important; padding: 16px 24px; font-size: 0.7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--fondo-galeria); transition: var(--transition); }
+    .dropdown-content a:hover { background-color: var(--fondo-galeria); color: var(--dorado) !important; padding-left: 32px; }
+    .dropdown-content a:last-child { border-bottom: none; }
+    .dropdown.right .dropdown-content { left: auto; right: 0; }
+
+    /* BOTONES DE ACCIÓN (BOLSA Y FAVORITOS) */
+    .btn-action { display: flex; align-items: center; gap: 8px; color: var(--carbon) !important; padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 16px); border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.55rem, 1.2vw, 0.65rem); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; background: transparent; transition: var(--transition); }
+    .btn-action:hover { background-color: var(--dorado); border-color: var(--dorado); color: var(--blanco-dior) !important; }
+    .btn-action svg { width: clamp(12px, 1.8vw, 15px); height: clamp(12px, 1.8vw, 15px); fill: currentColor; }
+
+    .btn-cart-nav { background-color: var(--blanco-dior); animation: bagWigglePulse 6s ease-in-out infinite; }
+    .btn-cart-nav:hover { animation-play-state: paused; } 
+    .counter-badge { font-weight: 700; }
+    .txt-hide-mobile { display: inline; }
+
+    /* =========================================
+       ENCABEZADO EDITORIAL CONCIERGE
+       ========================================= */
+    .header-section { text-align: center; padding: 80px 20px 40px; border-bottom: 1px solid var(--linea-fina); }
+    .kicker { font-family: 'Cinzel', serif; font-style: italic; font-size: 1rem; color: var(--dorado); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 15px; font-weight: 600;}
+    .main-title { font-family: 'Cinzel', serif; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 0.15em; text-transform: uppercase; color: var(--carbon); margin-bottom: 20px; font-weight: 500;}
+    .desc-text { font-size: 0.95rem; line-height: 2; color: var(--gris-suave); max-width: 650px; margin: 0 auto; font-weight: 400; letter-spacing: 1px; }
+
+    /* =========================================
+       DIRECTORIO CONCIERGE (GRID)
+       ========================================= */
+    .concierge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      padding: 60px 5vw 120px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .contact-card {
+      background-color: var(--blanco-dior);
+      border: 1px solid var(--linea-fina);
+      padding: 50px 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 3px;
+      background-color: var(--dorado);
+      transform: scaleX(0);
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .contact-card:hover {
+      box-shadow: 0 20px 50px rgba(0,0,0,0.04);
+      transform: translateY(-5px);
+      border-color: transparent;
+    }
+
+    .contact-card:hover::before { transform: scaleX(1); }
+
+    .social-icon {
+      width: 50px;
+      height: 50px;
+      fill: var(--dorado);
+      margin-bottom: 25px;
+      transition: var(--transition);
+    }
+
+    .contact-card:hover .social-icon {
+      transform: scale(1.1);
+      fill: var(--carbon);
+    }
+
+    .platform-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--carbon);
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .enigme-phrase {
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--gris-suave);
+      font-weight: 300;
+      font-style: italic;
+      margin-bottom: 30px;
+      flex-grow: 1;
+    }
+
+    .btn-connect {
+      display: inline-block;
+      padding: 14px 30px;
+      border: 1px solid var(--carbon);
+      color: var(--carbon);
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+      transition: var(--transition);
+      background: transparent;
+      width: 100%;
+      border-radius: 2px;
+    }
+
+    .btn-connect:hover {
+      background-color: var(--carbon);
+      color: var(--blanco-dior);
+    }
+
+    .contact-card:hover .btn-connect {
+      background-color: var(--carbon);
+      color: var(--dorado);
+      border-color: var(--carbon);
+    }
+
+    /* =========================================
+       BOTÓN WHATSAPP FLOTANTE
+       ========================================= */
+    .whatsapp-float {
+      position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px;
+      background-color: var(--carbon); color: var(--blanco-dior); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 900; transition: var(--transition);
+    }
+    .whatsapp-float:hover { transform: translateY(-5px); background-color: var(--dorado); color: var(--carbon); }
+    .whatsapp-float svg { width: 26px; height: 26px; fill: currentColor; }
+
+    /* =========================================
+       FOOTER MINIMALISTA
+       ========================================= */
+    .footer { border-top: 1px solid var(--linea-fina); padding: 50px 20px; text-align: center; background-color: var(--blanco-dior); margin-top: auto; }
+    .footer-logo { font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 2.5vw, 1.8rem); letter-spacing: 0.3em; color: var(--carbon); margin-bottom: 12px; }
+    .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; }
+    .footer-links a { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--carbon); font-weight: 600; border-bottom: 1px solid transparent; padding-bottom: 3px; transition: var(--transition); }
+    .footer-links a:hover { color: var(--dorado); border-color: var(--dorado); }
+    .footer-copy { font-size: 0.5rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gris-suave); opacity: 0.6; font-weight: 400; }
+
+    /* =========================================
+       SÚPER RESPONSIVO MÓVIL
+       ========================================= */
+    @media (max-width: 768px) {
+      .navbar { display: flex; flex-wrap: wrap; padding: 15px 4vw; justify-content: space-between; align-items: center; }
+      
+      .brand-nav { position: relative; left: 0; transform: none; width: 100%; text-align: center; font-size: 1.8rem; letter-spacing: 0.2em; order: 1; margin-bottom: 15px; white-space: nowrap; }
+      
+      .nav-group { order: 2; width: auto; gap: 10px; }
+      .nav-group.right { order: 3; width: auto; gap: 8px; justify-content: flex-end; }
+      
+      .txt-hide-mobile { display: none; }
+      
+      /* Ajuste de escala para móvil (botones más grandes) */
+      .btn-action { padding: 6px 10px; font-size: 0.65rem; margin-left: 0 !important; }
+      .btn-action svg { width: 14px; height: 14px; }
+      .dropbtn { font-size: 0.7rem; letter-spacing: 1px; padding: 5px 0;}
+      .dropbtn svg { display: none;} 
+
+      .navbar .dropdown { position: static;} 
+      .dropdown-content { top: calc(100% + 1px); left: 0; right: 0; width: 100vw; min-width: 100%; text-align: center; border-left: none; border-right: none; margin-left: -4vw; }
+      .dropdown-content a { font-size: 0.7rem; padding: 15px 20px;}
+      .dropdown-content a:hover { padding-left: 15px;}
+      
+      .header-section { padding: 50px 15px 30px; }
+      .main-title { font-size: 1.8rem; }
+      .desc-text { font-size: 0.85rem; }
+
+      .concierge-grid { padding: 40px 15px 100px; grid-template-columns: 1fr; gap: 20px; }
+      .contact-card { padding: 40px 20px; }
+      
+      .whatsapp-float { bottom: 20px; right: 20px; width: 45px; height: 45px; }
+      .whatsapp-float svg { width: 22px; height: 22px; }
+    }
+  </style>
+  <meta property="og:title" content="Contacto | La Casa ÈNIGME">
+  <meta property="og:description" content="Contáctanos para consultas sobre alta joyería y bolsos de lujo. La Casa ÈNIGME Honduras.">
+  <meta property="og:image" content="https://enigmeofficial.com/portada.png">
+  <meta property="og:type" content="website">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-group">
+      <div class="dropdown">
+        <button class="dropbtn">
+          CASA ÈNIGME <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+        </button>
+        <div class="dropdown-content">
+          <a href="index.html">Inicio</a>
+          <a href="trabaja.html">Trabaja con Nosotros</a>
+          <a href="enigme.html">Sobre la Marca</a>
+          <a href="soporte.html">Soporte</a>
+          <a href="contactos.html" style="color:var(--dorado)!important;">Contactos</a>
+          <a href="certificado.html">Certificado</a>
+          <a href="ley.html">Políticas</a>
+        </div>
+      </div>
+    </div>
+    
+    <a href="index.html" class="brand-nav">È N I G M E</a>
+    
+    <div class="nav-group right">
+      <div class="dropdown right">
+        <button class="dropbtn">
+          CATÁLOGO <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+        </button>
+        <div class="dropdown-content">
+          <a href="catalogo.html">Catálogo Completo</a>
+          <a href="joyeria.html">Alta Joyería</a>
+          <a href="boutique.html">Bolsos Boutique</a>
+          <a href="liquidacion.html">Liquidación</a>
+            <a href="vestidos.html">Colección Ella</a>
+        </div>
+      </div>
+
+      <a href="favoritos.html" class="btn-action">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <span id="fav-count" class="counter-badge">0</span>
+      </a>
+
+      <a href="carrito.html" class="btn-action btn-cart-nav">
+        <svg viewBox="0 0 24 24"><path d="M16 6V4a4 4 0 0 0-8 0v2H3v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6h-5zm-6-2a2 2 0 0 1 4 0v2h-4V4zm8 16H6V8h2v2a1 1 0 0 0 2 0V8h4v2a1 1 0 0 0 2 0V8h2v12z"/></svg>
+        <span class="txt-hide-mobile">BOLSA</span> (<span id="cart-count" class="counter-badge">0</span>)
+      </a>
+    </div>
+  </nav>
+
+  <a href="https://wa.me/34602149162?text=Hola,%20deseo%20comunicarme%20con%20el%20Concierge%20de%20ÈNIGME%20para%20asistencia%20VIP." class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157.1zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+  </a>
+
+  <header class="header-section">
+    <p class="kicker">Le Concierge</p>
+    <h1 class="main-title">Directorio Oficial</h1>
+    <p class="desc-text">La alta costura exige atención impecable. Conecte de manera directa y privada con los canales oficiales de La Casa ÈNIGME Honduras.</p>
+  </header>
+
+  <main class="concierge-grid">
+
+    <article class="contact-card">
+      <svg class="social-icon" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+      <h2 class="platform-name">Instagram</h2>
+      <p class="enigme-phrase">"El lienzo visual de nuestra estética. Descubre las piezas en su máximo esplendor fotográfico."</p>
+      <a href="https://www.instagram.com/enigmehonduras?igsh=cDJ4MW02aGNvN2Nq&utm_source=qr" target="_blank" rel="noopener noreferrer" class="btn-connect">L'Esthétique</a>
+    </article>
+
+    <article class="contact-card">
+      <svg class="social-icon" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
+      <h2 class="platform-name">TikTok</h2>
+      <p class="enigme-phrase">"El movimiento y el brillo en tiempo real. Sé testigo de la magia ÈNIGME al desnudo."</p>
+      <a href="https://www.tiktok.com/@enigmeofficial?_r=1&_t=ZN-94nwecNClGg" target="_blank" rel="noopener noreferrer" class="btn-connect">Le Mouvement</a>
+    </article>
+
+    <article class="contact-card">
+      <svg class="social-icon" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157.1zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+      <h2 class="platform-name">WhatsApp</h2>
+      <p class="enigme-phrase">"Servicio de Concierge Privado. Asesoría de estilo y gestión de adquisiciones de lujo."</p>
+      <a href="https://wa.me/34602149162?text=Hola,%20deseo%20comunicarme%20con%20el%20Concierge%20de%20ÈNIGME%20para%20asistencia%20VIP." target="_blank" rel="noopener noreferrer" class="btn-connect">Le Concierge</a>
+    </article>
+
+    <article class="contact-card">
+      <svg class="social-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"/></svg>
+      <h2 class="platform-name">Facebook</h2>
+      <p class="enigme-phrase">"El epicentro de nuestra sociedad. Únete al círculo de exclusividad y descubre nuestras noticias."</p>
+      <a href="https://www.facebook.com/share/14ZvKHGLKQH/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="btn-connect">La Société</a>
+    </article>
+
+    <article class="contact-card">
+      <svg class="social-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/></svg>
+      <h2 class="platform-name">E-Mail</h2>
+      <p class="enigme-phrase">"Correspondencia oficial. Reservado para asuntos corporativos, distribución y alianzas de marca."</p>
+      <a href="mailto:info@enigmeofficial.com?subject=Consulta%20VIP%20-%20ÈNIGME" class="btn-connect">La Correspondance</a>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-logo">ÈNIGME</div>
+    
+    <div class="footer-links">
+      <a href="ley.html">Política de Garantías y Devoluciones</a>
+    </div>
+
+    <div class="footer-copy">
+      © 2026 ÈNIGME · MARCA DE JOYERÍA ESPAÑOLA CON OPERACIONES EN HONDURAS. TODOS LOS DERECHOS RESERVADOS.
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================
+       ACTUALIZAR CONTADORES NAVBAR
+       ========================================= */
+    function updateCounts() {
+      const cart = JSON.parse(localStorage.getItem('enigme_cart')) || [];
+      const favs = JSON.parse(localStorage.getItem('enigme_favs')) || [];
+      let totalItems = 0; cart.forEach(item => totalItems += (item.qty || 1));
+      if(document.getElementById('cart-count')) document.getElementById('cart-count').innerText = totalItems;
+      if(document.getElementById('fav-count')) document.getElementById('fav-count').innerText = favs.length;
+    }
+
+    window.onload = updateCounts;
+  </script>
+
+<script src="enigme-shared.js"></script>
+<script src="enigme-core.js"></script>
+</body>
+</html>

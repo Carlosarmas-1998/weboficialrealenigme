@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#1C1C1C" />
+  <link rel="apple-touch-icon" href="monograma.png" />
+  <link rel="icon" type="image/png" href="monograma.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Realizar Pedido · Enigme</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #2a2a2a;
+      --border-hover: #8b7355;
+      --gold: #c9a96e;
+      --gold-dim: #8b7355;
+      --text: #e8e0d4;
+      --text-muted: #6b6259;
+      --error: #c0605a;
+      --success: #6b9e78;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 80px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Atmospheric background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(201,169,110,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 60% at 80% 80%, rgba(201,169,110,0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.4;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .brand-mark {
+      display: inline-block;
+      width: 44px;
+      height: 1px;
+      background: var(--gold);
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .brand-mark::before, .brand-mark::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      width: 7px;
+      height: 7px;
+      border: 1px solid var(--gold);
+      transform: rotate(45deg);
+    }
+    .brand-mark::before { left: -4px; }
+    .brand-mark::after  { right: -4px; }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .subtitle {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 48px 44px;
+      position: relative;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+
+    /* Corner accents */
+    .form-card::before, .form-card::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: var(--gold-dim);
+      border-style: solid;
+    }
+    .form-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+    .form-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    input, select, textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Jost', sans-serif;
+      font-weight: 300;
+      font-size: 0.95rem;
+      padding: 10px 0;
+      outline: none;
+      transition: border-color 0.25s;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b7355' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 4px center;
+      padding-right: 24px;
+    }
+
+    select option { background: #1a1a1a; color: var(--text); }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+      padding-top: 10px;
+      line-height: 1.6;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-bottom-color: var(--gold);
+    }
+
+    .field:focus-within label { color: var(--gold); }
+
+    input::placeholder, textarea::placeholder { color: var(--text-muted); font-style: italic; }
+
+    .price-row {
+      display: flex;
+      gap: 16px;
+    }
+    .price-row .field { flex: 1; }
+
+    /* Separator */
+    .sep {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      margin-top: 36px;
+      padding: 16px 0;
+      background: transparent;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Jost', sans-serif;
+      font-weight: 400;
+      font-size: 0.78rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s, border-color 0.3s;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.7,0,0.3,1);
+      z-index: 0;
+    }
+
+    .btn-submit:hover::before { transform: scaleX(1); }
+    .btn-submit:hover { color: #0a0a0a; border-color: var(--gold); }
+
+    .btn-submit span { position: relative; z-index: 1; }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-submit:disabled::before { display: none; }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px 28px;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 100;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.success { border-color: var(--success); color: var(--success); }
+    #toast.error   { border-color: var(--error);   color: var(--error);   }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 1px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Config notice */
+    .config-notice {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border: 1px solid #2a2200;
+      background: #1a1500;
+      font-size: 0.78rem;
+      color: #a08840;
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+    .config-notice code {
+      background: #2a2000;
+      padding: 1px 6px;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
+
+    @media (max-width: 520px) {
+      .form-card { padding: 32px 24px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="brand-mark"></div>
+      <h1>Realizar <em>Pedido</em></h1>
+      <p class="subtitle">Enigme Official &nbsp;·&nbsp; Formulario de Compra</p>
+    </header>
+
+
+
+    <div class="form-card">
+
+      <!-- SECCIÓN 1: Cliente -->
+      <p class="section-label">01 &nbsp; Datos del cliente</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="nombre">Nombre completo *</label>
+          <input type="text" id="nombre" placeholder="Tu nombre" required />
+        </div>
+        <div class="field">
+          <label for="email">Email *</label>
+          <input type="email" id="email" placeholder="tu@email.com" required />
+        </div>
+        <div class="field full">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" placeholder="+34 600 000 000" />
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- SECCIÓN 2: Pedido -->
+      <p class="section-label">02 &nbsp; Detalle del pedido</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="producto">Producto *</label>
+          <input type="text" id="producto" placeholder="Nombre del producto" required />
+        </div>
+        <div class="field">
+          <label for="cantidad">Cantidad *</label>
+          <input type="number" id="cantidad" placeholder="1" min="1" required />
+        </div>
+        <div class="field">
+          <label for="precio">Precio unitario (€) *</label>
+          <input type="number" id="precio" placeholder="0.00" min="0" step="0.01" required />
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- SECCIÓN 3: Envío -->
+      <p class="section-label">03 &nbsp; Dirección de envío</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="direccion">Calle y número *</label>
+          <input type="text" id="direccion" placeholder="Calle Mayor, 12, 3ºB" required />
+        </div>
+        <div class="field">
+          <label for="ciudad">Ciudad *</label>
+          <input type="text" id="ciudad" placeholder="Madrid" required />
+        </div>
+        <div class="field">
+          <label for="cp">Código Postal *</label>
+          <input type="text" id="cp" placeholder="28001" required />
+        </div>
+        <div class="field full">
+          <label for="pais">País</label>
+          <select id="pais">
+            <option value="España">España</option>
+            <option value="México">México</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Chile">Chile</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- SECCIÓN 4: Pago y Notas -->
+      <p class="section-label">04 &nbsp; Pago y notas</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="metodopago">Método de pago *</label>
+          <select id="metodopago">
+            <option value="Tarjeta de crédito">Tarjeta de crédito</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Transferencia bancaria">Transferencia bancaria</option>
+            <option value="Efectivo">Efectivo</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="notas">Instrucciones especiales</label>
+          <textarea id="notas" placeholder="Cualquier detalle adicional sobre tu pedido..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="enviarPedido()">
+        <span id="btnText">Confirmar Pedido</span>
+      </button>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // ════════════════════════════════════════════
+    //  ⚙️  CONFIGURACIÓN — EDITA ESTOS VALORES
+    // ════════════════════════════════════════════
+    const AIRTABLE_TOKEN = 'patjAwf3cZuzx0WA1.d14956791c3d08ebaace3bbcc3cba1b605102925585158991399b33c29dcae49';
+    const BASE_ID        = 'appul2TWy3wIST2GO';
+    const TABLE_NAME     = 'Pedidos';              // Nombre exacto de tu tabla
+    // ════════════════════════════════════════════
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `show ${type}`;
+      setTimeout(() => { t.className = ''; }, 4000);
+    }
+
+    function setLoading(loading) {
+      const btn = document.getElementById('submitBtn');
+      const txt = document.getElementById('btnText');
+      btn.disabled = loading;
+      txt.innerHTML = loading
+        ? '<span class="spinner"></span>Enviando...'
+        : 'Confirmar Pedido';
+    }
+
+    function getVal(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    async function enviarPedido() {
+      // Validación básica
+      const required = ['nombre','email','producto','cantidad','precio','direccion','ciudad','cp'];
+      for (const id of required) {
+        if (!getVal(id)) {
+          showToast(`Por favor completa el campo: ${id}`, 'error');
+          document.getElementById(id).focus();
+          return;
+        }
+      }
+
+      // Verificar configuración
+      if (AIRTABLE_TOKEN === 'TU_AIRTABLE_TOKEN') {
+        showToast('⚙️ Configura tu token de Airtable primero', 'error');
+        return;
+      }
+
+      setLoading(true);
+
+      const cantidad = parseFloat(getVal('cantidad'));
+      const precio   = parseFloat(getVal('precio'));
+      const total    = (cantidad * precio).toFixed(2);
+
+      const direccionCompleta =
+        `${getVal('direccion')}, ${getVal('ciudad')} ${getVal('cp')}, ${getVal('pais')}`;
+
+      const fields = {
+        'Cliente Nombre':   getVal('nombre'),
+        'Cliente Email':    getVal('email'),
+        'Cliente Teléfono': getVal('telefono'),
+        'Productos':        getVal('producto'),
+        'Cantidad':         cantidad,
+        'Precio Unitario':  precio,
+        'Total':            parseFloat(total),
+        'Dirección de Envío': direccionCompleta,
+        'Método de Pago':   getVal('metodopago'),
+        'Notas':            getVal('notas'),
+        'Fecha':            new Date().toISOString().split('T')[0],
+        'Estado del Pedido': 'Pendiente'
+      };
+
+      try {
+        const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE_NAME)}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fields })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error?.message || 'Error al guardar');
+        }
+
+        showToast('✓ Pedido recibido con éxito', 'success');
+
+        // Limpiar formulario
+        ['nombre','email','telefono','producto','cantidad','precio',
+         'direccion','ciudad','cp','notas'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('metodopago').selectedIndex = 0;
+
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  </script>
+
+<script src="enigme-core.js"></script>
+</body>
+</html>
