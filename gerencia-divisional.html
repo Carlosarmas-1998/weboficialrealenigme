@@ -888,7 +888,7 @@ async function loadDashboard() {
     // Nombramientos payment: <20 = L220 each, >=20 = L320 each
     var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
     var comGZ = s.neta * 0.03;
-    var base = 15000;
+    var base = 16000;
     var totalGZ = base + pagoNombr + comGZ;
     totalNomina += totalGZ;
     rows += '<tr><td>' + esc(s.nombre) + '</td><td>' + esc(s.zona) + '</td><td>' + s.pedidos + '</td><td>' + s.nombramientos + '</td><td>' + fmtL(s.bruta) + '</td><td>' + fmtL(s.neta) + '</td><td>' + fmtL(pagoNombr) + '</td><td>' + fmtL(comGZ) + '</td><td>' + fmtL(base) + '</td><td style="font-weight:600;color:var(--dorado);">' + fmtL(totalGZ) + '</td></tr>';
@@ -1208,7 +1208,7 @@ async function loadComisiones() {
 
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
-    var base = 15000;
+    var base = 16000;
     var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
     var comGZ = s.neta * 0.03;
     var totalPagoGZ = base + pagoNombr + comGZ;

@@ -440,10 +440,19 @@
       </div>
     </div>
 
+    <!-- PUNTO DE EQUILIBRIO POR GERENCIA DE ZONA -->
+    <div style="background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;margin-bottom:14px;color:var(--gold);">Punto de Equilibrio por Gerencia de Zona</h3>
+      <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:14px;letter-spacing:.06em;">Sueldo bruto G. Zona: <strong style="color:var(--gold);">L 16,000</strong> &mdash; Cu&aacute;nto debe vender NETO una zona para que la empresa sea rentable con todos los gastos.</p>
+      <div id="puntoEquilibrio" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+      </div>
+      <div style="margin-top:14px;font-size:.7rem;color:var(--text-muted);line-height:1.6;" id="peExplicacion"></div>
+    </div>
+
     <div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Desglose por <em style="color:var(--gold);font-style:italic;">Gerencia Divisional</em></h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Com. GD (6%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L15,000)</th><th>Com. Asesoras (18%)</th><th>Com. Ger. Gral. (7%)</th></tr></thead>
+        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Com. GD (6%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L16,000)</th><th>Com. Asesoras (18%)</th><th>Com. Ger. Gral. (7%)</th></tr></thead>
         <tbody id="comisionesDesglose"></tbody>
       </table></div>
     </div>
@@ -1782,7 +1791,7 @@ var COMISION_ESTRUCTURA = [
   { concepto: 'Comision Asesoras', pct: 18, color: '#b08fd0' },
   { concepto: 'Logistica', pct: 10, color: '#9e6b6b' },
   { concepto: 'Gerencia Divisional', pct: 6, color: '#c9a96e' },
-  { concepto: 'Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L15,000 base por gerente' },
+  { concepto: 'Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 base por gerente' },
   { concepto: 'Empresa (Utilidad)', pct: 20, color: '#d0a84f' },
   { concepto: 'Gerencia General', pct: 7, color: '#8b7355' },
   { concepto: 'Marketing y Web', pct: 6, color: '#a08840' }
@@ -1817,7 +1826,7 @@ async function loadComisiones() {
 
   // Stats row
   var totalGerentesZona = gerentes.length;
-  var baseGZ = totalGerentesZona * 15000;
+  var baseGZ = totalGerentesZona * 16000;
   document.getElementById('comisionesStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Producto/Coste (30%)</div><div class="stat-value">L' + (totalNeta*0.30).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
@@ -1878,7 +1887,7 @@ async function loadComisiones() {
     if (pagoNomDetails.length) {
       pagoNomHtml += '<div style="font-size:.6rem;color:var(--text-muted);margin-top:2px;">' + pagoNomDetails.map(function(d){return esc(d);}).join('<br>') + '</div>';
     }
-    var baseGZGd = gdGerentes.length * 15000;
+    var baseGZGd = gdGerentes.length * 16000;
 
     desHtml += '<tr>' +
       '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
@@ -1893,6 +1902,29 @@ async function loadComisiones() {
   });
   if (!desHtml) desHtml = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
   document.getElementById('comisionesDesglose').innerHTML = desHtml;
+
+  // ── PUNTO DE EQUILIBRIO POR GERENCIA DE ZONA ──
+  // Sueldo GZ = L16,000 brutos. Comisiones fijas sobre neta: 30%prod+18%asesoras+10%log+6%div+3%gz+7%gg+6%mkt=80%
+  // Empresa queda 20%. Para rentabilidad, la empresa necesita cubrir el sueldo GZ desde su 20%.
+  // Punto de equilibrio: ventaNeta * 0.20 >= 16000 → ventaNeta >= 80,000 por GZ
+  // Venta bruta = ventaNeta / 0.85
+  var peContainer = document.getElementById('puntoEquilibrio');
+  var peExpl = document.getElementById('peExplicacion');
+  var sueldoGZ = 16000;
+  var pctEmpresa = 0.20;
+  var ventaNetaMinGZ = sueldoGZ / pctEmpresa; // 80,000
+  var ventaBrutaMinGZ = ventaNetaMinGZ / 0.85; // ~94,118
+  var costoProductoMin = ventaNetaMinGZ * 0.30; // 24,000
+
+  peContainer.innerHTML =
+    '<div class="stat-card"><div class="stat-label">Sueldo Bruto G. Zona</div><div class="stat-value" style="font-size:1.5rem;">L' + sueldoGZ.toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Neta M&iacute;nima / GZ</div><div class="stat-value" style="font-size:1.5rem;color:var(--warn);">L' + ventaNetaMinGZ.toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Bruta M&iacute;nima / GZ</div><div class="stat-value" style="font-size:1.5rem;">L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Inversi&oacute;n Producto M&iacute;n / GZ</div><div class="stat-value" style="font-size:1.5rem;">L' + costoProductoMin.toLocaleString('es-HN') + '</div></div>';
+
+  peExpl.innerHTML = '<strong style="color:var(--gold);">C&aacute;lculo:</strong> Del 100% de venta neta: 30% producto + 18% asesoras + 10% log&iacute;stica + 6% divisional + 3% zona + 7% gerencia general + 6% marketing = <strong>80% gastos</strong>. Queda <strong>20% empresa</strong>. ' +
+    'Para cubrir el sueldo de L' + sueldoGZ.toLocaleString('es-HN') + ' de cada G. Zona desde ese 20%, cada zona debe producir m&iacute;nimo <strong style="color:var(--gold);">L' + ventaNetaMinGZ.toLocaleString('es-HN') + ' en venta neta</strong> (L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + ' bruta). ' +
+    'Toda venta por encima de ese punto es <strong style="color:var(--success);">ganancia neta para la empresa</strong>.';
 
   // Pie chart
   if (chartComisionesPie) chartComisionesPie.destroy();
