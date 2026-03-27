@@ -836,11 +836,11 @@
           const p = parseInt(item.price.replace(/\D/g, ''));
           const subtotal = p * item.qty;
           if (moneda === 'EUR') {
-            return `${item.qty}x ${item.name} — \u20AC${(subtotal / TASA_CAMBIO_CHECKOUT).toFixed(2)}`;
+            return `${item.qty}x ${item.name} — \u20AC${psychologicalPrice(subtotal / TASA_CAMBIO_CHECKOUT).toFixed(2)}`;
           }
           return `${item.qty}x ${item.name} — L ${subtotal}`;
         }),
-        total: moneda === 'EUR' ? (order.totalGlobal / TASA_CAMBIO_CHECKOUT).toFixed(2) : order.totalGlobal,
+        total: moneda === 'EUR' ? psychologicalPrice(order.totalGlobal / TASA_CAMBIO_CHECKOUT).toFixed(2) : order.totalGlobal,
         totalHNL: order.totalGlobal
       };
 
@@ -927,7 +927,7 @@
     async function guardarPedidoEnSupabase(data, order, orderId, metodoPago) {
       const moneda = getCartCurrency();
       const totalHNL = order.totalGlobal;
-      const totalEUR = Math.round((totalHNL / TASA_CAMBIO_CHECKOUT) * 100) / 100;
+      const totalEUR = psychologicalPrice(totalHNL / TASA_CAMBIO_CHECKOUT);
 
       try {
         // 1. Create or find client
@@ -1024,7 +1024,7 @@
         const itemsHtml = (po.items || []).map(it => {
           const hnlTotal = it.price * it.qty;
           const displayPrice = moneda === 'EUR'
-            ? (hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2)
+            ? psychologicalPrice(hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2)
             : hnlTotal.toLocaleString('es-HN');
           return `<tr><td style="padding:8px 4px;border-bottom:1px solid #333;color:#ccc;text-align:left;">${it.qty}x ${it.name}</td><td style="padding:8px 4px;border-bottom:1px solid #333;color:#B8860B;text-align:right;">${symbol} ${displayPrice}</td></tr>`;
         }).join('');
@@ -1087,8 +1087,9 @@
       var moneda = getCartCurrency();
       if (typeof hnlPrice === 'string') hnlPrice = parseInt(hnlPrice.replace(/\D/g, '')) || 0;
       if (moneda === 'EUR') {
-        var eurPrice = (hnlPrice / TASA_CAMBIO_CHECKOUT).toFixed(2);
-        return '\u20AC ' + eurPrice;
+        var eurRaw = hnlPrice / TASA_CAMBIO_CHECKOUT;
+        var eurPrice = psychologicalPrice(eurRaw);
+        return '\u20AC ' + eurPrice.toFixed(2);
       }
       return 'L ' + hnlPrice.toLocaleString('es-HN');
     }
@@ -1293,7 +1294,7 @@
         let subtotal = priceNum * item.qty;
         totalGlobal += subtotal;
         if (moneda === 'EUR') {
-          details += `${item.qty}x [${item.ref}] ${item.name} - \u20AC${(subtotal / TASA_CAMBIO_CHECKOUT).toFixed(2)}\n`;
+          details += `${item.qty}x [${item.ref}] ${item.name} - \u20AC${psychologicalPrice(subtotal / TASA_CAMBIO_CHECKOUT).toFixed(2)}\n`;
         } else {
           details += `${item.qty}x [${item.ref}] ${item.name} - L ${subtotal}\n`;
         }
@@ -1361,7 +1362,7 @@
       sendPaymentNotification(orderId, order.totalGlobal);
 
       const waMoneda = getCartCurrency();
-      const waTotal = waMoneda === 'EUR' ? '\u20AC' + (order.totalGlobal / TASA_CAMBIO_CHECKOUT).toFixed(2) : 'L ' + order.totalGlobal;
+      const waTotal = waMoneda === 'EUR' ? '\u20AC' + psychologicalPrice(order.totalGlobal / TASA_CAMBIO_CHECKOUT).toFixed(2) : 'L ' + order.totalGlobal;
       let waText = `*LA CASA ÈNIGME - FORMALIZACIÓN V.I.P.*%0A%0ACLIENTE: ${data.nombre}%0ATELÉFONO: ${data.telefono}%0ADEPARTAMENTO: ${data.departamento}%0AEN: ${data.direccion}%0A%0A*SELECCIÓN:*%0A${encodeURIComponent(order.details)}%0A━━━━━━━━━━━━━━━━━%0A*TOTAL: ${waTotal}*%0A━━━━━━━━━━━━━━━━━`;
       clearCartAndUI();
       showOrderTracking(orderId);
@@ -1386,7 +1387,7 @@
       try {
         const moneda = getCartCurrency();
         const totalHNL = order.totalGlobal;
-        const totalEUR = (totalHNL / TASA_CAMBIO_CHECKOUT).toFixed(2);
+        const totalEUR = psychologicalPrice(totalHNL / TASA_CAMBIO_CHECKOUT).toFixed(2);
         const displayTotal = moneda === 'EUR' ? totalEUR : totalHNL;
         const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
 
