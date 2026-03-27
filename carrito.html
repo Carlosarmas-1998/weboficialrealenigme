@@ -1048,7 +1048,7 @@
               <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
                 <thead><tr><th style="text-align:left;padding:8px 4px;border-bottom:2px solid #B8860B;color:#B8860B;">Producto</th><th style="text-align:right;padding:8px 4px;border-bottom:2px solid #B8860B;color:#B8860B;">Precio</th></tr></thead>
                 <tbody>${itemsHtml}</tbody>
-                <tfoot><tr><td style="padding:12px 4px 0;font-weight:700;color:#fff;">TOTAL</td><td style="padding:12px 4px 0;font-weight:700;color:#B8860B;text-align:right;font-size:1.1rem;">${symbol} ${po.displayTotal}</td></tr></tfoot>
+                <tfoot><tr><td style="padding:12px 4px 0;font-weight:700;color:#fff;">SUBTOTAL</td><td style="padding:12px 4px 0;font-weight:700;color:#B8860B;text-align:right;font-size:1.1rem;">${symbol} ${po.displayTotal}</td></tr></tfoot>
               </table>
             </div>
             <div style="font-size:0.8rem;color:#888;margin-bottom:20px;">
@@ -1089,12 +1089,13 @@
     }
 
     function getCartPriceDisplay(hnlPrice) {
-      var rate = parseFloat(localStorage.getItem("enigme_tasa")) || 1;
-      var symbol = localStorage.getItem("enigme_simbolo") || "L";
+      var moneda = getCartCurrency();
       if (typeof hnlPrice === 'string') hnlPrice = parseInt(hnlPrice.replace(/\D/g, '')) || 0;
-      var converted = hnlPrice * rate;
-      converted = psychologicalPrice(converted);
-      return symbol + " " + converted.toLocaleString('es-HN');
+      if (moneda === 'EUR') {
+        var eurPrice = (hnlPrice / TASA_CAMBIO_CHECKOUT).toFixed(2);
+        return '\u20AC ' + eurPrice;
+      }
+      return 'L ' + hnlPrice.toLocaleString('es-HN');
     }
 
     function getCartCurrency() {
@@ -1241,14 +1242,10 @@
 
         currentTotalGlobal = total;
         const monedaCart = getCartCurrency();
-        document.getElementById('summary-total').innerText = getCartPriceDisplay(total);
-        // For Stripe notice, show exact amount in the payment currency
-        if (monedaCart === 'EUR') {
-          const eurTotal = (total / TASA_CAMBIO_CHECKOUT).toFixed(2);
-          document.getElementById('stripe-amount-notice').innerText = '\u20AC ' + eurTotal;
-        } else {
-          document.getElementById('stripe-amount-notice').innerText = 'L ' + total.toLocaleString('es-HN');
-        }
+        const totalDisplay = getCartPriceDisplay(total);
+        document.getElementById('summary-total').innerText = totalDisplay;
+        // Stripe notice shows SAME amount as total
+        document.getElementById('stripe-amount-notice').innerText = totalDisplay;
         updateCurrencyHint();
       }
     }

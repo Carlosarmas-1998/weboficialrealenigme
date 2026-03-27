@@ -183,15 +183,8 @@
     doc.line(marginL, y, pageW - marginR, y);
     y += 4;
 
-    // --- Total ---
-    doc.setFillColor(28, 28, 28);
-    doc.roundedRect(pageW - marginR - 60, y, 60, 12, 2, 2, "F");
-    doc.setTextColor(203, 170, 99);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    var totalConverted = parseFloat(orderData.total || 0) * currRate;
-    doc.text("TOTAL: " + currSymbol + " " + totalConverted.toLocaleString(currLocale, { minimumFractionDigits: 2 }), pageW - marginR - 55, y + 8);
-    y += 18;
+    // --- Subtotal (sin línea de Total separada) ---
+    y += 4;
 
     // --- Payment Method ---
     doc.setTextColor(28, 28, 28);
