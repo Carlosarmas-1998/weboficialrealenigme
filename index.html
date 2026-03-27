@@ -136,6 +136,11 @@
 
     @keyframes goldShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
     @keyframes ripplePulse { 0% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0.5); } 70% { box-shadow: 0 0 0 12px rgba(203, 170, 99, 0); } 100% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0); } }
+    @keyframes sparkle { 0%,100% { box-shadow: 0 0 4px rgba(203,170,99,0.4), 0 0 8px rgba(203,170,99,0.2); } 25% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 16px rgba(203,170,99,0.4), 4px -4px 6px rgba(255,255,255,0.3); } 50% { box-shadow: 0 0 12px rgba(203,170,99,0.6), 0 0 24px rgba(203,170,99,0.3), -4px 4px 8px rgba(255,255,255,0.2); } 75% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 18px rgba(203,170,99,0.4), 3px 3px 6px rgba(255,255,255,0.3); } }
+    .catalogo-btn { position:relative; display:inline-block; padding:9px 22px; font-weight:700; font-size:clamp(0.6rem,1vw,0.75rem); letter-spacing:4px; text-transform:uppercase; color:var(--carbon) !important; background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brillo) 40%, var(--dorado) 70%, #d4b66a 100%); background-size:300% 300%; border:none; border-radius:2px; animation: goldShimmer 4s infinite linear, sparkle 2s infinite ease-in-out; transition:all .3s; overflow:hidden; }
+    .catalogo-btn:hover { transform:translateY(-2px); filter:brightness(1.1); }
+    .catalogo-btn::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 60%); animation:sparkleMove 3s infinite linear; pointer-events:none; }
+    @keyframes sparkleMove { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
     /* ── NAVBAR ── */
     .navbar {
@@ -366,12 +371,13 @@
           <a href="certificado.html">Certificado</a>
         </div>
       </div>
+      <a href="#" class="nav-link" style="font-weight:600;letter-spacing:2px;" onclick="event.preventDefault();document.getElementById('miEspacioModal').style.display='flex';">MI ESPACIO</a>
     </div>
 
     <div class="brand-nav">&Egrave; N I G M E</div>
 
     <div class="nav-group right">
-      <a href="catalogo.html" class="nav-link" style="font-weight: 700;">CAT&Aacute;LOGO</a>
+      <a href="catalogo.html" class="nav-link catalogo-btn">CAT&Aacute;LOGO</a>
     </div>
   </nav>
 
@@ -464,6 +470,97 @@
 
     <a href="admin-v2.html" style="color:transparent;font-size:4px;opacity:0.04;display:inline-block;margin-top:8px;user-select:none;" tabindex="-1">&middot;</a>
   </footer>
+
+  <!-- ══ MODAL MI ESPACIO ══ -->
+  <div id="miEspacioModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--blanco-dior,#FAF9F6);max-width:440px;width:100%;border-radius:4px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
+      <button onclick="document.getElementById('miEspacioModal').style.display='none';document.getElementById('meLoginDiv').style.display='none';document.getElementById('meLoginGZ').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGDError').textContent='';document.getElementById('meGZError').textContent='';" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;color:#1C1C1C;cursor:pointer;z-index:2;">&times;</button>
+
+      <div style="padding:40px 30px 10px;text-align:center;">
+        <div style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.25em;color:#1C1C1C;margin-bottom:6px;">MI ESPACIO</div>
+        <div style="width:40px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>
+      </div>
+
+      <!-- Main options -->
+      <div id="meMain" style="padding:0 30px 35px;display:block;">
+        <button onclick="document.getElementById('meMain').style.display='none';document.getElementById('meLoginDiv').style.display='block';" style="width:100%;padding:16px;margin-bottom:12px;background:#1C1C1C;color:#CBAA63;border:1px solid #1C1C1C;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;">GERENCIA DIVISIONAL</button>
+        <button onclick="document.getElementById('meMain').style.display='none';document.getElementById('meLoginGZ').style.display='block';" style="width:100%;padding:16px;background:transparent;color:#1C1C1C;border:1px solid #CBAA63;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;">GERENCIA DE ZONA</button>
+      </div>
+
+      <!-- Login Gerencia Divisional -->
+      <div id="meLoginDiv" style="display:none;padding:0 30px 35px;">
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#888;text-align:center;margin-bottom:18px;">Ingrese sus credenciales de Gerencia Divisional</p>
+        <input id="meGDCodigo" type="text" placeholder="C&oacute;digo de Gerencia" style="width:100%;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
+        <input id="meGDPassword" type="password" placeholder="Contrase&ntilde;a" style="width:100%;padding:12px 14px;margin-bottom:6px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
+        <p id="meGDError" style="color:#c0392b;font-size:0.7rem;font-family:'Montserrat',sans-serif;min-height:18px;margin:0 0 10px;"></p>
+        <button onclick="loginGerenciaDivisional()" style="width:100%;padding:14px;background:#CBAA63;color:#1C1C1C;border:none;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:600;">ACCEDER</button>
+        <button onclick="document.getElementById('meLoginDiv').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGDError').textContent='';" style="width:100%;padding:10px;margin-top:8px;background:none;border:none;color:#888;font-size:0.65rem;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:1px;">&larr; VOLVER</button>
+      </div>
+
+      <!-- Login Gerencia de Zona -->
+      <div id="meLoginGZ" style="display:none;padding:0 30px 35px;">
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#888;text-align:center;margin-bottom:18px;">Ingrese sus credenciales de Gerente de Zona</p>
+        <input id="meGZCodigo" type="text" placeholder="C&oacute;digo (ej: ACC123)" maxlength="6" style="width:100%;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;text-transform:uppercase;box-sizing:border-box;" />
+        <input id="meGZPassword" type="password" placeholder="Contrase&ntilde;a" style="width:100%;padding:12px 14px;margin-bottom:6px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
+        <p id="meGZError" style="color:#c0392b;font-size:0.7rem;font-family:'Montserrat',sans-serif;min-height:18px;margin:0 0 10px;"></p>
+        <button onclick="loginGerenteZona()" style="width:100%;padding:14px;background:#CBAA63;color:#1C1C1C;border:none;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:600;">ACCEDER</button>
+        <button onclick="document.getElementById('meLoginGZ').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGZError').textContent='';" style="width:100%;padding:10px;margin-top:8px;background:none;border:none;color:#888;font-size:0.65rem;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:1px;">&larr; VOLVER</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var SB_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+
+    async function loginGerenciaDivisional() {
+      var codigo = document.getElementById('meGDCodigo').value.trim();
+      var password = document.getElementById('meGDPassword').value.trim();
+      var errEl = document.getElementById('meGDError');
+      errEl.textContent = '';
+      if (!codigo || !password) { errEl.textContent = 'Complete ambos campos.'; return; }
+      try {
+        var res = await fetch(SB_URL + '/rest/v1/gerencias_divisionales?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true&select=id,codigo,nombre,password_temporal', {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        var data = await res.json();
+        if (!data.length) { errEl.textContent = 'Código no encontrado o inactivo.'; return; }
+        var gd = data[0];
+        if (gd.password_temporal !== password) { errEl.textContent = 'Contraseña incorrecta.'; return; }
+        localStorage.setItem('enigme_gd_session', JSON.stringify({ id: gd.id, codigo: gd.codigo, nombre: gd.nombre }));
+        window.location.href = 'gerencia-divisional.html';
+      } catch(e) { errEl.textContent = 'Error de conexión.'; }
+    }
+
+    async function loginGerenteZona() {
+      var codigo = document.getElementById('meGZCodigo').value.trim().toUpperCase();
+      var password = document.getElementById('meGZPassword').value.trim();
+      var errEl = document.getElementById('meGZError');
+      errEl.textContent = '';
+      if (!codigo || !password) { errEl.textContent = 'Complete código y contraseña.'; return; }
+      try {
+        var res = await fetch(SB_URL + '/rest/v1/gerentes_zona?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true&select=id,codigo,nombre,zona_id,gerencia_divisional_id,password_temporal', {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        var data = await res.json();
+        if (!data.length) { errEl.textContent = 'Código no encontrado o inactivo.'; return; }
+        var gz = data[0];
+        if (gz.password_temporal !== password) { errEl.textContent = 'Contraseña incorrecta.'; return; }
+        localStorage.setItem('enigme_gz_session', JSON.stringify({ id: gz.id, codigo: gz.codigo, nombre: gz.nombre, zona_id: gz.zona_id, gerencia_divisional_id: gz.gerencia_divisional_id }));
+        window.location.href = 'gerencia-zona.html';
+      } catch(e) { errEl.textContent = 'Error de conexión.'; }
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.getElementById('miEspacioModal').style.display = 'none';
+        document.getElementById('meLoginDiv').style.display = 'none';
+        document.getElementById('meLoginGZ').style.display = 'none';
+        document.getElementById('meMain').style.display = 'block';
+      }
+    });
+  </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="enigme-shared.js"></script>

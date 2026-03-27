@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es-HN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerencia Divisional | ENIGME</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--carbon:#1C1C1C;--dorado:#CBAA63;--marfil:#FAF9F6;--gris:#888;--borde:#e0dcd5;--danger:#c0392b;--success:#27ae60;--surface:#fff;--shadow:0 2px 12px rgba(0,0,0,0.06);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;}
+
+    .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .topbar-brand{font-family:'Cinzel',serif;color:var(--dorado);font-size:1rem;letter-spacing:0.2em;}
+    .topbar-user{color:rgba(255,255,255,0.7);font-size:0.75rem;letter-spacing:0.05em;}
+    .topbar-logout{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:6px 14px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .3s;}
+    .topbar-logout:hover{border-color:var(--dorado);color:var(--dorado);}
+
+    .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--borde);padding:0 24px;overflow-x:auto;}
+    .tab-btn{padding:14px 24px;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
+    .tab-btn:hover{color:var(--carbon);}
+    .tab-btn.active{color:var(--dorado);border-bottom-color:var(--dorado);}
+
+    .container{max-width:1200px;margin:0 auto;padding:30px 24px;}
+    .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+    .card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);}
+    .card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
+
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+    .form-group{display:flex;flex-direction:column;}
+    .form-group label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:500;}
+    .form-group input,.form-group select{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--dorado);}
+
+    .btn{padding:10px 20px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;}
+    .btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
+    .btn-outline{background:transparent;color:var(--carbon);}
+    .btn-outline:hover{background:var(--carbon);color:var(--dorado);}
+    .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}
+    .btn-danger:hover{background:var(--danger);color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:0.6rem;}
+
+    table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+    thead{background:var(--carbon);}
+    th{color:var(--dorado);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:10px 12px;text-align:left;font-weight:500;}
+    td{padding:10px 12px;border-bottom:1px solid var(--borde);}
+    tr:hover{background:rgba(203,170,99,0.04);}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:20px;text-align:center;box-shadow:var(--shadow);}
+    .stat-value{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--dorado);margin-bottom:4px;}
+    .stat-label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
+
+    .chart-container{position:relative;height:300px;margin:20px 0;}
+
+    .msg-feed{max-height:600px;overflow-y:auto;padding-right:8px;}
+    .msg-item{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:16px;margin-bottom:12px;}
+    .msg-text{font-size:0.85rem;line-height:1.7;margin-bottom:8px;}
+    .msg-photos{display:flex;gap:8px;margin-bottom:8px;}
+    .msg-photos img{max-width:200px;max-height:150px;border-radius:4px;object-fit:cover;cursor:pointer;}
+    .msg-meta{font-size:0.65rem;color:var(--gris);display:flex;justify-content:space-between;align-items:center;}
+    .msg-reactions{display:flex;align-items:center;gap:4px;font-size:0.75rem;}
+
+    .multiselect{border:1px solid var(--borde);background:var(--marfil);max-height:180px;overflow-y:auto;padding:8px;}
+    .multiselect label{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.8rem;cursor:pointer;}
+    .multiselect input[type="checkbox"]{accent-color:var(--dorado);}
+
+    .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.6rem;letter-spacing:0.05em;font-weight:600;}
+    .badge-active{background:rgba(39,174,96,0.1);color:var(--success);}
+    .badge-inactive{background:rgba(192,57,43,0.1);color:var(--danger);}
+
+    .error-msg{color:var(--danger);font-size:0.75rem;margin-top:8px;}
+    .success-msg{color:var(--success);font-size:0.75rem;margin-top:8px;}
+
+    .textarea{width:100%;padding:12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:vertical;min-height:80px;outline:none;background:var(--marfil);}
+    .textarea:focus{border-color:var(--dorado);}
+
+    @media(max-width:768px){
+      .topbar{padding:10px 16px;flex-wrap:wrap;gap:8px;}
+      .tabs{padding:0 12px;}
+      .tab-btn{padding:12px 16px;font-size:0.6rem;}
+      .container{padding:20px 12px;}
+      .form-grid{grid-template-columns:1fr;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">ENIGME &middot; GERENCIA DIVISIONAL</div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="topbar-user" id="userName"></span>
+    <button class="topbar-logout" onclick="logout()">Salir</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('gerentes')">Mis Gerentes de Zona</button>
+  <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard por Campa&ntilde;a</button>
+  <button class="tab-btn" onclick="switchTab('mensajeria')">Centro de Mensajer&iacute;a</button>
+</div>
+
+<div class="container">
+
+  <!-- ══ TAB: GERENTES DE ZONA ══ -->
+  <div class="tab-panel active" id="panel-gerentes">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Gerentes de Zona</h2>
+      <button class="btn" onclick="toggleFormGZ()" id="btnNuevoGZ">+ Nuevo Gerente</button>
+    </div>
+
+    <div class="card" id="formGZ" style="display:none;">
+      <div class="card-title">Registrar Gerente de Zona</div>
+      <div class="form-grid">
+        <div class="form-group"><label>DNI *</label><input id="gzDni" placeholder="0000-0000-00000"/></div>
+        <div class="form-group"><label>Nombre Completo *</label><input id="gzNombre" placeholder="Nombre y apellidos"/></div>
+        <div class="form-group"><label>Tel&eacute;fono *</label><input id="gzTelefono" placeholder="+504..."/></div>
+        <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="gzEmail" type="email" placeholder="correo@email.com"/></div>
+        <div class="form-group"><label>Fecha de Nacimiento *</label><input id="gzFechaNac" type="date"/></div>
+        <div class="form-group"><label>N&uacute;mero de Cuenta *</label><input id="gzCuenta" placeholder="Número de cuenta bancaria"/></div>
+        <div class="form-group"><label>Nombre del Banco *</label><input id="gzBanco" placeholder="Ej: BAC, Ficohsa..."/></div>
+        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="gzDireccion" placeholder="Dirección completa"/></div>
+        <div class="form-group"><label>Fecha de Ingreso *</label><input id="gzFechaIngreso" type="date"/></div>
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select id="gzDepto" onchange="loadMunicipiosDepto()">
+            <option value="">Seleccione...</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios (seleccione los que abarcará esta zona) *</label>
+        <div class="multiselect" id="gzMunicipios">
+          <p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:14px;">
+        <div class="form-group"><label>Nombre de la Zona *</label><input id="gzZonaNombre" placeholder="Ej: Zona Sur Choluteca"/></div>
+        <div class="form-group"><label>Contrase&ntilde;a del Gerente *</label><input id="gzPassword" type="text" placeholder="Mín. 6 caracteres"/></div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="guardarGerenteZona()">Guardar Gerente</button>
+        <button class="btn btn-outline" onclick="toggleFormGZ()">Cancelar</button>
+      </div>
+      <p id="gzError" class="error-msg"></p>
+      <p id="gzSuccess" class="success-msg"></p>
+    </div>
+
+    <div id="listaGZ">
+      <p style="color:var(--gris);text-align:center;padding:40px;font-size:0.85rem;">Cargando...</p>
+    </div>
+  </div>
+
+  <!-- ══ TAB: DASHBOARD ══ -->
+  <div class="tab-panel" id="panel-dashboard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Dashboard por Campa&ntilde;a</h2>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select id="dashCampana" onchange="loadDashboard()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+          <option value="">Seleccione campaña</option>
+        </select>
+        <span id="dashAno" style="font-size:0.75rem;color:var(--gris);"></span>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="dashStats"></div>
+
+    <div class="card">
+      <div class="card-title">Detalle por Gerente de Zona</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Gerente</th><th>Zona</th><th>Pedidos</th><th>Nombramientos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+          <tbody id="dashTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card">
+        <div class="card-title">Comparativa de Campa&ntilde;as</div>
+        <div class="chart-container"><canvas id="chartComparativa"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Distribuci&oacute;n por Gerente</div>
+        <div class="chart-container"><canvas id="chartDistribucion"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tendencia de Ventas por Campa&ntilde;a</div>
+      <div class="chart-container"><canvas id="chartTendencia"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: MENSAJERÍA ══ -->
+  <div class="tab-panel" id="panel-mensajeria">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;margin-bottom:20px;">Centro de Mensajer&iacute;a</h2>
+
+    <div class="card">
+      <div class="card-title">Nuevo Mensaje</div>
+      <textarea class="textarea" id="msgTexto" placeholder="Escriba su mensaje para todos los gerentes de zona..."></textarea>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          Adjuntar Fotos (m&aacute;x 2)
+          <input type="file" id="msgFotos" accept="image/*" multiple style="display:none;" onchange="previewFotos(this)"/>
+        </label>
+        <div id="msgFotosPreview" style="display:flex;gap:8px;"></div>
+        <button class="btn" onclick="enviarMensaje()" style="margin-left:auto;">Enviar</button>
+      </div>
+      <p id="msgError" class="error-msg"></p>
+    </div>
+
+    <div class="msg-feed" id="msgFeed">
+      <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.85rem;">Cargando mensajes...</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   ENIGME - GERENCIA DIVISIONAL
+   ================================================================ */
+var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var H = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
+var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+var session = null;
+var departamentos = [];
+var municipios = [];
+var gerentes = [];
+var campanas = [];
+var chartComparativa = null;
+var chartDistribucion = null;
+var chartTendencia = null;
+
+// ── INIT ──
+(function init() {
+  var s = localStorage.getItem('enigme_gd_session');
+  if (!s) { window.location.href = 'index.html'; return; }
+  session = JSON.parse(s);
+  document.getElementById('userName').textContent = session.nombre;
+  loadDepartamentos();
+  loadCampanas();
+  loadGerentesZona();
+  loadMensajes();
+})();
+
+function logout() {
+  localStorage.removeItem('enigme_gd_session');
+  window.location.href = 'index.html';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'dashboard') loadDashboard();
+  if (tab === 'mensajeria') loadMensajes();
+}
+
+// ── API HELPERS ──
+async function api(path, opts) {
+  var res = await fetch(SB + path, Object.assign({ headers: H }, opts || {}));
+  return res.json();
+}
+async function apiPost(path, body) {
+  var res = await fetch(SB + path, { method: 'POST', headers: HJ, body: JSON.stringify(body) });
+  if (!res.ok) throw await res.json();
+  return res.json();
+}
+async function apiPatch(path, body) {
+  var res = await fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+  return res;
+}
+
+// ── DEPARTAMENTOS ──
+async function loadDepartamentos() {
+  departamentos = await api('/rest/v1/departamentos?order=nombre');
+  var sel = document.getElementById('gzDepto');
+  departamentos.forEach(function(d) {
+    var opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = d.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadMunicipiosDepto() {
+  var deptoId = document.getElementById('gzDepto').value;
+  var container = document.getElementById('gzMunicipios');
+  if (!deptoId) { container.innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>'; return; }
+  municipios = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&order=nombre');
+  container.innerHTML = municipios.map(function(m) {
+    return '<label><input type="checkbox" value="' + m.id + '"/> ' + m.nombre + '</label>';
+  }).join('');
+}
+
+// ── CAMPAÑAS ──
+async function loadCampanas() {
+  campanas = await api('/rest/v1/campanas?order=numero');
+  var sel = document.getElementById('dashCampana');
+  campanas.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = 'Campaña ' + c.numero;
+    sel.appendChild(opt);
+  });
+  document.getElementById('dashAno').textContent = 'Año ' + new Date().getFullYear();
+}
+
+// ══════════════════════════════════════════
+// TAB 1: GERENTES DE ZONA
+// ══════════════════════════════════════════
+function toggleFormGZ() {
+  var f = document.getElementById('formGZ');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('gzError').textContent = '';
+  document.getElementById('gzSuccess').textContent = '';
+}
+
+async function loadGerentesZona() {
+  gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&select=*,zonas(id,nombre,departamento_id,departamentos(nombre)),zonas_municipios:zonas(zonas_municipios(municipio_id,municipios(nombre)))&order=created_at.desc');
+  // fallback: simpler query
+  if (!gerentes || gerentes.error) {
+    gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
+  }
+  renderGerentesZona();
+}
+
+function renderGerentesZona() {
+  var container = document.getElementById('listaGZ');
+  if (!gerentes.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gris);"><p style="font-size:0.9rem;">No hay gerentes de zona registrados</p><p style="font-size:0.75rem;margin-top:8px;">Haga clic en "+ Nuevo Gerente" para agregar el primero</p></div>';
+    return;
+  }
+  container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Código</th><th>Nombre</th><th>Zona</th><th>Teléfono</th><th>Email</th><th>Contraseña</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
+    gerentes.map(function(g) {
+      var zonaNombre = g.zonas ? g.zonas.nombre : '-';
+      var estado = g.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
+      var acciones = g.activo
+        ? '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')">Dar de Baja</button>'
+        : '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')">Dar de Alta</button>';
+      var pwField = '<div style="display:flex;gap:4px;align-items:center;"><input type="text" id="gzPw_' + g.id + '" value="' + (g.password_temporal || '') + '" style="width:100px;padding:4px 6px;border:1px solid var(--borde);font-size:0.75rem;background:var(--marfil);"/><button class="btn btn-sm" style="padding:3px 8px;font-size:0.55rem;" onclick="changeGzPassword(\'' + g.id + '\')">OK</button></div>';
+      return '<tr><td style="font-weight:600;color:var(--dorado);">' + g.codigo + '</td><td>' + g.nombre + '</td><td>' + zonaNombre + '</td><td>' + (g.telefono || '-') + '</td><td>' + (g.email || '-') + '</td><td>' + pwField + '</td><td>' + estado + '</td><td>' + acciones + '</td></tr>';
+    }).join('') +
+    '</tbody></table></div>';
+}
+
+async function guardarGerenteZona() {
+  var err = document.getElementById('gzError');
+  var suc = document.getElementById('gzSuccess');
+  err.textContent = ''; suc.textContent = '';
+
+  // Check max 7
+  var activos = gerentes.filter(function(g){ return g.activo; });
+  if (false /* sin límite */) { err.textContent = 'Máximo 7 gerentes de zona activos permitidos.'; return; }
+
+  var dni = document.getElementById('gzDni').value.trim();
+  var nombre = document.getElementById('gzNombre').value.trim();
+  var telefono = document.getElementById('gzTelefono').value.trim();
+  var email = document.getElementById('gzEmail').value.trim();
+  var fechaNac = document.getElementById('gzFechaNac').value;
+  var cuenta = document.getElementById('gzCuenta').value.trim();
+  var banco = document.getElementById('gzBanco').value.trim();
+  var direccion = document.getElementById('gzDireccion').value.trim();
+  var fechaIngreso = document.getElementById('gzFechaIngreso').value;
+  var deptoId = document.getElementById('gzDepto').value;
+  var zonaNombre = document.getElementById('gzZonaNombre').value.trim();
+  var gzPassword = document.getElementById('gzPassword').value.trim();
+
+  if (!dni || !nombre || !telefono || !fechaNac || !cuenta || !banco || !direccion || !fechaIngreso || !deptoId || !zonaNombre || !gzPassword) {
+    err.textContent = 'Complete todos los campos obligatorios (*).'; return;
+  }
+  if (gzPassword.length < 6) { err.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+
+  var municipiosSeleccionados = [];
+  document.querySelectorAll('#gzMunicipios input[type="checkbox"]:checked').forEach(function(cb) {
+    municipiosSeleccionados.push(parseInt(cb.value));
+  });
+  if (!municipiosSeleccionados.length) { err.textContent = 'Seleccione al menos un municipio.'; return; }
+
+  try {
+    // 1. Generate code
+    var codeRes = await api('/rest/v1/rpc/generar_codigo_gerente_zona', { method: 'POST', headers: HJ, body: '{}' });
+    // Alternative: just call the function
+    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_gerente_zona', { method: 'POST', headers: HJ, body: '{}' });
+    var codigo = await codeResp.json();
+
+    // 2. Create zona
+    var zonaData = await apiPost('/rest/v1/zonas', {
+      codigo: codigo,
+      nombre: zonaNombre,
+      departamento_id: parseInt(deptoId),
+      gerencia_divisional_id: session.id
+    });
+    var zonaId = zonaData[0].id;
+
+    // 3. Insert zona_municipios
+    var zmData = municipiosSeleccionados.map(function(mId) {
+      return { zona_id: zonaId, municipio_id: mId };
+    });
+    await fetch(SB + '/rest/v1/zonas_municipios', {
+      method: 'POST', headers: HJ, body: JSON.stringify(zmData)
+    });
+
+    // 4. Create gerente_zona
+    await apiPost('/rest/v1/gerentes_zona', {
+      codigo: codigo,
+      nombre: nombre,
+      telefono: telefono,
+      email: email || null,
+      dni: dni,
+      direccion: direccion,
+      zona_id: zonaId,
+      gerencia_divisional_id: session.id,
+      fecha_nacimiento: fechaNac,
+      numero_cuenta: cuenta,
+      nombre_banco: banco,
+      fecha_ingreso: fechaIngreso,
+      departamento_id: parseInt(deptoId),
+      password_temporal: gzPassword,
+      activo: true
+    });
+
+    // 5. Link division to zona
+    await apiPost('/rest/v1/gerencias_divisionales_zonas', {
+      gerencia_divisional_id: session.id,
+      zona_id: zonaId,
+      es_activa: true
+    });
+
+    suc.textContent = 'Gerente de zona creado exitosamente. Código: ' + codigo;
+    // Reset form
+    ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('gzDepto').value = '';
+    document.getElementById('gzMunicipios').innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>';
+    loadGerentesZona();
+  } catch(e) {
+    err.textContent = e.message || 'Error al crear gerente de zona.';
+    console.error(e);
+  }
+}
+
+async function changeGzPassword(id) {
+  var input = document.getElementById('gzPw_' + id);
+  var newPw = input ? input.value.trim() : '';
+  if (!newPw || newPw.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { password_temporal: newPw });
+  alert('Contraseña del gerente de zona actualizada.');
+}
+
+async function bajaGerente(id) {
+  if (!confirm('¿Dar de baja a este gerente de zona? Los datos de venta se conservarán.')) return;
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false });
+  loadGerentesZona();
+}
+
+async function altaGerente(id) {
+  var activos = gerentes.filter(function(g){ return g.activo; });
+  if (false /* sin límite */) { alert('Máximo 7 gerentes activos.'); return; }
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true });
+  loadGerentesZona();
+}
+
+// ══════════════════════════════════════════
+// TAB 2: DASHBOARD
+// ══════════════════════════════════════════
+async function loadDashboard() {
+  var campanaId = document.getElementById('dashCampana').value;
+  var ano = new Date().getFullYear();
+  if (!campanaId) {
+    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">Seleccione una campaña</div></div>';
+    document.getElementById('dashTable').innerHTML = '';
+    return;
+  }
+
+  // Load pedidos for this campaign and division's gerentes
+  var gerenteIds = gerentes.map(function(g){ return g.id; });
+  if (!gerenteIds.length) {
+    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">No hay gerentes de zona</div></div>';
+    return;
+  }
+
+  var idFilter = 'in.(' + gerenteIds.join(',') + ')';
+
+  var pedidos = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta');
+  var nombramientos = await api('/rest/v1/nombramientos?gerente_id=' + idFilter + '&campana_ingreso_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id');
+
+  // Build per-gerente stats
+  var totalPedidos = 0, totalNombramientos = 0, totalBruta = 0, totalNeta = 0;
+  var gerenteStats = {};
+  gerentes.forEach(function(g) {
+    gerenteStats[g.id] = { nombre: g.nombre, zona: g.zonas ? g.zonas.nombre : (g.zona_id || '-'), pedidos: 0, nombramientos: 0, bruta: 0, neta: 0 };
+  });
+
+  pedidos.forEach(function(p) {
+    if (gerenteStats[p.gerente_id]) {
+      gerenteStats[p.gerente_id].pedidos++;
+      gerenteStats[p.gerente_id].bruta += parseFloat(p.subtotal_catalogo || 0);
+      gerenteStats[p.gerente_id].neta += parseFloat(p.total_venta_neta || 0);
+    }
+    totalPedidos++;
+    totalBruta += parseFloat(p.subtotal_catalogo || 0);
+    totalNeta += parseFloat(p.total_venta_neta || 0);
+  });
+
+  nombramientos.forEach(function(n) {
+    if (gerenteStats[n.gerente_id]) {
+      gerenteStats[n.gerente_id].nombramientos++;
+    }
+    totalNombramientos++;
+  });
+
+  // Render stats cards
+  document.getElementById('dashStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Pedidos Totales</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + totalNombramientos + '</div><div class="stat-label">Nombramientos</div></div>' +
+    '<div class="stat-card"><div class="stat-value">L ' + totalBruta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Bruta</div></div>' +
+    '<div class="stat-card"><div class="stat-value">L ' + totalNeta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta (-15%)</div></div>';
+
+  // Render table
+  var rows = '';
+  var gerenteLabels = [], gerenteVentas = [];
+  Object.keys(gerenteStats).forEach(function(gId) {
+    var s = gerenteStats[gId];
+    var neta = s.bruta * 0.85;
+    rows += '<tr><td>' + s.nombre + '</td><td>' + s.zona + '</td><td>' + s.pedidos + '</td><td>' + s.nombramientos + '</td><td>L ' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td>L ' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    gerenteLabels.push(s.nombre);
+    gerenteVentas.push(s.bruta);
+  });
+  document.getElementById('dashTable').innerHTML = rows;
+
+  // Charts
+  renderCharts(campanaId, gerenteLabels, gerenteVentas, gerenteIds, ano);
+}
+
+async function renderCharts(campanaId, gerenteLabels, gerenteVentas, gerenteIds, ano) {
+  var campNum = 0;
+  campanas.forEach(function(c){ if (c.id == campanaId) campNum = c.numero; });
+
+  // Get data for comparison (2 previous campaigns)
+  var prevCamps = campanas.filter(function(c){ return c.numero < campNum; }).sort(function(a,b){ return b.numero - a.numero; }).slice(0, 2).reverse();
+  var compareCamps = prevCamps.concat(campanas.filter(function(c){ return c.numero === campNum; }));
+
+  var idFilter = 'in.(' + gerenteIds.join(',') + ')';
+  var compLabels = [];
+  var compVentas = [];
+
+  for (var i = 0; i < compareCamps.length; i++) {
+    var c = compareCamps[i];
+    compLabels.push('C' + c.numero);
+    var p = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + c.id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
+    var total = 0;
+    p.forEach(function(r){ total += parseFloat(r.subtotal_catalogo || 0); });
+    compVentas.push(total);
+  }
+
+  // Comparativa chart
+  if (chartComparativa) chartComparativa.destroy();
+  chartComparativa = new Chart(document.getElementById('chartComparativa'), {
+    type: 'bar',
+    data: {
+      labels: compLabels,
+      datasets: [{
+        label: 'Venta Bruta (L)',
+        data: compVentas,
+        backgroundColor: ['rgba(203,170,99,0.3)', 'rgba(203,170,99,0.5)', 'rgba(203,170,99,0.9)'],
+        borderColor: '#CBAA63',
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  // Distribution chart
+  if (chartDistribucion) chartDistribucion.destroy();
+  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad'];
+  chartDistribucion = new Chart(document.getElementById('chartDistribucion'), {
+    type: 'doughnut',
+    data: {
+      labels: gerenteLabels,
+      datasets: [{ data: gerenteVentas, backgroundColor: colors.slice(0, gerenteLabels.length), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  // Tendencia - all campaigns
+  var tendLabels = [], tendVentas = [];
+  for (var j = 0; j < campanas.length; j++) {
+    var camp = campanas[j];
+    tendLabels.push('C' + camp.numero);
+    var pd = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + camp.id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
+    var tot = 0;
+    pd.forEach(function(r){ tot += parseFloat(r.subtotal_catalogo || 0); });
+    tendVentas.push(tot);
+  }
+
+  if (chartTendencia) chartTendencia.destroy();
+  chartTendencia = new Chart(document.getElementById('chartTendencia'), {
+    type: 'line',
+    data: {
+      labels: tendLabels,
+      datasets: [{
+        label: 'Venta Bruta (L)',
+        data: tendVentas,
+        borderColor: '#CBAA63',
+        backgroundColor: 'rgba(203,170,99,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: '#CBAA63'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+}
+
+// ══════════════════════════════════════════
+// TAB 3: MENSAJERÍA
+// ══════════════════════════════════════════
+var fotoFiles = [];
+
+function previewFotos(input) {
+  var files = Array.from(input.files).slice(0, 2);
+  fotoFiles = files;
+  var preview = document.getElementById('msgFotosPreview');
+  preview.innerHTML = '';
+  files.forEach(function(f) {
+    var url = URL.createObjectURL(f);
+    preview.innerHTML += '<img src="' + url + '" style="max-height:60px;border-radius:4px;"/>';
+  });
+  if (input.files.length > 2) {
+    document.getElementById('msgError').textContent = 'Máximo 2 fotos. Se tomaron las primeras 2.';
+  }
+}
+
+async function enviarMensaje() {
+  var texto = document.getElementById('msgTexto').value.trim();
+  var errEl = document.getElementById('msgError');
+  errEl.textContent = '';
+  if (!texto) { errEl.textContent = 'Escriba un mensaje.'; return; }
+
+  try {
+    // Create message
+    var msg = await apiPost('/rest/v1/mensajes_divisional', {
+      gerencia_divisional_id: session.id,
+      texto: texto
+    });
+    var msgId = msg[0].id;
+
+    // Upload photos if any
+    for (var i = 0; i < fotoFiles.length; i++) {
+      var file = fotoFiles[i];
+      var ext = file.name.split('.').pop();
+      var path = 'mensajes/' + msgId + '/' + (i + 1) + '.' + ext;
+
+      await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+        method: 'POST',
+        headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
+        body: file
+      });
+
+      var publicUrl = SB + '/storage/v1/object/public/archivos-corporativos/' + path;
+      await apiPost('/rest/v1/mensajes_divisional_fotos', {
+        mensaje_id: msgId,
+        url_foto: publicUrl,
+        nombre_archivo: file.name
+      });
+    }
+
+    document.getElementById('msgTexto').value = '';
+    document.getElementById('msgFotosPreview').innerHTML = '';
+    document.getElementById('msgFotos').value = '';
+    fotoFiles = [];
+    loadMensajes();
+  } catch(e) {
+    errEl.textContent = e.message || 'Error al enviar mensaje.';
+    console.error(e);
+  }
+}
+
+async function loadMensajes() {
+  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id,gerentes_zona(nombre))&order=created_at.desc');
+  // fallback
+  if (mensajes.error) {
+    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
+  }
+
+  var feed = document.getElementById('msgFeed');
+  if (!mensajes.length) {
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes aún. Escriba el primero.</p>';
+    return;
+  }
+
+  feed.innerHTML = mensajes.map(function(m) {
+    var fotos = '';
+    if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
+      fotos = '<div class="msg-photos">' + m.mensajes_divisional_fotos.map(function(f) {
+        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
+      }).join('') + '</div>';
+    }
+    var reacciones = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
+    var reactNames = '';
+    if (m.mensajes_reacciones && m.mensajes_reacciones.length) {
+      reactNames = m.mensajes_reacciones.map(function(r) {
+        return r.gerentes_zona ? r.gerentes_zona.nombre : 'Gerente';
+      }).join(', ');
+    }
+    var fecha = new Date(m.created_at).toLocaleString('es-HN');
+    return '<div class="msg-item">' +
+      '<div class="msg-text">' + m.texto.replace(/\n/g, '<br>') + '</div>' +
+      fotos +
+      '<div class="msg-meta">' +
+        '<span>' + fecha + '</span>' +
+        '<div class="msg-reactions" title="' + reactNames + '">&#10084;&#65039; ' + reacciones + '</div>' +
+      '</div></div>';
+  }).join('');
+}
+</script>
+</body>
+</html>

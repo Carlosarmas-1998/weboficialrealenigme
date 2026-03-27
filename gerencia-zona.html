@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es-HN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerencia de Zona | ENIGME</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--carbon:#1C1C1C;--dorado:#CBAA63;--marfil:#FAF9F6;--gris:#888;--borde:#e0dcd5;--danger:#c0392b;--success:#27ae60;--surface:#fff;--shadow:0 2px 12px rgba(0,0,0,0.06);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;}
+
+    .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;}
+    .topbar-brand{font-family:'Cinzel',serif;color:var(--dorado);font-size:1rem;letter-spacing:0.2em;}
+    .topbar-info{color:rgba(255,255,255,0.7);font-size:0.7rem;letter-spacing:0.05em;text-align:right;}
+    .topbar-info strong{color:var(--dorado);}
+    .topbar-logout{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:6px 14px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .3s;}
+    .topbar-logout:hover{border-color:var(--dorado);color:var(--dorado);}
+
+    .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--borde);padding:0 24px;overflow-x:auto;}
+    .tab-btn{padding:14px 20px;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
+    .tab-btn:hover{color:var(--carbon);}.tab-btn.active{color:var(--dorado);border-bottom-color:var(--dorado);}
+
+    .container{max-width:1200px;margin:0 auto;padding:30px 24px;}
+    .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+    .card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);}
+    .card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
+
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
+    .form-group{display:flex;flex-direction:column;}
+    .form-group label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:500;}
+    .form-group input,.form-group select{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
+    .form-group input:focus,.form-group select:focus{border-color:var(--dorado);}
+
+    .btn{padding:10px 20px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;}
+    .btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
+    .btn-outline{background:transparent;color:var(--carbon);}.btn-outline:hover{background:var(--carbon);color:var(--dorado);}
+    .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}.btn-danger:hover{background:var(--danger);color:#fff;}
+    .btn-sm{padding:6px 12px;font-size:0.6rem;}
+
+    table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+    thead{background:var(--carbon);}
+    th{color:var(--dorado);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:10px 12px;text-align:left;font-weight:500;}
+    td{padding:10px 12px;border-bottom:1px solid var(--borde);}
+    tr:hover{background:rgba(203,170,99,0.04);}
+
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:18px;text-align:center;box-shadow:var(--shadow);}
+    .stat-value{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--dorado);margin-bottom:4px;}
+    .stat-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
+
+    .chart-container{position:relative;height:280px;margin:20px 0;}
+
+    .pedido-items-table{width:100%;border-collapse:collapse;margin-top:10px;}
+    .pedido-items-table th{background:var(--marfil);color:var(--carbon);font-size:0.65rem;padding:8px;border:1px solid var(--borde);}
+    .pedido-items-table td{padding:6px 8px;border:1px solid var(--borde);font-size:0.8rem;}
+    .pedido-items-table input{width:100%;padding:6px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;background:transparent;}
+    .pedido-items-table input:focus{border-color:var(--dorado);}
+
+    .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.6rem;font-weight:600;}
+    .badge-active{background:rgba(39,174,96,0.1);color:var(--success);}
+    .badge-inactive{background:rgba(192,57,43,0.1);color:var(--danger);}
+
+    .error-msg{color:var(--danger);font-size:0.75rem;margin-top:8px;}
+    .success-msg{color:var(--success);font-size:0.75rem;margin-top:8px;}
+
+    .msg-feed{max-height:600px;overflow-y:auto;}
+    .msg-item{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:16px;margin-bottom:12px;}
+    .msg-text{font-size:0.85rem;line-height:1.7;margin-bottom:8px;}
+    .msg-photos{display:flex;gap:8px;margin-bottom:8px;}
+    .msg-photos img{max-width:200px;max-height:150px;border-radius:4px;object-fit:cover;cursor:pointer;}
+    .msg-meta{font-size:0.65rem;color:var(--gris);display:flex;justify-content:space-between;align-items:center;}
+    .msg-reactions{display:flex;align-items:center;gap:6px;}
+    .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:0.75rem;transition:all .3s;}
+    .react-btn:hover,.react-btn.reacted{background:rgba(203,170,99,0.15);border-color:var(--dorado);}
+
+    .prof-card{background:rgba(203,170,99,0.08);border:1px solid var(--dorado);border-radius:4px;padding:14px;margin:10px 0;display:none;}
+    .prof-card.visible{display:block;}
+    .prof-card p{font-size:0.8rem;margin:2px 0;}.prof-card strong{color:var(--dorado);}
+
+    @media(max-width:768px){
+      .topbar{padding:10px 16px;}
+      .tabs{padding:0 8px;}.tab-btn{padding:12px 14px;font-size:0.58rem;}
+      .container{padding:20px 12px;}
+      .form-grid{grid-template-columns:1fr;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">ENIGME &middot; GERENCIA DE ZONA</div>
+  <div class="topbar-info">
+    <span id="userInfo"></span>
+  </div>
+  <button class="topbar-logout" onclick="logout()">Salir</button>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('sectores',this)">Mis Sectores</button>
+  <button class="tab-btn" onclick="switchTab('pedidos',this)">Subir Pedidos</button>
+  <button class="tab-btn" onclick="switchTab('nombramientos',this)">Nombramientos</button>
+  <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona</button>
+  <button class="tab-btn" onclick="switchTab('mensajeria',this)">Mensajer&iacute;a</button>
+</div>
+
+<div class="container">
+
+  <!-- ══ TAB 1: SECTORES ══ -->
+  <div class="tab-panel active" id="panel-sectores">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Mis Sectores</h2>
+      <button class="btn" onclick="toggleFormSector()">+ Nuevo Sector</button>
+    </div>
+
+    <div class="card" id="formSector" style="display:none;">
+      <div class="card-title">Crear Sector y Asignar Coordinador</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Sector (se asigna auto)</label><input id="secNumero" readonly style="background:#eee;"/></div>
+        <div class="form-group"><label>Nombre del Coordinador *</label><input id="secNombre" placeholder="Nombre completo"/></div>
+        <div class="form-group"><label>DNI *</label><input id="secDni" placeholder="0000-0000-00000"/></div>
+        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="secDireccion" placeholder="Dirección"/></div>
+        <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="secEmail" type="email" placeholder="correo@email.com"/></div>
+        <div class="form-group"><label>RTN</label><input id="secRtn" placeholder="RTN"/></div>
+        <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="secCuenta" placeholder="Número de cuenta"/></div>
+        <div class="form-group"><label>Nombre del Banco</label><input id="secBanco" placeholder="Ej: BAC, Ficohsa"/></div>
+        <div class="form-group"><label>Fecha de Nacimiento</label><input id="secFechaNac" type="date"/></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn" onclick="guardarSector()">Guardar</button>
+        <button class="btn btn-outline" onclick="toggleFormSector()">Cancelar</button>
+      </div>
+      <p id="secError" class="error-msg"></p>
+      <p id="secSuccess" class="success-msg"></p>
+    </div>
+
+    <div id="listaSectores"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p></div>
+  </div>
+
+  <!-- ══ TAB 2: SUBIR PEDIDOS ══ -->
+  <div class="tab-panel" id="panel-pedidos">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Subir Pedido</h2>
+
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>C&oacute;digo de Profesional *</label>
+          <input id="pedCodigo" placeholder="Ej: 301222" onblur="buscarProfesional()"/>
+        </div>
+        <div class="form-group">
+          <label>Campa&ntilde;a *</label>
+          <select id="pedCampana"><option value="">Seleccione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Sector *</label>
+          <select id="pedSector"><option value="">Seleccione...</option></select>
+        </div>
+      </div>
+
+      <div class="prof-card" id="profCard">
+        <p><strong>Nombre:</strong> <span id="profNombre"></span></p>
+        <p><strong>DNI:</strong> <span id="profDni"></span></p>
+        <p><strong>Tel&eacute;fono:</strong> <span id="profTelefono"></span></p>
+        <p><strong>Direcci&oacute;n:</strong> <span id="profDireccion"></span></p>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="card-title">Detalle del Pedido</div>
+        <div style="max-height:400px;overflow-y:auto;">
+          <table class="pedido-items-table">
+            <thead><tr><th style="width:80px;">Cantidad</th><th>Referencia</th><th style="width:120px;">Precio</th><th style="width:120px;">Total</th><th style="width:40px;"></th></tr></thead>
+            <tbody id="pedItems">
+              <tr>
+                <td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td><input class="pi-ref" placeholder="Ref. producto" onkeydown="handleEnterPed(event,this)"/></td>
+                <td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td class="pi-total" style="font-weight:600;">0.00</td>
+                <td><button class="btn-danger btn-sm" onclick="removeRow(this)" style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;">&times;</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="addRow()">+ Agregar Fila</button>
+          <div style="text-align:right;">
+            <div style="font-size:0.85rem;">Total Bruto: <strong id="pedTotalBruto" style="color:var(--dorado);">L 0.00</strong></div>
+            <div style="font-size:0.85rem;">Total Neto (-15%): <strong id="pedTotalNeto" style="color:var(--success);">L 0.00</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          Adjuntar Archivos (m&aacute;x 2)
+          <input type="file" id="pedArchivos" accept="image/*,.pdf" multiple style="display:none;"/>
+        </label>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn" onclick="guardarPedido()">Guardar Pedido</button>
+      </div>
+      <p id="pedError" class="error-msg"></p>
+      <p id="pedSuccess" class="success-msg"></p>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: NOMBRAMIENTOS ══ -->
+  <div class="tab-panel" id="panel-nombramientos">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Nuevo Nombramiento</h2>
+
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group"><label>DNI *</label><input id="nomDni" placeholder="0000-0000-00000" onblur="buscarExistente()"/></div>
+        <div class="form-group"><label>Nombre Completo *</label><input id="nomNombre" placeholder="Nombre y apellidos"/></div>
+        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="nomDireccion" placeholder="Dirección completa"/></div>
+        <div class="form-group"><label>Tel&eacute;fono *</label><input id="nomTelefono" placeholder="+504..."/></div>
+        <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="nomEmail" type="email" placeholder="Opcional"/></div>
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select id="nomDepto"><option value="">Seleccione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Sector *</label>
+          <select id="nomSector"><option value="">Seleccione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Campa&ntilde;a de Ingreso *</label>
+          <select id="nomCampana"><option value="">Seleccione...</option></select>
+        </div>
+      </div>
+
+      <div id="nomExisteAlert" style="display:none;background:rgba(192,57,43,0.08);border:1px solid var(--danger);border-radius:4px;padding:12px;margin-top:12px;">
+        <p style="font-size:0.8rem;color:var(--danger);font-weight:600;">Esta persona ya est&aacute; registrada en el sistema. Se notificar&aacute; a Gerencia Divisional.</p>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+          Adjuntar Archivos (m&aacute;x 2)
+          <input type="file" id="nomArchivos" accept="image/*,.pdf" multiple style="display:none;"/>
+        </label>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn" onclick="guardarNombramiento()">Registrar Nombramiento</button>
+      </div>
+      <p id="nomError" class="error-msg"></p>
+      <p id="nomSuccess" class="success-msg"></p>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="card-title">Nombramientos Recientes</div>
+      <div id="listaNom"><p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p></div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 4: MI ZONA RESUMEN ══ -->
+  <div class="tab-panel" id="panel-resumen">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Resumen de Mi Zona</h2>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;">
+      <select id="resCampana" onchange="loadResumen()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+        <option value="">Todas las campañas</option>
+      </select>
+      <span style="font-size:0.75rem;color:var(--gris);">A&ntilde;o <span id="resAno"></span></span>
+    </div>
+
+    <div class="stats-grid" id="resStats"></div>
+
+    <div class="card">
+      <div class="card-title">Ventas por Sector</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Sector</th><th>Coordinador</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+          <tbody id="resTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card">
+        <div class="card-title">Comparativa Campa&ntilde;as</div>
+        <div class="chart-container"><canvas id="resChartComp"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ventas por Sector</div>
+        <div class="chart-container"><canvas id="resChartSector"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 5: MENSAJERÍA ══ -->
+  <div class="tab-panel" id="panel-mensajeria">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mensajes de Gerencia Divisional</h2>
+    <div class="msg-feed" id="gzMsgFeed">
+      <p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   ENIGME - GERENCIA DE ZONA
+   ================================================================ */
+var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var H = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
+var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+var session = null;
+var sectores = [];
+var campanas = [];
+var profData = null; // professional found by code
+var resChartComp = null;
+var resChartSector = null;
+
+// ── INIT ──
+(function init() {
+  var s = localStorage.getItem('enigme_gz_session');
+  if (!s) { window.location.href = 'index.html'; return; }
+  session = JSON.parse(s);
+  document.getElementById('userInfo').innerHTML = '<strong>' + session.nombre + '</strong> &middot; Código: ' + session.codigo;
+  loadCampanas();
+  loadSectores();
+  loadDepartamentosNom();
+  loadMensajesGZ();
+})();
+
+function logout() {
+  localStorage.removeItem('enigme_gz_session');
+  window.location.href = 'index.html';
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'resumen') loadResumen();
+  if (tab === 'mensajeria') loadMensajesGZ();
+}
+
+async function api(path) {
+  var res = await fetch(SB + path, { headers: H });
+  return res.json();
+}
+async function apiPost(path, body) {
+  var res = await fetch(SB + path, { method: 'POST', headers: HJ, body: JSON.stringify(body) });
+  if (!res.ok) throw await res.json();
+  return res.json();
+}
+async function apiPatch(path, body) {
+  return fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+}
+
+async function loadCampanas() {
+  campanas = await api('/rest/v1/campanas?order=numero');
+  ['pedCampana','nomCampana','resCampana'].forEach(function(selId) {
+    var sel = document.getElementById(selId);
+    if (!sel) return;
+    campanas.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = 'Campaña ' + c.numero;
+      sel.appendChild(opt);
+    });
+  });
+  document.getElementById('resAno').textContent = new Date().getFullYear();
+}
+
+// ══════════════════════════════════════════
+// TAB 1: SECTORES
+// ══════════════════════════════════════════
+async function loadSectores() {
+  sectores = await api('/rest/v1/sectores?gerente_id=eq.' + session.id + '&order=numero_sector');
+  renderSectores();
+  populateSectorSelects();
+}
+
+function populateSectorSelects() {
+  ['pedSector','nomSector'].forEach(function(selId) {
+    var sel = document.getElementById(selId);
+    if (!sel) return;
+    // keep first option
+    while (sel.options.length > 1) sel.remove(1);
+    sectores.forEach(function(s) {
+      var opt = document.createElement('option');
+      opt.value = s.id; opt.textContent = 'S' + s.numero_sector;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function renderSectores() {
+  var c = document.getElementById('listaSectores');
+  if (!sectores.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">No hay sectores. Cree el primero.</p>'; return; }
+  // Load coordinators for each sector
+  loadCoordinadoresSectores();
+}
+
+async function loadCoordinadoresSectores() {
+  var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&order=created_at.desc');
+  var c = document.getElementById('listaSectores');
+  c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Sector</th><th>Coordinador</th><th>Código</th><th>DNI</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
+    sectores.map(function(s) {
+      var coord = null;
+      coords.forEach(function(co) { if (co.sector_id === s.id && co.activo) coord = co; });
+      var coordNombre = coord ? coord.nombre : '<span style="color:var(--gris);">Sin asignar</span>';
+      var coordCodigo = coord ? '<span style="color:var(--dorado);font-weight:600;">' + coord.codigo + '</span>' : '-';
+      var coordDni = coord ? (coord.dni || '-') : '-';
+      var coordTel = coord ? (coord.telefono || '-') : '-';
+      var estado = s.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
+      var acciones = coord ? '<button class="btn btn-danger btn-sm" onclick="bajaCoordinador(\'' + coord.id + '\',\'' + s.id + '\')">Cambiar</button>' : '';
+      return '<tr><td style="font-weight:600;">S' + s.numero_sector + '</td><td>' + coordNombre + '</td><td>' + coordCodigo + '</td><td>' + coordDni + '</td><td>' + coordTel + '</td><td>' + estado + '</td><td>' + acciones + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+function toggleFormSector() {
+  var f = document.getElementById('formSector');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('secError').textContent = '';
+  document.getElementById('secSuccess').textContent = '';
+  // Set next sector number
+  var nextNum = sectores.length + 1;
+  document.getElementById('secNumero').value = 'S' + nextNum;
+}
+
+async function guardarSector() {
+  var err = document.getElementById('secError');
+  var suc = document.getElementById('secSuccess');
+  err.textContent = ''; suc.textContent = '';
+
+  if (sectores.length >= 15) { err.textContent = 'Máximo 15 sectores permitidos.'; return; }
+
+  var nombre = document.getElementById('secNombre').value.trim();
+  var dni = document.getElementById('secDni').value.trim();
+  var direccion = document.getElementById('secDireccion').value.trim();
+
+  if (!nombre || !dni || !direccion) { err.textContent = 'Nombre, DNI y dirección son obligatorios.'; return; }
+
+  try {
+    var numSector = sectores.length + 1;
+
+    // 1. Create sector
+    var secData = await apiPost('/rest/v1/sectores', {
+      gerente_id: session.id,
+      numero_sector: numSector,
+      activo: true
+    });
+    var sectorId = secData[0].id;
+
+    // 2. Create coordinador with auto-generated code
+    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
+    var codigo = await codeResp.json();
+
+    await apiPost('/rest/v1/coordinadores', {
+      codigo: String(codigo),
+      nombre: nombre,
+      dni: dni,
+      direccion: direccion,
+      email: document.getElementById('secEmail').value.trim() || null,
+      rtn: document.getElementById('secRtn').value.trim() || null,
+      numero_cuenta: document.getElementById('secCuenta').value.trim() || null,
+      nombre_banco: document.getElementById('secBanco').value.trim() || null,
+      fecha_nacimiento: document.getElementById('secFechaNac').value || null,
+      sector_id: sectorId,
+      gerente_id: session.id,
+      activo: true
+    });
+
+    // Also create vendedora entry (coordinators are also sellers)
+    await apiPost('/rest/v1/vendedoras', {
+      codigo: String(codigo),
+      nombre: nombre,
+      dni: dni,
+      direccion: direccion,
+      email: document.getElementById('secEmail').value.trim() || null,
+      zona_id: session.zona_id,
+      sector_id: sectorId,
+      gerente_id: session.id,
+      coordinador_id: null,
+      activo: true
+    });
+
+    suc.textContent = 'Sector S' + numSector + ' creado. Coordinador: ' + nombre + ' - Código: ' + codigo;
+    ['secNombre','secDni','secDireccion','secEmail','secRtn','secCuenta','secBanco','secFechaNac'].forEach(function(id){ document.getElementById(id).value = ''; });
+    loadSectores();
+  } catch(e) {
+    err.textContent = e.message || 'Error al crear sector.';
+    console.error(e);
+  }
+}
+
+async function bajaCoordinador(coordId, sectorId) {
+  if (!confirm('¿Dar de baja al coordinador actual? Se conservan sus datos. Deberá asignar uno nuevo.')) return;
+  await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null });
+  loadSectores();
+}
+
+// ══════════════════════════════════════════
+// TAB 2: PEDIDOS
+// ══════════════════════════════════════════
+async function buscarProfesional() {
+  var codigo = document.getElementById('pedCodigo').value.trim();
+  var card = document.getElementById('profCard');
+  card.classList.remove('visible');
+  profData = null;
+  if (!codigo) return;
+
+  // Search in coordinadores and vendedoras
+  var coords = await api('/rest/v1/coordinadores?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
+  if (coords.length) {
+    profData = coords[0];
+  } else {
+    var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
+    if (vends.length) profData = vends[0];
+  }
+
+  if (profData) {
+    document.getElementById('profNombre').textContent = profData.nombre || '-';
+    document.getElementById('profDni').textContent = profData.dni || '-';
+    document.getElementById('profTelefono').textContent = profData.telefono || '-';
+    document.getElementById('profDireccion').textContent = profData.direccion || '-';
+    card.classList.add('visible');
+  }
+}
+
+function addRow() {
+  var tbody = document.getElementById('pedItems');
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelector('.pi-cant').focus();
+}
+
+function removeRow(btn) {
+  var tbody = document.getElementById('pedItems');
+  if (tbody.rows.length <= 1) return;
+  btn.closest('tr').remove();
+  calcTotals();
+}
+
+function calcRow(input) {
+  var tr = input.closest('tr');
+  var cant = parseFloat(tr.querySelector('.pi-cant').value) || 0;
+  var precio = parseFloat(tr.querySelector('.pi-precio').value) || 0;
+  var total = cant * precio;
+  tr.querySelector('.pi-total').textContent = total.toFixed(2);
+  calcTotals();
+}
+
+function calcTotals() {
+  var total = 0;
+  document.querySelectorAll('#pedItems .pi-total').forEach(function(td) {
+    total += parseFloat(td.textContent) || 0;
+  });
+  document.getElementById('pedTotalBruto').textContent = 'L ' + total.toLocaleString('es-HN', {minimumFractionDigits:2});
+  document.getElementById('pedTotalNeto').textContent = 'L ' + (total * 0.85).toLocaleString('es-HN', {minimumFractionDigits:2});
+}
+
+function handleEnterPed(e, input) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    var tr = input.closest('tr');
+    var inputs = tr.querySelectorAll('input');
+    var idx = Array.from(inputs).indexOf(input);
+    if (idx < inputs.length - 1) {
+      inputs[idx + 1].focus();
+    } else {
+      addRow();
+    }
+  }
+}
+
+async function guardarPedido() {
+  var err = document.getElementById('pedError');
+  var suc = document.getElementById('pedSuccess');
+  err.textContent = ''; suc.textContent = '';
+
+  var codigo = document.getElementById('pedCodigo').value.trim();
+  var campanaId = document.getElementById('pedCampana').value;
+  var sectorId = document.getElementById('pedSector').value;
+
+  if (!codigo || !campanaId || !sectorId) { err.textContent = 'Complete código, campaña y sector.'; return; }
+  if (!profData) { err.textContent = 'Profesional no encontrado. Verifique el código.'; return; }
+
+  // Collect items
+  var items = [];
+  var totalBruto = 0;
+  var rows = document.querySelectorAll('#pedItems tr');
+  for (var i = 0; i < rows.length; i++) {
+    var cant = parseInt(rows[i].querySelector('.pi-cant').value) || 0;
+    var ref = rows[i].querySelector('.pi-ref').value.trim();
+    var precio = parseFloat(rows[i].querySelector('.pi-precio').value) || 0;
+    if (!ref || cant <= 0 || precio <= 0) continue;
+    var subtotal = cant * precio;
+    items.push({ cantidad: cant, codigo_producto: ref, nombre_producto: ref, precio_catalogo_unitario: precio, iva_unitario: 0, venta_neta_unitaria: precio * 0.85, subtotal_catalogo: subtotal, subtotal_iva: 0, subtotal_con_iva: subtotal, subtotal_venta_neta: subtotal * 0.85 });
+    totalBruto += subtotal;
+  }
+
+  if (!items.length) { err.textContent = 'Agregue al menos un item al pedido.'; return; }
+
+  var totalNeto = totalBruto * 0.85;
+
+  try {
+    // Generate pedido code
+    var codigoPedido = 'PED-' + Date.now().toString(36).toUpperCase();
+
+    // Find vendedora id from profData
+    var vendedoraId = profData.id;
+    // If profData is a coordinator, look up vendedora by codigo
+    if (!profData.zona_id) {
+      var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(profData.codigo));
+      if (vends.length) vendedoraId = vends[0].id;
+    }
+
+    var pedido = await apiPost('/rest/v1/pedidos', {
+      codigo_pedido: codigoPedido,
+      campana_id: parseInt(campanaId),
+      vendedora_id: vendedoraId,
+      gerente_id: session.id,
+      sector_id: sectorId,
+      subtotal_catalogo: totalBruto,
+      total_iva: 0,
+      total_con_iva: totalBruto,
+      total_venta_neta: totalNeto,
+      ano: new Date().getFullYear()
+    });
+
+    var pedidoId = pedido[0].id;
+
+    // Insert items
+    var itemsData = items.map(function(it) {
+      it.pedido_id = pedidoId;
+      return it;
+    });
+    await fetch(SB + '/rest/v1/pedidos_detalle', {
+      method: 'POST', headers: HJ, body: JSON.stringify(itemsData)
+    });
+
+    // Upload files if any
+    var files = document.getElementById('pedArchivos').files;
+    for (var f = 0; f < Math.min(files.length, 2); f++) {
+      var file = files[f];
+      var ext = file.name.split('.').pop();
+      var path = 'pedidos/' + pedidoId + '/' + (f + 1) + '.' + ext;
+      await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+        method: 'POST',
+        headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
+        body: file
+      });
+    }
+
+    suc.textContent = 'Pedido guardado exitosamente. Código: ' + codigoPedido + ' | Bruto: L ' + totalBruto.toFixed(2) + ' | Neto: L ' + totalNeto.toFixed(2);
+
+    // Reset
+    document.getElementById('pedCodigo').value = '';
+    document.getElementById('profCard').classList.remove('visible');
+    profData = null;
+    document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
+    document.getElementById('pedTotalBruto').textContent = 'L 0.00';
+    document.getElementById('pedTotalNeto').textContent = 'L 0.00';
+    document.getElementById('pedArchivos').value = '';
+  } catch(e) {
+    err.textContent = e.message || 'Error al guardar pedido.';
+    console.error(e);
+  }
+}
+
+// ══════════════════════════════════════════
+// TAB 3: NOMBRAMIENTOS
+// ══════════════════════════════════════════
+async function loadDepartamentosNom() {
+  var deptos = await api('/rest/v1/departamentos?order=nombre');
+  var sel = document.getElementById('nomDepto');
+  deptos.forEach(function(d) {
+    var opt = document.createElement('option');
+    opt.value = d.id; opt.textContent = d.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+async function buscarExistente() {
+  var dni = document.getElementById('nomDni').value.trim();
+  var alert = document.getElementById('nomExisteAlert');
+  alert.style.display = 'none';
+  if (!dni) return;
+
+  // Search in vendedoras by DNI
+  var vends = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+  if (vends.length) {
+    var v = vends[0];
+    document.getElementById('nomNombre').value = v.nombre || '';
+    document.getElementById('nomDireccion').value = v.direccion || '';
+    document.getElementById('nomTelefono').value = v.telefono || '';
+    document.getElementById('nomEmail').value = v.email || '';
+    alert.style.display = 'block';
+  }
+}
+
+async function guardarNombramiento() {
+  var err = document.getElementById('nomError');
+  var suc = document.getElementById('nomSuccess');
+  err.textContent = ''; suc.textContent = '';
+
+  var dni = document.getElementById('nomDni').value.trim();
+  var nombre = document.getElementById('nomNombre').value.trim();
+  var direccion = document.getElementById('nomDireccion').value.trim();
+  var telefono = document.getElementById('nomTelefono').value.trim();
+  var email = document.getElementById('nomEmail').value.trim();
+  var sectorId = document.getElementById('nomSector').value;
+  var campanaId = document.getElementById('nomCampana').value;
+
+  if (!dni || !nombre || !direccion || !telefono || !sectorId || !campanaId) {
+    err.textContent = 'Complete todos los campos obligatorios.'; return;
+  }
+
+  try {
+    // Generate code
+    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
+    var codigo = await codeResp.json();
+
+    // Check if already exists and notify divisional
+    var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+    var yaExiste = existentes.length > 0;
+
+    // Create vendedora
+    await apiPost('/rest/v1/vendedoras', {
+      codigo: String(codigo),
+      nombre: nombre,
+      dni: dni,
+      direccion: direccion,
+      telefono: telefono,
+      email: email || null,
+      zona_id: session.zona_id,
+      sector_id: sectorId,
+      gerente_id: session.id,
+      activo: true
+    });
+
+    // Create nombramiento record
+    var nomData = await apiPost('/rest/v1/nombramientos', {
+      codigo_nombramiento: 'NOM-' + String(codigo),
+      campana_ingreso_id: parseInt(campanaId),
+      vendedora_id: existentes.length ? existentes[0].id : (await api('/rest/v1/vendedoras?codigo=eq.' + codigo))[0].id,
+      gerente_id: session.id,
+      sector_id: sectorId,
+      dni: dni,
+      fecha_nacimiento: '2000-01-01',
+      nombre: nombre,
+      telefono: telefono,
+      direccion: direccion,
+      email: email || null,
+      ano: new Date().getFullYear()
+    });
+
+    // Upload files
+    var files = document.getElementById('nomArchivos').files;
+    if (nomData[0] && files.length) {
+      for (var f = 0; f < Math.min(files.length, 2); f++) {
+        var file = files[f];
+        var ext = file.name.split('.').pop();
+        var path = 'nombramientos/' + nomData[0].id + '/' + (f + 1) + '.' + ext;
+        await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+          method: 'POST',
+          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
+          body: file
+        });
+      }
+    }
+
+    // If already existed, notify divisional
+    if (yaExiste && session.gerencia_divisional_id) {
+      await apiPost('/rest/v1/web_notificaciones', {
+        tipo: 'nombramiento_duplicado',
+        titulo: 'Nombramiento Duplicado',
+        mensaje: 'La asesora ' + nombre + ' (DNI: ' + dni + ') ya existía en el sistema. Registrada nuevamente por ' + session.nombre + '.',
+        leida: false
+      });
+    }
+
+    suc.textContent = 'Nombramiento registrado. Código asignado: ' + codigo;
+    ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('nomDepto').value = '';
+    document.getElementById('nomSector').value = '';
+    document.getElementById('nomCampana').value = '';
+    document.getElementById('nomExisteAlert').style.display = 'none';
+    document.getElementById('nomArchivos').value = '';
+    loadNombramientos();
+  } catch(e) {
+    err.textContent = e.message || 'Error al registrar nombramiento.';
+    console.error(e);
+  }
+}
+
+async function loadNombramientos() {
+  var noms = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + '&order=created_at.desc&limit=20');
+  var c = document.getElementById('listaNom');
+  if (!noms.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin nombramientos registrados.</p>'; return; }
+  c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Código</th><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Campaña</th><th>Fecha</th></tr></thead><tbody>' +
+    noms.map(function(n) {
+      var campNum = '';
+      campanas.forEach(function(c){ if (c.id == n.campana_ingreso_id) campNum = c.numero; });
+      return '<tr><td style="color:var(--dorado);font-weight:600;">' + n.codigo_nombramiento + '</td><td>' + n.nombre + '</td><td>' + n.dni + '</td><td>' + (n.telefono || '-') + '</td><td>C' + campNum + '</td><td>' + new Date(n.created_at).toLocaleDateString('es-HN') + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+// Load on tab init
+setTimeout(loadNombramientos, 500);
+
+// ══════════════════════════════════════════
+// TAB 4: RESUMEN DE ZONA
+// ══════════════════════════════════════════
+async function loadResumen() {
+  var campanaId = document.getElementById('resCampana').value;
+  var ano = new Date().getFullYear();
+
+  var pedidosFilter = 'gerente_id=eq.' + session.id + '&ano=eq.' + ano;
+  if (campanaId) pedidosFilter += '&campana_id=eq.' + campanaId;
+
+  var pedidos = await api('/rest/v1/pedidos?' + pedidosFilter + '&select=id,sector_id,subtotal_catalogo,total_venta_neta');
+  var nombramientos = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + '&ano=eq.' + ano + (campanaId ? '&campana_ingreso_id=eq.' + campanaId : '') + '&select=id');
+
+  var totalBruto = 0, totalNeto = 0;
+  var sectorStats = {};
+  sectores.forEach(function(s) { sectorStats[s.id] = { num: s.numero_sector, pedidos: 0, bruta: 0, neta: 0 }; });
+
+  pedidos.forEach(function(p) {
+    totalBruto += parseFloat(p.subtotal_catalogo || 0);
+    totalNeto += parseFloat(p.total_venta_neta || 0);
+    if (sectorStats[p.sector_id]) {
+      sectorStats[p.sector_id].pedidos++;
+      sectorStats[p.sector_id].bruta += parseFloat(p.subtotal_catalogo || 0);
+      sectorStats[p.sector_id].neta += parseFloat(p.total_venta_neta || 0);
+    }
+  });
+
+  document.getElementById('resStats').innerHTML =
+    '<div class="stat-card"><div class="stat-value">' + pedidos.length + '</div><div class="stat-label">Total Pedidos</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + nombramientos.length + '</div><div class="stat-label">Nombramientos</div></div>' +
+    '<div class="stat-card"><div class="stat-value">L ' + totalBruto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Bruta</div></div>' +
+    '<div class="stat-card"><div class="stat-value">L ' + totalNeto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta</div></div>';
+
+  // Sector table
+  var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&activo=eq.true');
+  var coordMap = {};
+  coords.forEach(function(c) { if (c.sector_id) coordMap[c.sector_id] = c.nombre; });
+
+  var sectorLabels = [], sectorVentas = [];
+  var rows = '';
+  Object.keys(sectorStats).forEach(function(sId) {
+    var s = sectorStats[sId];
+    sectorLabels.push('S' + s.num);
+    sectorVentas.push(s.bruta);
+    rows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + (coordMap[sId] || '-') + '</td><td>' + s.pedidos + '</td><td>L ' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td>L ' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  });
+  document.getElementById('resTable').innerHTML = rows;
+
+  // Charts
+  renderResCharts(sectorLabels, sectorVentas, ano);
+}
+
+async function renderResCharts(sectorLabels, sectorVentas, ano) {
+  // Sector chart
+  if (resChartSector) resChartSector.destroy();
+  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad','#e67e22','#1abc9c','#34495e','#f39c12','#d35400','#2c3e50','#7f8c8d','#16a085'];
+  resChartSector = new Chart(document.getElementById('resChartSector'), {
+    type: 'bar',
+    data: {
+      labels: sectorLabels,
+      datasets: [{ label: 'Venta Bruta (L)', data: sectorVentas, backgroundColor: colors.slice(0, sectorLabels.length), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  // Comparison chart - current campaign vs 2 previous
+  var campanaId = document.getElementById('resCampana').value;
+  if (!campanaId) return;
+
+  var campNum = 0;
+  campanas.forEach(function(c){ if (c.id == campanaId) campNum = c.numero; });
+  var compareCamps = campanas.filter(function(c){ return c.numero >= campNum - 2 && c.numero <= campNum; }).sort(function(a,b){ return a.numero - b.numero; });
+
+  var compLabels = [], compVentas = [];
+  for (var i = 0; i < compareCamps.length; i++) {
+    compLabels.push('C' + compareCamps[i].numero);
+    var p = await api('/rest/v1/pedidos?gerente_id=eq.' + session.id + '&campana_id=eq.' + compareCamps[i].id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
+    var t = 0; p.forEach(function(r){ t += parseFloat(r.subtotal_catalogo || 0); });
+    compVentas.push(t);
+  }
+
+  if (resChartComp) resChartComp.destroy();
+  resChartComp = new Chart(document.getElementById('resChartComp'), {
+    type: 'bar',
+    data: {
+      labels: compLabels,
+      datasets: [{ label: 'Venta Bruta (L)', data: compVentas, backgroundColor: ['rgba(203,170,99,0.3)','rgba(203,170,99,0.6)','rgba(203,170,99,1)'], borderColor: '#CBAA63', borderWidth: 1 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+}
+
+// ══════════════════════════════════════════
+// TAB 5: MENSAJERÍA (solo lectura + reacciones)
+// ══════════════════════════════════════════
+async function loadMensajesGZ() {
+  if (!session.gerencia_divisional_id) {
+    document.getElementById('gzMsgFeed').innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin mensajes disponibles.</p>';
+    return;
+  }
+
+  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id)&order=created_at.desc');
+  if (mensajes.error) {
+    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.desc');
+  }
+
+  var feed = document.getElementById('gzMsgFeed');
+  if (!mensajes.length) {
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes de Gerencia Divisional aún.</p>';
+    return;
+  }
+
+  feed.innerHTML = mensajes.map(function(m) {
+    var fotos = '';
+    if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
+      fotos = '<div class="msg-photos">' + m.mensajes_divisional_fotos.map(function(f) {
+        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
+      }).join('') + '</div>';
+    }
+
+    var totalReactions = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
+    var yaReacciono = false;
+    if (m.mensajes_reacciones) {
+      m.mensajes_reacciones.forEach(function(r) { if (r.gerente_zona_id === session.id) yaReacciono = true; });
+    }
+
+    var fecha = new Date(m.created_at).toLocaleString('es-HN');
+    var reactClass = yaReacciono ? 'react-btn reacted' : 'react-btn';
+
+    return '<div class="msg-item">' +
+      '<div class="msg-text">' + m.texto.replace(/\n/g, '<br>') + '</div>' +
+      fotos +
+      '<div class="msg-meta">' +
+        '<span>' + fecha + '</span>' +
+        '<div class="msg-reactions">' +
+          '<button class="' + reactClass + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')" ' + (yaReacciono ? 'title="Ya reaccionaste"' : '') + '>&#10084;&#65039; ' + totalReactions + '</button>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function toggleReaction(msgId, yaReacciono) {
+  try {
+    if (yaReacciono) {
+      // Remove reaction
+      await fetch(SB + '/rest/v1/mensajes_reacciones?mensaje_id=eq.' + msgId + '&gerente_zona_id=eq.' + session.id, {
+        method: 'DELETE', headers: H
+      });
+    } else {
+      // Add reaction
+      await apiPost('/rest/v1/mensajes_reacciones', {
+        mensaje_id: msgId,
+        gerente_zona_id: session.id,
+        tipo: 'corazon'
+      });
+    }
+    loadMensajesGZ();
+  } catch(e) { console.error(e); }
+}
+</script>
+</body>
+</html>
