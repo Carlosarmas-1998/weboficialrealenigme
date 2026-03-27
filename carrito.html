@@ -930,8 +930,8 @@
       const totalEUR = psychologicalPrice(totalHNL / TASA_CAMBIO_CHECKOUT);
 
       try {
-        // 1. Create or find client
-        const clienteRes = await supaFetch('/web_clientes', {
+        // 1. Create or find client (upsert on email)
+        const clienteRes = await supaFetch('/web_clientes?on_conflict=email', {
           method: 'POST',
           prefer: 'return=representation',
           headers: { 'Prefer': 'return=representation,resolution=merge-duplicates' },
@@ -969,7 +969,7 @@
             total_eur: totalEUR,
             total_hnl: totalHNL,
             metodo_pago: metodoPago,
-            estado: 'enviado',
+            estado: 'Pendiente',
             pagado: false
           })
         });
