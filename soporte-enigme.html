@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        /* [El CSS se mantiene exactamente igual, con el diseño perfecto actual] */
         :root {
             --bg-cream: #faf8f5;
             --bg-dark: #0a0a0a;
@@ -159,7 +160,6 @@
             border-radius: 4px;
         }
 
-        /* Chat Header */
         .chat-header {
             display: flex;
             align-items: center;
@@ -218,7 +218,6 @@
         }
         .chat-live-time span { display: block; color: var(--gold-light); font-weight: 600; margin-top: 3px;}
 
-        /* Chat Messages */
         .chat-messages {
             flex-grow: 1;
             overflow-y: auto;
@@ -273,7 +272,6 @@
         .msg-bot ul { margin-top: 10px; padding-left: 20px; }
         .msg-bot li { margin-bottom: 5px; }
 
-        /* Typing Indicator */
         .typing-indicator {
             align-self: flex-start;
             display: flex;
@@ -297,7 +295,6 @@
             40% { transform: scale(1); opacity: 1; }
         }
 
-        /* Quick Replies Grid */
         .quick-replies-container {
             align-self: flex-start;
             max-width: 95%;
@@ -338,7 +335,6 @@
 
         .quick-btn:hover { background: var(--bg-dark); border-color: var(--bg-dark); color: var(--gold-light); }
 
-        /* Input */
         .chat-input-area {
             display: flex;
             align-items: center;
@@ -375,7 +371,6 @@
         .chat-send:hover { background: var(--bg-dark); transform: scale(1.05); }
         .chat-send svg { width: 18px; height: 18px; }
 
-        /* Footer */
         footer { background: var(--bg-dark); padding: 5rem 2rem 3rem; text-align: center; width: 100%; }
         .footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; letter-spacing: 12px; text-transform: uppercase; color: var(--gold-light); margin-bottom: 2rem; }
         .copyright { font-size: 0.5rem; color: #555; text-transform: uppercase; letter-spacing: 3px; font-weight: 400; line-height: 1.6;}
@@ -387,7 +382,7 @@
             .chat-container { height: 600px; border-radius: 0; border-left: none; border-right: none;}
             .chat-header { padding: 15px; }
             .chat-avatar { width: 38px; height: 38px; font-size: 1rem; }
-            .chat-live-time { display: none; } /* Ocultar hora en móvil para ganar espacio */
+            .chat-live-time { display: none; } 
             .msg { max-width: 92%; font-size: 0.78rem; padding: 14px 18px; }
             .quick-btn { font-size: 0.6rem; padding: 10px 16px; }
         }
@@ -473,78 +468,94 @@
         };
 
         const contactLink = `<a href="https://wa.me/34602149162" target="_blank">Click aquí para ir a nuestro WhatsApp V.I.P (+34 602 14 91 62)</a>`;
+        const emailContact = `info@enigmeofficia.com`;
 
         /* ═══════════════════════════════════════════════════════════
-           MOTOR SEMÁNTICO ORIENTADO A VENTAS Y CONFIANZA
+           MOTOR SEMÁNTICO ORIENTADO A VENTAS Y ESTRUCTURA ÈNIGME
         ═══════════════════════════════════════════════════════════ */
         const responses = [
             {
                 keywords: ['hola','buenas','hey','qué tal','saludos','inicio','arrancar','buen dia','buenas tardes','buenas noches'],
                 replies: [
-                    `${greet()}. Es un placer recibirle en <strong>La Casa ÈNIGME</strong>. Soy su Conserje Virtual. Estoy aquí para resolver sus dudas sobre la calidad de nuestras joyas, cómo realizar su compra segura, y los detalles de nuestros envíos a su ciudad. ¿Qué le gustaría saber?`
+                    `${greet()}. Es un placer recibirle en <strong>La Casa ÈNIGME</strong>. Soy su Conserje Virtual. Estoy aquí para guiarle a través de nuestra propuesta de lujo accesible. ¿En qué le puedo asistir hoy?`
                 ]
             },
             {
-                keywords: ['comprar','pagar','pago','precio','precios','moneda','lempiras','tarjeta','transferencia','deposito','metodo'],
+                keywords: ['que es','quienes son','enigme','marca','historia','concepto','lujo accesible'],
                 replies: [
-                    `Comprar en ÈNIGME es rápido y 100% seguro. Todos nuestros precios están en <strong>Lempiras (HNL)</strong>. Para su total comodidad y protección, aceptamos transferencias bancarias y depósitos. <br><br>Solo tiene que agregar los productos a su 'Bolsa' en nuestro catálogo, y un Asesor V.I.P le contactará por WhatsApp para finalizar el pago. ¡Así garantizamos que su pedido sea atendido de forma personalizada!`
+                    `<strong>ÈNIGME</strong> no es solo una tienda, es una marca de lujo accesible diseñada con identidad y estructura. Nuestra esencia gira alrededor del <strong>Aura, Misterio y Presencia</strong>.<br><br>Ofrecemos joyería y accesorios de alta calidad, combinando una estética limpia y premium con precios alcanzables. Operamos a través de nuestro exclusivo Ecommerce y una red comercial profesional organizada.`
                 ]
             },
             {
-                keywords: ['envio','envios','mandan','entrega','llega','cuanto tarda','tiempo','choluteca','valle','tegucigalpa','san pedro sula','nacional'],
+                keywords: ['material','materiales','oro','plata','925','14k','acero','316l','304l','se oxida','calidad','perfumes','bolsos','carteras'],
                 replies: [
-                    `Enviamos lujo hasta la puerta de su casa. Nuestras rutas principales cubren <strong>Choluteca y Valle</strong> con entregas muy ágiles (1 a 2 días hábiles). <br><br>También realizamos envíos seguros a <strong>Francisco Morazán, Cortés</strong> y el resto del país mediante empresas de mensajería certificadas. Empacamos cada pieza con los más altos estándares para que la reciba en perfectas condiciones.`
-                ]
-            },
-            {
-                keywords: ['material','materiales','oro','plata','925','14k','acero','inoxidable','se oxida','se pone feo','calidad','baño','duracion'],
-                replies: [
-                    `Nuestras piezas son una verdadera inversión en elegancia. Garantizamos que no se oxidan ni manchan su piel. Trabajamos exclusivamente con:
+                    `Nuestras colecciones se distinguen por su calidad y estética elegante. Manejamos líneas de:<br>
                     <ul>
-                        <li><strong>Plata de Ley 925:</strong> Pura, hipoalergénica y certificada.</li>
-                        <li><strong>Acero Quirúrgico Premium:</strong> Tratado con un triple baño de <strong>Oro de 14K</strong> para un brillo inalterable y aspecto de alta joyería.</li>
+                        <li><strong>Plata de Ley 925</strong> pura y certificada.</li>
+                        <li><strong>Acero Inoxidable (316L y 304L)</strong> resistente y duradero.</li>
+                        <li>Piezas majestuosas con acabado en <strong>Oro de 14K</strong>.</li>
                     </ul>
-                    Están diseñadas para acompañarle en su día a día sin perder su majestuosidad.`
+                    Además, contamos con colecciones de bolsos, carteras y próximamente expandiremos nuestra visión con líneas de perfumería y moda boutique.`
                 ]
             },
             {
-                keywords: ['garantia','devolucion','cambio','certificado','autenticidad','roto','seguro','confianza','es estafa','oficial'],
+                keywords: ['comprar','pagar','pago','precio','precios','moneda','lempiras','tarjeta','ecommerce','online'],
                 replies: [
-                    `Su tranquilidad es nuestro mayor lujo. La firma ÈNIGME pertenece legalmente a la compañía ÈNIGME. <br><br>Todas nuestras joyas incluyen una <strong>Tarjeta de Certificación de Autenticidad</strong>. Si por alguna remota razón recibe un producto con un defecto de fábrica, nuestra política de garantía le cubre al 100% para realizar un cambio. Compre con total seguridad.`
+                    `Todos nuestros precios se manejan en <strong>Lempiras (HNL)</strong>. Puede realizar sus compras de forma segura a través de nuestro catálogo online integrado con pagos protegidos (como Stripe), o bien gestionar su pedido a través de nuestra red de asesoras.<br><br>Toda venta neta se calcula de forma transparente (Precio de catálogo - 15% de IVA).`
                 ]
             },
             {
-                keywords: ['catalogo','fotos','ver','modelos','anillos','cadenas','bolsos','carteras','coleccion'],
+                keywords: ['envio','envios','mandan','entrega','llega','costo','gratis','minimo','choluteca','valle','tegucigalpa','morazan','cortes'],
                 replies: [
-                    `¡Nuestras colecciones le van a encantar! Puede descubrir todas las piezas disponibles, con fotos de alta resolución y precios, directamente en nuestro <a href="catalogo.html">Catálogo Oficial</a> en el menú superior. Hay piezas de edición limitada esperando por usted.`
+                    `Operamos principalmente en el sur (<strong>Choluteca y Valle</strong>) y estamos en expansión hacia Francisco Morazán y Cortés.<br><br>
+                    <strong>Nuestras políticas de envío:</strong>
+                    <ul>
+                        <li><strong>Envío Gratis:</strong> A punto de entrega en pedidos superiores a 999 lempiras.</li>
+                        <li><strong>Pedido Mínimo Válido:</strong> Es de 1,999 lempiras para considerarse una orden fuerte.</li>
+                        <li><strong>Recargo:</strong> Los pedidos menores a 1,999 lempiras llevan un recargo fijo de 99 lempiras por gestión logística.</li>
+                    </ul>`
                 ]
             },
             {
-                keywords: ['asesor','humano','persona','hablar','contacto','telefono','whatsapp','correo','duda especifica'],
+                keywords: ['trabajar','asesora','vendedora','vender','campaña','comision','ganancia','premio','negocio','red'],
                 replies: [
-                    `Para brindarle un servicio de Primera Clase y ayudarle a cerrar su pedido de manera personalizada, nuestras asesoras V.I.P están disponibles para usted en este momento.<br><br>${contactLink}`
+                    `ÈNIGME cuenta con una estructura comercial profesional (Dirección, Gerencias y Coordinación). Trabajamos bajo un sistema de <strong>campañas de 25 días</strong>.<br><br>
+                    Nuestras asesoras disfrutan de un <strong>18% de beneficio</strong> en venta normal (15% en ofertas) y obtienen premios exclusivos de campaña al alcanzar la meta de 2,499 lempiras. Si desea unirse a nuestra red, contacte con la gerencia.`
+                ]
+            },
+            {
+                keywords: ['paises','expansion','centroamerica','honduras','el salvador','guatemala','nicaragua','costa rica','latinoamerica'],
+                replies: [
+                    `Nuestras raíces están en el sur de Honduras, pero <strong>ÈNIGME</strong> nació para crecer. Nuestra proyección de expansión abarca El Salvador, Guatemala, Nicaragua, Costa Rica y, eventualmente, el resto de Latinoamérica, llevando nuestro estándar de lujo accesible a nuevos horizontes.`
+                ]
+            },
+            {
+                keywords: ['asesor','humano','persona','hablar','contacto','telefono','whatsapp','correo','abril','armas'],
+                replies: [
+                    `Para recibir un servicio de Primera Clase, nuestras asesoras V.I.P., como Abril Armas, están a su entera disposición.<br><br>
+                    Puede escribirnos directamente a <strong>${emailContact}</strong> o hablar con nosotros vía WhatsApp:<br>${contactLink}`
                 ]
             },
             {
                 keywords: ['gracias','amable','perfecto','ok','entendido','adios','hasta luego','despedida'],
                 replies: [
-                    `El placer ha sido completamente mío. Recuerde que elegir ÈNIGME es elegir distinción. Esperamos verle pronto luciendo nuestras piezas. ¡Que tenga un excelente día!`
+                    `El placer ha sido completamente mío. Recuerde que elegir ÈNIGME es elegir presencia y distinción. ¡Que tenga un día excelente!`
                 ]
             }
         ];
 
         /* ── Inteligencia de Respuesta por defecto ── */
         const fallbacks = [
-            `Esa es una excelente pregunta. Para darle una respuesta exacta y brindarle la asesoría de lujo que usted merece para realizar su compra, le invito a conversar con nuestro equipo humano: <br><br>${contactLink}`,
-            `Nuestra base de datos no tiene la respuesta exacta a esa consulta específica, pero no se preocupe. Nuestro equipo de atención V.I.P le puede asistir de inmediato por WhatsApp para despejar cualquier duda y procesar su pedido: <br><br>${contactLink}`
+            `Esa es una excelente pregunta sobre el universo ÈNIGME. Para brindarle la atención detallada que merece, le sugiero conversar directamente con nuestras asesoras V.I.P: <br><br>${contactLink}`,
+            `Nuestra plataforma virtual no tiene la respuesta exacta a esa consulta, pero nuestro equipo directivo y comercial sí. Puede escribirnos a ${emailContact} o vía WhatsApp aquí: <br><br>${contactLink}`
         ];
 
-        /* ── EXACTAMENTE 5 TEMAS SUGERIDOS (Orientados a Ventas y Confianza) ── */
+        /* ── EXACTAMENTE 5 TEMAS SUGERIDOS (Orientados al concepto integral de la marca) ── */
         const quickReplies = [
-            { label: '¿Cómo comprar y pagar?', text: '¿Cuáles son los métodos de pago y cómo compro?' },
-            { label: 'Calidad y Materiales', text: '¿De qué material son las joyas y se oxidan?' },
-            { label: 'Tiempos de Envío', text: '¿Cuánto tarda el envío y a dónde envían?' },
-            { label: 'Garantía ÈNIGME', text: '¿Qué garantía y certificados tienen los productos?' },
+            { label: '¿Qué es ÈNIGME?', text: '¿Cuál es el concepto y la historia detrás de la marca ÈNIGME?' },
+            { label: 'Calidad y Materiales', text: '¿De qué material son las joyas, bolsos y futuros productos?' },
+            { label: 'Envíos y Pedidos Mínimos', text: '¿Cuáles son los costos de envío y el pedido mínimo en lempiras?' },
+            { label: 'Sistema de Asesoras', text: '¿Cómo funcionan las campañas, comisiones y la red de ventas?' },
             { label: 'Hablar con Asesor V.I.P', text: 'Quiero hablar con atención al cliente humana.' }
         ];
 
@@ -657,10 +668,8 @@
 
             showTyping();
 
-            // Tiempo de "pensado" dinámico basado en la longitud de la respuesta esperada
             const reply = findResponse(rawInput || display);
             
-            // Simular que escribe como un humano: palabras estimadas * milisegundos
             const wordsCount = reply.split(' ').length;
             let typingDelay = 1000 + (wordsCount * 45); 
             if(typingDelay > 4000) typingDelay = 4000; 
@@ -694,7 +703,7 @@
                     showTyping();
                     setTimeout(() => {
                         hideTyping();
-                        addMessage(`Estoy aquí para despejar sus dudas y ayudarle a realizar su compra con total seguridad. ¿En qué le puedo asistir hoy?`, 'bot');
+                        addMessage(`Estoy aquí para resolver sus dudas sobre nuestra firma de lujo accesible, nuestras colecciones y nuestro sistema de trabajo. ¿En qué le puedo asistir?`, 'bot');
                         showQuickReplies();
                     }, 1800);
                 }, 800);

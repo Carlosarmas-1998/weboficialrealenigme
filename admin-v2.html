@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel · Enigme</title>
+  <title>Admin Panel &middot; Enigme</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
+    :root{
       --bg:#0a0a0a;--surface:#111111;--surface2:#161616;--border:#222222;
       --gold:#c9a96e;--gold-dim:#8b7355;--text:#e8e0d4;--text-muted:#6b6259;
       --success:#6b9e78;--danger:#9e6b6b;--info:#5a8fa0;--warn:#a08840;
@@ -116,7 +116,7 @@
 
     /* TOAST */
     .toast-container{position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;}
-    .toast{background:var(--surface);border:1px solid var(--gold-dim);color:var(--text);padding:14px 22px;font-size:.78rem;letter-spacing:.08em;animation:fadeIn .3s ease;min-width:250px;}
+    .toast{background:var(--surface);border:1px solid var(--gold-dim);color:var(--text);padding:14px 22px;font-size:.78rem;letter-spacing:.08em;animation:toastIn .3s ease;min-width:250px;}
     .toast.error{border-color:var(--danger);}
 
     /* FILTER ROW */
@@ -130,8 +130,15 @@
     /* NOTIFICATION DOT */
     .notif-unread{background:rgba(201,169,110,.08);}
 
+    /* DETAIL ROW */
+    .detail-row td{padding:0 !important;border-bottom:1px solid var(--border);}
+    .detail-inner{padding:16px 24px;background:var(--surface2);}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px;}
+    .detail-grid .dlabel{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);}
+    .detail-grid .dvalue{font-size:.82rem;color:var(--text);margin-top:2px;}
+
     /* ANIMATIONS */
-    @keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes toastIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
 
     /* MOBILE */
     @media(max-width:768px){
@@ -144,6 +151,7 @@
       .main{margin-left:0;padding:20px 16px;}
       .stats-row{grid-template-columns:1fr 1fr;}
       .page-header{flex-direction:column;align-items:flex-start;}
+      .detail-grid{grid-template-columns:1fr;}
     }
     @media(max-width:480px){
       .stats-row{grid-template-columns:1fr;}
@@ -199,7 +207,7 @@
       <label>Filtrar estado:</label>
       <select id="pedidosFilter" onchange="loadPedidos()">
         <option value="">Todos</option>
-        <option value="Enviado">Enviado</option>
+        <option value="enviado">Enviado</option>
         <option value="Pagado">Pagado</option>
         <option value="Preparando">Preparando</option>
         <option value="En Reparto">En Reparto</option>
@@ -208,7 +216,7 @@
       </select>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>ID</th><th>Cliente</th><th>Email</th><th>Tel</th><th>Items</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>C&oacute;digo</th><th>Cliente</th><th>Contacto</th><th>Direcci&oacute;n</th><th>Items</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
       <tbody id="pedidosBody"></tbody>
     </table></div>
     <div class="empty-state" id="pedidosEmpty" style="display:none;">No hay pedidos</div>
@@ -224,7 +232,7 @@
       </div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Nombre</th><th>Email</th><th>Tel</th><th>Puesto</th><th>Carta Motivaci&oacute;n</th><th>Estado</th><th>Notas Admin</th><th>Fecha</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>DNI</th><th>Email</th><th>Tel</th><th>Puesto</th><th>Ubicaci&oacute;n</th><th>Carta</th><th>Estado</th><th>Notas Admin</th><th>Fecha</th></tr></thead>
       <tbody id="postulacionesBody"></tbody>
     </table></div>
     <div class="empty-state" id="postulacionesEmpty" style="display:none;">No hay postulaciones</div>
@@ -241,7 +249,7 @@
     </div>
     <div class="stats-row" id="cookiesStats"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>ID</th><th>Fecha</th><th>Pa&iacute;s</th><th>Dispositivo</th><th>Aceptado</th></tr></thead>
+      <thead><tr><th>ID</th><th>Aceptado</th><th>Pa&iacute;s</th><th>Ciudad</th><th>Idioma</th><th>Navegador</th><th>Pantalla</th><th>P&aacute;gina</th><th>Referrer</th><th>Fecha</th></tr></thead>
       <tbody id="cookiesBody"></tbody>
     </table></div>
     <div class="empty-state" id="cookiesEmpty" style="display:none;">No hay registros</div>
@@ -257,7 +265,7 @@
       </div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Email</th><th>Tipo</th><th>Fecha</th><th>P&aacute;gina Origen</th></tr></thead>
+      <thead><tr><th>Email</th><th>Tipo</th><th>P&aacute;gina Origen</th><th>Pa&iacute;s</th><th>Activa</th><th>Fecha</th></tr></thead>
       <tbody id="suscripcionesBody"></tbody>
     </table></div>
     <div class="empty-state" id="suscripcionesEmpty" style="display:none;">No hay suscripciones</div>
@@ -274,7 +282,7 @@
     </div>
     <div class="stats-row" id="analyticsStats"></div>
     <div class="table-wrap"><table>
-      <thead><tr><th>P&aacute;gina</th><th>Pa&iacute;s</th><th>Dispositivo</th><th>Navegador</th><th>Fecha</th></tr></thead>
+      <thead><tr><th>Evento</th><th>P&aacute;gina</th><th>T&iacute;tulo</th><th>Pa&iacute;s</th><th>Ciudad</th><th>Dispositivo</th><th>Navegador</th><th>Pantalla</th><th>Idioma</th><th>Referrer</th><th>Fecha</th></tr></thead>
       <tbody id="analyticsBody"></tbody>
     </table></div>
     <div class="empty-state" id="analyticsEmpty" style="display:none;">No hay datos</div>
@@ -302,33 +310,42 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-/* ============================================================
-   ENIGME ADMIN PANEL - COMPLETE REWRITE
-   ============================================================ */
+/* ================================================================
+   ENIGME ADMIN PANEL v2 - COMPLETE REWRITE
+   ================================================================ */
 
 // ---- CONSTANTS ----
-const ADMIN_PASSWORD = 'Gusiteamo.1998';
-const WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
-const RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
-const SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var ADMIN_PASSWORD = 'Gusiteamo.1998';
+var WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
+var RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
+var SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 
 // ---- DATA CACHES ----
-let cachedPedidos = [];
-let cachedPostulaciones = [];
-let cachedCookies = [];
-let cachedSuscripciones = [];
-let cachedAnalytics = [];
-let cachedNotificaciones = [];
-let refreshInterval = null;
+var cachedPedidos = [];
+var cachedPostulaciones = [];
+var cachedCookies = [];
+var cachedSuscripciones = [];
+var cachedAnalytics = [];
+var cachedNotificaciones = [];
+var refreshInterval = null;
 
-// ============================================================
+// ================================================================
 // SUPABASE REST HELPERS
-// ============================================================
+// ================================================================
+function supaHeaders() {
+  return {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+}
+
 async function supaGet(table, query) {
   if (!query) query = '';
   try {
-    const r = await fetch(SUPA_URL + '/rest/v1/' + table + '?select=*' + query, {
+    var r = await fetch(SUPA_URL + '/rest/v1/' + table + '?select=*' + query, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
     return r.ok ? await r.json() : [];
@@ -337,9 +354,9 @@ async function supaGet(table, query) {
 
 async function supaPost(table, data) {
   try {
-    const r = await fetch(SUPA_URL + '/rest/v1/' + table, {
+    var r = await fetch(SUPA_URL + '/rest/v1/' + table, {
       method: 'POST',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      headers: supaHeaders(),
       body: JSON.stringify(data)
     });
     return r.ok ? await r.json() : null;
@@ -348,9 +365,9 @@ async function supaPost(table, data) {
 
 async function supaPatch(table, id, data) {
   try {
-    const r = await fetch(SUPA_URL + '/rest/v1/' + table + '?id=eq.' + id, {
+    var r = await fetch(SUPA_URL + '/rest/v1/' + table + '?id=eq.' + id, {
       method: 'PATCH',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      headers: supaHeaders(),
       body: JSON.stringify(data)
     });
     return r.ok ? await r.json() : null;
@@ -359,7 +376,7 @@ async function supaPatch(table, id, data) {
 
 async function supaDelete(table, id) {
   try {
-    const r = await fetch(SUPA_URL + '/rest/v1/' + table + '?id=eq.' + id, {
+    var r = await fetch(SUPA_URL + '/rest/v1/' + table + '?id=eq.' + id, {
       method: 'DELETE',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
@@ -367,19 +384,19 @@ async function supaDelete(table, id) {
   } catch(e) { console.error('supaDelete error:', e); return false; }
 }
 
-// ============================================================
+// ================================================================
 // LOGIN
-// ============================================================
+// ================================================================
 function doLogin() {
-  const pw = document.getElementById('loginPassword').value;
+  var pw = document.getElementById('loginPassword').value;
   if (pw === ADMIN_PASSWORD) {
     localStorage.setItem('enigme_admin_session', 'true');
     localStorage.setItem('enigme_admin_login_time', Date.now().toString());
     showApp();
   } else {
-    const err = document.getElementById('loginError');
+    var err = document.getElementById('loginError');
     err.classList.add('show');
-    setTimeout(() => err.classList.remove('show'), 3000);
+    setTimeout(function(){ err.classList.remove('show'); }, 3000);
   }
 }
 
@@ -412,9 +429,9 @@ function doLogout() {
 }
 
 async function forgotPassword() {
-  const msgEl = document.getElementById('forgotMsg');
+  var msgEl = document.getElementById('forgotMsg');
   try {
-    const r = await fetch('https://api.web3forms.com/submit', {
+    var r = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -437,34 +454,40 @@ async function forgotPassword() {
     msgEl.style.color = 'var(--danger)';
   }
   msgEl.classList.add('show');
-  setTimeout(() => msgEl.classList.remove('show'), 5000);
+  setTimeout(function(){ msgEl.classList.remove('show'); }, 5000);
 }
 
-// ============================================================
+// ================================================================
 // TABS
-// ============================================================
+// ================================================================
 function switchTab(tab) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelector('.nav-item[data-tab="'+tab+'"]').classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var el = document.querySelector('.nav-item[data-tab="'+tab+'"]');
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+  var tabEl = document.getElementById('tab-'+tab);
+  if (tabEl) tabEl.classList.add('active');
 }
 
-// ============================================================
+// ================================================================
 // TOAST
-// ============================================================
+// ================================================================
 function showToast(msg, isError) {
-  const c = document.getElementById('toastContainer');
-  const t = document.createElement('div');
+  var c = document.getElementById('toastContainer');
+  var t = document.createElement('div');
   t.className = 'toast' + (isError ? ' error' : '');
   t.textContent = msg;
   c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  setTimeout(function(){
+    t.style.opacity = '0';
+    t.style.transition = 'opacity .3s';
+    setTimeout(function(){ t.remove(); }, 300);
+  }, 3000);
 }
 
-// ============================================================
+// ================================================================
 // HELPERS
-// ============================================================
+// ================================================================
 function esc(s) {
   if (s === null || s === undefined) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -473,14 +496,14 @@ function esc(s) {
 function formatDate(d) {
   if (!d) return '-';
   try {
-    const dt = new Date(d);
-    return dt.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' ' + dt.toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+    var dt = new Date(d);
+    return dt.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + dt.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   } catch(e) { return d; }
 }
 
-function currencySymbol(c) {
-  if (!c) return '';
-  const up = String(c).toUpperCase();
+function currencySymbol(moneda) {
+  if (!moneda) return '';
+  var up = String(moneda).toUpperCase();
   if (up === 'EUR') return '\u20AC';
   if (up === 'HNL') return 'L';
   return up + ' ';
@@ -491,9 +514,33 @@ function statusClass(s) {
   return 'status-' + s.toLowerCase().replace(/\s+/g, '_');
 }
 
-// ============================================================
+function parseItems(items) {
+  if (!items) return '-';
+  if (typeof items === 'string') {
+    try { items = JSON.parse(items); } catch(e) { return items; }
+  }
+  if (Array.isArray(items)) {
+    return items.map(function(it){
+      if (typeof it === 'object' && it !== null) {
+        var name = it.nombre || it.name || it.producto || it.title || '';
+        var qty = it.cantidad || it.qty || it.quantity || 1;
+        var size = it.talla || it.size || '';
+        var parts = [];
+        if (name) parts.push(name);
+        if (size) parts.push('T:' + size);
+        parts.push('x' + qty);
+        return parts.join(' ');
+      }
+      return String(it);
+    }).join(', ');
+  }
+  if (typeof items === 'object') return JSON.stringify(items);
+  return String(items);
+}
+
+// ================================================================
 // LOAD ALL DATA
-// ============================================================
+// ================================================================
 function loadAllData() {
   loadPedidos();
   loadPostulaciones();
@@ -503,22 +550,29 @@ function loadAllData() {
   loadNotificaciones();
 }
 
-// ============================================================
+// ================================================================
 // PEDIDOS
-// ============================================================
+// ================================================================
 async function loadPedidos() {
-  const filterVal = document.getElementById('pedidosFilter').value;
-  let query = '&order=created_at.desc';
+  var filterVal = document.getElementById('pedidosFilter').value;
+  var query = '&order=created_at.desc';
   if (filterVal) query += '&estado=eq.' + encodeURIComponent(filterVal);
-  const data = await supaGet('web_pedidos', query);
+  var data = await supaGet('web_pedidos', query);
   cachedPedidos = data;
 
-  // Stats (always unfiltered for totals)
-  const allData = filterVal ? await supaGet('web_pedidos', '&order=created_at.desc') : data;
-  const totalOrders = allData.length;
-  const eurTotal = allData.filter(p => String(p.moneda||'').toUpperCase() === 'EUR').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
-  const hnlTotal = allData.filter(p => String(p.moneda||'').toUpperCase() === 'HNL').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
-  const pending = allData.filter(p => p.estado !== 'Entregado' && p.estado !== 'Cancelado').length;
+  // Stats always unfiltered
+  var allData = filterVal ? await supaGet('web_pedidos', '&order=created_at.desc') : data;
+  var totalOrders = allData.length;
+  var eurTotal = 0;
+  var hnlTotal = 0;
+  var pending = 0;
+  allData.forEach(function(p){
+    var mon = String(p.moneda || '').toUpperCase();
+    var tot = parseFloat(p.total) || 0;
+    if (mon === 'EUR') eurTotal += (parseFloat(p.total_eur) || tot);
+    else hnlTotal += (parseFloat(p.total_hnl) || tot);
+    if (p.estado !== 'Entregado' && p.estado !== 'Cancelado') pending++;
+  });
 
   document.getElementById('pedidosStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Total Pedidos</div><div class="stat-value">' + totalOrders + '</div></div>' +
@@ -526,8 +580,8 @@ async function loadPedidos() {
     '<div class="stat-card"><div class="stat-label">Ingresos HNL</div><div class="stat-value">L' + hnlTotal.toFixed(2) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value">' + pending + '</div></div>';
 
-  const tbody = document.getElementById('pedidosBody');
-  const emptyEl = document.getElementById('pedidosEmpty');
+  var tbody = document.getElementById('pedidosBody');
+  var emptyEl = document.getElementById('pedidosEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -536,62 +590,69 @@ async function loadPedidos() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(p => {
-    const cur = String(p.moneda || p.currency || '').toUpperCase();
-    const sym = currencySymbol(cur);
-    const total = parseFloat(p.total) || 0;
-    const estado = p.estado || 'Enviado';
-    const isEntregado = estado === 'Entregado';
-    const isCancelado = estado === 'Cancelado';
-    const items = p.items || p.productos || '-';
-    const displayItems = typeof items === 'object' ? JSON.stringify(items) : items;
+  var html = '';
+  data.forEach(function(p){
+    var mon = String(p.moneda || '').toUpperCase();
+    var sym = currencySymbol(mon);
+    var total = parseFloat(p.total) || 0;
+    var estado = p.estado || 'enviado';
+    var isEntregado = estado === 'Entregado';
+    var isCancelado = estado === 'Cancelado';
+    var itemsStr = parseItems(p.items);
 
     html += '<tr>';
-    html += '<td>' + esc(p.id) + '</td>';
+    html += '<td style="white-space:nowrap;">' + esc(p.codigo || 'PED-' + p.id) + '</td>';
     html += '<td>' + esc(p.nombre_cliente || '-') + '</td>';
-    html += '<td>' + esc(p.email_cliente || '-') + '</td>';
-    html += '<td>' + esc(p.telefono_cliente || '-') + '</td>';
-    html += '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(displayItems) + '">' + esc(displayItems) + '</td>';
-    html += '<td>' + sym + total.toFixed(2) + '</td>';
-    html += '<td><select class="btn-sm" onchange="changePedidoStatus(' + p.id + ', this.value)" ' + (isEntregado ? 'disabled' : '') + '>';
-    ['Enviado','Pagado','Preparando','En Reparto','Entregado','Cancelado'].forEach(st => {
+    html += '<td><div style="font-size:.8rem;">' + esc(p.email_cliente || '-') + '</div><div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">' + esc(p.telefono_cliente || '') + '</div></td>';
+    html += '<td><div style="font-size:.8rem;">' + esc(p.direccion_envio || '-') + '</div><div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">' + esc(p.departamento || '') + (p.ciudad ? ', ' + esc(p.ciudad) : '') + '</div></td>';
+    html += '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(itemsStr) + '">' + esc(itemsStr) + '</td>';
+    html += '<td style="white-space:nowrap;">' + sym + total.toFixed(2) + '</td>';
+    html += '<td><select class="btn-sm" onchange="changePedidoStatus(' + p.id + ', this.value, \'' + esc(estado) + '\')" ' + (isEntregado ? 'disabled' : '') + '>';
+    ['enviado','Pagado','Preparando','En Reparto','Entregado','Cancelado'].forEach(function(st){
       html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st + '</option>';
     });
     html += '</select></td>';
-    html += '<td>' + formatDate(p.created_at || p.fecha) + '</td>';
-    html += '<td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+    html += '<td style="white-space:nowrap;">';
     if (isCancelado) {
-      html += '<button class="btn btn-danger btn-sm" onclick="deletePedido(' + p.id + ')">Eliminar</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="deletePedido(' + p.id + ')">Eliminar</button> ';
     }
-    if (!isEntregado) {
-      html += ' <span class="chat-toggle" onclick="toggleChat(' + p.id + ')">Chat</span>';
-    }
+    html += '<span class="chat-toggle" onclick="toggleChat(' + p.id + ')">Chat</span>';
     html += '</td>';
     html += '</tr>';
 
     // Chat row
-    if (!isEntregado) {
-      html += '<tr id="chat-row-' + p.id + '" style="display:none;"><td colspan="9">';
-      html += '<div class="chat-box">';
-      html += '<div class="chat-messages" id="chat-msgs-' + p.id + '">Cargando...</div>';
-      html += '<div class="chat-input-row">';
-      html += '<input type="text" id="chat-input-' + p.id + '" placeholder="Escribir mensaje..." onkeydown="if(event.key===\'Enter\')sendChat(' + p.id + ')">';
-      html += '<button class="btn btn-gold btn-sm" onclick="sendChat(' + p.id + ')">Enviar</button>';
-      html += '</div></div>';
-      html += '</td></tr>';
-    }
+    html += '<tr id="chat-row-' + p.id + '" style="display:none;" class="detail-row"><td colspan="9"><div class="detail-inner">';
+    html += '<div class="chat-box">';
+    html += '<div class="chat-messages" id="chat-msgs-' + p.id + '">Cargando...</div>';
+    html += '<div class="chat-input-row">';
+    html += '<input type="text" id="chat-input-' + p.id + '" placeholder="Escribir mensaje..." onkeydown="if(event.key===\'Enter\')sendChat(' + p.id + ')">';
+    html += '<button class="btn btn-gold btn-sm" onclick="sendChat(' + p.id + ')">Enviar</button>';
+    html += '</div></div>';
+    html += '</div></td></tr>';
   });
   tbody.innerHTML = html;
 }
 
-async function changePedidoStatus(id, newStatus) {
-  const result = await supaPatch('web_pedidos', id, { estado: newStatus });
+async function changePedidoStatus(id, newStatus, oldStatus) {
+  var result = await supaPatch('web_pedidos', id, { estado: newStatus });
   if (result) {
-    // Insert history
-    await supaPost('web_pedido_historial', { pedido_id: id, estado_nuevo: newStatus, cambiado_por: 'admin' });
+    // Insert history record
+    await supaPost('web_pedido_historial', {
+      pedido_id: id,
+      estado_anterior: oldStatus || null,
+      estado_nuevo: newStatus,
+      cambiado_por: 'admin'
+    });
     // Insert notification
-    await supaPost('web_notificaciones', { pedido_codigo: 'PED-' + id, tipo: 'estado_pedido', mensaje: 'Pedido cambiado a: ' + newStatus, leida: false });
+    var pedido = cachedPedidos.find(function(p){ return p.id === id; });
+    var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + id;
+    await supaPost('web_notificaciones', {
+      pedido_codigo: codigo,
+      tipo: 'estado',
+      mensaje: 'Pedido ' + codigo + ' cambiado a: ' + newStatus,
+      leida: false
+    });
     showToast('Estado actualizado: ' + newStatus);
     loadPedidos();
     loadNotificaciones();
@@ -602,7 +663,7 @@ async function changePedidoStatus(id, newStatus) {
 
 async function deletePedido(id) {
   if (!confirm('Eliminar pedido #' + id + ' permanentemente?')) return;
-  const ok = await supaDelete('web_pedidos', id);
+  var ok = await supaDelete('web_pedidos', id);
   if (ok) {
     showToast('Pedido eliminado');
     loadPedidos();
@@ -613,7 +674,7 @@ async function deletePedido(id) {
 
 // ---- CHAT ----
 async function toggleChat(pedidoId) {
-  const row = document.getElementById('chat-row-' + pedidoId);
+  var row = document.getElementById('chat-row-' + pedidoId);
   if (!row) return;
   if (row.style.display === 'none') {
     row.style.display = '';
@@ -624,19 +685,19 @@ async function toggleChat(pedidoId) {
 }
 
 async function loadChatMessages(pedidoId) {
-  const container = document.getElementById('chat-msgs-' + pedidoId);
+  var container = document.getElementById('chat-msgs-' + pedidoId);
   if (!container) return;
-  const msgs = await supaGet('web_pedido_comentarios', '&pedido_id=eq.' + pedidoId + '&order=created_at.asc');
+  var msgs = await supaGet('web_pedido_comentarios', '&pedido_id=eq.' + pedidoId + '&order=created_at.asc');
   if (!msgs.length) {
     container.innerHTML = '<div style="color:var(--text-muted);font-size:.75rem;text-align:center;padding:10px;">Sin mensajes</div>';
     return;
   }
-  let html = '';
-  msgs.forEach(m => {
-    const isAdmin = m.autor === 'admin';
+  var html = '';
+  msgs.forEach(function(m){
+    var isAdmin = m.autor === 'admin';
     html += '<div class="chat-msg ' + (isAdmin ? 'admin' : 'cliente') + '">';
     html += esc(m.mensaje);
-    html += '<div class="chat-meta">' + (isAdmin ? 'Admin' : 'Cliente') + ' - ' + formatDate(m.created_at) + '</div>';
+    html += '<div class="chat-meta">' + (isAdmin ? 'Admin' : esc(m.autor || 'Cliente')) + ' - ' + formatDate(m.created_at) + '</div>';
     html += '</div>';
   });
   container.innerHTML = html;
@@ -644,23 +705,24 @@ async function loadChatMessages(pedidoId) {
 }
 
 async function sendChat(pedidoId) {
-  const input = document.getElementById('chat-input-' + pedidoId);
+  var input = document.getElementById('chat-input-' + pedidoId);
   if (!input) return;
-  const msg = input.value.trim();
+  var msg = input.value.trim();
   if (!msg) return;
   input.value = '';
 
-  const result = await supaPost('web_pedido_comentarios', {
+  var result = await supaPost('web_pedido_comentarios', {
     pedido_id: pedidoId,
     autor: 'admin',
     mensaje: msg
   });
   if (result) {
-    // Notification
+    var pedido = cachedPedidos.find(function(p){ return p.id === pedidoId; });
+    var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + pedidoId;
     await supaPost('web_notificaciones', {
-      pedido_codigo: 'PED-' + pedidoId,
-      tipo: 'mensaje_pedido',
-      mensaje: 'Nuevo mensaje admin en pedido #' + pedidoId,
+      pedido_codigo: codigo,
+      tipo: 'estado',
+      mensaje: 'Nuevo mensaje admin en pedido ' + codigo,
       leida: false
     });
     showToast('Mensaje enviado');
@@ -671,15 +733,15 @@ async function sendChat(pedidoId) {
   }
 }
 
-// ============================================================
+// ================================================================
 // POSTULACIONES
-// ============================================================
+// ================================================================
 async function loadPostulaciones() {
-  const data = await supaGet('web_postulaciones', '&order=fecha.desc');
+  var data = await supaGet('web_postulaciones', '&order=created_at.desc');
   cachedPostulaciones = data;
 
-  const tbody = document.getElementById('postulacionesBody');
-  const emptyEl = document.getElementById('postulacionesEmpty');
+  var tbody = document.getElementById('postulacionesBody');
+  var emptyEl = document.getElementById('postulacionesEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -688,29 +750,31 @@ async function loadPostulaciones() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(p => {
-    const estado = p.estado || 'Recibida';
+  var html = '';
+  data.forEach(function(p){
+    var estado = p.estado || 'Recibida';
     html += '<tr>';
     html += '<td>' + esc(p.nombre_completo || '-') + '</td>';
+    html += '<td>' + esc(p.dni || '-') + '</td>';
     html += '<td>' + esc(p.email || '-') + '</td>';
     html += '<td>' + esc(p.telefono || '-') + '</td>';
     html += '<td>' + esc(p.puesto || '-') + '</td>';
+    html += '<td>' + esc(p.departamento || '-') + (p.municipio ? ', ' + esc(p.municipio) : '') + '</td>';
     html += '<td style="max-width:250px;"><details><summary style="cursor:pointer;color:var(--gold);font-size:.75rem;">Ver carta</summary><div style="margin-top:6px;font-size:.78rem;white-space:pre-wrap;">' + esc(p.carta_motivacion || '-') + '</div></details></td>';
     html += '<td><select class="btn-sm" onchange="changePostulacionStatus(' + p.id + ', this.value)">';
-    ['Recibida','En Revision','Entrevista','Aceptada','Rechazada'].forEach(st => {
+    ['Recibida','En Revision','Entrevista','Aceptada','Rechazada'].forEach(function(st){
       html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st + '</option>';
     });
     html += '</select></td>';
     html += '<td><textarea style="min-width:150px;" onblur="savePostulacionNotes(' + p.id + ', this.value)" placeholder="Notas...">' + esc(p.notas_admin || '') + '</textarea></td>';
-    html += '<td>' + formatDate(p.fecha) + '</td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
 
 async function changePostulacionStatus(id, newStatus) {
-  const result = await supaPatch('web_postulaciones', id, { estado: newStatus });
+  var result = await supaPatch('web_postulaciones', id, { estado: newStatus });
   if (result) {
     showToast('Postulacion actualizada: ' + newStatus);
   } else {
@@ -719,29 +783,29 @@ async function changePostulacionStatus(id, newStatus) {
 }
 
 async function savePostulacionNotes(id, notes) {
-  const result = await supaPatch('web_postulaciones', id, { notas_admin: notes });
+  var result = await supaPatch('web_postulaciones', id, { notas_admin: notes });
   if (result) {
     showToast('Notas guardadas');
   }
 }
 
-// ============================================================
+// ================================================================
 // COOKIES
-// ============================================================
+// ================================================================
 async function loadCookies() {
-  const data = await supaGet('web_cookie_consents', '&order=created_at.desc');
+  var data = await supaGet('web_cookie_consents', '&order=created_at.desc');
   cachedCookies = data;
 
-  const totalConsents = data.length;
-  const accepted = data.filter(c => c.accepted === true || c.aceptado === true || c.accepted === 'true').length;
+  var totalConsents = data.length;
+  var accepted = data.filter(function(c){ return c.aceptado === true; }).length;
 
   document.getElementById('cookiesStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Total Consentimientos</div><div class="stat-value">' + totalConsents + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Aceptados</div><div class="stat-value">' + accepted + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Rechazados</div><div class="stat-value">' + (totalConsents - accepted) + '</div></div>';
 
-  const tbody = document.getElementById('cookiesBody');
-  const emptyEl = document.getElementById('cookiesEmpty');
+  var tbody = document.getElementById('cookiesBody');
+  var emptyEl = document.getElementById('cookiesEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -750,28 +814,33 @@ async function loadCookies() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(c => {
+  var html = '';
+  data.forEach(function(c){
     html += '<tr>';
     html += '<td>' + esc(c.id) + '</td>';
-    html += '<td>' + formatDate(c.created_at || c.fecha) + '</td>';
-    html += '<td>' + esc(c.country || c.pais || '-') + '</td>';
-    html += '<td>' + esc(c.device || c.dispositivo || '-') + '</td>';
-    html += '<td>' + ((c.accepted === true || c.aceptado === true || c.accepted === 'true') ? '<span style="color:var(--success);">Si</span>' : '<span style="color:var(--danger);">No</span>') + '</td>';
+    html += '<td>' + (c.aceptado === true ? '<span style="color:var(--success);">Si</span>' : '<span style="color:var(--danger);">No</span>') + '</td>';
+    html += '<td>' + esc(c.pais || '-') + '</td>';
+    html += '<td>' + esc(c.ciudad || '-') + '</td>';
+    html += '<td>' + esc(c.idioma || '-') + '</td>';
+    html += '<td>' + esc(c.navegador || '-') + '</td>';
+    html += '<td>' + esc(c.pantalla || '-') + '</td>';
+    html += '<td>' + esc(c.pagina || '-') + '</td>';
+    html += '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(c.referrer || '') + '">' + esc(c.referrer || '-') + '</td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(c.created_at) + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
 
-// ============================================================
+// ================================================================
 // SUSCRIPCIONES
-// ============================================================
+// ================================================================
 async function loadSuscripciones() {
-  const data = await supaGet('web_email_suscripciones', '&order=fecha.desc');
+  var data = await supaGet('web_email_suscripciones', '&order=created_at.desc');
   cachedSuscripciones = data;
 
-  const tbody = document.getElementById('suscripcionesBody');
-  const emptyEl = document.getElementById('suscripcionesEmpty');
+  var tbody = document.getElementById('suscripcionesBody');
+  var emptyEl = document.getElementById('suscripcionesEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -780,37 +849,38 @@ async function loadSuscripciones() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(s => {
+  var html = '';
+  data.forEach(function(s){
     html += '<tr>';
     html += '<td>' + esc(s.email || '-') + '</td>';
     html += '<td>' + esc(s.tipo || '-') + '</td>';
-    html += '<td>' + formatDate(s.fecha || s.created_at) + '</td>';
     html += '<td>' + esc(s.pagina_origen || '-') + '</td>';
+    html += '<td>' + esc(s.pais || '-') + '</td>';
+    html += '<td>' + (s.activa === true ? '<span style="color:var(--success);">Si</span>' : '<span style="color:var(--danger);">No</span>') + '</td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(s.created_at) + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
 
-// ============================================================
+// ================================================================
 // ANALYTICS
-// ============================================================
+// ================================================================
 async function loadAnalytics() {
-  const data = await supaGet('web_analytics', '&order=created_at.desc');
+  var data = await supaGet('web_analytics', '&order=created_at.desc');
   cachedAnalytics = data;
 
-  // Stats
-  const totalVisits = data.length;
-  const countries = {};
-  const devices = {};
-  data.forEach(a => {
-    const country = a.country || a.pais || 'Desconocido';
-    const device = a.device || a.dispositivo || 'Desconocido';
+  var totalVisits = data.length;
+  var countries = {};
+  var devices = {};
+  data.forEach(function(a){
+    var country = a.pais || 'Desconocido';
+    var device = a.dispositivo || 'Desconocido';
     countries[country] = (countries[country] || 0) + 1;
     devices[device] = (devices[device] || 0) + 1;
   });
-  const topCountry = Object.entries(countries).sort((a,b) => b[1]-a[1])[0];
-  const topDevice = Object.entries(devices).sort((a,b) => b[1]-a[1])[0];
+  var topCountry = Object.entries(countries).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var topDevice = Object.entries(devices).sort(function(a,b){ return b[1]-a[1]; })[0];
 
   document.getElementById('analyticsStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Total Visitas</div><div class="stat-value">' + totalVisits + '</div></div>' +
@@ -818,8 +888,8 @@ async function loadAnalytics() {
     '<div class="stat-card"><div class="stat-label">Top Pais</div><div class="stat-value" style="font-size:1.4rem;">' + (topCountry ? esc(topCountry[0]) : '-') + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Top Dispositivo</div><div class="stat-value" style="font-size:1.4rem;">' + (topDevice ? esc(topDevice[0]) : '-') + '</div></div>';
 
-  const tbody = document.getElementById('analyticsBody');
-  const emptyEl = document.getElementById('analyticsEmpty');
+  var tbody = document.getElementById('analyticsBody');
+  var emptyEl = document.getElementById('analyticsEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -828,29 +898,34 @@ async function loadAnalytics() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(a => {
+  var html = '';
+  data.forEach(function(a){
     html += '<tr>';
-    html += '<td>' + esc(a.page || a.pagina || '-') + '</td>';
-    html += '<td>' + esc(a.country || a.pais || '-') + '</td>';
-    html += '<td>' + esc(a.device || a.dispositivo || '-') + '</td>';
-    html += '<td>' + esc(a.browser || a.navegador || '-') + '</td>';
-    html += '<td>' + formatDate(a.created_at || a.fecha) + '</td>';
+    html += '<td>' + esc(a.tipo_evento || '-') + '</td>';
+    html += '<td>' + esc(a.pagina || '-') + '</td>';
+    html += '<td>' + esc(a.titulo_pagina || '-') + '</td>';
+    html += '<td>' + esc(a.pais || '-') + '</td>';
+    html += '<td>' + esc(a.ciudad || '-') + '</td>';
+    html += '<td>' + esc(a.dispositivo || '-') + '</td>';
+    html += '<td>' + esc(a.navegador || '-') + '</td>';
+    html += '<td>' + esc(a.pantalla || '-') + '</td>';
+    html += '<td>' + esc(a.idioma || '-') + '</td>';
+    html += '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(a.referrer || '') + '">' + esc(a.referrer || '-') + '</td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(a.created_at) + '</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
 }
 
-// ============================================================
+// ================================================================
 // NOTIFICACIONES
-// ============================================================
+// ================================================================
 async function loadNotificaciones() {
-  const data = await supaGet('web_notificaciones', '&order=created_at.desc');
+  var data = await supaGet('web_notificaciones', '&order=created_at.desc');
   cachedNotificaciones = data;
 
-  // Badge
-  const unread = data.filter(n => n.leida === false).length;
-  const badge = document.getElementById('notifBadge');
+  var unread = data.filter(function(n){ return n.leida === false; }).length;
+  var badge = document.getElementById('notifBadge');
   if (unread > 0) {
     badge.textContent = unread > 99 ? '99+' : unread;
     badge.style.display = '';
@@ -858,8 +933,8 @@ async function loadNotificaciones() {
     badge.style.display = 'none';
   }
 
-  const tbody = document.getElementById('notificacionesBody');
-  const emptyEl = document.getElementById('notificacionesEmpty');
+  var tbody = document.getElementById('notificacionesBody');
+  var emptyEl = document.getElementById('notificacionesEmpty');
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -868,14 +943,14 @@ async function loadNotificaciones() {
   }
   emptyEl.style.display = 'none';
 
-  let html = '';
-  data.forEach(n => {
-    const isUnread = n.leida === false;
+  var html = '';
+  data.forEach(function(n){
+    var isUnread = n.leida === false;
     html += '<tr class="' + (isUnread ? 'notif-unread' : '') + '">';
-    html += '<td><span class="status-badge ' + (n.tipo === 'estado_pedido' ? 'status-pagado' : 'status-enviado') + '">' + esc(n.tipo || '-') + '</span></td>';
+    html += '<td><span class="status-badge ' + statusClass(n.tipo || 'estado') + '">' + esc(n.tipo || '-') + '</span></td>';
     html += '<td>' + esc(n.mensaje || '-') + '</td>';
-    html += '<td>' + (n.pedido_codigo ? n.pedido_codigo : '-') + '</td>';
-    html += '<td>' + formatDate(n.created_at || n.fecha) + '</td>';
+    html += '<td>' + esc(n.pedido_codigo || '-') + '</td>';
+    html += '<td style="white-space:nowrap;">' + formatDate(n.created_at) + '</td>';
     html += '<td>';
     if (isUnread) {
       html += '<button class="btn btn-sm" onclick="markRead(' + n.id + ')">Marcar leida</button>';
@@ -889,7 +964,7 @@ async function loadNotificaciones() {
 }
 
 async function markRead(id) {
-  const result = await supaPatch('web_notificaciones', id, { leida: true });
+  var result = await supaPatch('web_notificaciones', id, { leida: true });
   if (result) {
     showToast('Notificacion marcada como leida');
     loadNotificaciones();
@@ -897,88 +972,130 @@ async function markRead(id) {
 }
 
 async function markAllRead() {
-  const unread = cachedNotificaciones.filter(n => n.leida === false);
+  var unread = cachedNotificaciones.filter(function(n){ return n.leida === false; });
   if (!unread.length) {
     showToast('No hay notificaciones sin leer');
     return;
   }
-  let success = 0;
-  for (const n of unread) {
-    const r = await supaPatch('web_notificaciones', n.id, { leida: true });
+  var success = 0;
+  for (var i = 0; i < unread.length; i++) {
+    var r = await supaPatch('web_notificaciones', unread[i].id, { leida: true });
     if (r) success++;
   }
   showToast(success + ' notificaciones marcadas como leidas');
   loadNotificaciones();
 }
 
-// ============================================================
+// ================================================================
 // EXCEL EXPORT
-// ============================================================
+// ================================================================
 function exportExcel(type) {
-  let data = [];
-  let filename = 'export.xlsx';
-  let sheetName = 'Datos';
+  var data = [];
+  var filename = 'export.xlsx';
+  var sheetName = 'Datos';
 
   switch(type) {
     case 'pedidos':
-      data = cachedPedidos.map(p => ({
-        'ID': p.id,
-        'Codigo': p.codigo || '',
-        'Cliente': p.nombre_cliente || '',
-        'Email': p.email_cliente || '',
-        'Telefono': p.telefono_cliente || '',
-        'Items': typeof p.items === 'object' ? JSON.stringify(p.items) : (p.items || ''),
-        'Total': p.total || 0,
-        'Moneda': p.moneda || '',
-        'Estado': p.estado || '',
-        'Fecha': p.created_at || ''
-      }));
+      data = cachedPedidos.map(function(p){
+        return {
+          'ID': p.id,
+          'Codigo': p.codigo || '',
+          'Cliente': p.nombre_cliente || '',
+          'Email': p.email_cliente || '',
+          'Telefono': p.telefono_cliente || '',
+          'Direccion': p.direccion_envio || '',
+          'Ciudad': p.ciudad || '',
+          'Departamento': p.departamento || '',
+          'Pais': p.pais || '',
+          'Items': parseItems(p.items),
+          'Subtotal': p.subtotal || 0,
+          'Descuento': p.descuento || 0,
+          'Total': p.total || 0,
+          'Moneda': p.moneda || '',
+          'Total EUR': p.total_eur || 0,
+          'Total HNL': p.total_hnl || 0,
+          'Metodo Pago': p.metodo_pago || '',
+          'Estado': p.estado || '',
+          'Pagado': p.pagado ? 'Si' : 'No',
+          'Notas Admin': p.notas_admin || '',
+          'Fecha': p.created_at || ''
+        };
+      });
       filename = 'pedidos_enigme.xlsx';
       sheetName = 'Pedidos';
       break;
     case 'postulaciones':
-      data = cachedPostulaciones.map(p => ({
-        'Nombre': p.nombre_completo || '',
-        'Email': p.email || '',
-        'Telefono': p.telefono || '',
-        'Puesto': p.puesto || '',
-        'Carta Motivacion': p.carta_motivacion || '',
-        'Estado': p.estado || '',
-        'Notas Admin': p.notas_admin || '',
-        'Fecha': p.fecha || ''
-      }));
+      data = cachedPostulaciones.map(function(p){
+        return {
+          'Nombre': p.nombre_completo || '',
+          'DNI': p.dni || '',
+          'Fecha Nacimiento': p.fecha_nacimiento || '',
+          'Email': p.email || '',
+          'Telefono': p.telefono || '',
+          'Puesto': p.puesto || '',
+          'Departamento': p.departamento || '',
+          'Municipio': p.municipio || '',
+          'Carta Motivacion': p.carta_motivacion || '',
+          'Estado': p.estado || '',
+          'Notas Admin': p.notas_admin || '',
+          'Fecha': p.created_at || ''
+        };
+      });
       filename = 'postulaciones_enigme.xlsx';
       sheetName = 'Postulaciones';
       break;
     case 'cookies':
-      data = cachedCookies.map(c => ({
-        'ID': c.id,
-        'Fecha': c.created_at || c.fecha || '',
-        'Pais': c.country || c.pais || '',
-        'Dispositivo': c.device || c.dispositivo || '',
-        'Aceptado': (c.accepted === true || c.aceptado === true) ? 'Si' : 'No'
-      }));
+      data = cachedCookies.map(function(c){
+        return {
+          'ID': c.id,
+          'Aceptado': c.aceptado ? 'Si' : 'No',
+          'Pais': c.pais || '',
+          'Ciudad': c.ciudad || '',
+          'Region': c.region || '',
+          'Idioma': c.idioma || '',
+          'Pantalla': c.pantalla || '',
+          'Navegador': c.navegador || '',
+          'Referrer': c.referrer || '',
+          'User Agent': c.user_agent || '',
+          'Pagina': c.pagina || '',
+          'Fecha': c.created_at || ''
+        };
+      });
       filename = 'cookies_enigme.xlsx';
       sheetName = 'Cookies';
       break;
     case 'suscripciones':
-      data = cachedSuscripciones.map(s => ({
-        'Email': s.email || '',
-        'Tipo': s.tipo || '',
-        'Fecha': s.fecha || s.created_at || '',
-        'Pagina Origen': s.pagina_origen || ''
-      }));
+      data = cachedSuscripciones.map(function(s){
+        return {
+          'Email': s.email || '',
+          'Tipo': s.tipo || '',
+          'Pagina Origen': s.pagina_origen || '',
+          'Pais': s.pais || '',
+          'Activa': s.activa ? 'Si' : 'No',
+          'Fecha': s.created_at || ''
+        };
+      });
       filename = 'suscripciones_enigme.xlsx';
       sheetName = 'Suscripciones';
       break;
     case 'analytics':
-      data = cachedAnalytics.map(a => ({
-        'Pagina': a.page || a.pagina || '',
-        'Pais': a.country || a.pais || '',
-        'Dispositivo': a.device || a.dispositivo || '',
-        'Navegador': a.browser || a.navegador || '',
-        'Fecha': a.created_at || a.fecha || ''
-      }));
+      data = cachedAnalytics.map(function(a){
+        return {
+          'Tipo Evento': a.tipo_evento || '',
+          'Pagina': a.pagina || '',
+          'Titulo': a.titulo_pagina || '',
+          'Pais': a.pais || '',
+          'Ciudad': a.ciudad || '',
+          'Region': a.region || '',
+          'Dispositivo': a.dispositivo || '',
+          'Navegador': a.navegador || '',
+          'Pantalla': a.pantalla || '',
+          'Idioma': a.idioma || '',
+          'Referrer': a.referrer || '',
+          'Metodo Screenshot': a.metodo_screenshot || '',
+          'Fecha': a.created_at || ''
+        };
+      });
       filename = 'analytics_enigme.xlsx';
       sheetName = 'Analytics';
       break;
@@ -993,14 +1110,14 @@ function exportExcel(type) {
   }
 
   try {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.json_to_sheet(data);
+    var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
     XLSX.writeFile(wb, filename);
-    showToast('Excel descargado: ' + filename);
+    showToast('Exportado: ' + filename);
   } catch(e) {
-    console.error('Excel export error:', e);
-    showToast('Error al exportar Excel', true);
+    console.error('Export error:', e);
+    showToast('Error al exportar', true);
   }
 }
 </script>

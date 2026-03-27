@@ -992,13 +992,13 @@
           // 4. History entry
           await supaFetch('/web_pedido_historial', {
             method: 'POST', prefer: 'return=minimal',
-            body: JSON.stringify({ pedido_id: pedidoId, estado_nuevo: 'Pendiente', cambiado_por: 'sistema', nota: 'Pedido creado, redirigido a pago ' + metodoPago })
+            body: JSON.stringify({ pedido_id: pedidoId, estado_nuevo: 'Pendiente', cambiado_por: 'sistema' })
           });
 
           // 5. Notification for admin
           await supaFetch('/web_notificaciones', {
             method: 'POST', prefer: 'return=minimal',
-            body: JSON.stringify({ pedido_codigo: orderId, tipo: 'nuevo_pedido', mensaje: 'Nuevo pedido ' + orderId + ' de ' + data.nombre + ' — ' + (moneda === 'EUR' ? '€' + totalEUR : 'L ' + totalHNL) })
+            body: JSON.stringify({ pedido_codigo: orderId, tipo: 'nuevo_pedido', mensaje: 'Nuevo pedido ' + orderId + ' de ' + data.nombre + ' — ' + (moneda === 'EUR' ? '€' + totalEUR : 'L ' + totalHNL), leida: false })
           });
         }
 
