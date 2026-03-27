@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin · Pedidos · Enigme</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg:#0a0a0a;--surface:#111111;--surface2:#161616;--border:#222222;
+      --gold:#c9a96e;--gold-dim:#8b7355;--text:#e8e0d4;--text-muted:#6b6259;
+      --pending:#a08840;--shipped:#5a8fa0;--done:#6b9e78;--cancelled:#9e6b6b;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh;}
+
+    /* -- LOGIN SCREEN -- */
+    .login-screen {
+      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      width: 100%; max-width: 380px; padding: 0 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+    }
+    .login-mark {
+      width: 44px; height: 1px; background: var(--gold); margin-bottom: 24px; position: relative;
+    }
+    .login-mark::before, .login-mark::after {
+      content: ''; position: absolute; top: -3px; width: 7px; height: 7px;
+      border: 1px solid var(--gold); transform: rotate(45deg);
+    }
+    .login-mark::before { left: -4px; }
+    .login-mark::after  { right: -4px; }
+    .login-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300;
+      letter-spacing: 0.14em; color: var(--text); margin-bottom: 6px; text-align: center;
+    }
+    .login-title em { font-style: italic; color: var(--gold); }
+    .login-sub {
+      font-size: 0.65rem; letter-spacing: 0.26em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 40px; text-align: center;
+    }
+    .login-input {
+      width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border);
+      color: var(--text); font-family: 'Jost', sans-serif; font-size: 1rem; font-weight: 300;
+      padding: 12px 0; outline: none; letter-spacing: 0.2em; text-align: center;
+      transition: border-color 0.2s; margin-bottom: 28px;
+    }
+    .login-input:focus { border-bottom-color: var(--gold); }
+    .login-input::placeholder { color: var(--text-muted); letter-spacing: 0.1em; font-size: 0.8rem; }
+    .login-btn {
+      width: 100%; padding: 14px 0; background: transparent; border: 1px solid var(--gold-dim);
+      color: var(--gold); font-family: 'Jost', sans-serif; font-size: 0.72rem;
+      letter-spacing: 0.26em; text-transform: uppercase; cursor: pointer;
+      position: relative; overflow: hidden; transition: color 0.3s, border-color 0.3s;
+    }
+    .login-btn::before {
+      content: ''; position: absolute; inset: 0; background: var(--gold);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.35s cubic-bezier(0.7,0,0.3,1);
+    }
+    .login-btn:hover::before { transform: scaleX(1); }
+    .login-btn:hover { color: #0a0a0a; border-color: var(--gold); }
+    .login-btn span { position: relative; z-index: 1; }
+    .login-error {
+      margin-top: 16px; font-size: 0.68rem; letter-spacing: 0.14em;
+      color: #c0605a; text-transform: uppercase; text-align: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .login-error.show { opacity: 1; }
+
+    /* -- SIDEBAR -- */
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;border-right:1px solid var(--border);padding:36px 24px;display:flex;flex-direction:column;gap:0;z-index:10;background:var(--surface);}
+    .sidebar-brand{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:40px;}
+    .sidebar-brand h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;letter-spacing:.12em;}
+    .sidebar-brand h2 em{font-style:italic;color:var(--gold);}
+    .sidebar-brand span{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted);margin-top:3px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-left:2px solid transparent;transition:all .2s;margin-bottom:2px;}
+    .nav-item:hover{color:var(--text);}
+    .nav-item.active{color:var(--gold);border-left-color:var(--gold);}
+    .sidebar-footer{margin-top:auto;font-size:.68rem;color:var(--text-muted);letter-spacing:.08em;line-height:1.6;}
+
+    /* -- MAIN -- */
+    .main{margin-left:220px;padding:40px 44px;min-height:100vh;}
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;animation:fadeDown .6s ease both;}
+    .page-title h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;letter-spacing:.06em;}
+    .page-title h1 em{font-style:italic;color:var(--gold);}
+    .page-title p{margin-top:4px;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);}
+    .header-actions{display:flex;gap:12px;flex-wrap:wrap;}
+    .btn{padding:10px 22px;font-family:'Jost',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s;}
+    .btn:hover{color:var(--text);border-color:var(--text-muted);}
+    .btn-primary{border-color:var(--gold-dim);color:var(--gold);position:relative;overflow:hidden;}
+    .btn-primary::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.7,0,.3,1);}
+    .btn-primary:hover::before{transform:scaleX(1);}
+    .btn-primary:hover{color:#0a0a0a;}
+    .btn-primary span{position:relative;z-index:1;}
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;animation:fadeUp .6s .1s ease both;}
+    .stats-row-5{grid-template-columns:repeat(5,1fr);}
+    .stats-row-6{grid-template-columns:repeat(6,1fr);}
+    .stat-card{background:var(--surface);border:1px solid var(--border);padding:22px 24px;position:relative;}
+    .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s ease;}
+    .stat-card:hover::after{transform:scaleX(1);}
+    .stat-label{font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+    .stat-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;color:var(--text);line-height:1;}
+    .stat-value.gold{color:var(--gold);}
+    .filters{display:flex;gap:12px;margin-bottom:20px;align-items:center;animation:fadeUp .6s .15s ease both;flex-wrap:wrap;}
+    .search-box{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);padding:9px 16px;color:var(--text);font-family:'Jost',sans-serif;font-size:.85rem;font-weight:300;outline:none;transition:border-color .2s;}
+    .search-box:focus{border-color:var(--gold-dim);}
+    .search-box::placeholder{color:var(--text-muted);}
+    .filter-btn{padding:9px 18px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s;}
+    .filter-btn.active{border-color:var(--gold-dim);color:var(--gold);}
+    .filter-btn:hover:not(.active){color:var(--text);border-color:#444;}
+    .table-wrapper{background:var(--surface);border:1px solid var(--border);overflow-x:auto;animation:fadeUp .6s .2s ease both;}
+    table{width:100%;border-collapse:collapse;}
+    thead tr{border-bottom:1px solid var(--border);}
+    th{padding:14px 18px;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);text-align:left;font-weight:400;white-space:nowrap;}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--surface2);}
+    td{padding:14px 18px;font-size:.85rem;color:var(--text);font-weight:300;vertical-align:middle;}
+    .td-name{font-weight:400;}
+    .td-price{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;border:1px solid;}
+    .badge-pending{color:var(--pending);border-color:var(--pending);}
+    .badge-shipped{color:var(--shipped);border-color:var(--shipped);}
+    .badge-done{color:var(--done);border-color:var(--done);}
+    .badge-cancelled{color:var(--cancelled);border-color:var(--cancelled);}
+    .badge-recibido{color:#5a8fa0;border-color:#5a8fa0;}
+    .badge-pagado{color:#6b9e78;border-color:#6b9e78;}
+    .badge-enviado{color:#5a8fa0;border-color:#5a8fa0;}
+    .badge-reparto{color:#a07840;border-color:#a07840;}
+    .badge-entregado{color:#6b9e78;border-color:#6b9e78;}
+    .badge-revision{color:#a08840;border-color:#a08840;}
+    .badge-entrevista{color:#5a8fa0;border-color:#5a8fa0;}
+    .badge-aceptada{color:#6b9e78;border-color:#6b9e78;}
+    .badge-rechazada{color:#9e6b6b;border-color:#9e6b6b;}
+
+    /* -- COMMENTS MODAL -- */
+    .comments-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:none;align-items:center;justify-content:center;}
+    .comments-overlay.show{display:flex;}
+    .comments-modal{background:var(--surface);border:1px solid var(--border);width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;padding:0;position:relative;}
+    .comments-modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
+    .comments-modal-header h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;letter-spacing:.06em;}
+    .comments-modal-header h3 em{font-style:italic;color:var(--gold);}
+    .comments-close{background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;transition:color .2s;}
+    .comments-close:hover{color:var(--text);}
+    .comments-thread{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;min-height:120px;max-height:400px;}
+    .comment-bubble{padding:10px 14px;border:1px solid var(--border);font-size:.82rem;line-height:1.5;max-width:85%;}
+    .comment-bubble.admin{background:var(--surface2);border-color:var(--gold-dim);align-self:flex-end;color:var(--text);}
+    .comment-bubble.user{background:transparent;align-self:flex-start;color:var(--text-muted);}
+    .comment-bubble .comment-meta{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-top:6px;}
+    .comment-bubble.admin .comment-meta{color:var(--gold-dim);}
+    .comments-empty{text-align:center;padding:30px;color:var(--text-muted);font-size:.78rem;letter-spacing:.1em;}
+    .comments-input-area{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;}
+    .comments-input-area textarea{flex:1;background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Jost',sans-serif;font-size:.82rem;font-weight:300;padding:10px 12px;outline:none;resize:none;min-height:60px;max-height:100px;transition:border-color .2s;}
+    .comments-input-area textarea:focus{border-color:var(--gold-dim);}
+    .comments-input-area textarea::placeholder{color:var(--text-muted);}
+    .comments-send{padding:10px 20px;font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .comments-send:hover{background:var(--gold);color:#0a0a0a;}
+    .comment-char-count{font-size:.6rem;color:var(--text-muted);letter-spacing:.08em;padding:0 24px 8px;text-align:right;}
+    .td-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .action-btn{padding:4px 10px;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .18s;}
+    .action-btn:hover{color:var(--text);border-color:#555;}
+    .empty-state{padding:60px 20px;text-align:center;color:var(--text-muted);}
+    .empty-state p{font-size:.8rem;letter-spacing:.12em;margin-top:12px;}
+    .loading-state{padding:60px 20px;text-align:center;}
+    .loading-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold-dim);margin:0 3px;animation:bounce 1.2s infinite ease-in-out;}
+    .loading-dots span:nth-child(2){animation-delay:.15s;}
+    .loading-dots span:nth-child(3){animation-delay:.3s;}
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-top:1px solid var(--border);font-size:.72rem;letter-spacing:.1em;color:var(--text-muted);}
+    .pag-btns{display:flex;gap:8px;}
+    .pag-btn{padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;transition:all .2s;}
+    .pag-btn:hover:not(:disabled){color:var(--text);border-color:#444;}
+    .pag-btn:disabled{opacity:.3;cursor:default;}
+
+    /* -- SECTION VIEWS -- */
+    .view-section{display:none;}
+    .view-section.active{display:block;}
+
+    /* -- BAR CHART -- */
+    .bar-chart{display:flex;align-items:flex-end;gap:16px;height:180px;padding:20px 0;margin-top:12px;}
+    .bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end;}
+    .bar-fill{width:100%;max-width:60px;background:var(--gold);border-radius:2px 2px 0 0;transition:height .4s ease;min-height:2px;}
+    .bar-label{margin-top:8px;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);text-align:center;}
+    .bar-value{margin-bottom:6px;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold);}
+
+    /* -- POPULAR PRODUCTS -- */
+    .popular-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:16px;}
+    .popular-card{background:var(--surface);border:1px solid var(--border);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+    .popular-card .prod-name{font-size:.85rem;font-weight:400;color:var(--text);}
+    .popular-card .prod-count{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);}
+
+    /* -- SECTION TITLE -- */
+    .section-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--text);margin-top:36px;margin-bottom:16px;letter-spacing:.06em;}
+    .section-title em{font-style:italic;color:var(--gold);}
+
+    /* -- MOBILE NAV -- */
+    .mobile-nav{display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;overflow-x:auto;white-space:nowrap;gap:8px;}
+    .mobile-nav .nav-item{display:inline-flex;border-left:none;border-bottom:2px solid transparent;padding:8px 14px;margin-bottom:0;font-size:.7rem;}
+    .mobile-nav .nav-item.active{border-bottom-color:var(--gold);border-left-color:transparent;}
+
+    /* -- TOAST -- */
+    .toast{position:fixed;bottom:30px;right:30px;background:var(--surface);border:1px solid var(--gold-dim);padding:14px 22px;font-size:.78rem;color:var(--gold);letter-spacing:.08em;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s ease;pointer-events:none;}
+    .toast.show{transform:translateY(0);opacity:1;}
+
+    /* -- NOTES MODAL -- */
+    .notes-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:none;align-items:center;justify-content:center;}
+    .notes-overlay.show{display:flex;}
+    .notes-modal{background:var(--surface);border:1px solid var(--border);width:100%;max-width:480px;padding:24px;position:relative;}
+    .notes-modal h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;margin-bottom:16px;}
+    .notes-modal h3 em{font-style:italic;color:var(--gold);}
+    .notes-modal textarea{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Jost',sans-serif;font-size:.82rem;padding:10px 12px;outline:none;resize:vertical;min-height:100px;margin-bottom:14px;}
+    .notes-modal textarea:focus{border-color:var(--gold-dim);}
+    .notes-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+    @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+    @media(max-width:900px){
+      .sidebar{display:none;}
+      .mobile-nav{display:flex;}
+      .main{margin-left:0;padding:24px 20px;}
+      .stats-row{grid-template-columns:repeat(2,1fr);}
+      .stats-row-5{grid-template-columns:repeat(2,1fr);}
+      .stats-row-6{grid-template-columns:repeat(3,1fr);}
+      .page-header{flex-direction:column;align-items:flex-start;gap:16px;}
+      .header-actions{width:100%;}
+      .header-actions .btn{flex:1;text-align:center;}
+      .bar-chart{height:140px;}
+    }
+    @media(max-width:520px){
+      .stats-row,.stats-row-5,.stats-row-6{grid-template-columns:1fr;}
+      .filters{flex-direction:column;}
+      .search-box{width:100%;}
+      .popular-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- -- PANTALLA DE LOGIN -- -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-mark"></div>
+    <h1 class="login-title"><em>Enigme</em></h1>
+    <p class="login-sub">Panel de Administracion</p>
+    <input
+      class="login-input" id="loginInput" type="password"
+      placeholder="Introduce la contrasena"
+      onkeydown="if(event.key==='Enter') checkLogin()"
+    />
+    <button class="login-btn" onclick="checkLogin()"><span>Acceder</span></button>
+    <button class="login-btn" style="margin-top:10px;background:transparent;border:1px solid rgba(184,134,11,0.3);font-size:0.65rem;padding:10px 20px;" onclick="recuperarPassword()"><span>Olvidé mi contraseña</span></button>
+    <p class="login-error" id="loginError">Contrasena incorrecta</p>
+    <p class="login-error" id="loginSuccess" style="color:#4CAF50;background:rgba(76,175,80,0.1);border-color:#4CAF50;display:none;">Contraseña enviada a tu correo</p>
+  </div>
+</div>
+
+<!-- -- PANEL PRINCIPAL (oculto hasta login) -- -->
+<div id="adminPanel" style="display:none">
+
+<!-- MOBILE TOP NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="nav-item active" data-view="pedidos" onclick="switchView('pedidos',this)"><span>&#9672;</span> Pedidos</div>
+  <div class="nav-item" data-view="postulaciones" onclick="switchView('postulaciones',this)"><span>&#9998;</span> Postulaciones</div>
+  <div class="nav-item" data-view="cookies" onclick="switchView('cookies',this)"><span>&#9679;</span> Cookies</div>
+  <div class="nav-item" data-view="suscripciones" onclick="switchView('suscripciones',this)"><span>&#9993;</span> Suscripciones</div>
+  <div class="nav-item" data-view="clientes" onclick="switchView('clientes',this)"><span>&#9733;</span> Clientes</div>
+  <div class="nav-item" data-view="analytics" onclick="switchView('analytics',this)"><span>&#9737;</span> Analytics</div>
+  <div class="nav-item" data-view="notificaciones" onclick="switchView('notificaciones',this)"><span>&#9888;</span> Notificaciones</div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <h2><em>Enigme</em></h2>
+    <span>Panel de Admin</span>
+  </div>
+  <div class="nav-item active" data-view="pedidos" onclick="switchView('pedidos',this)"><span>&#9672;</span> Pedidos</div>
+  <div class="nav-item" data-view="postulaciones" onclick="switchView('postulaciones',this)"><span>&#9998;</span> Postulaciones</div>
+  <div class="nav-item" data-view="cookies" onclick="switchView('cookies',this)"><span>&#9679;</span> Cookies Consent</div>
+  <div class="nav-item" data-view="suscripciones" onclick="switchView('suscripciones',this)"><span>&#9993;</span> Suscripciones Email</div>
+  <div class="nav-item" data-view="clientes" onclick="switchView('clientes',this)"><span>&#9733;</span> Clientes</div>
+  <div class="nav-item" data-view="analytics" onclick="switchView('analytics',this)"><span>&#9737;</span> Analytics</div>
+  <div class="nav-item" data-view="notificaciones" onclick="switchView('notificaciones',this)"><span>&#9888;</span> Notificaciones</div>
+  <div class="sidebar-footer">Enigme Official<br/>Admin v4.0 Supabase</div>
+</aside>
+
+<main class="main">
+
+  <!-- ================================================ -->
+  <!--  VIEW: PEDIDOS                                     -->
+  <!-- ================================================ -->
+  <div class="view-section active" id="viewPedidos">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Gestion de <em>Pedidos</em></h1>
+        <p>Todos los pedidos recibidos &mdash; Supabase Realtime</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarPedidos()">&#8635; Actualizar</button>
+        <button class="btn btn-primary" onclick="exportarExcel()"><span>&#11015; Exportar Excel</span></button>
+        <button class="btn btn-primary" onclick="exportarGerencia()"><span>&#11015; Exportar Gerencia</span></button>
+      </div>
+    </div>
+
+    <div class="stats-row stats-row-6">
+      <div class="stat-card"><div class="stat-label">Total pedidos</div><div class="stat-value" id="statTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Completados</div><div class="stat-value" id="statDone">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos totales</div><div class="stat-value gold" id="statRevenue">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos EUR</div><div class="stat-value gold" id="statRevenueEUR">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos HNL</div><div class="stat-value gold" id="statRevenueHNL">&mdash;</div></div>
+    </div>
+
+    <div class="filters" id="pedidosFilters">
+      <input class="search-box" id="searchInput" type="text" placeholder="Buscar por nombre, codigo, email..." oninput="filtrarTabla()"/>
+      <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('Pendiente',this)">Pendientes</button>
+      <button class="filter-btn" onclick="setFilter('Recibido',this)">Recibidos</button>
+      <button class="filter-btn" onclick="setFilter('Pagado',this)">Pagados</button>
+      <button class="filter-btn" onclick="setFilter('Enviado',this)">Enviados</button>
+      <button class="filter-btn" onclick="setFilter('En Reparto',this)">En Reparto</button>
+      <button class="filter-btn" onclick="setFilter('Entregado',this)">Entregados</button>
+      <button class="filter-btn" onclick="setFilter('Cancelado',this)">Cancelados</button>
+      <span style="width:1px;height:24px;background:var(--border);margin:0 4px;"></span>
+      <button class="filter-btn" onclick="setCurrencyFilter('todos',this)">Todas Monedas</button>
+      <button class="filter-btn" onclick="setCurrencyFilter('EUR',this)">EUR</button>
+      <button class="filter-btn" onclick="setCurrencyFilter('HNL',this)">HNL</button>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="loading-state" id="loadingState">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+      </div>
+      <table id="ordersTable" style="display:none">
+        <thead><tr>
+          <th>Codigo</th><th>Fecha</th><th>Cliente</th><th>Email</th><th>Items</th>
+          <th>Total</th><th>Pago</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9672;</span>
+        <p>No se encontraron pedidos</p>
+      </div>
+      <div class="pagination" id="pagination" style="display:none">
+        <span id="paginationInfo"></span>
+        <div class="pag-btns">
+          <button class="pag-btn" id="prevBtn" onclick="changePage(-1)">&larr; Anterior</button>
+          <button class="pag-btn" id="nextBtn" onclick="changePage(1)">Siguiente &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: POSTULACIONES                               -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewPostulaciones">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Postulaciones de <em>Empleo</em></h1>
+        <p>Solicitudes de trabajo recibidas</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarPostulaciones()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row stats-row-5">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="postStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Recibidas</div><div class="stat-value" id="postStatRecibida">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">En Revision</div><div class="stat-value" id="postStatRevision">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Entrevista</div><div class="stat-value" id="postStatEntrevista">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Aceptadas</div><div class="stat-value gold" id="postStatAceptada">&mdash;</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table id="postTable">
+        <thead><tr>
+          <th>Fecha</th><th>Puesto</th><th>Nombre</th><th>Email</th><th>Telefono</th><th>Departamento</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="postBody"></tbody>
+      </table>
+      <div class="empty-state" id="postEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9998;</span>
+        <p>No hay postulaciones registradas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: COOKIES CONSENT                             -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewCookies">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Cookies <em>Consent</em></h1>
+        <p>Registro de aceptacion de cookies por los usuarios</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarCookies()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total respuestas</div><div class="stat-value" id="cookieStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Aceptaron</div><div class="stat-value" style="color:var(--done)" id="cookieStatAccepted">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Rechazaron</div><div class="stat-value" style="color:var(--cancelled)" id="cookieStatDeclined">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Tasa aceptacion</div><div class="stat-value gold" id="cookieStatRate">&mdash;</div></div>
+    </div>
+    <div class="section-title">Distribucion por <em>Pais</em></div>
+    <div class="table-wrapper" style="padding:20px 24px;">
+      <div class="bar-chart" id="cookieBarChart"></div>
+    </div>
+    <div class="section-title" style="margin-top:28px;">Registro de <em>Consentimientos</em></div>
+    <div class="table-wrapper">
+      <table id="cookieTable">
+        <thead><tr>
+          <th>Fecha</th><th>Acepto</th><th>Pais</th><th>Ciudad</th><th>Pantalla</th><th>Idioma</th><th>Navegador</th>
+        </tr></thead>
+        <tbody id="cookieBody"></tbody>
+      </table>
+      <div class="empty-state" id="cookieEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9679;</span>
+        <p>No hay datos de consentimiento de cookies</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: SUSCRIPCIONES EMAIL                         -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewSuscripciones">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Suscripciones <em>Email</em></h1>
+        <p>Usuarios suscritos al newsletter y ofertas</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarSuscripciones()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="subStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Activas</div><div class="stat-value" style="color:var(--done)" id="subStatActive">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Inactivas</div><div class="stat-value" style="color:var(--cancelled)" id="subStatInactive">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Newsletter</div><div class="stat-value gold" id="subStatNewsletter">&mdash;</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table id="subTable">
+        <thead><tr>
+          <th>Fecha</th><th>Email</th><th>Tipo</th><th>Pagina Origen</th><th>Pais</th><th>Activa</th>
+        </tr></thead>
+        <tbody id="subBody"></tbody>
+      </table>
+      <div class="empty-state" id="subEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9993;</span>
+        <p>No hay suscripciones registradas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: CLIENTES                                    -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewClientes">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Base de <em>Clientes</em></h1>
+        <p>Todos los clientes registrados</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarClientes()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total clientes</div><div class="stat-value" id="cliStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Honduras</div><div class="stat-value" id="cliStatHN">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Espana</div><div class="stat-value" id="cliStatES">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Con push</div><div class="stat-value gold" id="cliStatPush">&mdash;</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table id="cliTable">
+        <thead><tr>
+          <th>Fecha</th><th>Nombre</th><th>Email</th><th>Telefono</th><th>Ciudad</th><th>Pais</th><th>Moneda</th>
+        </tr></thead>
+        <tbody id="cliBody"></tbody>
+      </table>
+      <div class="empty-state" id="cliEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9733;</span>
+        <p>No hay clientes registrados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: ANALYTICS                                   -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewAnalytics">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Web <em>Analytics</em></h1>
+        <p>Visitas y navegacion de la web</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarAnalytics()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row stats-row-5">
+      <div class="stat-card"><div class="stat-label">Total visitas</div><div class="stat-value" id="anaStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-value gold" id="anaStatToday">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Paises unicos</div><div class="stat-value" id="anaStatCountries">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Movil</div><div class="stat-value" id="anaStatMobile">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Desktop</div><div class="stat-value" id="anaStatDesktop">&mdash;</div></div>
+    </div>
+    <div class="section-title">Paginas mas <em>Visitadas</em></div>
+    <div class="popular-grid" id="anaPopularPages"></div>
+    <div class="section-title" style="margin-top:28px;">Distribucion por <em>Pais</em></div>
+    <div class="table-wrapper" style="padding:20px 24px;">
+      <div class="bar-chart" id="anaBarChart"></div>
+    </div>
+    <div class="section-title" style="margin-top:28px;">Registro de <em>Visitas</em></div>
+    <div class="table-wrapper">
+      <table id="anaTable">
+        <thead><tr>
+          <th>Fecha</th><th>Pagina</th><th>Pais</th><th>Ciudad</th><th>Dispositivo</th><th>Navegador</th><th>Referrer</th>
+        </tr></thead>
+        <tbody id="anaBody"></tbody>
+      </table>
+      <div class="empty-state" id="anaEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9737;</span>
+        <p>No hay datos de analytics</p>
+      </div>
+      <div class="pagination" id="anaPagination" style="display:none">
+        <span id="anaPaginationInfo"></span>
+        <div class="pag-btns">
+          <button class="pag-btn" id="anaPrevBtn" onclick="changeAnaPage(-1)">&larr; Anterior</button>
+          <button class="pag-btn" id="anaNextBtn" onclick="changeAnaPage(1)">Siguiente &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================ -->
+  <!--  VIEW: NOTIFICACIONES                              -->
+  <!-- ================================================ -->
+  <div class="view-section" id="viewNotificaciones">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Centro de <em>Notificaciones</em></h1>
+        <p>Notificaciones enviadas a los clientes</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="cargarNotificaciones()">&#8635; Actualizar</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="notStatTotal">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">No leidas</div><div class="stat-value" style="color:var(--pending)" id="notStatUnread">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Leidas</div><div class="stat-value" style="color:var(--done)" id="notStatRead">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-value gold" id="notStatToday">&mdash;</div></div>
+    </div>
+    <div class="table-wrapper">
+      <table id="notTable">
+        <thead><tr>
+          <th>Fecha</th><th>Codigo Pedido</th><th>Tipo</th><th>Mensaje</th><th>Leida</th>
+        </tr></thead>
+        <tbody id="notBody"></tbody>
+      </table>
+      <div class="empty-state" id="notEmpty" style="display:none">
+        <span style="font-size:2rem;opacity:.3">&#9888;</span>
+        <p>No hay notificaciones</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+</div> <!-- /adminPanel -->
+
+<!-- -- COMMENTS MODAL -- -->
+<div class="comments-overlay" id="commentsOverlay" onclick="if(event.target===this)cerrarComentarios()">
+  <div class="comments-modal">
+    <div class="comments-modal-header">
+      <h3>Comentarios &mdash; <em id="commentsOrderId"></em></h3>
+      <button class="comments-close" onclick="cerrarComentarios()">&times;</button>
+    </div>
+    <div class="comments-thread" id="commentsThread"></div>
+    <div class="comment-char-count"><span id="commentCharCount">0</span>/500</div>
+    <div class="comments-input-area">
+      <textarea id="commentInput" placeholder="Escribe un comentario para el cliente..." maxlength="500" oninput="document.getElementById('commentCharCount').textContent=this.value.length"></textarea>
+      <button class="comments-send" onclick="enviarComentario()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- -- NOTES MODAL (for postulaciones) -- -->
+<div class="notes-overlay" id="notesOverlay" onclick="if(event.target===this)cerrarNotas()">
+  <div class="notes-modal">
+    <h3>Notas Admin &mdash; <em id="notesTitle"></em></h3>
+    <textarea id="notesInput" placeholder="Escribe notas internas sobre esta postulacion..."></textarea>
+    <div class="notes-modal-actions">
+      <button class="btn" onclick="cerrarNotas()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarNotas()"><span>Guardar</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- -- TOAST -- -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================================
+//  SUPABASE CONFIG
+// ======================================
+const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ======================================
+//  STATE
+// ======================================
+let todosLosPedidos = [];
+let pedidoItems = {};
+let filtroEstado = 'todos';
+let filtroCurrency = 'todos';
+let paginaActual = 1;
+const POR_PAGINA = 15;
+
+let postulacionesData = [];
+let cookiesData = [];
+let suscripcionesData = [];
+let clientesData = [];
+let analyticsData = [];
+let notificacionesData = [];
+let anaPage = 1;
+
+// ======================================
+//  TOAST
+// ======================================
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// ======================================
+//  LOGIN
+// ======================================
+window.addEventListener('load', function() {
+  document.getElementById('loginInput').focus();
+});
+
+function checkLogin() {
+  var pass = document.getElementById('loginInput').value;
+  if (pass === 'Gusiteamo.1998') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    initAdmin();
+  } else {
+    document.getElementById('loginError').classList.add('show');
+    setTimeout(function(){ document.getElementById('loginError').classList.remove('show'); }, 2000);
+  }
+}
+
+async function recuperarPassword() {
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'f2440038-7209-42d5-b13c-e5e47aa82dae',
+        to: 'carlosarmas@enigmeofficial.com',
+        subject: 'ÈNIGME Admin - Recuperación de Contraseña',
+        message: 'Tu contraseña del panel de administración ÈNIGME es: Gusiteamo.1998\n\nSi no solicitaste esta recuperación, ignora este mensaje.\n\n— Sistema ÈNIGME',
+        from_name: 'ÈNIGME Sistema'
+      })
+    });
+    var el = document.getElementById('loginSuccess');
+    el.style.display = 'block';
+    el.classList.add('show');
+    setTimeout(function(){ el.classList.remove('show'); el.style.display = 'none'; }, 4000);
+  } catch(e) {
+    alert('Error al enviar. Inténtalo de nuevo.');
+  }
+}
+
+function initAdmin() {
+  cargarPedidos();
+  setupRealtime();
+  // Auto-refresh every 30 seconds
+  setInterval(function() {
+    var activeView = document.querySelector('.view-section.active');
+    if (activeView) {
+      var id = activeView.id;
+      if (id === 'viewPedidos') cargarPedidos();
+      else if (id === 'viewPostulaciones') cargarPostulaciones();
+      else if (id === 'viewCookies') cargarCookies();
+      else if (id === 'viewSuscripciones') cargarSuscripciones();
+      else if (id === 'viewClientes') cargarClientes();
+      else if (id === 'viewAnalytics') cargarAnalytics();
+      else if (id === 'viewNotificaciones') cargarNotificaciones();
+    }
+  }, 30000);
+}
+
+// ======================================
+//  SUPABASE REALTIME
+// ======================================
+function setupRealtime() {
+  sb.channel('admin-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_pedidos' }, function(payload) {
+      showToast('Pedidos actualizados (realtime)');
+      cargarPedidos();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_postulaciones' }, function(payload) {
+      showToast('Postulaciones actualizadas');
+      if (document.getElementById('viewPostulaciones').classList.contains('active')) cargarPostulaciones();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_cookie_consents' }, function(payload) {
+      if (document.getElementById('viewCookies').classList.contains('active')) cargarCookies();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_email_suscripciones' }, function(payload) {
+      if (document.getElementById('viewSuscripciones').classList.contains('active')) cargarSuscripciones();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_clientes' }, function(payload) {
+      if (document.getElementById('viewClientes').classList.contains('active')) cargarClientes();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_analytics' }, function(payload) {
+      if (document.getElementById('viewAnalytics').classList.contains('active')) cargarAnalytics();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'web_notificaciones' }, function(payload) {
+      if (document.getElementById('viewNotificaciones').classList.contains('active')) cargarNotificaciones();
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'web_pedido_comentarios' }, function(payload) {
+      if (currentCommentsPedidoId && payload.new && payload.new.pedido_id === currentCommentsPedidoId) {
+        cargarComentariosPedido(currentCommentsPedidoId);
+      }
+    })
+    .subscribe();
+}
+
+// ======================================
+//  VIEW SWITCHING
+// ======================================
+function switchView(view, clickedNav) {
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.querySelectorAll('.nav-item[data-view="'+view+'"]').forEach(function(n) { n.classList.add('active'); });
+  document.querySelectorAll('.view-section').forEach(function(s) { s.classList.remove('active'); });
+
+  if (view === 'pedidos') {
+    document.getElementById('viewPedidos').classList.add('active');
+  } else if (view === 'postulaciones') {
+    document.getElementById('viewPostulaciones').classList.add('active');
+    cargarPostulaciones();
+  } else if (view === 'cookies') {
+    document.getElementById('viewCookies').classList.add('active');
+    cargarCookies();
+  } else if (view === 'suscripciones') {
+    document.getElementById('viewSuscripciones').classList.add('active');
+    cargarSuscripciones();
+  } else if (view === 'clientes') {
+    document.getElementById('viewClientes').classList.add('active');
+    cargarClientes();
+  } else if (view === 'analytics') {
+    document.getElementById('viewAnalytics').classList.add('active');
+    cargarAnalytics();
+  } else if (view === 'notificaciones') {
+    document.getElementById('viewNotificaciones').classList.add('active');
+    cargarNotificaciones();
+  }
+}
+
+// ======================================
+//  PEDIDOS
+// ======================================
+async function cargarPedidos() {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('ordersTable').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('pagination').style.display = 'none';
+  try {
+    var { data, error } = await sb.from('web_pedidos').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    todosLosPedidos = data || [];
+
+    // Load items for all orders
+    var ids = todosLosPedidos.map(function(p){ return p.id; });
+    if (ids.length > 0) {
+      var { data: items, error: itemsErr } = await sb.from('web_pedido_items').select('*').in('pedido_id', ids);
+      if (!itemsErr && items) {
+        pedidoItems = {};
+        items.forEach(function(it) {
+          if (!pedidoItems[it.pedido_id]) pedidoItems[it.pedido_id] = [];
+          pedidoItems[it.pedido_id].push(it);
+        });
+      }
+    }
+
+    actualizarStats();
+    renderizarTabla();
+  } catch (err) {
+    document.getElementById('loadingState').innerHTML =
+      '<p style="color:#c0605a;font-size:.8rem;letter-spacing:.1em">Error: '+err.message+'</p>';
+  }
+}
+
+function actualizarStats() {
+  var total = todosLosPedidos.length;
+  var pending = todosLosPedidos.filter(function(r) { return r.estado === 'Pendiente'; }).length;
+  var done = todosLosPedidos.filter(function(r) { return r.estado === 'Entregado'; }).length;
+  var eurRevenue = 0, hnlRevenue = 0;
+  todosLosPedidos.forEach(function(r) {
+    var val = parseFloat(r.total) || 0;
+    if (r.moneda === 'EUR') eurRevenue += val;
+    else hnlRevenue += val;
+  });
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statRevenue').textContent = (eurRevenue + hnlRevenue).toFixed(2);
+  document.getElementById('statRevenueEUR').textContent = '\u20AC' + eurRevenue.toFixed(2);
+  document.getElementById('statRevenueHNL').textContent = 'L ' + hnlRevenue.toFixed(2);
+}
+
+function setFilter(estado, btn) {
+  filtroEstado = estado; paginaActual = 1;
+  var btns = document.querySelectorAll('#pedidosFilters .filter-btn');
+  // Deactivate status filters (all except last 3 which are currency)
+  var statusBtns = Array.prototype.slice.call(btns, 0, btns.length - 3);
+  statusBtns.forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderizarTabla();
+}
+
+function setCurrencyFilter(cur, btn) {
+  filtroCurrency = cur; paginaActual = 1;
+  var allBtns = document.querySelectorAll('#pedidosFilters .filter-btn');
+  var currBtns = Array.prototype.slice.call(allBtns, -3);
+  currBtns.forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderizarTabla();
+}
+
+function filtrarTabla() { paginaActual = 1; renderizarTabla(); }
+
+function pedidosFiltrados() {
+  var q = document.getElementById('searchInput').value.toLowerCase();
+  return todosLosPedidos.filter(function(r) {
+    var matchEstado = filtroEstado === 'todos' || r.estado === filtroEstado;
+    var matchSearch = !q ||
+      (r.nombre_cliente || '').toLowerCase().includes(q) ||
+      (r.email_cliente || '').toLowerCase().includes(q) ||
+      (r.codigo || '').toLowerCase().includes(q) ||
+      (r.telefono_cliente || '').toLowerCase().includes(q);
+    var matchCurrency = filtroCurrency === 'todos' || (r.moneda || '').toUpperCase() === filtroCurrency;
+    return matchEstado && matchSearch && matchCurrency;
+  });
+}
+
+function renderizarTabla() {
+  var filtered = pedidosFiltrados();
+  var total = filtered.length;
+  var inicio = (paginaActual - 1) * POR_PAGINA;
+  var fin = Math.min(inicio + POR_PAGINA, total);
+  var pagina = filtered.slice(inicio, fin);
+  document.getElementById('loadingState').style.display = 'none';
+  if (total === 0) {
+    document.getElementById('ordersTable').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('ordersTable').style.display = 'table';
+  var BADGE = {
+    'Pendiente':'badge-pending','Recibido':'badge-recibido','Pagado':'badge-pagado','Enviado':'badge-enviado',
+    'En Reparto':'badge-reparto','Entregado':'badge-entregado','Cancelado':'badge-cancelled'
+  };
+  document.getElementById('ordersBody').innerHTML = pagina.map(function(r) {
+    var estado = r.estado || 'Pendiente';
+    var totalVal = parseFloat(r.total) || 0;
+    var cur = (r.moneda || 'EUR').toUpperCase();
+    var curSymbol = cur === 'EUR' ? '\u20AC' : 'L ';
+    var items = pedidoItems[r.id] || [];
+    var itemsStr = items.length > 0 ? items.map(function(it){ return (it.nombre_producto || '?') + (it.talla ? ' ('+it.talla+')' : '') + ' x' + it.cantidad; }).join(', ') : '\u2014';
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '\u2014';
+    var pedidoId = r.id;
+    var codigo = r.codigo || '\u2014';
+    return '<tr>'+
+      '<td style="color:var(--gold-dim);font-size:.8rem">'+codigo+'</td>'+
+      '<td>'+fecha+'</td>'+
+      '<td class="td-name">'+(r.nombre_cliente||'\u2014')+'</td>'+
+      '<td style="color:var(--text-muted);font-size:.8rem">'+(r.email_cliente||'\u2014')+'</td>'+
+      '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+itemsStr+'">'+itemsStr+'</td>'+
+      '<td class="td-price">'+curSymbol+totalVal.toFixed(2)+'</td>'+
+      '<td style="color:var(--text-muted);font-size:.8rem">'+(r.metodo_pago||'\u2014')+'</td>'+
+      '<td><span class="badge '+(BADGE[estado]||'badge-pending')+'">'+estado+'</span></td>'+
+      '<td class="td-actions">'+
+        '<button class="action-btn" onclick="cambiarEstado(\''+pedidoId+'\',\''+estado+'\')">Estado &#8635;</button>'+
+        '<button class="action-btn" onclick="abrirComentarios(\''+pedidoId+'\',\''+codigo.replace(/'/g,"\\'") +'\')">&#9993;</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+  document.getElementById('pagination').style.display = 'flex';
+  document.getElementById('paginationInfo').textContent = 'Mostrando '+(inicio+1)+'\u2013'+fin+' de '+total+' pedidos';
+  document.getElementById('prevBtn').disabled = paginaActual === 1;
+  document.getElementById('nextBtn').disabled = fin >= total;
+}
+
+function changePage(dir) { paginaActual += dir; renderizarTabla(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+async function cambiarEstado(pedidoId, estadoActual) {
+  var estados = ['Pendiente','Recibido','Pagado','Enviado','En Reparto','Entregado','Cancelado'];
+  var nuevo = estados[(estados.indexOf(estadoActual) + 1) % estados.length];
+  if (!confirm('Cambiar estado a "'+nuevo+'"?')) return;
+  try {
+    // Update pedido
+    var { error } = await sb.from('web_pedidos').update({ estado: nuevo, updated_at: new Date().toISOString() }).eq('id', pedidoId);
+    if (error) throw error;
+
+    // Find the pedido to get its codigo and cliente_id
+    var pedido = todosLosPedidos.find(function(p){ return p.id === pedidoId; });
+    var codigoPedido = pedido ? pedido.codigo : '';
+    var clienteId = pedido ? pedido.cliente_id : null;
+
+    // Insert into historial
+    await sb.from('web_pedido_historial').insert({
+      pedido_id: pedidoId,
+      estado_anterior: estadoActual,
+      estado_nuevo: nuevo,
+      cambiado_por: 'admin',
+      nota: 'Cambio de estado desde panel admin'
+    });
+
+    // Insert notification
+    await sb.from('web_notificaciones').insert({
+      cliente_id: clienteId,
+      pedido_codigo: codigoPedido,
+      tipo: 'estado_pedido',
+      mensaje: 'Su pedido ' + codigoPedido + ' ha cambiado a: ' + nuevo,
+      leida: false
+    });
+
+    showToast('Estado actualizado a: ' + nuevo);
+    await cargarPedidos();
+  } catch(err) { alert('Error: ' + err.message); }
+}
+
+// -- COMMENTS SYSTEM (Supabase) --
+var currentCommentsPedidoId = '';
+var currentCommentsOrderCode = '';
+
+async function abrirComentarios(pedidoId, orderCode) {
+  currentCommentsPedidoId = pedidoId;
+  currentCommentsOrderCode = orderCode || pedidoId;
+  document.getElementById('commentsOrderId').textContent = currentCommentsOrderCode;
+  document.getElementById('commentInput').value = '';
+  document.getElementById('commentCharCount').textContent = '0';
+  await cargarComentariosPedido(pedidoId);
+  document.getElementById('commentsOverlay').classList.add('show');
+}
+
+function cerrarComentarios() {
+  document.getElementById('commentsOverlay').classList.remove('show');
+  currentCommentsPedidoId = '';
+  currentCommentsOrderCode = '';
+}
+
+async function cargarComentariosPedido(pedidoId) {
+  var container = document.getElementById('commentsThread');
+  container.innerHTML = '<div class="comments-empty">Cargando...</div>';
+  try {
+    var { data, error } = await sb.from('web_pedido_comentarios').select('*').eq('pedido_id', pedidoId).order('created_at', { ascending: true });
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="comments-empty">No hay comentarios en este pedido</div>';
+      return;
+    }
+    container.innerHTML = data.map(function(c) {
+      var isAdmin = c.autor === 'admin';
+      var fecha = c.created_at ? new Date(c.created_at).toLocaleString('es-ES') : '';
+      return '<div class="comment-bubble '+(isAdmin?'admin':'user')+'">'+
+        '<div>'+escapeHtml(c.mensaje)+'</div>'+
+        '<div class="comment-meta">'+(isAdmin?'Admin':'Cliente')+' \u2014 '+fecha+'</div>'+
+      '</div>';
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  } catch(err) {
+    container.innerHTML = '<div class="comments-empty">Error: '+err.message+'</div>';
+  }
+}
+
+async function enviarComentario() {
+  var input = document.getElementById('commentInput');
+  var msg = input.value.trim();
+  if (!msg || !currentCommentsPedidoId) return;
+  if (msg.length > 500) { alert('El comentario no puede superar los 500 caracteres.'); return; }
+
+  try {
+    var { error } = await sb.from('web_pedido_comentarios').insert({
+      pedido_id: currentCommentsPedidoId,
+      autor: 'admin',
+      mensaje: msg,
+      leido: false
+    });
+    if (error) throw error;
+
+    // Also create a notification for the client
+    var pedido = todosLosPedidos.find(function(p){ return p.id === currentCommentsPedidoId; });
+    if (pedido) {
+      await sb.from('web_notificaciones').insert({
+        cliente_id: pedido.cliente_id,
+        pedido_codigo: pedido.codigo,
+        tipo: 'comentario',
+        mensaje: 'Nuevo mensaje de soporte en su pedido ' + (pedido.codigo || ''),
+        leida: false
+      });
+    }
+
+    input.value = '';
+    document.getElementById('commentCharCount').textContent = '0';
+    await cargarComentariosPedido(currentCommentsPedidoId);
+  } catch(err) { alert('Error: ' + err.message); }
+}
+
+// -- EXPORT EXCEL --
+function exportarExcel() {
+  if (!todosLosPedidos.length) { alert('No hay pedidos para exportar'); return; }
+  var datos = todosLosPedidos.map(function(r) {
+    var items = pedidoItems[r.id] || [];
+    var itemsStr = items.map(function(it){ return (it.nombre_producto||'') + ' x' + it.cantidad; }).join(', ');
+    return {
+      'Codigo': r.codigo || '',
+      'Fecha': r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '',
+      'Cliente': r.nombre_cliente || '',
+      'Email': r.email_cliente || '',
+      'Telefono': r.telefono_cliente || '',
+      'Productos': itemsStr,
+      'Subtotal': r.subtotal || '',
+      'Descuento': r.descuento || '',
+      'Total': r.total || '',
+      'Moneda': r.moneda || '',
+      'Metodo Pago': r.metodo_pago || '',
+      'Direccion': r.direccion_envio || '',
+      'Ciudad': r.ciudad || '',
+      'Estado': r.estado || '',
+      'Notas Admin': r.notas_admin || ''
+    };
+  });
+  var hoja = XLSX.utils.json_to_sheet(datos);
+  var libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Pedidos');
+  XLSX.writeFile(libro, 'enigme_pedidos_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function exportarGerencia() {
+  if (!todosLosPedidos.length) { alert('No hay pedidos para exportar'); return; }
+  var eurOrders = todosLosPedidos.filter(function(r) { return (r.moneda||'').toUpperCase() === 'EUR'; });
+  var hnlOrders = todosLosPedidos.filter(function(r) { return (r.moneda||'').toUpperCase() === 'HNL'; });
+  var libro = XLSX.utils.book_new();
+  var makeSheet = function(orders, label) {
+    return orders.map(function(r) {
+      return {
+        'Codigo': r.codigo||'', 'Fecha': r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '',
+        'Cliente': r.nombre_cliente||'', 'Email': r.email_cliente||'',
+        ['Total ('+label+')']: r.total||'', 'Estado': r.estado||'', 'Pago': r.metodo_pago||''
+      };
+    });
+  };
+  XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(makeSheet(eurOrders,'EUR')), 'Pedidos EUR');
+  XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(makeSheet(hnlOrders,'HNL')), 'Pedidos HNL');
+  var eurTotal = eurOrders.reduce(function(s,r){return s+(parseFloat(r.total)||0);},0);
+  var hnlTotal = hnlOrders.reduce(function(s,r){return s+(parseFloat(r.total)||0);},0);
+  var resumen = [
+    {'Concepto':'Total Pedidos','Valor':todosLosPedidos.length},
+    {'Concepto':'Pedidos EUR','Valor':eurOrders.length},
+    {'Concepto':'Pedidos HNL','Valor':hnlOrders.length},
+    {'Concepto':'Ingresos EUR','Valor':'\u20AC'+eurTotal.toFixed(2)},
+    {'Concepto':'Ingresos HNL','Valor':'L '+hnlTotal.toFixed(2)},
+    {'Concepto':'Fecha','Valor':new Date().toLocaleDateString('es-ES')}
+  ];
+  XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(resumen), 'Resumen Gerencia');
+  XLSX.writeFile(libro, 'enigme_gerencia_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+// ======================================
+//  POSTULACIONES
+// ======================================
+async function cargarPostulaciones() {
+  try {
+    var { data, error } = await sb.from('web_postulaciones').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    postulacionesData = data || [];
+    renderPostulaciones();
+  } catch(err) { console.error('Postulaciones error:', err); }
+}
+
+function renderPostulaciones() {
+  var d = postulacionesData;
+  document.getElementById('postStatTotal').textContent = d.length;
+  document.getElementById('postStatRecibida').textContent = d.filter(function(r){return r.estado==='Recibida';}).length;
+  document.getElementById('postStatRevision').textContent = d.filter(function(r){return r.estado==='En Revision';}).length;
+  document.getElementById('postStatEntrevista').textContent = d.filter(function(r){return r.estado==='Entrevista';}).length;
+  document.getElementById('postStatAceptada').textContent = d.filter(function(r){return r.estado==='Aceptada';}).length;
+
+  if (d.length === 0) {
+    document.getElementById('postTable').style.display = 'none';
+    document.getElementById('postEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('postEmpty').style.display = 'none';
+  document.getElementById('postTable').style.display = 'table';
+
+  var BADGE = {'Recibida':'badge-pending','En Revision':'badge-revision','Entrevista':'badge-entrevista','Aceptada':'badge-aceptada','Rechazada':'badge-rechazada'};
+
+  document.getElementById('postBody').innerHTML = d.map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '\u2014';
+    var estado = r.estado || 'Recibida';
+    return '<tr>'+
+      '<td>'+fecha+'</td>'+
+      '<td>'+(r.puesto||'\u2014')+'</td>'+
+      '<td class="td-name">'+(r.nombre_completo||'\u2014')+'</td>'+
+      '<td style="color:var(--text-muted);font-size:.8rem">'+(r.email||'\u2014')+'</td>'+
+      '<td>'+(r.telefono||'\u2014')+'</td>'+
+      '<td>'+(r.departamento||'\u2014')+'</td>'+
+      '<td><span class="badge '+(BADGE[estado]||'badge-pending')+'">'+estado+'</span></td>'+
+      '<td class="td-actions">'+
+        '<button class="action-btn" onclick="cambiarEstadoPost(\''+r.id+'\',\''+estado+'\')">Estado &#8635;</button>'+
+        '<button class="action-btn" onclick="abrirNotas(\''+r.id+'\',\''+escapeAttr(r.nombre_completo||'')+'\')">&#9998; Notas</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+async function cambiarEstadoPost(id, estadoActual) {
+  var estados = ['Recibida','En Revision','Entrevista','Aceptada','Rechazada'];
+  var nuevo = estados[(estados.indexOf(estadoActual) + 1) % estados.length];
+  if (!confirm('Cambiar estado a "'+nuevo+'"?')) return;
+  try {
+    var { error } = await sb.from('web_postulaciones').update({ estado: nuevo, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
+    showToast('Postulacion actualizada a: ' + nuevo);
+    await cargarPostulaciones();
+  } catch(err) { alert('Error: ' + err.message); }
+}
+
+// -- NOTES for postulaciones --
+var currentNotesPostId = '';
+
+function abrirNotas(id, nombre) {
+  currentNotesPostId = id;
+  document.getElementById('notesTitle').textContent = nombre;
+  var post = postulacionesData.find(function(p){ return p.id === id; });
+  document.getElementById('notesInput').value = post ? (post.notas_admin || '') : '';
+  document.getElementById('notesOverlay').classList.add('show');
+}
+
+function cerrarNotas() {
+  document.getElementById('notesOverlay').classList.remove('show');
+  currentNotesPostId = '';
+}
+
+async function guardarNotas() {
+  if (!currentNotesPostId) return;
+  var notas = document.getElementById('notesInput').value.trim();
+  try {
+    var { error } = await sb.from('web_postulaciones').update({ notas_admin: notas, updated_at: new Date().toISOString() }).eq('id', currentNotesPostId);
+    if (error) throw error;
+    showToast('Notas guardadas');
+    cerrarNotas();
+    await cargarPostulaciones();
+  } catch(err) { alert('Error: ' + err.message); }
+}
+
+// ======================================
+//  COOKIES CONSENT
+// ======================================
+async function cargarCookies() {
+  try {
+    var { data, error } = await sb.from('web_cookie_consents').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    cookiesData = data || [];
+    renderCookies();
+  } catch(err) { console.error('Cookies error:', err); }
+}
+
+function renderCookies() {
+  var d = cookiesData;
+  var accepted = d.filter(function(r){ return r.aceptado === true; }).length;
+  var declined = d.filter(function(r){ return r.aceptado === false; }).length;
+  var rate = d.length > 0 ? Math.round((accepted/d.length)*100) : 0;
+  document.getElementById('cookieStatTotal').textContent = d.length;
+  document.getElementById('cookieStatAccepted').textContent = accepted;
+  document.getElementById('cookieStatDeclined').textContent = declined;
+  document.getElementById('cookieStatRate').textContent = rate + '%';
+
+  // Chart by country
+  var byCountry = {};
+  d.forEach(function(r) { var c = r.pais || '?'; byCountry[c] = (byCountry[c]||0)+1; });
+  var max = Math.max.apply(null, Object.values(byCountry).concat([1]));
+  document.getElementById('cookieBarChart').innerHTML = Object.keys(byCountry).map(function(c) {
+    var pct = (byCountry[c]/max)*100;
+    return '<div class="bar-col"><div class="bar-value">'+byCountry[c]+'</div><div class="bar-fill" style="height:'+Math.max(pct,2)+'%"></div><div class="bar-label">'+c+'</div></div>';
+  }).join('');
+
+  // Table
+  if (d.length === 0) {
+    document.getElementById('cookieTable').style.display = 'none';
+    document.getElementById('cookieEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('cookieEmpty').style.display = 'none';
+  document.getElementById('cookieTable').style.display = 'table';
+  document.getElementById('cookieBody').innerHTML = d.slice(0, 100).map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-ES') : '\u2014';
+    return '<tr>'+
+      '<td>'+fecha+'</td>'+
+      '<td>'+(r.aceptado ? '<span style="color:var(--done)">Si</span>' : '<span style="color:var(--cancelled)">No</span>')+'</td>'+
+      '<td>'+(r.pais||'\u2014')+'</td>'+
+      '<td>'+(r.ciudad||'\u2014')+'</td>'+
+      '<td>'+(r.pantalla||'\u2014')+'</td>'+
+      '<td>'+(r.idioma||'\u2014')+'</td>'+
+      '<td>'+(r.navegador||'\u2014')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ======================================
+//  SUSCRIPCIONES EMAIL
+// ======================================
+async function cargarSuscripciones() {
+  try {
+    var { data, error } = await sb.from('web_email_suscripciones').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    suscripcionesData = data || [];
+    renderSuscripciones();
+  } catch(err) { console.error('Suscripciones error:', err); }
+}
+
+function renderSuscripciones() {
+  var d = suscripcionesData;
+  var active = d.filter(function(r){ return r.activa === true; }).length;
+  var inactive = d.filter(function(r){ return r.activa === false; }).length;
+  var newsletter = d.filter(function(r){ return (r.tipo||'').toLowerCase() === 'newsletter'; }).length;
+  document.getElementById('subStatTotal').textContent = d.length;
+  document.getElementById('subStatActive').textContent = active;
+  document.getElementById('subStatInactive').textContent = inactive;
+  document.getElementById('subStatNewsletter').textContent = newsletter;
+
+  if (d.length === 0) {
+    document.getElementById('subTable').style.display = 'none';
+    document.getElementById('subEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('subEmpty').style.display = 'none';
+  document.getElementById('subTable').style.display = 'table';
+  document.getElementById('subBody').innerHTML = d.map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '\u2014';
+    return '<tr>'+
+      '<td>'+fecha+'</td>'+
+      '<td>'+(r.email||'\u2014')+'</td>'+
+      '<td>'+(r.tipo||'\u2014')+'</td>'+
+      '<td>'+(r.pagina_origen||'\u2014')+'</td>'+
+      '<td>'+(r.pais||'\u2014')+'</td>'+
+      '<td>'+(r.activa ? '<span style="color:var(--done)">Si</span>' : '<span style="color:var(--cancelled)">No</span>')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ======================================
+//  CLIENTES
+// ======================================
+async function cargarClientes() {
+  try {
+    var { data, error } = await sb.from('web_clientes').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    clientesData = data || [];
+    renderClientes();
+  } catch(err) { console.error('Clientes error:', err); }
+}
+
+function renderClientes() {
+  var d = clientesData;
+  var hn = d.filter(function(r){ return (r.pais||'').toLowerCase().includes('honduras') || (r.pais||'').toUpperCase() === 'HN'; }).length;
+  var es = d.filter(function(r){ return (r.pais||'').toLowerCase().includes('espa') || (r.pais||'').toUpperCase() === 'ES'; }).length;
+  var push = d.filter(function(r){ return r.push_consent === true; }).length;
+  document.getElementById('cliStatTotal').textContent = d.length;
+  document.getElementById('cliStatHN').textContent = hn;
+  document.getElementById('cliStatES').textContent = es;
+  document.getElementById('cliStatPush').textContent = push;
+
+  if (d.length === 0) {
+    document.getElementById('cliTable').style.display = 'none';
+    document.getElementById('cliEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('cliEmpty').style.display = 'none';
+  document.getElementById('cliTable').style.display = 'table';
+  document.getElementById('cliBody').innerHTML = d.map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : '\u2014';
+    return '<tr>'+
+      '<td>'+fecha+'</td>'+
+      '<td class="td-name">'+(r.nombre||'\u2014')+'</td>'+
+      '<td style="color:var(--text-muted);font-size:.8rem">'+(r.email||'\u2014')+'</td>'+
+      '<td>'+(r.telefono||'\u2014')+'</td>'+
+      '<td>'+(r.ciudad||'\u2014')+'</td>'+
+      '<td>'+(r.pais||'\u2014')+'</td>'+
+      '<td>'+(r.moneda||'\u2014')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ======================================
+//  ANALYTICS
+// ======================================
+async function cargarAnalytics() {
+  try {
+    var { data, error } = await sb.from('web_analytics').select('*').order('created_at', { ascending: false }).limit(2000);
+    if (error) throw error;
+    analyticsData = data || [];
+    anaPage = 1;
+    renderAnalytics();
+  } catch(err) { console.error('Analytics error:', err); }
+}
+
+function renderAnalytics() {
+  var d = analyticsData;
+  var today = new Date().toISOString().split('T')[0];
+  var todayCount = d.filter(function(r){ return (r.created_at||'').startsWith(today); }).length;
+  var countries = new Set(); d.forEach(function(r){ if(r.pais) countries.add(r.pais); });
+  var mobile = d.filter(function(r){ return (r.dispositivo||'').toLowerCase().includes('mobil') || (r.dispositivo||'').toLowerCase().includes('phone'); }).length;
+  var desktop = d.filter(function(r){ return (r.dispositivo||'').toLowerCase().includes('desktop') || (r.dispositivo||'').toLowerCase().includes('windows') || (r.dispositivo||'').toLowerCase().includes('mac'); }).length;
+
+  document.getElementById('anaStatTotal').textContent = d.length;
+  document.getElementById('anaStatToday').textContent = todayCount;
+  document.getElementById('anaStatCountries').textContent = countries.size;
+  document.getElementById('anaStatMobile').textContent = mobile;
+  document.getElementById('anaStatDesktop').textContent = desktop;
+
+  // Popular pages
+  var pageCounts = {};
+  d.forEach(function(r) { var p = r.pagina || '?'; pageCounts[p] = (pageCounts[p]||0)+1; });
+  var sorted = Object.keys(pageCounts).sort(function(a,b){ return pageCounts[b]-pageCounts[a]; }).slice(0, 10);
+  document.getElementById('anaPopularPages').innerHTML = sorted.length ? sorted.map(function(p) {
+    return '<div class="popular-card"><span class="prod-name">'+p+'</span><span class="prod-count">'+pageCounts[p]+'</span></div>';
+  }).join('') : '<div class="empty-state"><p>Sin datos</p></div>';
+
+  // Chart by country
+  var byCountry = {};
+  d.forEach(function(r) { var c = r.pais || '?'; byCountry[c] = (byCountry[c]||0)+1; });
+  var max = Math.max.apply(null, Object.values(byCountry).concat([1]));
+  document.getElementById('anaBarChart').innerHTML = Object.keys(byCountry).sort(function(a,b){ return byCountry[b]-byCountry[a]; }).slice(0,8).map(function(c) {
+    var pct = (byCountry[c]/max)*100;
+    return '<div class="bar-col"><div class="bar-value">'+byCountry[c]+'</div><div class="bar-fill" style="height:'+Math.max(pct,2)+'%"></div><div class="bar-label">'+c+'</div></div>';
+  }).join('');
+
+  renderAnalyticsTable();
+}
+
+function renderAnalyticsTable() {
+  var d = analyticsData;
+  var total = d.length;
+  if (total === 0) {
+    document.getElementById('anaTable').style.display = 'none';
+    document.getElementById('anaEmpty').style.display = 'block';
+    document.getElementById('anaPagination').style.display = 'none';
+    return;
+  }
+  document.getElementById('anaEmpty').style.display = 'none';
+  document.getElementById('anaTable').style.display = 'table';
+  var inicio = (anaPage-1)*POR_PAGINA;
+  var fin = Math.min(inicio+POR_PAGINA, total);
+  document.getElementById('anaBody').innerHTML = d.slice(inicio, fin).map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-ES') : '\u2014';
+    return '<tr>'+
+      '<td>'+fecha+'</td>'+
+      '<td>'+(r.pagina||'\u2014')+'</td>'+
+      '<td>'+(r.pais||'\u2014')+'</td>'+
+      '<td>'+(r.ciudad||'\u2014')+'</td>'+
+      '<td>'+(r.dispositivo||'\u2014')+'</td>'+
+      '<td>'+(r.navegador||'\u2014')+'</td>'+
+      '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">'+(r.referrer||'\u2014')+'</td>'+
+    '</tr>';
+  }).join('');
+  if (total > POR_PAGINA) {
+    document.getElementById('anaPagination').style.display = 'flex';
+    document.getElementById('anaPaginationInfo').textContent = 'Mostrando '+(inicio+1)+'\u2013'+fin+' de '+total;
+    document.getElementById('anaPrevBtn').disabled = anaPage === 1;
+    document.getElementById('anaNextBtn').disabled = fin >= total;
+  } else {
+    document.getElementById('anaPagination').style.display = 'none';
+  }
+}
+
+function changeAnaPage(dir) { anaPage += dir; renderAnalyticsTable(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ======================================
+//  NOTIFICACIONES
+// ======================================
+async function cargarNotificaciones() {
+  try {
+    var { data, error } = await sb.from('web_notificaciones').select('*').order('created_at', { ascending: false }).limit(500);
+    if (error) throw error;
+    notificacionesData = data || [];
+    renderNotificaciones();
+  } catch(err) { console.error('Notificaciones error:', err); }
+}
+
+function renderNotificaciones() {
+  var d = notificacionesData;
+  var today = new Date().toISOString().split('T')[0];
+  var unread = d.filter(function(r){ return r.leida === false; }).length;
+  var read = d.filter(function(r){ return r.leida === true; }).length;
+  var todayCount = d.filter(function(r){ return (r.created_at||'').startsWith(today); }).length;
+
+  document.getElementById('notStatTotal').textContent = d.length;
+  document.getElementById('notStatUnread').textContent = unread;
+  document.getElementById('notStatRead').textContent = read;
+  document.getElementById('notStatToday').textContent = todayCount;
+
+  if (d.length === 0) {
+    document.getElementById('notTable').style.display = 'none';
+    document.getElementById('notEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('notEmpty').style.display = 'none';
+  document.getElementById('notTable').style.display = 'table';
+  document.getElementById('notBody').innerHTML = d.slice(0, 200).map(function(r) {
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-ES') : '\u2014';
+    return '<tr style="'+(r.leida ? '' : 'background:var(--surface2)')+'">'+
+      '<td>'+fecha+'</td>'+
+      '<td style="color:var(--gold-dim)">'+(r.pedido_codigo||'\u2014')+'</td>'+
+      '<td>'+(r.tipo||'\u2014')+'</td>'+
+      '<td>'+escapeHtml(r.mensaje||'\u2014')+'</td>'+
+      '<td>'+(r.leida ? '<span style="color:var(--done)">Si</span>' : '<span style="color:var(--pending)">No</span>')+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ======================================
+//  UTILITIES
+// ======================================
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escapeAttr(str) {
+  if (!str) return '';
+  return str.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
