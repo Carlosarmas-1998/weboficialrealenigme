@@ -516,8 +516,8 @@ async function loadPedidos() {
   // Stats (always unfiltered for totals)
   const allData = filterVal ? await supaGet('web_pedidos', '&order=created_at.desc') : data;
   const totalOrders = allData.length;
-  const eurTotal = allData.filter(p => String(p.moneda||p.currency||'').toUpperCase() === 'EUR').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
-  const hnlTotal = allData.filter(p => String(p.moneda||p.currency||'').toUpperCase() === 'HNL').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
+  const eurTotal = allData.filter(p => String(p.moneda||'').toUpperCase() === 'EUR').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
+  const hnlTotal = allData.filter(p => String(p.moneda||'').toUpperCase() === 'HNL').reduce((s, p) => s + (parseFloat(p.total) || 0), 0);
   const pending = allData.filter(p => p.estado !== 'Entregado' && p.estado !== 'Cancelado').length;
 
   document.getElementById('pedidosStats').innerHTML =
@@ -549,9 +549,9 @@ async function loadPedidos() {
 
     html += '<tr>';
     html += '<td>' + esc(p.id) + '</td>';
-    html += '<td>' + esc(p.nombre || p.nombre_completo || '-') + '</td>';
-    html += '<td>' + esc(p.email || '-') + '</td>';
-    html += '<td>' + esc(p.telefono || p.phone || '-') + '</td>';
+    html += '<td>' + esc(p.nombre_cliente || '-') + '</td>';
+    html += '<td>' + esc(p.email_cliente || '-') + '</td>';
+    html += '<td>' + esc(p.telefono_cliente || '-') + '</td>';
     html += '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(displayItems) + '">' + esc(displayItems) + '</td>';
     html += '<td>' + sym + total.toFixed(2) + '</td>';
     html += '<td><select class="btn-sm" onchange="changePedidoStatus(' + p.id + ', this.value)" ' + (isEntregado ? 'disabled' : '') + '>';
@@ -589,9 +589,9 @@ async function changePedidoStatus(id, newStatus) {
   const result = await supaPatch('web_pedidos', id, { estado: newStatus });
   if (result) {
     // Insert history
-    await supaPost('web_pedido_historial', { pedido_id: id, estado: newStatus, fecha: new Date().toISOString() });
+    await supaPost('web_pedido_historial', { pedido_id: id, estado_nuevo: newStatus, cambiado_por: 'admin' });
     // Insert notification
-    await supaPost('web_notificaciones', { pedido_id: id, tipo: 'estado_pedido', mensaje: 'Pedido #' + id + ' cambiado a: ' + newStatus, leida: false });
+    await supaPost('web_notificaciones', { pedido_codigo: 'PED-' + id, tipo: 'estado_pedido', mensaje: 'Pedido cambiado a: ' + newStatus, leida: false });
     showToast('Estado actualizado: ' + newStatus);
     loadPedidos();
     loadNotificaciones();
@@ -626,7 +626,7 @@ async function toggleChat(pedidoId) {
 async function loadChatMessages(pedidoId) {
   const container = document.getElementById('chat-msgs-' + pedidoId);
   if (!container) return;
-  const msgs = await supaGet('web_pedido_comentarios', '&pedido_id=eq.' + pedidoId + '&order=fecha.asc');
+  const msgs = await supaGet('web_pedido_comentarios', '&pedido_id=eq.' + pedidoId + '&order=created_at.asc');
   if (!msgs.length) {
     container.innerHTML = '<div style="color:var(--text-muted);font-size:.75rem;text-align:center;padding:10px;">Sin mensajes</div>';
     return;
@@ -636,7 +636,7 @@ async function loadChatMessages(pedidoId) {
     const isAdmin = m.autor === 'admin';
     html += '<div class="chat-msg ' + (isAdmin ? 'admin' : 'cliente') + '">';
     html += esc(m.mensaje);
-    html += '<div class="chat-meta">' + (isAdmin ? 'Admin' : 'Cliente') + ' - ' + formatDate(m.fecha) + '</div>';
+    html += '<div class="chat-meta">' + (isAdmin ? 'Admin' : 'Cliente') + ' - ' + formatDate(m.created_at) + '</div>';
     html += '</div>';
   });
   container.innerHTML = html;
@@ -653,13 +653,12 @@ async function sendChat(pedidoId) {
   const result = await supaPost('web_pedido_comentarios', {
     pedido_id: pedidoId,
     autor: 'admin',
-    mensaje: msg,
-    fecha: new Date().toISOString()
+    mensaje: msg
   });
   if (result) {
     // Notification
     await supaPost('web_notificaciones', {
-      pedido_id: pedidoId,
+      pedido_codigo: 'PED-' + pedidoId,
       tipo: 'mensaje_pedido',
       mensaje: 'Nuevo mensaje admin en pedido #' + pedidoId,
       leida: false
@@ -875,7 +874,7 @@ async function loadNotificaciones() {
     html += '<tr class="' + (isUnread ? 'notif-unread' : '') + '">';
     html += '<td><span class="status-badge ' + (n.tipo === 'estado_pedido' ? 'status-pagado' : 'status-enviado') + '">' + esc(n.tipo || '-') + '</span></td>';
     html += '<td>' + esc(n.mensaje || '-') + '</td>';
-    html += '<td>' + (n.pedido_id ? '#' + n.pedido_id : '-') + '</td>';
+    html += '<td>' + (n.pedido_codigo ? n.pedido_codigo : '-') + '</td>';
     html += '<td>' + formatDate(n.created_at || n.fecha) + '</td>';
     html += '<td>';
     if (isUnread) {
@@ -924,14 +923,15 @@ function exportExcel(type) {
     case 'pedidos':
       data = cachedPedidos.map(p => ({
         'ID': p.id,
-        'Cliente': p.nombre || p.nombre_completo || '',
-        'Email': p.email || '',
-        'Telefono': p.telefono || p.phone || '',
-        'Items': typeof (p.items || p.productos) === 'object' ? JSON.stringify(p.items || p.productos) : (p.items || p.productos || ''),
+        'Codigo': p.codigo || '',
+        'Cliente': p.nombre_cliente || '',
+        'Email': p.email_cliente || '',
+        'Telefono': p.telefono_cliente || '',
+        'Items': typeof p.items === 'object' ? JSON.stringify(p.items) : (p.items || ''),
         'Total': p.total || 0,
-        'Moneda': p.moneda || p.currency || '',
+        'Moneda': p.moneda || '',
         'Estado': p.estado || '',
-        'Fecha': p.created_at || p.fecha || ''
+        'Fecha': p.created_at || ''
       }));
       filename = 'pedidos_enigme.xlsx';
       sheetName = 'Pedidos';

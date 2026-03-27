@@ -956,25 +956,21 @@
           method: 'POST',
           body: JSON.stringify({
             codigo: orderId,
-            nombre: data.nombre,
             nombre_cliente: data.nombre,
-            email: data.correo,
             email_cliente: data.correo,
-            telefono: data.telefono,
             telefono_cliente: data.telefono,
             direccion_envio: data.direccion,
             departamento: data.departamento,
             pais: moneda === 'EUR' ? 'ES' : 'HN',
             moneda: moneda,
-            items: JSON.stringify(itemsJson),
+            items: itemsJson,
             subtotal: totalHNL,
             total: moneda === 'EUR' ? totalEUR : totalHNL,
             total_eur: totalEUR,
             total_hnl: totalHNL,
             metodo_pago: metodoPago,
             estado: 'enviado',
-            pagado: false,
-            fecha: new Date().toISOString()
+            pagado: false
           })
         });
         const pedidoData = await pedidoRes.json();
@@ -989,8 +985,7 @@
             imagen: item.img || '',
             cantidad: item.qty || 1,
             precio_unitario: parseInt(item.price.replace(/\D/g, '')) || 0,
-            subtotal: (parseInt(item.price.replace(/\D/g, '')) || 0) * (item.qty || 1),
-            moneda: 'HNL'
+            subtotal: (parseInt(item.price.replace(/\D/g, '')) || 0) * (item.qty || 1)
           }));
           await supaFetch('/web_pedido_items', { method: 'POST', body: JSON.stringify(items) });
 
@@ -2085,8 +2080,7 @@
               body: JSON.stringify({
                 pedido_id: pedidoId,
                 autor: 'cliente',
-                mensaje: text,
-                fecha: new Date().toISOString()
+                mensaje: text
               })
             });
           }
@@ -2103,7 +2097,7 @@
         const pedidoId = pedidos[0]?.id;
         if (!pedidoId) return;
 
-        const commentsRes = await supaFetch('/web_pedido_comentarios?pedido_id=eq.' + pedidoId + '&order=fecha.asc', { method: 'GET' });
+        const commentsRes = await supaFetch('/web_pedido_comentarios?pedido_id=eq.' + pedidoId + '&order=created_at.asc', { method: 'GET' });
         if (!commentsRes.ok) return;
         const comments = await commentsRes.json();
         if (!comments || comments.length === 0) return;
@@ -2111,7 +2105,7 @@
         const messages = comments.map(c => ({
           sender: c.autor === 'cliente' ? 'user' : 'support',
           text: c.mensaje,
-          timestamp: new Date(c.fecha).getTime()
+          timestamp: new Date(c.created_at).getTime()
         }));
         saveChatMessages(orderId, messages);
         renderChatMessages(orderId);
