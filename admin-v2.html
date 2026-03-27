@@ -425,10 +425,29 @@
       </table></div>
     </div>
 
+    <!-- INVESTMENT CALCULATOR -->
+    <div style="background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:24px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Calculadora de <em style="color:var(--gold);font-style:italic;">Inversi&oacute;n</em></h3>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;">
+        <div>
+          <label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Inversi&oacute;n en Lempiras (= 30% producto/coste)</label>
+          <input type="text" id="inversionInput" placeholder="Ej: 100000" style="width:220px;padding:10px 14px;font-size:1rem;" oninput="calcularInversion()"/>
+        </div>
+        <div id="invVentaNeta" style="font-size:.85rem;color:var(--gold);padding-bottom:4px;"></div>
+      </div>
+      <div id="inversionResult" style="display:none;">
+        <div class="stats-row" id="inversionStats"></div>
+        <div class="table-wrap" style="margin-top:12px;"><table>
+          <thead><tr><th>Concepto</th><th>Porcentaje</th><th>Monto (L)</th></tr></thead>
+          <tbody id="inversionBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
     <div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Desglose por <em style="color:var(--gold);font-style:italic;">Gerencia Divisional</em></h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Comisi&oacute;n GD (4%)</th><th>Comisi&oacute;n GZ (3%)</th><th>Comisi&oacute;n Asesoras (18%)</th><th>Comisi&oacute;n Ger. Gral. (7%)</th></tr></thead>
+        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Com. GD (6%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L15,000)</th><th>Com. Asesoras (18%)</th><th>Com. Ger. Gral. (7%)</th></tr></thead>
         <tbody id="comisionesDesglose"></tbody>
       </table></div>
     </div>
@@ -478,7 +497,7 @@ var ADMIN_PASSWORD = 'Gusiteamo.1998';
 var WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
 var RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
 var SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
 
 // ---- DATA CACHES ----
 var cachedPedidos = [];
@@ -796,10 +815,14 @@ async function loadPedidos() {
 
 async function changePedidoStatus(id, newStatus, oldStatus) {
   try {
-    // Step 1: Update pedido status
+    // Step 1: Update pedido status (simple headers, no Prefer to avoid 406)
     var patchRes = await fetch(SUPA_URL + '/rest/v1/web_pedidos?id=eq.' + id, {
       method: 'PATCH',
-      headers: supaHeaders(),
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ estado: newStatus })
     });
     if (!patchRes.ok) {
@@ -808,53 +831,62 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
       showToast('Error al actualizar estado: ' + patchRes.status, true);
       return;
     }
-    var patchData = await patchRes.json();
-    console.log('changePedidoStatus PATCH ok:', patchData);
+    console.log('changePedidoStatus PATCH ok, status:', patchRes.status);
 
-    // Step 2: Insert history record
-    try {
-      var histData = {
-        pedido_id: parseInt(id),
-        estado_anterior: oldStatus || null,
-        estado_nuevo: newStatus,
-        cambiado_por: 'admin'
-      };
-      var histRes = await fetch(SUPA_URL + '/rest/v1/web_pedido_historial', {
-        method: 'POST',
-        headers: supaHeaders(),
-        body: JSON.stringify(histData)
-      });
-      if (!histRes.ok) {
-        var histErr = await histRes.text();
-        console.warn('web_pedido_historial insert failed:', histRes.status, histErr);
-      } else {
-        console.log('web_pedido_historial insert ok');
+    // Step 2: Insert history record - completely fire-and-forget, never blocks
+    (function() {
+      try {
+        fetch(SUPA_URL + '/rest/v1/web_pedido_historial', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPA_KEY,
+            'Authorization': 'Bearer ' + SUPA_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            pedido_id: parseInt(id),
+            estado_anterior: oldStatus || null,
+            estado_nuevo: newStatus,
+            cambiado_por: 'admin'
+          })
+        }).then(function(r) {
+          if (!r.ok) console.warn('web_pedido_historial insert failed:', r.status);
+          else console.log('web_pedido_historial insert ok');
+        }).catch(function(e) {
+          console.warn('web_pedido_historial fetch error:', e);
+        });
+      } catch(e) {
+        console.warn('web_pedido_historial exception:', e);
       }
-    } catch(histEx) {
-      console.warn('web_pedido_historial exception:', histEx);
-    }
+    })();
 
-    // Step 3: Insert notification
-    try {
-      var pedido = cachedPedidos.find(function(p){ return p.id === id || p.id === parseInt(id); });
-      var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + id;
-      var notifRes = await fetch(SUPA_URL + '/rest/v1/web_notificaciones', {
-        method: 'POST',
-        headers: supaHeaders(),
-        body: JSON.stringify({
-          pedido_codigo: codigo,
-          tipo: 'estado',
-          mensaje: 'Pedido ' + codigo + ' cambiado a: ' + newStatus,
-          leida: false
-        })
-      });
-      if (!notifRes.ok) {
-        var notifErr = await notifRes.text();
-        console.warn('web_notificaciones insert failed:', notifRes.status, notifErr);
+    // Step 3: Insert notification - also fire-and-forget
+    (function() {
+      try {
+        var pedido = cachedPedidos.find(function(p){ return p.id === id || p.id === parseInt(id); });
+        var codigo = (pedido && pedido.codigo) ? pedido.codigo : 'PED-' + id;
+        fetch(SUPA_URL + '/rest/v1/web_notificaciones', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPA_KEY,
+            'Authorization': 'Bearer ' + SUPA_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            pedido_codigo: codigo,
+            tipo: 'estado',
+            mensaje: 'Pedido ' + codigo + ' cambiado a: ' + newStatus,
+            leida: false
+          })
+        }).then(function(r) {
+          if (!r.ok) console.warn('web_notificaciones insert failed:', r.status);
+        }).catch(function(e) {
+          console.warn('web_notificaciones exception:', e);
+        });
+      } catch(e) {
+        console.warn('web_notificaciones exception:', e);
       }
-    } catch(notifEx) {
-      console.warn('web_notificaciones exception:', notifEx);
-    }
+    })();
 
     showToast('Estado actualizado: ' + newStatus);
     loadPedidos();
@@ -1755,13 +1787,14 @@ async function loadGdMessages(gdId) {
 var chartComisionesPie = null, chartComisionesBar = null;
 
 var COMISION_ESTRUCTURA = [
-  { concepto: 'Gerencia Divisional', pct: 4, color: '#c9a96e' },
-  { concepto: 'Gerencia de Zona', pct: 3, color: '#6b9e78' },
-  { concepto: 'Gastos de Produccion', pct: 45, color: '#5a8fa0' },
-  { concepto: 'Gastos Varios', pct: 10, color: '#9e6b6b' },
+  { concepto: 'Producto / Coste', pct: 30, color: '#5a8fa0' },
   { concepto: 'Comision Asesoras', pct: 18, color: '#b08fd0' },
-  { concepto: 'Comision Gerencia General', pct: 7, color: '#d0a84f' },
-  { concepto: 'Bienes de Empresa', pct: 13, color: '#8b7355' }
+  { concepto: 'Logistica', pct: 10, color: '#9e6b6b' },
+  { concepto: 'Gerencia Divisional', pct: 6, color: '#c9a96e' },
+  { concepto: 'Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L15,000 base por gerente' },
+  { concepto: 'Empresa (Utilidad)', pct: 20, color: '#d0a84f' },
+  { concepto: 'Gerencia General', pct: 7, color: '#8b7355' },
+  { concepto: 'Marketing y Web', pct: 6, color: '#a08840' }
 ];
 
 async function loadComisiones() {
@@ -1792,11 +1825,14 @@ async function loadComisiones() {
   });
 
   // Stats row
+  var totalGerentesZona = gerentes.length;
+  var baseGZ = totalGerentesZona * 15000;
   document.getElementById('comisionesStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. GD (4%)</div><div class="stat-value">L' + (totalNeta*0.04).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. GZ (3%)</div><div class="stat-value">L' + (totalNeta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Producto/Coste (30%)</div><div class="stat-value">L' + (totalNeta*0.30).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa/Utilidad (20%)</div><div class="stat-value">L' + (totalNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Asesoras (18%)</div><div class="stat-value">L' + (totalNeta*0.18).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GD (6%)</div><div class="stat-value">L' + (totalNeta*0.06).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (7%)</div><div class="stat-value">L' + (totalNeta*0.07).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
   // Estructura table
@@ -1805,25 +1841,66 @@ async function loadComisiones() {
   COMISION_ESTRUCTURA.forEach(function(c) {
     var monto = totalNeta * (c.pct / 100);
     totalPct += c.pct;
-    estHtml += '<tr><td>' + esc(c.concepto) + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '%</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    var notaHtml = c.nota ? ' <span style="font-size:.7rem;color:var(--text-muted);">' + esc(c.nota) + '</span>' : '';
+    estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '%</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
   estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">' + totalPct + '%</td><td style="font-weight:500;color:var(--gold);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   document.getElementById('comisionesEstructuraBody').innerHTML = estHtml;
+
+  // Load nombramientos for pago calculation
+  var nombramientos = await supaGet('nombramientos', '&ano=eq.' + ano);
+  // Count nombramientos per gerente de zona
+  var nomPerGerente = {};
+  nombramientos.forEach(function(n) {
+    var gId = n.gerente_id;
+    if (!nomPerGerente[gId]) nomPerGerente[gId] = 0;
+    nomPerGerente[gId]++;
+  });
+
+  // Group gerentes by gerencia divisional and compute nombramientos per GD
+  var gerentesByGd = {};
+  gerentes.forEach(function(g) {
+    var gdId = g.gerencia_divisional_id;
+    if (!gdId) return;
+    if (!gerentesByGd[gdId]) gerentesByGd[gdId] = [];
+    gerentesByGd[gdId].push(g);
+  });
 
   // Desglose per gerencia
   var desHtml = '';
   Object.keys(gStats).forEach(function(gdId) {
     var s = gStats[gdId];
+    // Calculate pago nombramientos for each GZ in this GD
+    var gdGerentes = gerentesByGd[gdId] || [];
+    var totalPagoNom = 0;
+    var pagoNomDetails = [];
+    gdGerentes.forEach(function(gz) {
+      var nomCount = nomPerGerente[gz.id] || 0;
+      var pagoPerNom = nomCount >= 20 ? 320 : 220;
+      var pagoTotal = nomCount * pagoPerNom;
+      totalPagoNom += pagoTotal;
+      if (nomCount > 0) {
+        pagoNomDetails.push(gz.nombre + ': ' + nomCount + ' x L' + pagoPerNom);
+      }
+    });
+    var pagoNomHtml = 'L' + totalPagoNom.toLocaleString('es-HN',{minimumFractionDigits:2});
+    if (pagoNomDetails.length) {
+      pagoNomHtml += '<div style="font-size:.6rem;color:var(--text-muted);margin-top:2px;">' + pagoNomDetails.map(function(d){return esc(d);}).join('<br>') + '</div>';
+    }
+    var baseGZGd = gdGerentes.length * 15000;
+
     desHtml += '<tr>' +
       '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
       '<td>L' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.04).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.06).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>L' + (s.neta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>' + pagoNomHtml + '</td>' +
+      '<td>L' + baseGZGd.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' <span style="font-size:.6rem;color:var(--text-muted);">(' + gdGerentes.length + ' GZ)</span></td>' +
       '<td>L' + (s.neta*0.18).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>L' + (s.neta*0.07).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '</tr>';
   });
-  if (!desHtml) desHtml = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
+  if (!desHtml) desHtml = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
   document.getElementById('comisionesDesglose').innerHTML = desHtml;
 
   // Pie chart
@@ -1856,6 +1933,55 @@ async function loadComisiones() {
     },
     options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#6b6259' }, grid: { color: '#222' } }, y: { ticks: { color: '#e8e0d4', font: { size: 10 } }, grid: { color: '#222' } } } }
   });
+}
+
+// ========== INVESTMENT CALCULATOR ==========
+function calcularInversion() {
+  var input = document.getElementById('inversionInput');
+  var rawVal = (input.value || '').replace(/[^0-9.]/g, '');
+  var inversion = parseFloat(rawVal);
+  var resultWrap = document.getElementById('inversionResult');
+  var ventaNetaLabel = document.getElementById('invVentaNeta');
+
+  if (!inversion || inversion <= 0) {
+    resultWrap.style.display = 'none';
+    ventaNetaLabel.textContent = '';
+    return;
+  }
+
+  // Inversion = 30% (producto/coste), so venta neta = inversion / 0.30
+  var ventaNeta = inversion / 0.30;
+  ventaNetaLabel.innerHTML = 'Venta Neta calculada: <strong>L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong>';
+  resultWrap.style.display = 'block';
+
+  var breakdown = [
+    { concepto: 'Producto / Coste (inversi\u00f3n)', pct: 30 },
+    { concepto: 'Comisi\u00f3n Asesoras', pct: 18 },
+    { concepto: 'Log\u00edstica', pct: 10 },
+    { concepto: 'Gerencia Divisional', pct: 6 },
+    { concepto: 'Gerencia de Zona', pct: 3 },
+    { concepto: 'Empresa (Utilidad)', pct: 20 },
+    { concepto: 'Gerencia General', pct: 7 },
+    { concepto: 'Marketing y Web', pct: 6 }
+  ];
+
+  // Stats
+  document.getElementById('inversionStats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (30%)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Utilidad Empresa (20%)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+
+  // Table
+  var html = '';
+  var totalCalc = 0;
+  breakdown.forEach(function(b) {
+    var monto = ventaNeta * (b.pct / 100);
+    totalCalc += monto;
+    var highlight = b.pct === 20 ? ' style="color:var(--success);font-weight:500;"' : '';
+    html += '<tr><td>' + b.concepto + '</td><td style="color:var(--gold);">' + b.pct + '%</td><td' + highlight + '>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  });
+  html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">100%</td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  document.getElementById('inversionBody').innerHTML = html;
 }
 
 async function sendAdminMsg() {

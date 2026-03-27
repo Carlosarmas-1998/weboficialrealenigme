@@ -11,73 +11,75 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;}
 
-    .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    /* ── LOGIN OVERLAY ── */
+    .login-overlay{position:fixed;inset:0;background:var(--carbon);display:flex;align-items:center;justify-content:center;z-index:9999;}
+    .login-box{background:var(--surface);padding:48px 40px;border-radius:4px;text-align:center;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+    .login-box h1{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--dorado);letter-spacing:0.3em;margin-bottom:6px;}
+    .login-box h2{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--carbon);letter-spacing:0.15em;margin-bottom:30px;font-weight:400;}
+    .login-box input{width:100%;padding:12px 14px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.9rem;outline:none;background:var(--marfil);margin-bottom:12px;text-align:center;letter-spacing:0.1em;transition:border-color .3s;}
+    .login-box input:focus{border-color:var(--dorado);}
+    .login-box button{width:100%;padding:14px;font-family:'Montserrat',sans-serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);cursor:pointer;font-weight:600;transition:all .3s;}
+    .login-box button:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
+    .login-error{color:var(--danger);font-size:0.75rem;margin-top:10px;min-height:20px;}
+
+    /* ── TOPBAR ── */
+    .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;}
     .topbar-brand{font-family:'Cinzel',serif;color:var(--dorado);font-size:1rem;letter-spacing:0.2em;}
-    .topbar-user{color:rgba(255,255,255,0.7);font-size:0.75rem;letter-spacing:0.05em;}
+    .topbar-info{color:rgba(255,255,255,0.7);font-size:0.7rem;letter-spacing:0.05em;text-align:right;}
+    .topbar-info strong{color:var(--dorado);}
     .topbar-logout{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:6px 14px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .3s;}
     .topbar-logout:hover{border-color:var(--dorado);color:var(--dorado);}
 
+    /* ── TABS ── */
     .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--borde);padding:0 24px;overflow-x:auto;}
-    .tab-btn{padding:14px 24px;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
+    .tab-btn{padding:14px 20px;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
     .tab-btn:hover{color:var(--carbon);}
     .tab-btn.active{color:var(--dorado);border-bottom-color:var(--dorado);}
 
+    .app-wrap{display:none;}
     .container{max-width:1200px;margin:0 auto;padding:30px 24px;}
     .tab-panel{display:none;}.tab-panel.active{display:block;}
 
+    /* ── CARDS ── */
     .card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);}
     .card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
 
+    /* ── FORMS ── */
     .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
     .form-group{display:flex;flex-direction:column;}
     .form-group label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:500;}
-    .form-group input,.form-group select{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
-    .form-group input:focus,.form-group select:focus{border-color:var(--dorado);}
+    .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--dorado);}
 
+    /* ── BUTTONS ── */
     .btn{padding:10px 20px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;}
     .btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
-    .btn-outline{background:transparent;color:var(--carbon);}
-    .btn-outline:hover{background:var(--carbon);color:var(--dorado);}
-    .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}
-    .btn-danger:hover{background:var(--danger);color:#fff;}
+    .btn-outline{background:transparent;color:var(--carbon);}.btn-outline:hover{background:var(--carbon);color:var(--dorado);}
+    .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}.btn-danger:hover{background:var(--danger);color:#fff;}
     .btn-sm{padding:6px 12px;font-size:0.6rem;}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;}
 
+    /* ── TABLES ── */
     table{width:100%;border-collapse:collapse;font-size:0.8rem;}
     thead{background:var(--carbon);}
     th{color:var(--dorado);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:10px 12px;text-align:left;font-weight:500;}
     td{padding:10px 12px;border-bottom:1px solid var(--borde);}
     tr:hover{background:rgba(203,170,99,0.04);}
 
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
-    .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:20px;text-align:center;box-shadow:var(--shadow);}
-    .stat-value{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--dorado);margin-bottom:4px;}
-    .stat-label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:18px;text-align:center;box-shadow:var(--shadow);}
+    .stat-value{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--dorado);margin-bottom:4px;}
+    .stat-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
 
-    .chart-container{position:relative;height:300px;margin:20px 0;}
+    .chart-container{position:relative;height:280px;margin:20px 0;}
 
-    /* ── CHAT STYLES ── */
-    .chat-container{display:flex;flex-direction:column;height:500px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);overflow:hidden;}
-    .chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .chat-bubble{max-width:75%;padding:12px 16px;border-radius:12px;font-size:0.85rem;line-height:1.6;position:relative;word-wrap:break-word;}
-    .chat-bubble.divisional{align-self:flex-end;background:var(--dorado);color:var(--carbon);border-bottom-right-radius:4px;}
-    .chat-bubble.admin{align-self:flex-start;background:var(--surface);color:var(--carbon);border:1px solid var(--borde);border-bottom-left-radius:4px;}
-    .chat-bubble .chat-sender{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;opacity:0.7;}
-    .chat-bubble .chat-time{font-size:0.6rem;opacity:0.6;margin-top:6px;text-align:right;}
-    .chat-bubble .chat-photos{display:flex;gap:6px;margin-top:8px;}
-    .chat-bubble .chat-photos img{max-width:180px;max-height:130px;border-radius:6px;object-fit:cover;cursor:pointer;}
-    .chat-input-bar{display:flex;gap:8px;padding:12px;background:var(--surface);border-top:1px solid var(--borde);align-items:flex-end;}
-    .chat-input-bar textarea{flex:1;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:none;min-height:44px;max-height:100px;outline:none;background:var(--marfil);border-radius:4px;}
-    .chat-input-bar textarea:focus{border-color:var(--dorado);}
-
-    /* ── COMISIONES CARD ── */
-    .comision-highlight{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);}
-    .comision-highlight .stat-value{color:var(--dorado);font-size:2.2rem;}
-    .comision-highlight .stat-label{color:rgba(250,249,246,0.7);}
-
+    /* ── MULTISELECT ── */
     .multiselect{border:1px solid var(--borde);background:var(--marfil);max-height:180px;overflow-y:auto;padding:8px;}
     .multiselect label{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.8rem;cursor:pointer;}
     .multiselect input[type="checkbox"]{accent-color:var(--dorado);}
 
+    /* ── BADGES ── */
     .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.6rem;letter-spacing:0.05em;font-weight:600;}
     .badge-active{background:rgba(39,174,96,0.1);color:var(--success);}
     .badge-inactive{background:rgba(192,57,43,0.1);color:var(--danger);}
@@ -85,56 +87,109 @@
     .error-msg{color:var(--danger);font-size:0.75rem;margin-top:8px;}
     .success-msg{color:var(--success);font-size:0.75rem;margin-top:8px;}
 
-    .textarea{width:100%;padding:12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:vertical;min-height:80px;outline:none;background:var(--marfil);}
-    .textarea:focus{border-color:var(--dorado);}
+    /* ── CHAT STYLES ── */
+    .chat-container{display:flex;flex-direction:column;height:520px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);overflow:hidden;}
+    .chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .chat-bubble{max-width:75%;padding:12px 16px;border-radius:12px;font-size:0.85rem;line-height:1.6;position:relative;word-wrap:break-word;}
+    .chat-bubble.right{align-self:flex-end;background:var(--dorado);color:var(--carbon);border-bottom-right-radius:4px;}
+    .chat-bubble.left{align-self:flex-start;background:var(--surface);color:var(--carbon);border:1px solid var(--borde);border-bottom-left-radius:4px;}
+    .chat-sender{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;opacity:0.7;}
+    .chat-right .chat-sender{color:var(--dorado);}
+    .chat-time{font-size:0.6rem;opacity:0.6;margin-top:6px;text-align:right;}
+    .chat-photos{display:flex;gap:6px;margin-top:8px;}
+    .chat-photos img{max-width:180px;max-height:130px;border-radius:6px;object-fit:cover;cursor:pointer;}
+    .chat-input-bar{display:flex;gap:8px;padding:12px;background:var(--surface);border-top:1px solid var(--borde);align-items:flex-end;}
+    .chat-input-bar textarea{flex:1;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:none;min-height:44px;max-height:100px;outline:none;background:var(--marfil);border-radius:4px;}
+    .chat-input-bar textarea:focus{border-color:var(--dorado);}
+
+    /* ── ZONA CHAT SPLIT ── */
+    .chat-split{display:grid;grid-template-columns:260px 1fr;height:560px;border:1px solid var(--borde);border-radius:4px;overflow:hidden;}
+    .chat-list{background:var(--surface);border-right:1px solid var(--borde);overflow-y:auto;}
+    .chat-list-item{padding:14px 16px;border-bottom:1px solid var(--borde);cursor:pointer;transition:background .2s;font-size:0.82rem;}
+    .chat-list-item:hover{background:rgba(203,170,99,0.06);}
+    .chat-list-item.active{background:rgba(203,170,99,0.12);border-left:3px solid var(--dorado);}
+    .chat-list-item .cli-name{font-weight:600;margin-bottom:2px;}
+    .chat-list-item .cli-zona{font-size:0.65rem;color:var(--gris);}
+    .chat-right-panel{display:flex;flex-direction:column;background:var(--marfil);}
+    .chat-right-panel .chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+
+    /* ── COMISIONES HIGHLIGHT ── */
+    .comision-highlight{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);}
+    .comision-highlight .stat-value{color:var(--dorado);font-size:2rem;}
+    .comision-highlight .stat-label{color:rgba(250,249,246,0.7);}
+
+    /* ── EDIT MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200;}
+    .modal-overlay.show{display:flex;}
+    .modal-box{background:var(--surface);border-radius:4px;padding:30px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;}
+    .modal-box .card-title{margin-bottom:20px;}
 
     @media(max-width:768px){
-      .topbar{padding:10px 16px;flex-wrap:wrap;gap:8px;}
-      .tabs{padding:0 12px;}
-      .tab-btn{padding:12px 16px;font-size:0.6rem;}
+      .topbar{padding:10px 16px;}
+      .tabs{padding:0 8px;}.tab-btn{padding:12px 10px;font-size:0.55rem;}
       .container{padding:20px 12px;}
       .form-grid{grid-template-columns:1fr;}
       .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .chat-split{grid-template-columns:1fr;height:auto;}
+      .chat-list{max-height:200px;}
+      .chat-right-panel{min-height:400px;}
       .chat-bubble{max-width:90%;}
     }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-brand">ENIGME &middot; GERENCIA DIVISIONAL</div>
-  <div style="display:flex;align-items:center;gap:16px;">
-    <span class="topbar-user" id="userName"></span>
-    <button class="topbar-logout" onclick="logout()">Salir</button>
+<!-- ═══════════ LOGIN OVERLAY ═══════════ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h1>ENIGME</h1>
+    <h2>Gerencia Divisional</h2>
+    <input id="loginCodigo" placeholder="C&oacute;digo de Gerencia" maxlength="10" autofocus/>
+    <input id="loginPassword" type="password" placeholder="Contrase&ntilde;a"/>
+    <button onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
+<!-- ═══════════ APP ═══════════ -->
+<div class="app-wrap" id="appWrap">
+
+<div class="topbar">
+  <div class="topbar-brand">ENIGME &middot; GERENCIA DIVISIONAL</div>
+  <div class="topbar-info" id="topbarInfo"></div>
+  <button class="topbar-logout" onclick="logout()">Salir</button>
+</div>
+
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('gerentes')">Mis Gerentes de Zona</button>
-  <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard por Campa&ntilde;a</button>
-  <button class="tab-btn" onclick="switchTab('mensajeria')">Centro de Mensajer&iacute;a</button>
+  <button class="tab-btn active" onclick="switchTab('gerentes',this)">Gerentes de Zona</button>
+  <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('msgAdmin',this)">Mensajer&iacute;a General</button>
+  <button class="tab-btn" onclick="switchTab('msgZona',this)">Mensajer&iacute;a Zonas</button>
+  <button class="tab-btn" onclick="switchTab('comisiones',this)">Comisiones y Pagos</button>
 </div>
 
 <div class="container">
 
-  <!-- TAB: GERENTES DE ZONA -->
+  <!-- ══════════ TAB 1: GERENTES DE ZONA ══════════ -->
   <div class="tab-panel active" id="panel-gerentes">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Gerentes de Zona</h2>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Gerentes de Zona</h2>
       <button class="btn" onclick="toggleFormGZ()" id="btnNuevoGZ">+ Nuevo Gerente</button>
     </div>
 
     <div class="card" id="formGZ" style="display:none;">
-      <div class="card-title">Registrar Gerente de Zona</div>
+      <div class="card-title" id="formGZTitle">Registrar Gerente de Zona</div>
+      <input type="hidden" id="gzEditId" value=""/>
       <div class="form-grid">
         <div class="form-group"><label>DNI *</label><input id="gzDni" placeholder="0000-0000-00000"/></div>
         <div class="form-group"><label>Nombre Completo *</label><input id="gzNombre" placeholder="Nombre y apellidos"/></div>
         <div class="form-group"><label>Tel&eacute;fono *</label><input id="gzTelefono" placeholder="+504..."/></div>
         <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="gzEmail" type="email" placeholder="correo@email.com"/></div>
         <div class="form-group"><label>Fecha de Nacimiento *</label><input id="gzFechaNac" type="date"/></div>
-        <div class="form-group"><label>N&uacute;mero de Cuenta *</label><input id="gzCuenta" placeholder="Número de cuenta bancaria"/></div>
+        <div class="form-group"><label>N&uacute;mero de Cuenta *</label><input id="gzCuenta" placeholder="N&uacute;mero de cuenta bancaria"/></div>
         <div class="form-group"><label>Nombre del Banco *</label><input id="gzBanco" placeholder="Ej: BAC, Ficohsa..."/></div>
-        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="gzDireccion" placeholder="Dirección completa"/></div>
+        <div class="form-group"><label>RTN</label><input id="gzRtn" placeholder="RTN"/></div>
+        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="gzDireccion" placeholder="Direcci&oacute;n completa"/></div>
         <div class="form-group"><label>Fecha de Ingreso *</label><input id="gzFechaIngreso" type="date"/></div>
         <div class="form-group">
           <label>Departamento *</label>
@@ -145,7 +200,7 @@
       </div>
 
       <div style="margin-top:14px;">
-        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios (seleccione los que abarcar&aacute; esta zona) *</label>
+        <label style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);font-weight:500;display:block;margin-bottom:6px;">Municipios de la Zona *</label>
         <div class="multiselect" id="gzMunicipios">
           <p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>
         </div>
@@ -153,57 +208,48 @@
 
       <div class="form-grid" style="margin-top:14px;">
         <div class="form-group"><label>Nombre de la Zona *</label><input id="gzZonaNombre" placeholder="Ej: Zona Sur Choluteca"/></div>
-        <div class="form-group"><label>Contrase&ntilde;a del Gerente *</label><input id="gzPassword" type="text" placeholder="Mín. 6 caracteres"/></div>
+        <div class="form-group"><label>Contrase&ntilde;a del Gerente *</label><input id="gzPassword" type="text" placeholder="M&iacute;n. 6 caracteres"/></div>
       </div>
 
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn" onclick="guardarGerenteZona()">Guardar Gerente</button>
-        <button class="btn btn-outline" onclick="toggleFormGZ()">Cancelar</button>
+        <button class="btn" onclick="guardarGerenteZona()" id="btnGuardarGZ">Guardar Gerente</button>
+        <button class="btn btn-outline" onclick="cancelFormGZ()">Cancelar</button>
       </div>
       <p id="gzError" class="error-msg"></p>
       <p id="gzSuccess" class="success-msg"></p>
     </div>
 
-    <div id="listaGZ">
-      <p style="color:var(--gris);text-align:center;padding:40px;font-size:0.85rem;">Cargando...</p>
-    </div>
+    <div id="listaGZ"><p style="color:var(--gris);text-align:center;padding:40px;font-size:0.85rem;">Cargando...</p></div>
   </div>
 
-  <!-- TAB: DASHBOARD -->
+  <!-- ══════════ TAB 2: DASHBOARD POR CAMPANA ══════════ -->
   <div class="tab-panel" id="panel-dashboard">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;">Dashboard por Campa&ntilde;a</h2>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Dashboard por Campa&ntilde;a</h2>
       <div style="display:flex;gap:10px;align-items:center;">
+        <select id="dashAno" onchange="loadDashboard()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;"></select>
         <select id="dashCampana" onchange="loadDashboard()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
           <option value="">Seleccione campa&ntilde;a</option>
         </select>
-        <span id="dashAno" style="font-size:0.75rem;color:var(--gris);"></span>
       </div>
     </div>
 
-    <div class="stats-grid" id="dashStats"></div>
+    <div class="stats-grid" id="dashStats">
+      <div class="stat-card"><div class="stat-label">Seleccione una campa&ntilde;a</div></div>
+    </div>
 
-    <!-- COMISIONES SECTION -->
-    <div id="comisionesSection" style="display:none;">
+    <!-- Payments per gerente -->
+    <div id="dashPaymentsSection" style="display:none;">
       <div class="card comision-highlight" style="margin-bottom:20px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;">
           <div style="text-align:center;">
-            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Tu Comisi&oacute;n Divisional (4% Venta Neta)</div>
-            <div class="stat-value" id="comisionDivisional">L 0.00</div>
+            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Comisi&oacute;n Divisional (4% Venta Neta)</div>
+            <div class="stat-value" id="dashComDiv">L 0.00</div>
           </div>
           <div style="text-align:center;">
-            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Total Comisiones Pagadas (GZ 3% + Divisional 4%)</div>
-            <div class="stat-value" id="totalComisiones" style="font-size:1.6rem;">L 0.00</div>
+            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Total N&oacute;mina Divisi&oacute;n</div>
+            <div class="stat-value" id="dashTotalNomina" style="font-size:1.5rem;">L 0.00</div>
           </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Comisiones por Gerente de Zona (3% Venta Neta de su Zona)</div>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead><tr><th>Gerente</th><th>Zona</th><th>Venta Neta Zona</th><th>Comisi&oacute;n GZ (3%)</th></tr></thead>
-            <tbody id="comisionesTable"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -212,7 +258,7 @@
       <div class="card-title">Detalle por Gerente de Zona</div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Gerente</th><th>Zona</th><th>Pedidos</th><th>Nombramientos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+          <thead><tr><th>Gerente</th><th>Zona</th><th>Pedidos</th><th>Nombram.</th><th>Venta Bruta</th><th>Venta Neta</th><th>Pago Nombr.</th><th>Comisi&oacute;n 3%</th><th>Base</th><th>Total Pago GZ</th></tr></thead>
           <tbody id="dashTable"></tbody>
         </table>
       </div>
@@ -234,111 +280,269 @@
     </div>
   </div>
 
-  <!-- TAB: MENSAJERIA (BIDIRECTIONAL CHAT) -->
-  <div class="tab-panel" id="panel-mensajeria">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerencia General</h2>
-
+  <!-- ══════════ TAB 3: MENSAJERIA CON GERENCIA GENERAL ══════════ -->
+  <div class="tab-panel" id="panel-msgAdmin">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerencia General</h2>
     <div class="chat-container">
-      <div class="chat-feed" id="chatFeed">
+      <div class="chat-feed" id="chatAdminFeed">
         <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.85rem;">Cargando mensajes...</p>
       </div>
       <div class="chat-input-bar">
         <label style="cursor:pointer;display:flex;align-items:center;padding:8px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);" title="Adjuntar fotos (max 2)">
           &#128247;
-          <input type="file" id="msgFotos" accept="image/*" multiple style="display:none;" onchange="previewFotos(this)"/>
+          <input type="file" id="adminFotos" accept="image/*" multiple style="display:none;" onchange="previewAdminFotos(this)"/>
         </label>
-        <div id="msgFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
-        <textarea id="msgTexto" placeholder="Escriba su mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensaje();}"></textarea>
-        <button class="btn" onclick="enviarMensaje()" style="white-space:nowrap;">Enviar</button>
+        <div id="adminFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
+        <textarea id="adminTexto" placeholder="Escriba su mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsgAdmin();}"></textarea>
+        <button class="btn" onclick="enviarMsgAdmin()" style="white-space:nowrap;">Enviar</button>
       </div>
     </div>
-    <p id="msgError" class="error-msg"></p>
+    <p id="adminMsgError" class="error-msg"></p>
   </div>
 
+  <!-- ══════════ TAB 4: MENSAJERIA CON GERENTES DE ZONA ══════════ -->
+  <div class="tab-panel" id="panel-msgZona">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerentes de Zona</h2>
+    <div class="chat-split">
+      <div class="chat-list" id="zonaListPanel">
+        <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.8rem;">Cargando...</p>
+      </div>
+      <div class="chat-right-panel">
+        <div style="padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--borde);font-size:0.75rem;font-weight:600;letter-spacing:0.08em;" id="zonaChatHeader">Seleccione un gerente de zona</div>
+        <div class="chat-feed" id="chatZonaFeed">
+          <p style="color:var(--gris);text-align:center;padding:40px;font-size:0.8rem;">Seleccione un gerente para ver la conversaci&oacute;n</p>
+        </div>
+        <div class="chat-input-bar" id="zonaChatInput" style="display:none;">
+          <label style="cursor:pointer;display:flex;align-items:center;padding:8px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);" title="Adjuntar fotos (max 2)">
+            &#128247;
+            <input type="file" id="zonaFotos" accept="image/*" multiple style="display:none;" onchange="previewZonaFotos(this)"/>
+          </label>
+          <div id="zonaFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
+          <textarea id="zonaTexto" placeholder="Escriba su mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsgZona();}"></textarea>
+          <button class="btn" onclick="enviarMsgZona()" style="white-space:nowrap;">Enviar</button>
+        </div>
+      </div>
+    </div>
+    <p id="zonaMsgError" class="error-msg"></p>
+  </div>
+
+  <!-- ══════════ TAB 5: COMISIONES Y PAGOS ══════════ -->
+  <div class="tab-panel" id="panel-comisiones">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Comisiones y Pagos</h2>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;">
+      <select id="comAno" onchange="loadComisiones()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;"></select>
+      <select id="comCampana" onchange="loadComisiones()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+        <option value="">Todas las campa&ntilde;as</option>
+      </select>
+    </div>
+
+    <div class="card comision-highlight" style="margin-bottom:20px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;text-align:center;">
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Tu Comisi&oacute;n Divisional (4%)</div>
+          <div class="stat-value" id="comDivTotal">L 0.00</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Total N&oacute;mina GZ</div>
+          <div class="stat-value" id="comNominaTotal" style="font-size:1.5rem;">L 0.00</div>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Total Pagos Divisi&oacute;n</div>
+          <div class="stat-value" id="comGrandTotal" style="font-size:1.5rem;">L 0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Desglose de Pagos por Gerente de Zona</div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Gerente</th><th>Zona</th><th>Base</th><th>Nombramientos</th><th>Pago Nombr.</th><th>Comisi&oacute;n 3%</th><th>Total Pago GZ</th></tr></thead>
+          <tbody id="comTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card">
+        <div class="card-title">Distribuci&oacute;n de Comisiones</div>
+        <div class="chart-container"><canvas id="chartComDist"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Pagos por Gerente</div>
+        <div class="chart-container"><canvas id="chartComBar"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /app-wrap -->
+
+<!-- ═══════════ EDIT MODAL ═══════════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="card-title">Editar Gerente de Zona</div>
+    <input type="hidden" id="editId"/>
+    <div class="form-grid">
+      <div class="form-group"><label>DNI</label><input id="editDni"/></div>
+      <div class="form-group"><label>Nombre</label><input id="editNombre"/></div>
+      <div class="form-group"><label>Tel&eacute;fono</label><input id="editTelefono"/></div>
+      <div class="form-group"><label>Email</label><input id="editEmail" type="email"/></div>
+      <div class="form-group"><label>Fecha Nacimiento</label><input id="editFechaNac" type="date"/></div>
+      <div class="form-group"><label>N&uacute;mero Cuenta</label><input id="editCuenta"/></div>
+      <div class="form-group"><label>Banco</label><input id="editBanco"/></div>
+      <div class="form-group"><label>RTN</label><input id="editRtn"/></div>
+      <div class="form-group"><label>Direcci&oacute;n</label><input id="editDireccion"/></div>
+      <div class="form-group"><label>Fecha Ingreso</label><input id="editFechaIngreso" type="date"/></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn" onclick="saveEditGZ()">Guardar Cambios</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancelar</button>
+    </div>
+    <p id="editError" class="error-msg"></p>
+    <p id="editSuccess" class="success-msg"></p>
+  </div>
 </div>
 
 <script>
 /* ================================================================
-   ENIGME - GERENCIA DIVISIONAL
+   ENIGME - GERENCIA DIVISIONAL - COMPLETE PANEL
    ================================================================ */
 var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
-var H = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var H  = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
 var session = null;
 var departamentos = [];
-var municipios = [];
+var municipiosCache = [];
 var gerentes = [];
 var campanas = [];
-var chartComparativa = null;
-var chartDistribucion = null;
-var chartTendencia = null;
-var msgPollingInterval = null;
+var chartComparativa = null, chartDistribucion = null, chartTendencia = null;
+var chartComDist = null, chartComBar = null;
+var adminPolling = null, zonaPolling = null;
+var selectedZonaGerente = null;
+var adminFotoFiles = [], zonaFotoFiles = [];
 
-// ── INIT ──
+/* ── INIT ── */
 (function init() {
-  var s = localStorage.getItem('enigme_gd_session');
-  if (!s) { window.location.href = 'index.html'; return; }
-  session = JSON.parse(s);
-  document.getElementById('userName').textContent = session.nombre;
-  loadDepartamentos();
-  loadCampanas();
-  loadGerentesZona();
-  loadMensajes();
+  var s = sessionStorage.getItem('enigme_gd_session');
+  if (s) {
+    session = JSON.parse(s);
+    showApp();
+  }
+  // Also check old localStorage key for backwards compat
+  if (!session) {
+    var old = localStorage.getItem('enigme_gd_session');
+    if (old) {
+      session = JSON.parse(old);
+      sessionStorage.setItem('enigme_gd_session', old);
+      localStorage.removeItem('enigme_gd_session');
+      showApp();
+    }
+  }
 })();
 
-function logout() {
-  if (msgPollingInterval) clearInterval(msgPollingInterval);
-  localStorage.removeItem('enigme_gd_session');
-  window.location.href = 'index.html';
-}
+/* ── LOGIN ── */
+async function doLogin() {
+  var codigo = document.getElementById('loginCodigo').value.trim().toUpperCase();
+  var password = document.getElementById('loginPassword').value.trim();
+  var errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if (!codigo) { errEl.textContent = 'Ingrese su c\u00f3digo de gerencia.'; return; }
+  if (!password) { errEl.textContent = 'Ingrese su contrase\u00f1a.'; return; }
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
-  event.target.classList.add('active');
-  document.getElementById('panel-' + tab).classList.add('active');
-  if (tab === 'dashboard') loadDashboard();
-  if (tab === 'mensajeria') {
-    loadMensajes();
-    startMsgPolling();
-  } else {
-    stopMsgPolling();
+  try {
+    var data = await api('/rest/v1/gerencias_divisionales?codigo=eq.' + encodeURIComponent(codigo) + '&select=*');
+    if (!data || !data.length) { errEl.textContent = 'C\u00f3digo no encontrado.'; return; }
+    var gd = data[0];
+    if (!gd.activo) { errEl.textContent = 'Esta gerencia divisional est\u00e1 inactiva.'; return; }
+    if (gd.password_temporal !== password) { errEl.textContent = 'Contrase\u00f1a incorrecta.'; return; }
+    session = gd;
+    sessionStorage.setItem('enigme_gd_session', JSON.stringify(gd));
+    showApp();
+  } catch(e) {
+    errEl.textContent = 'Error de conexi\u00f3n.';
+    console.error(e);
   }
 }
 
-function startMsgPolling() {
-  stopMsgPolling();
-  msgPollingInterval = setInterval(loadMensajes, 8000);
-}
-function stopMsgPolling() {
-  if (msgPollingInterval) { clearInterval(msgPollingInterval); msgPollingInterval = null; }
+document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('loginCodigo').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+});
+
+function showApp() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('appWrap').style.display = 'block';
+  document.getElementById('topbarInfo').innerHTML = '<strong>' + esc(session.nombre) + '</strong> &middot; ' + esc(session.codigo);
+  loadDepartamentos();
+  loadCampanas();
+  loadGerentesZona();
 }
 
-// ── API HELPERS ──
+function logout() {
+  stopAllPolling();
+  sessionStorage.removeItem('enigme_gd_session');
+  localStorage.removeItem('enigme_gd_session');
+  location.reload();
+}
+
+/* ── TAB SWITCHING ── */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  stopAllPolling();
+  if (tab === 'dashboard') loadDashboard();
+  if (tab === 'msgAdmin') { loadMsgAdmin(); adminPolling = setInterval(loadMsgAdmin, 10000); }
+  if (tab === 'msgZona') { renderZonaList(); if (selectedZonaGerente) { loadMsgZona(); zonaPolling = setInterval(loadMsgZona, 10000); } }
+  if (tab === 'comisiones') loadComisiones();
+}
+
+function stopAllPolling() {
+  if (adminPolling) { clearInterval(adminPolling); adminPolling = null; }
+  if (zonaPolling) { clearInterval(zonaPolling); zonaPolling = null; }
+}
+
+/* ── HELPERS ── */
 async function api(path, opts) {
   var res = await fetch(SB + path, Object.assign({ headers: H }, opts || {}));
   return res.json();
 }
 async function apiPost(path, body) {
   var res = await fetch(SB + path, { method: 'POST', headers: HJ, body: JSON.stringify(body) });
-  if (!res.ok) throw await res.json();
+  if (!res.ok) { var e = await res.json(); throw e; }
   return res.json();
 }
 async function apiPatch(path, body) {
-  var res = await fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
-  return res;
+  return fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
 }
 
-// ── DEPARTAMENTOS ──
+function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtL(n) { return 'L ' + Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function genCode() {
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var code = '';
+  for (var i = 0; i < 3; i++) code += chars.charAt(Math.floor(Math.random() * 26));
+  for (var j = 0; j < 3; j++) code += chars.charAt(26 + Math.floor(Math.random() * 10));
+  return code;
+}
+
+/* ── DEPARTAMENTOS & MUNICIPIOS ── */
 async function loadDepartamentos() {
   departamentos = await api('/rest/v1/departamentos?order=nombre');
+  if (!departamentos || departamentos.error) departamentos = [];
   var sel = document.getElementById('gzDepto');
+  sel.innerHTML = '<option value="">Seleccione...</option>';
   departamentos.forEach(function(d) {
     var opt = document.createElement('option');
-    opt.value = d.id;
-    opt.textContent = d.nombre;
+    opt.value = d.id; opt.textContent = d.nombre;
     sel.appendChild(opt);
   });
 }
@@ -347,47 +551,87 @@ async function loadMunicipiosDepto() {
   var deptoId = document.getElementById('gzDepto').value;
   var container = document.getElementById('gzMunicipios');
   if (!deptoId) { container.innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>'; return; }
-  municipios = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&order=nombre');
-  container.innerHTML = municipios.map(function(m) {
-    return '<label><input type="checkbox" value="' + m.id + '"/> ' + m.nombre + '</label>';
+  municipiosCache = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&order=nombre');
+  if (!municipiosCache || municipiosCache.error) municipiosCache = [];
+  container.innerHTML = municipiosCache.map(function(m) {
+    return '<label><input type="checkbox" value="' + m.id + '"/> ' + esc(m.nombre) + '</label>';
   }).join('');
 }
 
-// ── CAMPANAS ──
+/* ── CAMPANAS ── */
 async function loadCampanas() {
   campanas = await api('/rest/v1/campanas?order=numero');
-  var sel = document.getElementById('dashCampana');
+  if (!campanas || campanas.error) campanas = [];
+  // Dashboard selectors
+  var selD = document.getElementById('dashCampana');
+  selD.innerHTML = '<option value="">Seleccione campa\u00f1a</option>';
   campanas.forEach(function(c) {
     var opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = 'Campa\u00f1a ' + c.numero;
-    sel.appendChild(opt);
+    opt.value = c.id; opt.textContent = 'Campa\u00f1a ' + c.numero;
+    selD.appendChild(opt);
   });
-  document.getElementById('dashAno').textContent = 'A\u00f1o ' + new Date().getFullYear();
+  // Year selectors
+  var curYear = new Date().getFullYear();
+  ['dashAno','comAno'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    sel.innerHTML = '';
+    for (var y = curYear; y >= curYear - 2; y--) {
+      var opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      sel.appendChild(opt);
+    }
+  });
+  // Comisiones campaign selector
+  var selC = document.getElementById('comCampana');
+  selC.innerHTML = '<option value="">Todas las campa\u00f1as</option>';
+  campanas.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = 'Campa\u00f1a ' + c.numero;
+    selC.appendChild(opt);
+  });
 }
 
-// ══════════════════════════════════════════
-// TAB 1: GERENTES DE ZONA
-// ══════════════════════════════════════════
+/* ══════════════════════════════════════════
+   TAB 1: GERENTES DE ZONA (max 7)
+   ══════════════════════════════════════════ */
 function toggleFormGZ() {
   var f = document.getElementById('formGZ');
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  clearGZForm();
+}
+function cancelFormGZ() {
+  document.getElementById('formGZ').style.display = 'none';
+  clearGZForm();
+}
+function clearGZForm() {
+  document.getElementById('gzEditId').value = '';
+  document.getElementById('formGZTitle').textContent = 'Registrar Gerente de Zona';
+  document.getElementById('btnGuardarGZ').textContent = 'Guardar Gerente';
+  ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzRtn','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('gzDepto').value = '';
+  document.getElementById('gzMunicipios').innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>';
   document.getElementById('gzError').textContent = '';
   document.getElementById('gzSuccess').textContent = '';
 }
 
 async function loadGerentesZona() {
-  gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&select=*,zonas(id,nombre,departamento_id,departamentos(nombre)),zonas_municipios:zonas(zonas_municipios(municipio_id,municipios(nombre)))&order=created_at.desc');
-  // fallback: simpler query
-  if (!gerentes || gerentes.error) {
+  try {
     gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
-  }
+    if (!gerentes || gerentes.error) gerentes = [];
+    // Load zona names
+    for (var i = 0; i < gerentes.length; i++) {
+      if (gerentes[i].zona_id) {
+        var z = await api('/rest/v1/zonas?id=eq.' + gerentes[i].zona_id + '&select=id,nombre');
+        gerentes[i]._zona = (z && z.length) ? z[0] : null;
+      }
+    }
+  } catch(e) { gerentes = []; }
   renderGerentesZona();
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // Update nuevo button
+  var btn = document.getElementById('btnNuevoGZ');
+  var activeCount = gerentes.filter(function(g){ return g.activo; }).length;
+  btn.disabled = activeCount >= 7;
+  if (activeCount >= 7) btn.title = 'M\u00e1ximo 7 gerentes de zona alcanzado';
 }
 
 function renderGerentesZona() {
@@ -396,26 +640,32 @@ function renderGerentesZona() {
     container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gris);"><p style="font-size:0.9rem;">No hay gerentes de zona registrados</p><p style="font-size:0.75rem;margin-top:8px;">Haga clic en "+ Nuevo Gerente" para agregar el primero</p></div>';
     return;
   }
-  container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>Zona</th><th>Tel\u00e9fono</th><th>Email</th><th>Contrase\u00f1a</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
-    gerentes.map(function(g) {
-      var zonaNombre = g.zonas ? g.zonas.nombre : '-';
-      var estado = g.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
-      var acciones = g.activo
-        ? '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')">Dar de Baja</button>'
-        : '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')">Dar de Alta</button>';
-      var pwVal = escapeHtml(g.password_temporal || '');
-      var pwField = '<div style="display:flex;gap:4px;align-items:center;">' +
-        '<input type="text" id="gzPw_' + g.id + '" value="' + pwVal + '" style="width:100px;padding:4px 6px;border:1px solid var(--borde);font-size:0.75rem;background:var(--marfil);"/>' +
-        '<button class="btn btn-sm" style="padding:3px 8px;font-size:0.55rem;" onclick="changeGzPassword(\'' + g.id + '\')">OK</button></div>';
-      return '<tr><td style="font-weight:600;color:var(--dorado);">' + g.codigo + '</td><td>' + g.nombre + '</td><td>' + zonaNombre + '</td><td>' + (g.telefono || '-') + '</td><td>' + (g.email || '-') + '</td><td>' + pwField + '</td><td>' + estado + '</td><td>' + acciones + '</td></tr>';
-    }).join('') +
-    '</tbody></table></div>';
+  var rows = gerentes.map(function(g) {
+    var zonaNombre = g._zona ? g._zona.nombre : '-';
+    var estado = g.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
+    var acciones = '';
+    if (g.activo) {
+      acciones = '<button class="btn btn-sm" onclick="openEditGZ(\'' + g.id + '\')" style="margin-right:4px;">Editar</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')">Baja</button>';
+    } else {
+      acciones = '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')">Alta</button>';
+    }
+    var pwVal = esc(g.password_temporal || '');
+    var pwField = '<div style="display:flex;gap:4px;align-items:center;">' +
+      '<input type="text" id="gzPw_' + g.id + '" value="' + pwVal + '" style="width:90px;padding:4px 6px;border:1px solid var(--borde);font-size:0.72rem;background:var(--marfil);"/>' +
+      '<button class="btn btn-sm" style="padding:3px 6px;font-size:0.5rem;" onclick="changeGzPw(\'' + g.id + '\')">OK</button></div>';
+    return '<tr><td style="font-weight:600;color:var(--dorado);">' + esc(g.codigo) + '</td><td>' + esc(g.nombre) + '</td><td>' + esc(zonaNombre) + '</td><td>' + esc(g.telefono) + '</td><td>' + esc(g.email) + '</td><td>' + pwField + '</td><td>' + estado + '</td><td style="white-space:nowrap;">' + acciones + '</td></tr>';
+  }).join('');
+  container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>Zona</th><th>Tel\u00e9fono</th><th>Email</th><th>Contrase\u00f1a</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 async function guardarGerenteZona() {
   var err = document.getElementById('gzError');
   var suc = document.getElementById('gzSuccess');
   err.textContent = ''; suc.textContent = '';
+
+  var activeCount = gerentes.filter(function(g){ return g.activo; }).length;
+  if (activeCount >= 7) { err.textContent = 'M\u00e1ximo 7 gerentes de zona permitidos.'; return; }
 
   var dni = document.getElementById('gzDni').value.trim();
   var nombre = document.getElementById('gzNombre').value.trim();
@@ -424,6 +674,7 @@ async function guardarGerenteZona() {
   var fechaNac = document.getElementById('gzFechaNac').value;
   var cuenta = document.getElementById('gzCuenta').value.trim();
   var banco = document.getElementById('gzBanco').value.trim();
+  var rtn = document.getElementById('gzRtn').value.trim();
   var direccion = document.getElementById('gzDireccion').value.trim();
   var fechaIngreso = document.getElementById('gzFechaIngreso').value;
   var deptoId = document.getElementById('gzDepto').value;
@@ -442,20 +693,23 @@ async function guardarGerenteZona() {
   if (!municipiosSeleccionados.length) { err.textContent = 'Seleccione al menos un municipio.'; return; }
 
   try {
-    // 1. Generate code
-    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_gerente_zona', { method: 'POST', headers: HJ, body: '{}' });
-    var codigo = await codeResp.json();
+    // 1. Generate unique 6-char alphanumeric code
+    var codigo = genCode();
+    // Check uniqueness
+    var existing = await api('/rest/v1/gerentes_zona?codigo=eq.' + codigo + '&select=id');
+    while (existing && existing.length) {
+      codigo = genCode();
+      existing = await api('/rest/v1/gerentes_zona?codigo=eq.' + codigo + '&select=id');
+    }
 
     // 2. Create zona
     var zonaData = await apiPost('/rest/v1/zonas', {
-      codigo: codigo,
       nombre: zonaNombre,
-      departamento_id: parseInt(deptoId),
       gerencia_divisional_id: session.id
     });
     var zonaId = zonaData[0].id;
 
-    // 3. Insert zona_municipios
+    // 3. Insert zonas_municipios
     var zmData = municipiosSeleccionados.map(function(mId) {
       return { zona_id: zonaId, municipio_id: mId };
     });
@@ -463,8 +717,8 @@ async function guardarGerenteZona() {
       method: 'POST', headers: HJ, body: JSON.stringify(zmData)
     });
 
-    // 4. Create gerente_zona with password
-    await apiPost('/rest/v1/gerentes_zona', {
+    // 4. Create gerente_zona
+    var gzData = await apiPost('/rest/v1/gerentes_zona', {
       codigo: codigo,
       nombre: nombre,
       telefono: telefono,
@@ -476,88 +730,154 @@ async function guardarGerenteZona() {
       fecha_nacimiento: fechaNac,
       numero_cuenta: cuenta,
       nombre_banco: banco,
+      rtn: rtn || null,
       fecha_ingreso: fechaIngreso,
       departamento_id: parseInt(deptoId),
       password_temporal: gzPassword,
       activo: true
     });
 
-    // 5. Link division to zona
-    await apiPost('/rest/v1/gerencias_divisionales_zonas', {
-      gerencia_divisional_id: session.id,
-      zona_id: zonaId,
-      es_activa: true
+    // 5. Create 14 sectores for this gerente
+    var gerenteId = gzData[0].id;
+    var sectoresData = [];
+    for (var s = 1; s <= 14; s++) {
+      sectoresData.push({
+        gerente_id: gerenteId,
+        numero_sector: s,
+        activo: true
+      });
+    }
+    await fetch(SB + '/rest/v1/sectores', {
+      method: 'POST', headers: HJ, body: JSON.stringify(sectoresData)
     });
 
     suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
-    // Reset form
-    ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
-    document.getElementById('gzDepto').value = '';
-    document.getElementById('gzMunicipios').innerHTML = '<p style="color:var(--gris);font-size:0.8rem;">Primero seleccione un departamento</p>';
+    cancelFormGZ();
+    document.getElementById('gzSuccess').textContent = suc.textContent;
     loadGerentesZona();
   } catch(e) {
-    err.textContent = e.message || 'Error al crear gerente de zona.';
+    err.textContent = e.message || e.details || 'Error al crear gerente de zona.';
     console.error(e);
   }
 }
 
-async function changeGzPassword(id) {
+async function changeGzPw(id) {
   var input = document.getElementById('gzPw_' + id);
   var newPw = input ? input.value.trim() : '';
   if (!newPw || newPw.length < 6) { alert('La contrase\u00f1a debe tener al menos 6 caracteres.'); return; }
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { password_temporal: newPw });
-  alert('Contrase\u00f1a del gerente de zona actualizada.');
+  alert('Contrase\u00f1a actualizada.');
 }
 
 async function bajaGerente(id) {
-  if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos de venta se conservar\u00e1n.')) return;
+  if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos se conservar\u00e1n.')) return;
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false });
   loadGerentesZona();
 }
 
 async function altaGerente(id) {
+  var activeCount = gerentes.filter(function(g){ return g.activo; }).length;
+  if (activeCount >= 7) { alert('M\u00e1ximo 7 gerentes de zona activos.'); return; }
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true });
   loadGerentesZona();
 }
 
-// ══════════════════════════════════════════
-// TAB 2: DASHBOARD + COMISIONES
-// ══════════════════════════════════════════
+/* ── EDIT MODAL ── */
+function openEditGZ(id) {
+  var g = gerentes.find(function(x){ return x.id === id; });
+  if (!g) return;
+  document.getElementById('editId').value = g.id;
+  document.getElementById('editDni').value = g.dni || '';
+  document.getElementById('editNombre').value = g.nombre || '';
+  document.getElementById('editTelefono').value = g.telefono || '';
+  document.getElementById('editEmail').value = g.email || '';
+  document.getElementById('editFechaNac').value = g.fecha_nacimiento || '';
+  document.getElementById('editCuenta').value = g.numero_cuenta || '';
+  document.getElementById('editBanco').value = g.nombre_banco || '';
+  document.getElementById('editRtn').value = g.rtn || '';
+  document.getElementById('editDireccion').value = g.direccion || '';
+  document.getElementById('editFechaIngreso').value = g.fecha_ingreso || '';
+  document.getElementById('editError').textContent = '';
+  document.getElementById('editSuccess').textContent = '';
+  document.getElementById('editModal').classList.add('show');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('show');
+}
+
+async function saveEditGZ() {
+  var id = document.getElementById('editId').value;
+  var errEl = document.getElementById('editError');
+  var sucEl = document.getElementById('editSuccess');
+  errEl.textContent = ''; sucEl.textContent = '';
+
+  var body = {
+    dni: document.getElementById('editDni').value.trim(),
+    nombre: document.getElementById('editNombre').value.trim(),
+    telefono: document.getElementById('editTelefono').value.trim(),
+    email: document.getElementById('editEmail').value.trim() || null,
+    fecha_nacimiento: document.getElementById('editFechaNac').value || null,
+    numero_cuenta: document.getElementById('editCuenta').value.trim(),
+    nombre_banco: document.getElementById('editBanco').value.trim(),
+    rtn: document.getElementById('editRtn').value.trim() || null,
+    direccion: document.getElementById('editDireccion').value.trim(),
+    fecha_ingreso: document.getElementById('editFechaIngreso').value || null
+  };
+
+  if (!body.dni || !body.nombre || !body.telefono) {
+    errEl.textContent = 'DNI, nombre y tel\u00e9fono son obligatorios.'; return;
+  }
+
+  try {
+    await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, body);
+    sucEl.textContent = 'Datos actualizados.';
+    loadGerentesZona();
+    setTimeout(closeEditModal, 1200);
+  } catch(e) {
+    errEl.textContent = 'Error al actualizar.';
+    console.error(e);
+  }
+}
+
+/* ══════════════════════════════════════════
+   TAB 2: DASHBOARD POR CAMPANA
+   ══════════════════════════════════════════ */
 async function loadDashboard() {
   var campanaId = document.getElementById('dashCampana').value;
-  var ano = new Date().getFullYear();
+  var ano = document.getElementById('dashAno').value;
+
   if (!campanaId) {
     document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">Seleccione una campa\u00f1a</div></div>';
     document.getElementById('dashTable').innerHTML = '';
-    document.getElementById('comisionesSection').style.display = 'none';
+    document.getElementById('dashPaymentsSection').style.display = 'none';
     return;
   }
 
-  // Load pedidos for this campaign and division's gerentes
   var gerenteIds = gerentes.map(function(g){ return g.id; });
   if (!gerenteIds.length) {
-    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">No hay gerentes de zona</div></div>';
-    document.getElementById('comisionesSection').style.display = 'none';
+    document.getElementById('dashStats').innerHTML = '<div class="stat-card"><div class="stat-label">No hay gerentes de zona registrados</div></div>';
+    document.getElementById('dashPaymentsSection').style.display = 'none';
     return;
   }
 
   var idFilter = 'in.(' + gerenteIds.join(',') + ')';
-
   var pedidos = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta');
+  if (!pedidos || pedidos.error) pedidos = [];
   var nombramientos = await api('/rest/v1/nombramientos?gerente_id=' + idFilter + '&campana_ingreso_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id');
+  if (!nombramientos || nombramientos.error) nombramientos = [];
 
-  // Build per-gerente stats
   var totalPedidos = 0, totalNombramientos = 0, totalBruta = 0, totalNeta = 0;
-  var gerenteStats = {};
+  var gs = {};
   gerentes.forEach(function(g) {
-    gerenteStats[g.id] = { nombre: g.nombre, zona: g.zonas ? g.zonas.nombre : (g.zona_id || '-'), pedidos: 0, nombramientos: 0, bruta: 0, neta: 0 };
+    gs[g.id] = { nombre: g.nombre, zona: g._zona ? g._zona.nombre : '-', pedidos: 0, nombramientos: 0, bruta: 0, neta: 0 };
   });
 
   pedidos.forEach(function(p) {
-    if (gerenteStats[p.gerente_id]) {
-      gerenteStats[p.gerente_id].pedidos++;
-      gerenteStats[p.gerente_id].bruta += parseFloat(p.subtotal_catalogo || 0);
-      gerenteStats[p.gerente_id].neta += parseFloat(p.total_venta_neta || 0);
+    if (gs[p.gerente_id]) {
+      gs[p.gerente_id].pedidos++;
+      gs[p.gerente_id].bruta += parseFloat(p.subtotal_catalogo || 0);
+      gs[p.gerente_id].neta += parseFloat(p.total_venta_neta || 0);
     }
     totalPedidos++;
     totalBruta += parseFloat(p.subtotal_catalogo || 0);
@@ -565,163 +885,117 @@ async function loadDashboard() {
   });
 
   nombramientos.forEach(function(n) {
-    if (gerenteStats[n.gerente_id]) {
-      gerenteStats[n.gerente_id].nombramientos++;
-    }
+    if (gs[n.gerente_id]) gs[n.gerente_id].nombramientos++;
     totalNombramientos++;
   });
 
-  // Render stats cards
+  // Stats cards
   document.getElementById('dashStats').innerHTML =
-    '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Pedidos Totales</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Pedidos</div></div>' +
     '<div class="stat-card"><div class="stat-value">' + totalNombramientos + '</div><div class="stat-label">Nombramientos</div></div>' +
-    '<div class="stat-card"><div class="stat-value">L ' + totalBruta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Bruta</div></div>' +
-    '<div class="stat-card"><div class="stat-value">L ' + totalNeta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta (-15%)</div></div>';
+    '<div class="stat-card"><div class="stat-value">' + fmtL(totalBruta) + '</div><div class="stat-label">Venta Bruta</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + fmtL(totalNeta) + '</div><div class="stat-label">Venta Neta</div></div>';
 
-  // ── COMISIONES ──
-  // Divisional earns 4% of total NET sales of entire division
-  var comisionDivisional = totalNeta * 0.04;
-  var totalComisionesGZ = 0;
-
-  var comisionRows = '';
-  Object.keys(gerenteStats).forEach(function(gId) {
-    var s = gerenteStats[gId];
-    var netaGZ = s.neta;
-    var comisionGZ = netaGZ * 0.03;
-    totalComisionesGZ += comisionGZ;
-    comisionRows += '<tr><td>' + s.nombre + '</td><td>' + s.zona + '</td><td>L ' + netaGZ.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td style="font-weight:600;color:var(--dorado);">L ' + comisionGZ.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
-  });
-
-  var totalComisionesPagadas = comisionDivisional + totalComisionesGZ;
-
-  document.getElementById('comisionDivisional').textContent = 'L ' + comisionDivisional.toLocaleString('es-HN',{minimumFractionDigits:2});
-  document.getElementById('totalComisiones').textContent = 'L ' + totalComisionesPagadas.toLocaleString('es-HN',{minimumFractionDigits:2});
-  document.getElementById('comisionesTable').innerHTML = comisionRows;
-  document.getElementById('comisionesSection').style.display = 'block';
-
-  // Render detail table
+  // Payments section
+  var comisionDiv = totalNeta * 0.04;
+  var totalNomina = comisionDiv;
   var rows = '';
-  var gerenteLabels = [], gerenteVentas = [];
-  Object.keys(gerenteStats).forEach(function(gId) {
-    var s = gerenteStats[gId];
-    var neta = s.bruta * 0.85;
-    rows += '<tr><td>' + s.nombre + '</td><td>' + s.zona + '</td><td>' + s.pedidos + '</td><td>' + s.nombramientos + '</td><td>L ' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td>L ' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
-    gerenteLabels.push(s.nombre);
-    gerenteVentas.push(s.bruta);
+  var gLabels = [], gVentas = [];
+  Object.keys(gs).forEach(function(gId) {
+    var s = gs[gId];
+    // Nombramientos payment: <20 = L220 each, >=20 = L320 each
+    var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
+    var comGZ = s.neta * 0.03;
+    var base = 15000;
+    var totalGZ = base + pagoNombr + comGZ;
+    totalNomina += totalGZ;
+    rows += '<tr><td>' + esc(s.nombre) + '</td><td>' + esc(s.zona) + '</td><td>' + s.pedidos + '</td><td>' + s.nombramientos + '</td><td>' + fmtL(s.bruta) + '</td><td>' + fmtL(s.neta) + '</td><td>' + fmtL(pagoNombr) + '</td><td>' + fmtL(comGZ) + '</td><td>' + fmtL(base) + '</td><td style="font-weight:600;color:var(--dorado);">' + fmtL(totalGZ) + '</td></tr>';
+    gLabels.push(s.nombre);
+    gVentas.push(s.neta);
   });
   document.getElementById('dashTable').innerHTML = rows;
+  document.getElementById('dashComDiv').textContent = fmtL(comisionDiv);
+  document.getElementById('dashTotalNomina').textContent = fmtL(totalNomina);
+  document.getElementById('dashPaymentsSection').style.display = 'block';
 
   // Charts
-  renderCharts(campanaId, gerenteLabels, gerenteVentas, gerenteIds, ano);
+  renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano);
 }
 
-async function renderCharts(campanaId, gerenteLabels, gerenteVentas, gerenteIds, ano) {
+async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
   var campNum = 0;
   campanas.forEach(function(c){ if (c.id == campanaId) campNum = c.numero; });
+  var idFilter = 'in.(' + gerenteIds.join(',') + ')';
 
-  // Get data for comparison (2 previous campaigns)
+  // Comparison: 2 previous + current
   var prevCamps = campanas.filter(function(c){ return c.numero < campNum; }).sort(function(a,b){ return b.numero - a.numero; }).slice(0, 2).reverse();
   var compareCamps = prevCamps.concat(campanas.filter(function(c){ return c.numero === campNum; }));
 
-  var idFilter = 'in.(' + gerenteIds.join(',') + ')';
-  var compLabels = [];
-  var compVentas = [];
-
+  var compLabels = [], compVentas = [];
   for (var i = 0; i < compareCamps.length; i++) {
     var c = compareCamps[i];
     compLabels.push('C' + c.numero);
-    var p = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + c.id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
-    var total = 0;
-    p.forEach(function(r){ total += parseFloat(r.subtotal_catalogo || 0); });
-    compVentas.push(total);
+    var p = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + c.id + '&ano=eq.' + ano + '&select=total_venta_neta');
+    var tot = 0; if (p && !p.error) p.forEach(function(r){ tot += parseFloat(r.total_venta_neta || 0); });
+    compVentas.push(tot);
   }
 
-  // Comparativa chart
   if (chartComparativa) chartComparativa.destroy();
   chartComparativa = new Chart(document.getElementById('chartComparativa'), {
     type: 'bar',
-    data: {
-      labels: compLabels,
-      datasets: [{
-        label: 'Venta Bruta (L)',
-        data: compVentas,
-        backgroundColor: ['rgba(203,170,99,0.3)', 'rgba(203,170,99,0.5)', 'rgba(203,170,99,0.9)'],
-        borderColor: '#CBAA63',
-        borderWidth: 1
-      }]
-    },
+    data: { labels: compLabels, datasets: [{ label: 'Venta Neta (L)', data: compVentas, backgroundColor: ['rgba(203,170,99,0.3)','rgba(203,170,99,0.5)','rgba(203,170,99,0.9)'], borderColor: '#CBAA63', borderWidth: 1 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
-  // Distribution chart
+  // Distribution doughnut
   if (chartDistribucion) chartDistribucion.destroy();
   var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad'];
   chartDistribucion = new Chart(document.getElementById('chartDistribucion'), {
     type: 'doughnut',
-    data: {
-      labels: gerenteLabels,
-      datasets: [{ data: gerenteVentas, backgroundColor: colors.slice(0, gerenteLabels.length), borderWidth: 0 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    data: { labels: gLabels, datasets: [{ data: gVentas, backgroundColor: colors.slice(0, gLabels.length), borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
   });
 
-  // Tendencia - all campaigns
-  var tendLabels = [], tendVentas = [];
+  // Tendencia line - all campaigns
+  var tLabels = [], tVentas = [];
   for (var j = 0; j < campanas.length; j++) {
     var camp = campanas[j];
-    tendLabels.push('C' + camp.numero);
-    var pd = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + camp.id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
-    var tot = 0;
-    pd.forEach(function(r){ tot += parseFloat(r.subtotal_catalogo || 0); });
-    tendVentas.push(tot);
+    tLabels.push('C' + camp.numero);
+    var pd = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + camp.id + '&ano=eq.' + ano + '&select=total_venta_neta');
+    var t = 0; if (pd && !pd.error) pd.forEach(function(r){ t += parseFloat(r.total_venta_neta || 0); });
+    tVentas.push(t);
   }
 
   if (chartTendencia) chartTendencia.destroy();
   chartTendencia = new Chart(document.getElementById('chartTendencia'), {
     type: 'line',
-    data: {
-      labels: tendLabels,
-      datasets: [{
-        label: 'Venta Bruta (L)',
-        data: tendVentas,
-        borderColor: '#CBAA63',
-        backgroundColor: 'rgba(203,170,99,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointBackgroundColor: '#CBAA63'
-      }]
-    },
+    data: { labels: tLabels, datasets: [{ label: 'Venta Neta (L)', data: tVentas, borderColor: '#CBAA63', backgroundColor: 'rgba(203,170,99,0.1)', fill: true, tension: 0.3, pointBackgroundColor: '#CBAA63' }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 }
 
-// ══════════════════════════════════════════
-// TAB 3: MENSAJERIA BIDIRECCIONAL (CHAT)
-// ══════════════════════════════════════════
-var fotoFiles = [];
-
-function previewFotos(input) {
+/* ══════════════════════════════════════════
+   TAB 3: MENSAJERIA CON GERENCIA GENERAL
+   ══════════════════════════════════════════ */
+function previewAdminFotos(input) {
   var files = Array.from(input.files).slice(0, 2);
-  fotoFiles = files;
-  var preview = document.getElementById('msgFotosPreview');
+  adminFotoFiles = files;
+  var preview = document.getElementById('adminFotosPreview');
   preview.innerHTML = '';
   files.forEach(function(f) {
     var url = URL.createObjectURL(f);
-    preview.innerHTML += '<img src="' + url + '" style="max-height:40px;border-radius:4px;"/>';
+    preview.innerHTML += '<img src="' + url + '" style="max-height:36px;border-radius:4px;"/>';
   });
-  if (input.files.length > 2) {
-    document.getElementById('msgError').textContent = 'M\u00e1ximo 2 fotos. Se tomaron las primeras 2.';
-  }
+  if (input.files.length > 2) document.getElementById('adminMsgError').textContent = 'M\u00e1ximo 2 fotos.';
 }
 
-async function enviarMensaje() {
-  var texto = document.getElementById('msgTexto').value.trim();
-  var errEl = document.getElementById('msgError');
+async function enviarMsgAdmin() {
+  var texto = document.getElementById('adminTexto').value.trim();
+  var errEl = document.getElementById('adminMsgError');
   errEl.textContent = '';
   if (!texto) { errEl.textContent = 'Escriba un mensaje.'; return; }
 
   try {
-    // Create message with emisor = DIVISIONAL
     var msg = await apiPost('/rest/v1/mensajes_divisional', {
       gerencia_divisional_id: session.id,
       texto: texto,
@@ -729,79 +1003,272 @@ async function enviarMensaje() {
     });
     var msgId = msg[0].id;
 
-    // Upload photos if any
-    for (var i = 0; i < fotoFiles.length; i++) {
-      var file = fotoFiles[i];
+    for (var i = 0; i < adminFotoFiles.length; i++) {
+      var file = adminFotoFiles[i];
       var ext = file.name.split('.').pop();
       var path = 'mensajes/' + msgId + '/' + (i + 1) + '.' + ext;
-
       await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
         method: 'POST',
         headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
         body: file
       });
-
       var publicUrl = SB + '/storage/v1/object/public/archivos-corporativos/' + path;
-      await apiPost('/rest/v1/mensajes_divisional_fotos', {
-        mensaje_id: msgId,
-        url_foto: publicUrl,
-        nombre_archivo: file.name
-      });
+      await apiPost('/rest/v1/mensajes_divisional_fotos', { mensaje_id: msgId, url_foto: publicUrl });
     }
 
-    document.getElementById('msgTexto').value = '';
-    document.getElementById('msgFotosPreview').innerHTML = '';
-    document.getElementById('msgFotos').value = '';
-    fotoFiles = [];
-    loadMensajes();
+    document.getElementById('adminTexto').value = '';
+    document.getElementById('adminFotosPreview').innerHTML = '';
+    document.getElementById('adminFotos').value = '';
+    adminFotoFiles = [];
+    loadMsgAdmin();
   } catch(e) {
     errEl.textContent = e.message || 'Error al enviar mensaje.';
     console.error(e);
   }
 }
 
-async function loadMensajes() {
-  // Load ALL messages for this gerencia_divisional_id, ordered chronologically (ASC for chat)
-  var mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*)&order=created_at.asc');
-  // fallback
-  if (mensajes.error) {
-    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&order=created_at.asc');
-  }
+async function loadMsgAdmin() {
+  var mensajes = [];
+  try {
+    mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*)&order=created_at.asc');
+    if (!mensajes || mensajes.error) {
+      mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&order=created_at.asc');
+      if (!mensajes || mensajes.error) mensajes = [];
+    }
+  } catch(e) { mensajes = []; }
 
-  var feed = document.getElementById('chatFeed');
-  if (!mensajes || !mensajes.length) {
+  var feed = document.getElementById('chatAdminFeed');
+  if (!mensajes.length) {
     feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a\u00fan. Inicie la conversaci\u00f3n con Gerencia General.</p>';
     return;
   }
 
+  var prevLen = feed.children.length;
   feed.innerHTML = mensajes.map(function(m) {
-    // Determine sender: if emisor field exists use it, otherwise treat as DIVISIONAL (legacy)
-    var isAdmin = (m.emisor === 'ADMIN');
-    var bubbleClass = isAdmin ? 'admin' : 'divisional';
-    var senderLabel = isAdmin ? 'Gerencia General' : 'T\u00fa';
-
-    // Photos
+    var isMe = (m.emisor === 'DIVISIONAL');
+    var cls = isMe ? 'right' : 'left';
+    var sender = isMe ? 'T\u00fa' : 'Gerencia General';
     var fotosHtml = '';
     if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
       fotosHtml = '<div class="chat-photos">' + m.mensajes_divisional_fotos.map(function(f) {
-        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
+        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)"/>';
       }).join('') + '</div>';
     }
-
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    var textoSafe = escapeHtml(m.texto).replace(/\n/g, '<br>');
-
-    return '<div class="chat-bubble ' + bubbleClass + '">' +
-      '<div class="chat-sender">' + senderLabel + '</div>' +
-      textoSafe +
-      fotosHtml +
-      '<div class="chat-time">' + fecha + '</div>' +
-    '</div>';
+    return '<div class="chat-bubble ' + cls + '"><div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
   }).join('');
-
-  // Auto-scroll to bottom
   feed.scrollTop = feed.scrollHeight;
 }
+
+/* ══════════════════════════════════════════
+   TAB 4: MENSAJERIA CON GERENTES DE ZONA
+   ══════════════════════════════════════════ */
+function renderZonaList() {
+  var panel = document.getElementById('zonaListPanel');
+  if (!gerentes.length) {
+    panel.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;font-size:0.8rem;">No hay gerentes de zona</p>';
+    return;
+  }
+  panel.innerHTML = gerentes.map(function(g) {
+    var zonaN = g._zona ? g._zona.nombre : '';
+    var activeClass = (selectedZonaGerente && selectedZonaGerente.id === g.id) ? ' active' : '';
+    return '<div class="chat-list-item' + activeClass + '" onclick="selectZonaGerente(\'' + g.id + '\')">' +
+      '<div class="cli-name">' + esc(g.nombre) + '</div>' +
+      '<div class="cli-zona">' + esc(zonaN) + ' &middot; ' + esc(g.codigo) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function selectZonaGerente(gId) {
+  selectedZonaGerente = gerentes.find(function(g){ return g.id === gId; });
+  if (!selectedZonaGerente) return;
+  renderZonaList();
+  document.getElementById('zonaChatHeader').textContent = selectedZonaGerente.nombre + ' - ' + (selectedZonaGerente._zona ? selectedZonaGerente._zona.nombre : '');
+  document.getElementById('zonaChatInput').style.display = 'flex';
+  loadMsgZona();
+  if (zonaPolling) clearInterval(zonaPolling);
+  zonaPolling = setInterval(loadMsgZona, 10000);
+}
+
+function previewZonaFotos(input) {
+  var files = Array.from(input.files).slice(0, 2);
+  zonaFotoFiles = files;
+  var preview = document.getElementById('zonaFotosPreview');
+  preview.innerHTML = '';
+  files.forEach(function(f) {
+    var url = URL.createObjectURL(f);
+    preview.innerHTML += '<img src="' + url + '" style="max-height:36px;border-radius:4px;"/>';
+  });
+  if (input.files.length > 2) document.getElementById('zonaMsgError').textContent = 'M\u00e1ximo 2 fotos.';
+}
+
+async function enviarMsgZona() {
+  if (!selectedZonaGerente) return;
+  var texto = document.getElementById('zonaTexto').value.trim();
+  var errEl = document.getElementById('zonaMsgError');
+  errEl.textContent = '';
+  if (!texto) { errEl.textContent = 'Escriba un mensaje.'; return; }
+
+  try {
+    var msg = await apiPost('/rest/v1/mensajes_zona', {
+      gerente_zona_id: selectedZonaGerente.id,
+      gerencia_divisional_id: session.id,
+      texto: texto,
+      emisor: 'DIVISIONAL'
+    });
+    var msgId = msg[0].id;
+
+    for (var i = 0; i < zonaFotoFiles.length; i++) {
+      var file = zonaFotoFiles[i];
+      var ext = file.name.split('.').pop();
+      var path = 'mensajes_zona/' + msgId + '/' + (i + 1) + '.' + ext;
+      await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+        method: 'POST',
+        headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
+        body: file
+      });
+      var publicUrl = SB + '/storage/v1/object/public/archivos-corporativos/' + path;
+      await apiPost('/rest/v1/mensajes_zona_fotos', { mensaje_id: msgId, url_foto: publicUrl });
+    }
+
+    document.getElementById('zonaTexto').value = '';
+    document.getElementById('zonaFotosPreview').innerHTML = '';
+    document.getElementById('zonaFotos').value = '';
+    zonaFotoFiles = [];
+    loadMsgZona();
+  } catch(e) {
+    errEl.textContent = e.message || 'Error al enviar mensaje.';
+    console.error(e);
+  }
+}
+
+async function loadMsgZona() {
+  if (!selectedZonaGerente) return;
+  var mensajes = [];
+  try {
+    mensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + selectedZonaGerente.id + '&gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_zona_fotos(*)&order=created_at.asc');
+    if (!mensajes || mensajes.error) {
+      mensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + selectedZonaGerente.id + '&gerencia_divisional_id=eq.' + session.id + '&order=created_at.asc');
+      if (!mensajes || mensajes.error) mensajes = [];
+    }
+  } catch(e) { mensajes = []; }
+
+  var feed = document.getElementById('chatZonaFeed');
+  if (!mensajes.length) {
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes con este gerente a\u00fan.</p>';
+    return;
+  }
+
+  feed.innerHTML = mensajes.map(function(m) {
+    var isMe = (m.emisor === 'DIVISIONAL');
+    var cls = isMe ? 'right' : 'left';
+    var sender = isMe ? 'T\u00fa' : esc(selectedZonaGerente.nombre);
+    var fotosHtml = '';
+    if (m.mensajes_zona_fotos && m.mensajes_zona_fotos.length) {
+      fotosHtml = '<div class="chat-photos">' + m.mensajes_zona_fotos.map(function(f) {
+        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)"/>';
+      }).join('') + '</div>';
+    }
+    var fecha = new Date(m.created_at).toLocaleString('es-HN');
+    return '<div class="chat-bubble ' + cls + '"><div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
+  }).join('');
+  feed.scrollTop = feed.scrollHeight;
+}
+
+/* ══════════════════════════════════════════
+   TAB 5: COMISIONES Y PAGOS
+   ══════════════════════════════════════════ */
+async function loadComisiones() {
+  var ano = document.getElementById('comAno').value;
+  var campanaId = document.getElementById('comCampana').value;
+  var gerenteIds = gerentes.map(function(g){ return g.id; });
+
+  if (!gerenteIds.length) {
+    document.getElementById('comDivTotal').textContent = 'L 0.00';
+    document.getElementById('comNominaTotal').textContent = 'L 0.00';
+    document.getElementById('comGrandTotal').textContent = 'L 0.00';
+    document.getElementById('comTable').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gris);">No hay gerentes de zona</td></tr>';
+    return;
+  }
+
+  var idFilter = 'in.(' + gerenteIds.join(',') + ')';
+  var pedidosQuery = '/rest/v1/pedidos?gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta';
+  var nombrQuery = '/rest/v1/nombramientos?gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id';
+  if (campanaId) {
+    pedidosQuery += '&campana_id=eq.' + campanaId;
+    nombrQuery += '&campana_ingreso_id=eq.' + campanaId;
+  }
+
+  var pedidos = await api(pedidosQuery);
+  if (!pedidos || pedidos.error) pedidos = [];
+  var nombramientos = await api(nombrQuery);
+  if (!nombramientos || nombramientos.error) nombramientos = [];
+
+  var gs = {};
+  gerentes.forEach(function(g) {
+    gs[g.id] = { nombre: g.nombre, zona: g._zona ? g._zona.nombre : '-', neta: 0, nombramientos: 0 };
+  });
+  var totalNetaDiv = 0;
+
+  pedidos.forEach(function(p) {
+    var neta = parseFloat(p.total_venta_neta || 0);
+    if (gs[p.gerente_id]) gs[p.gerente_id].neta += neta;
+    totalNetaDiv += neta;
+  });
+  nombramientos.forEach(function(n) {
+    if (gs[n.gerente_id]) gs[n.gerente_id].nombramientos++;
+  });
+
+  var comDiv = totalNetaDiv * 0.04;
+  var totalNominaGZ = 0;
+  var rows = '';
+  var chartLabels = [], chartPagos = [];
+
+  Object.keys(gs).forEach(function(gId) {
+    var s = gs[gId];
+    var base = 15000;
+    var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
+    var comGZ = s.neta * 0.03;
+    var totalPagoGZ = base + pagoNombr + comGZ;
+    totalNominaGZ += totalPagoGZ;
+    chartLabels.push(s.nombre);
+    chartPagos.push(totalPagoGZ);
+    rows += '<tr><td>' + esc(s.nombre) + '</td><td>' + esc(s.zona) + '</td><td>' + fmtL(base) + '</td><td>' + s.nombramientos + '</td><td>' + fmtL(pagoNombr) + '</td><td>' + fmtL(comGZ) + '</td><td style="font-weight:600;color:var(--dorado);">' + fmtL(totalPagoGZ) + '</td></tr>';
+  });
+
+  var grandTotal = comDiv + totalNominaGZ;
+  document.getElementById('comDivTotal').textContent = fmtL(comDiv);
+  document.getElementById('comNominaTotal').textContent = fmtL(totalNominaGZ);
+  document.getElementById('comGrandTotal').textContent = fmtL(grandTotal);
+  document.getElementById('comTable').innerHTML = rows;
+
+  // Charts
+  if (chartComDist) chartComDist.destroy();
+  chartComDist = new Chart(document.getElementById('chartComDist'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Comisi\u00f3n Divisional (4%)', 'N\u00f3mina Gerentes Zona'],
+      datasets: [{ data: [comDiv, totalNominaGZ], backgroundColor: ['#CBAA63','#1C1C1C'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+  });
+
+  if (chartComBar) chartComBar.destroy();
+  var barColors = ['#CBAA63','#d4b96e','#a08940','#c0392b','#27ae60','#2980b9','#8e44ad'];
+  chartComBar = new Chart(document.getElementById('chartComBar'), {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [{ label: 'Total Pago GZ (L)', data: chartPagos, backgroundColor: barColors.slice(0, chartLabels.length), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+}
+
+/* ── Close modal on outside click ── */
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
 </script>
 </body>
 </html>

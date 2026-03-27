@@ -11,6 +11,18 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;}
 
+    /* ── LOGIN ── */
+    .login-overlay{position:fixed;inset:0;background:var(--carbon);display:flex;align-items:center;justify-content:center;z-index:9999;}
+    .login-box{background:var(--surface);border:1px solid var(--borde);border-radius:6px;padding:48px 40px;width:380px;max-width:92vw;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.3);}
+    .login-box .logo{font-family:'Cinzel',serif;font-size:1.6rem;letter-spacing:0.3em;color:var(--dorado);margin-bottom:6px;}
+    .login-box .subtitle{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gris);margin-bottom:32px;}
+    .login-box input{width:100%;padding:12px 14px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.9rem;outline:none;background:var(--marfil);margin-bottom:12px;text-align:center;letter-spacing:0.1em;transition:border-color .3s;}
+    .login-box input:focus{border-color:var(--dorado);}
+    .login-box .login-btn{width:100%;padding:12px;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;margin-top:8px;}
+    .login-box .login-btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
+    .login-error{color:var(--danger);font-size:0.75rem;margin-top:10px;min-height:20px;}
+
+    /* ── TOPBAR ── */
     .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;}
     .topbar-brand{font-family:'Cinzel',serif;color:var(--dorado);font-size:1rem;letter-spacing:0.2em;}
     .topbar-info{color:rgba(255,255,255,0.7);font-size:0.7rem;letter-spacing:0.05em;text-align:right;}
@@ -18,34 +30,43 @@
     .topbar-logout{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:6px 14px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .3s;}
     .topbar-logout:hover{border-color:var(--dorado);color:var(--dorado);}
 
+    /* ── TABS ── */
     .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--borde);padding:0 24px;overflow-x:auto;}
     .tab-btn{padding:14px 20px;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
     .tab-btn:hover{color:var(--carbon);}.tab-btn.active{color:var(--dorado);border-bottom-color:var(--dorado);}
 
+    /* ── LAYOUT ── */
     .container{max-width:1200px;margin:0 auto;padding:30px 24px;}
     .tab-panel{display:none;}.tab-panel.active{display:block;}
+    .app-wrapper{display:none;}
 
+    /* ── CARDS ── */
     .card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);}
     .card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
 
+    /* ── FORMS ── */
     .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;}
     .form-group{display:flex;flex-direction:column;}
     .form-group label{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:500;}
-    .form-group input,.form-group select{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
-    .form-group input:focus,.form-group select:focus{border-color:var(--dorado);}
+    .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--dorado);}
 
+    /* ── BUTTONS ── */
     .btn{padding:10px 20px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;}
     .btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
     .btn-outline{background:transparent;color:var(--carbon);}.btn-outline:hover{background:var(--carbon);color:var(--dorado);}
     .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}.btn-danger:hover{background:var(--danger);color:#fff;}
+    .btn-success{border-color:var(--success);background:var(--success);color:#fff;}.btn-success:hover{background:#219a52;}
     .btn-sm{padding:6px 12px;font-size:0.6rem;}
 
+    /* ── TABLE ── */
     table{width:100%;border-collapse:collapse;font-size:0.8rem;}
     thead{background:var(--carbon);}
     th{color:var(--dorado);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:10px 12px;text-align:left;font-weight:500;}
     td{padding:10px 12px;border-bottom:1px solid var(--borde);}
     tr:hover{background:rgba(203,170,99,0.04);}
 
+    /* ── STATS ── */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
     .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:18px;text-align:center;box-shadow:var(--shadow);}
     .stat-value{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--dorado);margin-bottom:4px;}
@@ -53,12 +74,23 @@
 
     .chart-container{position:relative;height:280px;margin:20px 0;}
 
+    /* ── SECTOR GRID ── */
+    .sector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+    .sector-card{background:var(--surface);border:1px solid var(--borde);border-radius:6px;padding:20px;box-shadow:var(--shadow);transition:border-color .3s;}
+    .sector-card:hover{border-color:var(--dorado);}
+    .sector-num{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--dorado);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+    .sector-coord-name{font-weight:600;font-size:0.9rem;margin-bottom:4px;}
+    .sector-detail{font-size:0.75rem;color:var(--gris);margin:2px 0;}
+    .sector-empty{text-align:center;padding:10px 0;color:var(--gris);font-size:0.8rem;font-style:italic;}
+
+    /* ── PEDIDO ITEMS TABLE ── */
     .pedido-items-table{width:100%;border-collapse:collapse;margin-top:10px;}
     .pedido-items-table th{background:var(--marfil);color:var(--carbon);font-size:0.65rem;padding:8px;border:1px solid var(--borde);}
     .pedido-items-table td{padding:6px 8px;border:1px solid var(--borde);font-size:0.8rem;}
     .pedido-items-table input{width:100%;padding:6px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;background:transparent;}
     .pedido-items-table input:focus{border-color:var(--dorado);}
 
+    /* ── BADGES ── */
     .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.6rem;font-weight:600;}
     .badge-active{background:rgba(39,174,96,0.1);color:var(--success);}
     .badge-inactive{background:rgba(192,57,43,0.1);color:var(--danger);}
@@ -66,24 +98,42 @@
     .error-msg{color:var(--danger);font-size:0.75rem;margin-top:8px;}
     .success-msg{color:var(--success);font-size:0.75rem;margin-top:8px;}
 
-    .msg-feed{max-height:600px;overflow-y:auto;}
-    .msg-item{background:var(--surface);border:1px solid var(--borde);border-radius:4px;padding:16px;margin-bottom:12px;}
-    .msg-text{font-size:0.85rem;line-height:1.7;margin-bottom:8px;}
-    .msg-photos{display:flex;gap:8px;margin-bottom:8px;}
-    .msg-photos img{max-width:200px;max-height:150px;border-radius:4px;object-fit:cover;cursor:pointer;}
-    .msg-meta{font-size:0.65rem;color:var(--gris);display:flex;justify-content:space-between;align-items:center;}
-    .msg-reactions{display:flex;align-items:center;gap:6px;}
-    .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:4px 10px;cursor:pointer;font-size:0.75rem;transition:all .3s;}
-    .react-btn:hover,.react-btn.reacted{background:rgba(203,170,99,0.15);border-color:var(--dorado);}
-
-    .msg-left{align-self:flex-start;max-width:75%;background:var(--surface);border:1px solid var(--borde);border-radius:4px 12px 12px 0;}
-    .msg-right{align-self:flex-end;max-width:75%;background:rgba(203,170,99,0.10);border:1px solid var(--dorado);border-radius:12px 4px 0 12px;}
-    .msg-sender{font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--gris);margin-bottom:4px;font-weight:600;}
-    .msg-right .msg-sender{color:var(--dorado);}
-
+    /* ── PROF CARD ── */
     .prof-card{background:rgba(203,170,99,0.08);border:1px solid var(--dorado);border-radius:4px;padding:14px;margin:10px 0;display:none;}
     .prof-card.visible{display:block;}
     .prof-card p{font-size:0.8rem;margin:2px 0;}.prof-card strong{color:var(--dorado);}
+
+    /* ── CHAT ── */
+    .chat-container{display:flex;flex-direction:column;height:520px;border:1px solid var(--borde);border-radius:6px;background:var(--marfil);overflow:hidden;}
+    .chat-feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .chat-bubble{max-width:75%;padding:12px 16px;border-radius:12px;font-size:0.85rem;line-height:1.6;position:relative;word-wrap:break-word;}
+    .chat-bubble.left{align-self:flex-start;background:var(--surface);color:var(--carbon);border:1px solid var(--borde);border-bottom-left-radius:4px;}
+    .chat-bubble.right{align-self:flex-end;background:rgba(203,170,99,0.15);color:var(--carbon);border:1px solid var(--dorado);border-bottom-right-radius:4px;}
+    .chat-sender{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;color:var(--gris);}
+    .chat-bubble.right .chat-sender{color:var(--dorado);}
+    .chat-time{font-size:0.6rem;color:var(--gris);margin-top:6px;text-align:right;}
+    .chat-photos{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+    .chat-photos img{max-width:160px;max-height:120px;border-radius:6px;object-fit:cover;cursor:pointer;}
+    .chat-input-bar{display:flex;gap:8px;padding:12px;background:var(--surface);border-top:1px solid var(--borde);align-items:flex-end;}
+    .chat-input-bar textarea{flex:1;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:none;min-height:44px;max-height:100px;outline:none;background:var(--marfil);border-radius:4px;}
+    .chat-input-bar textarea:focus{border-color:var(--dorado);}
+    .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.7rem;transition:all .3s;margin-top:4px;}
+    .react-btn:hover,.react-btn.reacted{background:rgba(203,170,99,0.2);border-color:var(--dorado);}
+
+    /* ── SALARY CARD ── */
+    .salary-card{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);padding:28px;}
+    .salary-card .stat-value{color:var(--dorado);font-size:2rem;}
+    .salary-card .stat-label{color:rgba(250,249,246,0.6);}
+    .salary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:0.85rem;}
+    .salary-row:last-child{border-bottom:none;}
+    .salary-row .sr-label{color:rgba(250,249,246,0.7);}
+    .salary-row .sr-value{color:var(--dorado);font-weight:600;}
+    .salary-total{font-family:'Cinzel',serif;font-size:2rem;color:var(--dorado);text-align:center;padding:16px 0 0;border-top:1px solid rgba(203,170,99,0.3);margin-top:8px;}
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:500;display:none;}
+    .modal-overlay.active{display:flex;}
+    .modal-box{background:var(--surface);border-radius:6px;padding:28px;width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
 
     @media(max-width:768px){
       .topbar{padding:10px 16px;}
@@ -91,10 +141,32 @@
       .container{padding:20px 12px;}
       .form-grid{grid-template-columns:1fr;}
       .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .sector-grid{grid-template-columns:1fr;}
+      .chat-bubble{max-width:90%;}
+      .login-box{padding:32px 24px;}
     }
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════════ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">ENIGME</div>
+    <div class="subtitle">Gerencia de Zona</div>
+    <input id="loginCodigo" placeholder="Ingrese su codigo" maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <input id="loginPassword" type="password" placeholder="Contrasena temporal" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP WRAPPER
+     ═══════════════════════════════════════════ -->
+<div class="app-wrapper" id="appWrapper">
 
 <div class="topbar">
   <div class="topbar-brand">ENIGME &middot; GERENCIA DE ZONA</div>
@@ -105,50 +177,31 @@
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('sectores',this)">Mis Sectores</button>
+  <button class="tab-btn active" onclick="switchTab('sectores',this)">Sectores</button>
   <button class="tab-btn" onclick="switchTab('pedidos',this)">Subir Pedidos</button>
   <button class="tab-btn" onclick="switchTab('nombramientos',this)">Nombramientos</button>
-  <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona</button>
+  <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona Resumen</button>
   <button class="tab-btn" onclick="switchTab('mensajeria',this)">Mensajer&iacute;a</button>
+  <button class="tab-btn" onclick="switchTab('registros',this)">Registros</button>
 </div>
 
 <div class="container">
 
-  <!-- ══ TAB 1: SECTORES ══ -->
+  <!-- ══════════════════════════════════════════
+       TAB 1: SECTORES (S1-S14)
+       ══════════════════════════════════════════ -->
   <div class="tab-panel active" id="panel-sectores">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Mis Sectores</h2>
-      <button class="btn" onclick="toggleFormSector()">+ Nuevo Sector</button>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mis Sectores</h2>
+    <div class="sector-grid" id="sectorGrid">
+      <p style="color:var(--gris);text-align:center;padding:40px;grid-column:1/-1;">Cargando sectores...</p>
     </div>
-
-    <div class="card" id="formSector" style="display:none;">
-      <div class="card-title">Crear Sector y Asignar Coordinador</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Sector (se asigna auto)</label><input id="secNumero" readonly style="background:#eee;"/></div>
-        <div class="form-group"><label>Nombre del Coordinador *</label><input id="secNombre" placeholder="Nombre completo"/></div>
-        <div class="form-group"><label>DNI *</label><input id="secDni" placeholder="0000-0000-00000"/></div>
-        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="secDireccion" placeholder="Dirección"/></div>
-        <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="secEmail" type="email" placeholder="correo@email.com"/></div>
-        <div class="form-group"><label>RTN</label><input id="secRtn" placeholder="RTN"/></div>
-        <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="secCuenta" placeholder="Número de cuenta"/></div>
-        <div class="form-group"><label>Nombre del Banco</label><input id="secBanco" placeholder="Ej: BAC, Ficohsa"/></div>
-        <div class="form-group"><label>Fecha de Nacimiento</label><input id="secFechaNac" type="date"/></div>
-      </div>
-      <div style="margin-top:16px;display:flex;gap:10px;">
-        <button class="btn" onclick="guardarSector()">Guardar</button>
-        <button class="btn btn-outline" onclick="toggleFormSector()">Cancelar</button>
-      </div>
-      <p id="secError" class="error-msg"></p>
-      <p id="secSuccess" class="success-msg"></p>
-    </div>
-
-    <div id="listaSectores"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p></div>
   </div>
 
-  <!-- ══ TAB 2: SUBIR PEDIDOS ══ -->
+  <!-- ══════════════════════════════════════════
+       TAB 2: SUBIR PEDIDOS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-pedidos">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Subir Pedido</h2>
-
     <div class="card">
       <div class="form-grid">
         <div class="form-group">
@@ -179,11 +232,11 @@
             <thead><tr><th style="width:80px;">Cantidad</th><th>Referencia</th><th style="width:120px;">Precio</th><th style="width:120px;">Total</th><th style="width:40px;"></th></tr></thead>
             <tbody id="pedItems">
               <tr>
-                <td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
                 <td><input class="pi-ref" placeholder="Ref. producto" onkeydown="handleEnterPed(event,this)"/></td>
-                <td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
                 <td class="pi-total" style="font-weight:600;">0.00</td>
-                <td><button class="btn-danger btn-sm" onclick="removeRow(this)" style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;">&times;</button></td>
+                <td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>
               </tr>
             </tbody>
           </table>
@@ -191,8 +244,8 @@
         <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="addRow()">+ Agregar Fila</button>
           <div style="text-align:right;">
-            <div style="font-size:0.85rem;">Total Bruto: <strong id="pedTotalBruto" style="color:var(--dorado);">L 0.00</strong></div>
-            <div style="font-size:0.85rem;">Total Neto (-15%): <strong id="pedTotalNeto" style="color:var(--success);">L 0.00</strong></div>
+            <div style="font-size:0.85rem;">Venta Bruta: <strong id="pedTotalBruto" style="color:var(--dorado);">L 0.00</strong></div>
+            <div style="font-size:0.85rem;">Venta Neta (-15%): <strong id="pedTotalNeto" style="color:var(--success);">L 0.00</strong></div>
           </div>
         </div>
       </div>
@@ -202,6 +255,7 @@
           Adjuntar Archivos (m&aacute;x 2)
           <input type="file" id="pedArchivos" accept="image/*,.pdf" multiple style="display:none;"/>
         </label>
+        <span id="pedFilesInfo" style="font-size:0.7rem;color:var(--gris);margin-left:8px;"></span>
       </div>
 
       <div style="margin-top:16px;display:flex;gap:10px;">
@@ -212,15 +266,16 @@
     </div>
   </div>
 
-  <!-- ══ TAB 3: NOMBRAMIENTOS ══ -->
+  <!-- ══════════════════════════════════════════
+       TAB 3: NOMBRAMIENTOS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-nombramientos">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Nuevo Nombramiento</h2>
-
     <div class="card">
       <div class="form-grid">
         <div class="form-group"><label>DNI *</label><input id="nomDni" placeholder="0000-0000-00000" onblur="buscarExistente()"/></div>
         <div class="form-group"><label>Nombre Completo *</label><input id="nomNombre" placeholder="Nombre y apellidos"/></div>
-        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="nomDireccion" placeholder="Dirección completa"/></div>
+        <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="nomDireccion" placeholder="Direcci&oacute;n completa"/></div>
         <div class="form-group"><label>Tel&eacute;fono *</label><input id="nomTelefono" placeholder="+504..."/></div>
         <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="nomEmail" type="email" placeholder="Opcional"/></div>
         <div class="form-group">
@@ -246,6 +301,7 @@
           Adjuntar Archivos (m&aacute;x 2)
           <input type="file" id="nomArchivos" accept="image/*,.pdf" multiple style="display:none;"/>
         </label>
+        <span id="nomFilesInfo" style="font-size:0.7rem;color:var(--gris);margin-left:8px;"></span>
       </div>
 
       <div style="margin-top:16px;display:flex;gap:10px;">
@@ -255,119 +311,219 @@
       <p id="nomSuccess" class="success-msg"></p>
     </div>
 
-    <div style="margin-top:20px;">
-      <div class="card-title">Nombramientos Recientes</div>
+    <div style="margin-top:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+        <div class="card-title" style="margin-bottom:0;">Nombramientos por Campa&ntilde;a</div>
+        <select id="nomListCampana" onchange="loadNombramientos()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+          <option value="">Todos</option>
+        </select>
+      </div>
       <div id="listaNom"><p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p></div>
     </div>
   </div>
 
-  <!-- ══ TAB 4: MI ZONA RESUMEN ══ -->
+  <!-- ══════════════════════════════════════════
+       TAB 4: MI ZONA RESUMEN
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-resumen">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Resumen de Mi Zona</h2>
 
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;">
       <select id="resCampana" onchange="loadResumen()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
-        <option value="">Todas las campañas</option>
+        <option value="">Todas las campa&ntilde;as</option>
       </select>
       <span style="font-size:0.75rem;color:var(--gris);">A&ntilde;o <span id="resAno"></span></span>
     </div>
 
     <div class="stats-grid" id="resStats"></div>
 
-    <!-- COMISIONES -->
-    <div class="card" style="border-left:4px solid var(--dorado);">
-      <div class="card-title" style="display:flex;align-items:center;gap:8px;">&#128176; Comisiones de Zona (3% Venta Neta)</div>
-      <div class="stats-grid" id="resComisionStats"></div>
-      <div style="overflow-x:auto;margin-top:12px;">
-        <table>
-          <thead><tr><th>Sector</th><th>Coordinador</th><th>Venta Neta</th><th>Aporte Comisi&oacute;n (3%)</th></tr></thead>
-          <tbody id="resComisionTable"></tbody>
-        </table>
-      </div>
-    </div>
-
+    <!-- SECTOR BREAKDOWN -->
     <div class="card">
-      <div class="card-title">Ventas por Sector</div>
+      <div class="card-title">Desglose por Sector</div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Sector</th><th>Coordinador</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+          <thead><tr><th>Sector</th><th>Coordinador</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th><th>Nombramientos</th></tr></thead>
           <tbody id="resTable"></tbody>
         </table>
       </div>
     </div>
 
+    <!-- CHARTS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-      <div class="card">
-        <div class="card-title">Comparativa Campa&ntilde;as</div>
-        <div class="chart-container"><canvas id="resChartComp"></canvas></div>
-      </div>
       <div class="card">
         <div class="card-title">Ventas por Sector</div>
         <div class="chart-container"><canvas id="resChartSector"></canvas></div>
       </div>
-    </div>
-  </div>
-
-  <!-- ══ TAB 5: MENSAJERÍA ══ -->
-  <div class="tab-panel" id="panel-mensajeria">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Conversaci&oacute;n con Gerencia Divisional</h2>
-
-    <div class="msg-feed" id="gzMsgFeed" style="display:flex;flex-direction:column;gap:12px;">
-      <p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p>
+      <div class="card">
+        <div class="card-title">Comparativa Campa&ntilde;as</div>
+        <div class="chart-container"><canvas id="resChartComp"></canvas></div>
+      </div>
     </div>
 
-    <!-- Compose message -->
-    <div class="card" style="margin-top:16px;position:sticky;bottom:0;z-index:10;">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <textarea id="gzMsgTexto" rows="3" placeholder="Escribe un mensaje a Gerencia Divisional..." style="width:100%;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;resize:vertical;background:var(--marfil);transition:border-color .3s;" onfocus="this.style.borderColor='var(--dorado)'" onblur="this.style.borderColor='var(--borde)'"></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-          <label class="btn btn-outline btn-sm" style="cursor:pointer;">
-            &#128247; Adjuntar fotos (m&aacute;x 3)
-            <input type="file" id="gzMsgFotos" accept="image/*" multiple style="display:none;"/>
-          </label>
-          <div id="gzMsgFotosPreview" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-          <button class="btn" onclick="enviarMensajeZona()">Enviar</button>
-        </div>
-        <p id="gzMsgError" class="error-msg"></p>
-        <p id="gzMsgSuccess" class="success-msg"></p>
+    <!-- SALARY CALCULATOR -->
+    <div class="card salary-card">
+      <div class="card-title" style="color:var(--dorado);">Calculadora de Salario</div>
+      <div id="salaryContent">
+        <p style="color:rgba(250,249,246,0.5);font-size:0.8rem;">Seleccione una campa&ntilde;a para ver su salario estimado.</p>
       </div>
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════
+       TAB 5: MENSAJERIA
+       ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-mensajeria">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Conversaci&oacute;n con Gerencia Divisional</h2>
+
+    <div class="chat-container">
+      <div class="chat-feed" id="chatFeed">
+        <p style="color:var(--gris);text-align:center;padding:20px;">Cargando mensajes...</p>
+      </div>
+      <div class="chat-input-bar">
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+          <textarea id="chatInput" placeholder="Escribe un mensaje..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensajeZona();}"></textarea>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <label class="btn btn-outline btn-sm" style="cursor:pointer;font-size:0.6rem;">
+              &#128247; Fotos (m&aacute;x 2)
+              <input type="file" id="chatFotos" accept="image/*" multiple style="display:none;"/>
+            </label>
+            <div id="chatFotosPreview" style="display:flex;gap:4px;"></div>
+          </div>
+        </div>
+        <button class="btn" onclick="enviarMensajeZona()" style="align-self:flex-end;">Enviar</button>
+      </div>
+    </div>
+    <p id="chatError" class="error-msg"></p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       TAB 6: REGISTROS
+       ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-registros">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Registros</h2>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn" id="regBtnNom" onclick="switchRegistro('nom')">Nombramientos</button>
+      <button class="btn btn-outline" id="regBtnPed" onclick="switchRegistro('ped')">Pedidos</button>
+      <select id="regCampana" onchange="loadRegistros()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+        <option value="">Todas las campa&ntilde;as</option>
+      </select>
+    </div>
+
+    <div id="regContent"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p></div>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /app-wrapper -->
+
+<!-- ═══════════════════════════════════════════
+     MODAL: Assign/Edit Coordinator
+     ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalCoord">
+  <div class="modal-box">
+    <div class="card-title" id="modalCoordTitle">Asignar Coordinador</div>
+    <input type="hidden" id="mcSectorId"/>
+    <input type="hidden" id="mcSectorNum"/>
+    <input type="hidden" id="mcCoordId"/>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre Completo *</label><input id="mcNombre" placeholder="Nombre completo"/></div>
+      <div class="form-group"><label>DNI *</label><input id="mcDni" placeholder="0000-0000-00000"/></div>
+      <div class="form-group"><label>Tel&eacute;fono *</label><input id="mcTelefono" placeholder="+504..."/></div>
+      <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="mcEmail" type="email" placeholder="correo@email.com"/></div>
+      <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="mcDireccion" placeholder="Direcci&oacute;n"/></div>
+      <div class="form-group"><label>RTN</label><input id="mcRtn" placeholder="RTN"/></div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input id="mcFechaNac" type="date"/></div>
+      <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="mcCuenta" placeholder="Cuenta bancaria"/></div>
+      <div class="form-group"><label>Nombre del Banco</label><input id="mcBanco" placeholder="Ej: BAC, Ficohsa"/></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn" onclick="guardarCoordinador()">Guardar</button>
+      <button class="btn btn-outline" onclick="cerrarModalCoord()">Cancelar</button>
+    </div>
+    <p id="mcError" class="error-msg"></p>
+    <p id="mcSuccess" class="success-msg"></p>
+  </div>
 </div>
 
 <script>
 /* ================================================================
-   ENIGME - GERENCIA DE ZONA
+   ENIGME - GERENCIA DE ZONA - PANEL COMPLETO
    ================================================================ */
 var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
-var H = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var H  = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-var session = null;
-var sectores = [];
-var campanas = [];
-var profData = null; // professional found by code
-var resChartComp = null;
+var session   = null;
+var sectores  = [];
+var campanas  = [];
+var coordMap  = {};
+var profData  = null;
+var resChartComp   = null;
 var resChartSector = null;
+var chatInterval   = null;
+var regMode = 'nom';
 
-// ── INIT ──
-(function init() {
-  var s = localStorage.getItem('enigme_gz_session');
-  if (!s) { window.location.href = 'index.html'; return; }
-  session = JSON.parse(s);
-  document.getElementById('userInfo').innerHTML = '<strong>' + session.nombre + '</strong> &middot; Código: ' + session.codigo;
+/* ══════════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════════ */
+(function checkSession() {
+  var s = sessionStorage.getItem('enigme_gz_session');
+  if (s) {
+    session = JSON.parse(s);
+    showApp();
+  }
+})();
+
+async function doLogin() {
+  var errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  var codigo = document.getElementById('loginCodigo').value.trim().toUpperCase();
+  var password = document.getElementById('loginPassword').value.trim();
+  if (!codigo || !password) { errEl.textContent = 'Ingrese su codigo y contrasena.'; return; }
+
+  try {
+    var res = await fetch(SB + '/rest/v1/gerentes_zona?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true&select=*', { headers: H });
+    var data = await res.json();
+    if (!data.length) { errEl.textContent = 'Codigo no encontrado o cuenta inactiva.'; return; }
+    var gerente = data[0];
+    if (gerente.password_temporal !== password) { errEl.textContent = 'Contrasena incorrecta.'; return; }
+
+    session = gerente;
+    sessionStorage.setItem('enigme_gz_session', JSON.stringify(session));
+    showApp();
+  } catch(e) {
+    errEl.textContent = 'Error de conexion. Intente de nuevo.';
+    console.error(e);
+  }
+}
+
+function showApp() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('appWrapper').style.display = 'block';
+  document.getElementById('userInfo').innerHTML =
+    '<strong>' + esc(session.nombre) + '</strong> &middot; C&oacute;digo: <strong>' + esc(session.codigo) + '</strong>';
+
   loadCampanas();
   loadSectores();
   loadDepartamentosNom();
-  loadMensajesGZ();
-})();
+  loadNombramientos();
+  startChatRefresh();
+  setupFileInfoListeners();
+}
 
 function logout() {
-  localStorage.removeItem('enigme_gz_session');
-  window.location.href = 'index.html';
+  sessionStorage.removeItem('enigme_gz_session');
+  if (chatInterval) clearInterval(chatInterval);
+  session = null;
+  document.getElementById('appWrapper').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginCodigo').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').textContent = '';
 }
+
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 function switchTab(tab, el) {
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -376,51 +532,115 @@ function switchTab(tab, el) {
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'resumen') loadResumen();
   if (tab === 'mensajeria') loadMensajesGZ();
+  if (tab === 'registros') loadRegistros();
 }
 
+/* ── API HELPERS ── */
 async function api(path) {
   var res = await fetch(SB + path, { headers: H });
-  return res.json();
+  var data = await res.json();
+  if (data && data.code) throw data;
+  return Array.isArray(data) ? data : (data.error ? [] : data);
 }
 async function apiPost(path, body) {
   var res = await fetch(SB + path, { method: 'POST', headers: HJ, body: JSON.stringify(body) });
-  if (!res.ok) throw await res.json();
+  if (!res.ok) { var e = await res.json(); throw e; }
   return res.json();
 }
 async function apiPatch(path, body) {
-  return fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+  var res = await fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+  return res;
 }
 
+function fmtL(n) { return 'L ' + Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+/* ── LOAD CAMPANAS ── */
 async function loadCampanas() {
-  campanas = await api('/rest/v1/campanas?order=numero');
-  ['pedCampana','nomCampana','resCampana'].forEach(function(selId) {
+  try { campanas = await api('/rest/v1/campanas?order=numero'); } catch(e) { campanas = []; }
+  ['pedCampana','nomCampana','resCampana','nomListCampana','regCampana'].forEach(function(selId) {
     var sel = document.getElementById(selId);
     if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
     campanas.forEach(function(c) {
       var opt = document.createElement('option');
-      opt.value = c.id; opt.textContent = 'Campaña ' + c.numero;
+      opt.value = c.id; opt.textContent = 'Campana ' + c.numero;
       sel.appendChild(opt);
     });
   });
   document.getElementById('resAno').textContent = new Date().getFullYear();
 }
 
-// ══════════════════════════════════════════
-// TAB 1: SECTORES
-// ══════════════════════════════════════════
+function getCampNum(id) {
+  var n = ''; campanas.forEach(function(c){ if (c.id == id) n = c.numero; }); return n;
+}
+
+/* ══════════════════════════════════════════
+   TAB 1: SECTORES (S1-S14 grid)
+   ══════════════════════════════════════════ */
 async function loadSectores() {
-  sectores = await api('/rest/v1/sectores?gerente_id=eq.' + session.id + '&order=numero_sector');
-  renderSectores();
+  try {
+    sectores = await api('/rest/v1/sectores?gerente_id=eq.' + session.id + '&order=numero_sector');
+  } catch(e) { sectores = []; }
+  await loadCoordinadores();
+  renderSectorGrid();
   populateSectorSelects();
+}
+
+async function loadCoordinadores() {
+  try {
+    var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id);
+    coordMap = {};
+    coords.forEach(function(c) { if (c.sector_id && c.activo) coordMap[c.sector_id] = c; });
+  } catch(e) { coordMap = {}; }
+}
+
+function renderSectorGrid() {
+  var grid = document.getElementById('sectorGrid');
+  var html = '';
+
+  for (var i = 1; i <= 14; i++) {
+    var sector = null;
+    sectores.forEach(function(s){ if (s.numero_sector === i) sector = s; });
+    var coord = sector ? coordMap[sector.id] : null;
+
+    html += '<div class="sector-card">';
+    html += '<div class="sector-num"><span>S' + i + '</span>';
+    if (sector) {
+      html += '<span class="badge ' + (sector.activo ? 'badge-active' : 'badge-inactive') + '">' + (sector.activo ? 'Activo' : 'Inactivo') + '</span>';
+    }
+    html += '</div>';
+
+    if (coord) {
+      html += '<div class="sector-coord-name">' + esc(coord.nombre) + '</div>';
+      html += '<div class="sector-detail">Codigo: <strong style="color:var(--dorado);">' + esc(coord.codigo) + '</strong></div>';
+      html += '<div class="sector-detail">DNI: ' + esc(coord.dni || '-') + '</div>';
+      html += '<div class="sector-detail">Tel: ' + esc(coord.telefono || '-') + '</div>';
+      html += '<div class="sector-detail">Email: ' + esc(coord.email || '-') + '</div>';
+      html += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">';
+      html += '<button class="btn btn-sm btn-outline" onclick="abrirEditarCoord(\'' + sector.id + '\',' + i + ',\'' + coord.id + '\')">Editar</button>';
+      html += '<button class="btn btn-sm btn-danger" onclick="bajaCoordinador(\'' + coord.id + '\',\'' + sector.id + '\')">Dar de Baja</button>';
+      html += '</div>';
+    } else if (sector) {
+      html += '<div class="sector-empty">Sin coordinador asignado</div>';
+      html += '<button class="btn btn-sm" onclick="abrirAsignarCoord(\'' + sector.id + '\',' + i + ')" style="width:100%;margin-top:8px;">Asignar Coordinador</button>';
+    } else {
+      html += '<div class="sector-empty">Sector no creado</div>';
+      html += '<button class="btn btn-sm btn-outline" onclick="crearSector(' + i + ')" style="width:100%;margin-top:8px;">Crear Sector</button>';
+    }
+
+    html += '</div>';
+  }
+
+  grid.innerHTML = html;
 }
 
 function populateSectorSelects() {
   ['pedSector','nomSector'].forEach(function(selId) {
     var sel = document.getElementById(selId);
     if (!sel) return;
-    // keep first option
     while (sel.options.length > 1) sel.remove(1);
     sectores.forEach(function(s) {
+      if (!s.activo) return;
       var opt = document.createElement('option');
       opt.value = s.id; opt.textContent = 'S' + s.numero_sector;
       sel.appendChild(opt);
@@ -428,115 +648,138 @@ function populateSectorSelects() {
   });
 }
 
-function renderSectores() {
-  var c = document.getElementById('listaSectores');
-  if (!sectores.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">No hay sectores. Cree el primero.</p>'; return; }
-  // Load coordinators for each sector
-  loadCoordinadoresSectores();
+async function crearSector(num) {
+  try {
+    await apiPost('/rest/v1/sectores', {
+      gerente_id: session.id,
+      numero_sector: num,
+      activo: true
+    });
+    await loadSectores();
+  } catch(e) { alert('Error al crear sector: ' + (e.message || JSON.stringify(e))); }
 }
 
-async function loadCoordinadoresSectores() {
-  var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&order=created_at.desc');
-  var c = document.getElementById('listaSectores');
-  c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Sector</th><th>Coordinador</th><th>Código</th><th>DNI</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' +
-    sectores.map(function(s) {
-      var coord = null;
-      coords.forEach(function(co) { if (co.sector_id === s.id && co.activo) coord = co; });
-      var coordNombre = coord ? coord.nombre : '<span style="color:var(--gris);">Sin asignar</span>';
-      var coordCodigo = coord ? '<span style="color:var(--dorado);font-weight:600;">' + coord.codigo + '</span>' : '-';
-      var coordDni = coord ? (coord.dni || '-') : '-';
-      var coordTel = coord ? (coord.telefono || '-') : '-';
-      var estado = s.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo</span>';
-      var acciones = coord ? '<button class="btn btn-danger btn-sm" onclick="bajaCoordinador(\'' + coord.id + '\',\'' + s.id + '\')">Cambiar</button>' : '';
-      return '<tr><td style="font-weight:600;">S' + s.numero_sector + '</td><td>' + coordNombre + '</td><td>' + coordCodigo + '</td><td>' + coordDni + '</td><td>' + coordTel + '</td><td>' + estado + '</td><td>' + acciones + '</td></tr>';
-    }).join('') + '</tbody></table></div>';
+function abrirAsignarCoord(sectorId, sectorNum) {
+  document.getElementById('modalCoordTitle').textContent = 'Asignar Coordinador - S' + sectorNum;
+  document.getElementById('mcSectorId').value = sectorId;
+  document.getElementById('mcSectorNum').value = sectorNum;
+  document.getElementById('mcCoordId').value = '';
+  ['mcNombre','mcDni','mcTelefono','mcEmail','mcDireccion','mcRtn','mcFechaNac','mcCuenta','mcBanco'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('mcError').textContent = '';
+  document.getElementById('mcSuccess').textContent = '';
+  document.getElementById('modalCoord').classList.add('active');
 }
 
-function toggleFormSector() {
-  var f = document.getElementById('formSector');
-  f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  document.getElementById('secError').textContent = '';
-  document.getElementById('secSuccess').textContent = '';
-  // Set next sector number
-  var nextNum = sectores.length + 1;
-  document.getElementById('secNumero').value = 'S' + nextNum;
+function abrirEditarCoord(sectorId, sectorNum, coordId) {
+  var coord = coordMap[sectorId];
+  if (!coord) return;
+  document.getElementById('modalCoordTitle').textContent = 'Editar Coordinador - S' + sectorNum;
+  document.getElementById('mcSectorId').value = sectorId;
+  document.getElementById('mcSectorNum').value = sectorNum;
+  document.getElementById('mcCoordId').value = coordId;
+  document.getElementById('mcNombre').value = coord.nombre || '';
+  document.getElementById('mcDni').value = coord.dni || '';
+  document.getElementById('mcTelefono').value = coord.telefono || '';
+  document.getElementById('mcEmail').value = coord.email || '';
+  document.getElementById('mcDireccion').value = coord.direccion || '';
+  document.getElementById('mcRtn').value = coord.rtn || '';
+  document.getElementById('mcFechaNac').value = coord.fecha_nacimiento || '';
+  document.getElementById('mcCuenta').value = coord.numero_cuenta || '';
+  document.getElementById('mcBanco').value = coord.nombre_banco || '';
+  document.getElementById('mcError').textContent = '';
+  document.getElementById('mcSuccess').textContent = '';
+  document.getElementById('modalCoord').classList.add('active');
 }
 
-async function guardarSector() {
-  var err = document.getElementById('secError');
-  var suc = document.getElementById('secSuccess');
+function cerrarModalCoord() {
+  document.getElementById('modalCoord').classList.remove('active');
+}
+
+async function guardarCoordinador() {
+  var err = document.getElementById('mcError');
+  var suc = document.getElementById('mcSuccess');
   err.textContent = ''; suc.textContent = '';
 
-  if (sectores.length >= 14) { err.textContent = 'Máximo 14 sectores permitidos.'; return; }
+  var sectorId  = document.getElementById('mcSectorId').value;
+  var coordId   = document.getElementById('mcCoordId').value;
+  var nombre    = document.getElementById('mcNombre').value.trim();
+  var dni       = document.getElementById('mcDni').value.trim();
+  var telefono  = document.getElementById('mcTelefono').value.trim();
+  var email     = document.getElementById('mcEmail').value.trim();
+  var direccion = document.getElementById('mcDireccion').value.trim();
 
-  var nombre = document.getElementById('secNombre').value.trim();
-  var dni = document.getElementById('secDni').value.trim();
-  var direccion = document.getElementById('secDireccion').value.trim();
+  if (!nombre || !dni || !telefono || !direccion) {
+    err.textContent = 'Nombre, DNI, telefono y direccion son obligatorios.'; return;
+  }
 
-  if (!nombre || !dni || !direccion) { err.textContent = 'Nombre, DNI y dirección son obligatorios.'; return; }
+  var payload = {
+    nombre: nombre,
+    dni: dni,
+    telefono: telefono,
+    email: email || null,
+    direccion: direccion,
+    rtn: document.getElementById('mcRtn').value.trim() || null,
+    fecha_nacimiento: document.getElementById('mcFechaNac').value || null,
+    numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
+    nombre_banco: document.getElementById('mcBanco').value.trim() || null
+  };
 
   try {
-    var numSector = sectores.length + 1;
+    if (coordId) {
+      await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, payload);
+      suc.textContent = 'Coordinador actualizado.';
+    } else {
+      var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
+      var codigo;
+      if (codeResp.ok) {
+        codigo = await codeResp.json();
+      } else {
+        var maxCode = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+        codigo = maxCode.length ? (parseInt(maxCode[0].codigo) + 1) : 301222;
+      }
 
-    // 1. Create sector
-    var secData = await apiPost('/rest/v1/sectores', {
-      gerente_id: session.id,
-      numero_sector: numSector,
-      activo: true
-    });
-    var sectorId = secData[0].id;
+      payload.codigo = String(codigo);
+      payload.sector_id = sectorId;
+      payload.gerente_id = session.id;
+      payload.activo = true;
 
-    // 2. Create coordinador with auto-generated code
-    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
-    var codigo = await codeResp.json();
+      await apiPost('/rest/v1/coordinadores', payload);
 
-    await apiPost('/rest/v1/coordinadores', {
-      codigo: String(codigo),
-      nombre: nombre,
-      dni: dni,
-      direccion: direccion,
-      email: document.getElementById('secEmail').value.trim() || null,
-      rtn: document.getElementById('secRtn').value.trim() || null,
-      numero_cuenta: document.getElementById('secCuenta').value.trim() || null,
-      nombre_banco: document.getElementById('secBanco').value.trim() || null,
-      fecha_nacimiento: document.getElementById('secFechaNac').value || null,
-      sector_id: sectorId,
-      gerente_id: session.id,
-      activo: true
-    });
+      try {
+        await apiPost('/rest/v1/vendedoras', {
+          codigo: String(codigo),
+          nombre: nombre,
+          dni: dni,
+          telefono: telefono,
+          direccion: direccion,
+          email: email || null,
+          sector_id: sectorId,
+          gerente_id: session.id,
+          activo: true
+        });
+      } catch(ve) { console.warn('vendedora entry:', ve); }
 
-    // Also create vendedora entry (coordinators are also sellers)
-    await apiPost('/rest/v1/vendedoras', {
-      codigo: String(codigo),
-      nombre: nombre,
-      dni: dni,
-      direccion: direccion,
-      email: document.getElementById('secEmail').value.trim() || null,
-      zona_id: session.zona_id,
-      sector_id: sectorId,
-      gerente_id: session.id,
-      coordinador_id: null,
-      activo: true
-    });
+      suc.textContent = 'Coordinador asignado. Codigo: ' + codigo;
+    }
 
-    suc.textContent = 'Sector S' + numSector + ' creado. Coordinador: ' + nombre + ' - Código: ' + codigo;
-    ['secNombre','secDni','secDireccion','secEmail','secRtn','secCuenta','secBanco','secFechaNac'].forEach(function(id){ document.getElementById(id).value = ''; });
-    loadSectores();
+    setTimeout(function(){ cerrarModalCoord(); loadSectores(); }, 1200);
   } catch(e) {
-    err.textContent = e.message || 'Error al crear sector.';
+    err.textContent = e.message || 'Error al guardar coordinador.';
     console.error(e);
   }
 }
 
 async function bajaCoordinador(coordId, sectorId) {
-  if (!confirm('¿Dar de baja al coordinador actual? Se conservan sus datos. Deberá asignar uno nuevo.')) return;
-  await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null });
-  loadSectores();
+  if (!confirm('Dar de baja al coordinador actual? Sus datos se conservan. Debera asignar uno nuevo.')) return;
+  try {
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null });
+    await loadSectores();
+  } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }
 
-// ══════════════════════════════════════════
-// TAB 2: PEDIDOS
-// ══════════════════════════════════════════
+/* ══════════════════════════════════════════
+   TAB 2: SUBIR PEDIDOS
+   ══════════════════════════════════════════ */
 async function buscarProfesional() {
   var codigo = document.getElementById('pedCodigo').value.trim();
   var card = document.getElementById('profCard');
@@ -544,28 +787,29 @@ async function buscarProfesional() {
   profData = null;
   if (!codigo) return;
 
-  // Search in coordinadores and vendedoras
-  var coords = await api('/rest/v1/coordinadores?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
-  if (coords.length) {
-    profData = coords[0];
-  } else {
-    var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
-    if (vends.length) profData = vends[0];
-  }
+  try {
+    var coords = await api('/rest/v1/coordinadores?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
+    if (coords.length) {
+      profData = coords[0];
+    } else {
+      var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
+      if (vends.length) profData = vends[0];
+    }
 
-  if (profData) {
-    document.getElementById('profNombre').textContent = profData.nombre || '-';
-    document.getElementById('profDni').textContent = profData.dni || '-';
-    document.getElementById('profTelefono').textContent = profData.telefono || '-';
-    document.getElementById('profDireccion').textContent = profData.direccion || '-';
-    card.classList.add('visible');
-  }
+    if (profData) {
+      document.getElementById('profNombre').textContent = profData.nombre || '-';
+      document.getElementById('profDni').textContent = profData.dni || '-';
+      document.getElementById('profTelefono').textContent = profData.telefono || '-';
+      document.getElementById('profDireccion').textContent = profData.direccion || '-';
+      card.classList.add('visible');
+    }
+  } catch(e) { console.error(e); }
 }
 
 function addRow() {
   var tbody = document.getElementById('pedItems');
   var tr = document.createElement('tr');
-  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
+  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
   tbody.appendChild(tr);
   tr.querySelector('.pi-cant').focus();
 }
@@ -581,8 +825,7 @@ function calcRow(input) {
   var tr = input.closest('tr');
   var cant = parseFloat(tr.querySelector('.pi-cant').value) || 0;
   var precio = parseFloat(tr.querySelector('.pi-precio').value) || 0;
-  var total = cant * precio;
-  tr.querySelector('.pi-total').textContent = total.toFixed(2);
+  tr.querySelector('.pi-total').textContent = (cant * precio).toFixed(2);
   calcTotals();
 }
 
@@ -591,8 +834,8 @@ function calcTotals() {
   document.querySelectorAll('#pedItems .pi-total').forEach(function(td) {
     total += parseFloat(td.textContent) || 0;
   });
-  document.getElementById('pedTotalBruto').textContent = 'L ' + total.toLocaleString('es-HN', {minimumFractionDigits:2});
-  document.getElementById('pedTotalNeto').textContent = 'L ' + (total * 0.85).toLocaleString('es-HN', {minimumFractionDigits:2});
+  document.getElementById('pedTotalBruto').textContent = fmtL(total);
+  document.getElementById('pedTotalNeto').textContent = fmtL(total * 0.85);
 }
 
 function handleEnterPed(e, input) {
@@ -618,10 +861,9 @@ async function guardarPedido() {
   var campanaId = document.getElementById('pedCampana').value;
   var sectorId = document.getElementById('pedSector').value;
 
-  if (!codigo || !campanaId || !sectorId) { err.textContent = 'Complete código, campaña y sector.'; return; }
-  if (!profData) { err.textContent = 'Profesional no encontrado. Verifique el código.'; return; }
+  if (!codigo || !campanaId || !sectorId) { err.textContent = 'Complete codigo, campana y sector.'; return; }
+  if (!profData) { err.textContent = 'Profesional no encontrado. Verifique el codigo.'; return; }
 
-  // Collect items
   var items = [];
   var totalBruto = 0;
   var rows = document.querySelectorAll('#pedItems tr');
@@ -631,7 +873,18 @@ async function guardarPedido() {
     var precio = parseFloat(rows[i].querySelector('.pi-precio').value) || 0;
     if (!ref || cant <= 0 || precio <= 0) continue;
     var subtotal = cant * precio;
-    items.push({ cantidad: cant, codigo_producto: ref, nombre_producto: ref, precio_catalogo_unitario: precio, iva_unitario: 0, venta_neta_unitaria: precio * 0.85, subtotal_catalogo: subtotal, subtotal_iva: 0, subtotal_con_iva: subtotal, subtotal_venta_neta: subtotal * 0.85 });
+    items.push({
+      cantidad: cant,
+      codigo_producto: ref,
+      nombre_producto: ref,
+      precio_catalogo_unitario: precio,
+      iva_unitario: 0,
+      venta_neta_unitaria: precio * 0.85,
+      subtotal_catalogo: subtotal,
+      subtotal_iva: 0,
+      subtotal_con_iva: subtotal,
+      subtotal_venta_neta: subtotal * 0.85
+    });
     totalBruto += subtotal;
   }
 
@@ -640,13 +893,10 @@ async function guardarPedido() {
   var totalNeto = totalBruto * 0.85;
 
   try {
-    // Generate pedido code
     var codigoPedido = 'PED-' + Date.now().toString(36).toUpperCase();
 
-    // Find vendedora id from profData
     var vendedoraId = profData.id;
-    // If profData is a coordinator, look up vendedora by codigo
-    if (!profData.zona_id) {
+    if (!profData.sector_id && !profData.zona_id) {
       var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(profData.codigo));
       if (vends.length) vendedoraId = vends[0].id;
     }
@@ -666,16 +916,11 @@ async function guardarPedido() {
 
     var pedidoId = pedido[0].id;
 
-    // Insert items
-    var itemsData = items.map(function(it) {
-      it.pedido_id = pedidoId;
-      return it;
-    });
+    var itemsData = items.map(function(it) { it.pedido_id = pedidoId; return it; });
     await fetch(SB + '/rest/v1/pedidos_detalle', {
       method: 'POST', headers: HJ, body: JSON.stringify(itemsData)
     });
 
-    // Upload files if any
     var files = document.getElementById('pedArchivos').files;
     for (var f = 0; f < Math.min(files.length, 2); f++) {
       var file = files[f];
@@ -688,33 +933,38 @@ async function guardarPedido() {
       });
     }
 
-    suc.textContent = 'Pedido guardado exitosamente. Código: ' + codigoPedido + ' | Bruto: L ' + totalBruto.toFixed(2) + ' | Neto: L ' + totalNeto.toFixed(2);
-
-    // Reset
-    document.getElementById('pedCodigo').value = '';
-    document.getElementById('profCard').classList.remove('visible');
-    profData = null;
-    document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" onchange="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
-    document.getElementById('pedTotalBruto').textContent = 'L 0.00';
-    document.getElementById('pedTotalNeto').textContent = 'L 0.00';
-    document.getElementById('pedArchivos').value = '';
+    suc.textContent = 'Pedido guardado. Codigo: ' + codigoPedido + ' | Bruto: ' + fmtL(totalBruto) + ' | Neto: ' + fmtL(totalNeto);
+    resetPedidoForm();
   } catch(e) {
     err.textContent = e.message || 'Error al guardar pedido.';
     console.error(e);
   }
 }
 
-// ══════════════════════════════════════════
-// TAB 3: NOMBRAMIENTOS
-// ══════════════════════════════════════════
+function resetPedidoForm() {
+  document.getElementById('pedCodigo').value = '';
+  document.getElementById('profCard').classList.remove('visible');
+  profData = null;
+  document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
+  document.getElementById('pedTotalBruto').textContent = 'L 0.00';
+  document.getElementById('pedTotalNeto').textContent = 'L 0.00';
+  document.getElementById('pedArchivos').value = '';
+  document.getElementById('pedFilesInfo').textContent = '';
+}
+
+/* ══════════════════════════════════════════
+   TAB 3: NOMBRAMIENTOS
+   ══════════════════════════════════════════ */
 async function loadDepartamentosNom() {
-  var deptos = await api('/rest/v1/departamentos?order=nombre');
-  var sel = document.getElementById('nomDepto');
-  deptos.forEach(function(d) {
-    var opt = document.createElement('option');
-    opt.value = d.id; opt.textContent = d.nombre;
-    sel.appendChild(opt);
-  });
+  try {
+    var deptos = await api('/rest/v1/departamentos?order=nombre');
+    var sel = document.getElementById('nomDepto');
+    deptos.forEach(function(d) {
+      var opt = document.createElement('option');
+      opt.value = d.id; opt.textContent = d.nombre;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.warn('deptos:', e); }
 }
 
 async function buscarExistente() {
@@ -723,16 +973,17 @@ async function buscarExistente() {
   alert.style.display = 'none';
   if (!dni) return;
 
-  // Search in vendedoras by DNI
-  var vends = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
-  if (vends.length) {
-    var v = vends[0];
-    document.getElementById('nomNombre').value = v.nombre || '';
-    document.getElementById('nomDireccion').value = v.direccion || '';
-    document.getElementById('nomTelefono').value = v.telefono || '';
-    document.getElementById('nomEmail').value = v.email || '';
-    alert.style.display = 'block';
-  }
+  try {
+    var vends = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+    if (vends.length) {
+      var v = vends[0];
+      document.getElementById('nomNombre').value = v.nombre || '';
+      document.getElementById('nomDireccion').value = v.direccion || '';
+      document.getElementById('nomTelefono').value = v.telefono || '';
+      document.getElementById('nomEmail').value = v.email || '';
+      alert.style.display = 'block';
+    }
+  } catch(e) { console.error(e); }
 }
 
 async function guardarNombramiento() {
@@ -740,12 +991,12 @@ async function guardarNombramiento() {
   var suc = document.getElementById('nomSuccess');
   err.textContent = ''; suc.textContent = '';
 
-  var dni = document.getElementById('nomDni').value.trim();
-  var nombre = document.getElementById('nomNombre').value.trim();
+  var dni       = document.getElementById('nomDni').value.trim();
+  var nombre    = document.getElementById('nomNombre').value.trim();
   var direccion = document.getElementById('nomDireccion').value.trim();
-  var telefono = document.getElementById('nomTelefono').value.trim();
-  var email = document.getElementById('nomEmail').value.trim();
-  var sectorId = document.getElementById('nomSector').value;
+  var telefono  = document.getElementById('nomTelefono').value.trim();
+  var email     = document.getElementById('nomEmail').value.trim();
+  var sectorId  = document.getElementById('nomSector').value;
   var campanaId = document.getElementById('nomCampana').value;
 
   if (!dni || !nombre || !direccion || !telefono || !sectorId || !campanaId) {
@@ -753,37 +1004,41 @@ async function guardarNombramiento() {
   }
 
   try {
-    // Generate code
     var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
-    var codigo = await codeResp.json();
+    var codigo;
+    if (codeResp.ok) {
+      codigo = await codeResp.json();
+    } else {
+      var maxCode = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+      codigo = maxCode.length ? (parseInt(maxCode[0].codigo) + 1) : 301222;
+    }
 
-    // Check if already exists and notify divisional
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
 
-    // Create vendedora
-    await apiPost('/rest/v1/vendedoras', {
+    var vendedora = await apiPost('/rest/v1/vendedoras', {
       codigo: String(codigo),
       nombre: nombre,
       dni: dni,
       direccion: direccion,
       telefono: telefono,
       email: email || null,
-      zona_id: session.zona_id,
       sector_id: sectorId,
       gerente_id: session.id,
-      activo: true
+      activo: true,
+      campana_ingreso_id: parseInt(campanaId)
     });
 
-    // Create nombramiento record
+    var vendedoraId = vendedora[0] ? vendedora[0].id : null;
+    if (!vendedoraId && existentes.length) vendedoraId = existentes[0].id;
+
     var nomData = await apiPost('/rest/v1/nombramientos', {
       codigo_nombramiento: 'NOM-' + String(codigo),
       campana_ingreso_id: parseInt(campanaId),
-      vendedora_id: existentes.length ? existentes[0].id : (await api('/rest/v1/vendedoras?codigo=eq.' + codigo))[0].id,
+      vendedora_id: vendedoraId,
       gerente_id: session.id,
       sector_id: sectorId,
       dni: dni,
-      fecha_nacimiento: '2000-01-01',
       nombre: nombre,
       telefono: telefono,
       direccion: direccion,
@@ -791,7 +1046,6 @@ async function guardarNombramiento() {
       ano: new Date().getFullYear()
     });
 
-    // Upload files
     var files = document.getElementById('nomArchivos').files;
     if (nomData[0] && files.length) {
       for (var f = 0; f < Math.min(files.length, 2); f++) {
@@ -806,23 +1060,25 @@ async function guardarNombramiento() {
       }
     }
 
-    // If already existed, notify divisional
     if (yaExiste && session.gerencia_divisional_id) {
-      await apiPost('/rest/v1/web_notificaciones', {
-        tipo: 'nombramiento_duplicado',
-        titulo: 'Nombramiento Duplicado',
-        mensaje: 'La asesora ' + nombre + ' (DNI: ' + dni + ') ya existía en el sistema. Registrada nuevamente por ' + session.nombre + '.',
-        leida: false
-      });
+      try {
+        await apiPost('/rest/v1/web_notificaciones', {
+          tipo: 'nombramiento_duplicado',
+          titulo: 'Nombramiento Duplicado',
+          mensaje: 'La asesora ' + nombre + ' (DNI: ' + dni + ') ya existia en el sistema. Registrada nuevamente por ' + session.nombre + '.',
+          leida: false
+        });
+      } catch(ne) { console.warn('notificacion:', ne); }
     }
 
-    suc.textContent = 'Nombramiento registrado. Código asignado: ' + codigo;
+    suc.textContent = 'Nombramiento registrado. Codigo asignado: ' + codigo;
     ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('nomDepto').value = '';
     document.getElementById('nomSector').value = '';
     document.getElementById('nomCampana').value = '';
     document.getElementById('nomExisteAlert').style.display = 'none';
     document.getElementById('nomArchivos').value = '';
+    document.getElementById('nomFilesInfo').textContent = '';
     loadNombramientos();
   } catch(e) {
     err.textContent = e.message || 'Error al registrar nombramiento.';
@@ -831,88 +1087,82 @@ async function guardarNombramiento() {
 }
 
 async function loadNombramientos() {
-  var noms = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + '&order=created_at.desc&limit=20');
-  var c = document.getElementById('listaNom');
-  if (!noms.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin nombramientos registrados.</p>'; return; }
-  c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Código</th><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Campaña</th><th>Fecha</th></tr></thead><tbody>' +
-    noms.map(function(n) {
-      var campNum = '';
-      campanas.forEach(function(c){ if (c.id == n.campana_ingreso_id) campNum = c.numero; });
-      return '<tr><td style="color:var(--dorado);font-weight:600;">' + n.codigo_nombramiento + '</td><td>' + n.nombre + '</td><td>' + n.dni + '</td><td>' + (n.telefono || '-') + '</td><td>C' + campNum + '</td><td>' + new Date(n.created_at).toLocaleDateString('es-HN') + '</td></tr>';
-    }).join('') + '</tbody></table></div>';
+  var campFilter = '';
+  var sel = document.getElementById('nomListCampana');
+  if (sel && sel.value) campFilter = '&campana_ingreso_id=eq.' + sel.value;
+
+  try {
+    var noms = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + campFilter + '&order=created_at.desc&limit=50');
+    var c = document.getElementById('listaNom');
+    if (!noms.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin nombramientos registrados.</p>'; return; }
+    c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Sector</th><th>Campana</th><th>Fecha</th></tr></thead><tbody>' +
+      noms.map(function(n) {
+        var sNum = '';
+        sectores.forEach(function(s){ if (s.id === n.sector_id) sNum = 'S' + s.numero_sector; });
+        return '<tr><td style="color:var(--dorado);font-weight:600;">' + esc(n.codigo_nombramiento) + '</td><td>' + esc(n.nombre) + '</td><td>' + esc(n.dni) + '</td><td>' + esc(n.telefono || '-') + '</td><td>' + sNum + '</td><td>C' + getCampNum(n.campana_ingreso_id) + '</td><td>' + new Date(n.created_at).toLocaleDateString('es-HN') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  } catch(e) { console.error(e); }
 }
 
-// Load on tab init
-setTimeout(loadNombramientos, 500);
-
-// ══════════════════════════════════════════
-// TAB 4: RESUMEN DE ZONA
-// ══════════════════════════════════════════
+/* ══════════════════════════════════════════
+   TAB 4: MI ZONA RESUMEN + SALARY
+   ══════════════════════════════════════════ */
 async function loadResumen() {
   var campanaId = document.getElementById('resCampana').value;
   var ano = new Date().getFullYear();
 
-  var pedidosFilter = 'gerente_id=eq.' + session.id + '&ano=eq.' + ano;
-  if (campanaId) pedidosFilter += '&campana_id=eq.' + campanaId;
+  var pedFilter = 'gerente_id=eq.' + session.id + '&ano=eq.' + ano;
+  if (campanaId) pedFilter += '&campana_id=eq.' + campanaId;
 
-  var pedidos = await api('/rest/v1/pedidos?' + pedidosFilter + '&select=id,sector_id,subtotal_catalogo,total_venta_neta');
-  var nombramientos = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + '&ano=eq.' + ano + (campanaId ? '&campana_ingreso_id=eq.' + campanaId : '') + '&select=id');
+  var nomFilter = 'gerente_id=eq.' + session.id + '&ano=eq.' + ano;
+  if (campanaId) nomFilter += '&campana_ingreso_id=eq.' + campanaId;
 
-  var totalBruto = 0, totalNeto = 0;
-  var sectorStats = {};
-  sectores.forEach(function(s) { sectorStats[s.id] = { num: s.numero_sector, pedidos: 0, bruta: 0, neta: 0 }; });
+  try {
+    var pedidos = await api('/rest/v1/pedidos?' + pedFilter + '&select=id,sector_id,subtotal_catalogo,total_venta_neta');
+    var nombramientos = await api('/rest/v1/nombramientos?' + nomFilter + '&select=id,sector_id');
 
-  pedidos.forEach(function(p) {
-    totalBruto += parseFloat(p.subtotal_catalogo || 0);
-    totalNeto += parseFloat(p.total_venta_neta || 0);
-    if (sectorStats[p.sector_id]) {
-      sectorStats[p.sector_id].pedidos++;
-      sectorStats[p.sector_id].bruta += parseFloat(p.subtotal_catalogo || 0);
-      sectorStats[p.sector_id].neta += parseFloat(p.total_venta_neta || 0);
-    }
-  });
+    var totalBruto = 0, totalNeto = 0;
+    var sectorStats = {};
+    sectores.forEach(function(s) { sectorStats[s.id] = { num: s.numero_sector, pedidos: 0, bruta: 0, neta: 0, noms: 0 }; });
 
-  var comisionTotal = totalNeto * 0.03;
+    pedidos.forEach(function(p) {
+      totalBruto += parseFloat(p.subtotal_catalogo || 0);
+      totalNeto += parseFloat(p.total_venta_neta || 0);
+      if (sectorStats[p.sector_id]) {
+        sectorStats[p.sector_id].pedidos++;
+        sectorStats[p.sector_id].bruta += parseFloat(p.subtotal_catalogo || 0);
+        sectorStats[p.sector_id].neta += parseFloat(p.total_venta_neta || 0);
+      }
+    });
 
-  document.getElementById('resStats').innerHTML =
-    '<div class="stat-card"><div class="stat-value">' + pedidos.length + '</div><div class="stat-label">Total Pedidos</div></div>' +
-    '<div class="stat-card"><div class="stat-value">' + nombramientos.length + '</div><div class="stat-label">Nombramientos</div></div>' +
-    '<div class="stat-card"><div class="stat-value">L ' + totalBruto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Bruta</div></div>' +
-    '<div class="stat-card"><div class="stat-value">L ' + totalNeto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta</div></div>';
+    nombramientos.forEach(function(n) {
+      if (sectorStats[n.sector_id]) sectorStats[n.sector_id].noms++;
+    });
 
-  // Sector table
-  var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&activo=eq.true');
-  var coordMap = {};
-  coords.forEach(function(c) { if (c.sector_id) coordMap[c.sector_id] = c.nombre; });
+    document.getElementById('resStats').innerHTML =
+      '<div class="stat-card"><div class="stat-value">' + pedidos.length + '</div><div class="stat-label">Total Pedidos</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + nombramientos.length + '</div><div class="stat-label">Nombramientos</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + fmtL(totalBruto) + '</div><div class="stat-label">Venta Bruta</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + fmtL(totalNeto) + '</div><div class="stat-label">Venta Neta</div></div>';
 
-  var sectorLabels = [], sectorVentas = [];
-  var rows = '';
-  var comisionRows = '';
-  Object.keys(sectorStats).forEach(function(sId) {
-    var s = sectorStats[sId];
-    sectorLabels.push('S' + s.num);
-    sectorVentas.push(s.bruta);
-    rows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + (coordMap[sId] || '-') + '</td><td>' + s.pedidos + '</td><td>L ' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td>L ' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
-    var sectorComision = s.neta * 0.03;
-    comisionRows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + (coordMap[sId] || '-') + '</td><td>L ' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td style="color:var(--dorado);font-weight:600;">L ' + sectorComision.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
-  });
-  document.getElementById('resTable').innerHTML = rows;
+    var sectorLabels = [], sectorVentas = [];
+    var rows = '';
+    Object.keys(sectorStats).forEach(function(sId) {
+      var s = sectorStats[sId];
+      sectorLabels.push('S' + s.num);
+      sectorVentas.push(s.bruta);
+      rows += '<tr><td style="font-weight:600;">S' + s.num + '</td><td>' + esc((coordMap[sId] || {}).nombre || '-') + '</td><td>' + s.pedidos + '</td><td>' + fmtL(s.bruta) + '</td><td>' + fmtL(s.neta) + '</td><td>' + s.noms + '</td></tr>';
+    });
+    document.getElementById('resTable').innerHTML = rows;
 
-  // Commission section
-  document.getElementById('resComisionStats').innerHTML =
-    '<div class="stat-card" style="border:2px solid var(--dorado);"><div class="stat-value" style="font-size:1.8rem;">L ' + comisionTotal.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Tu Comisi&oacute;n Total (3%)</div></div>' +
-    '<div class="stat-card"><div class="stat-value">L ' + totalNeto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div><div class="stat-label">Venta Neta de Zona</div></div>' +
-    '<div class="stat-card"><div class="stat-value">' + sectores.length + '</div><div class="stat-label">Sectores Activos</div></div>';
-  document.getElementById('resComisionTable').innerHTML = comisionRows;
-
-  // Charts
-  renderResCharts(sectorLabels, sectorVentas, ano);
+    renderResCharts(sectorLabels, sectorVentas, ano, campanaId);
+    renderSalary(totalNeto, nombramientos.length, campanaId);
+  } catch(e) { console.error('resumen error:', e); }
 }
 
-async function renderResCharts(sectorLabels, sectorVentas, ano) {
-  // Sector chart
+async function renderResCharts(sectorLabels, sectorVentas, ano, campanaId) {
   if (resChartSector) resChartSector.destroy();
-  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad','#e67e22','#1abc9c','#34495e','#f39c12','#d35400','#2c3e50','#7f8c8d','#16a085'];
+  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad','#e67e22','#1abc9c','#34495e','#f39c12','#d35400','#2c3e50','#7f8c8d'];
   resChartSector = new Chart(document.getElementById('resChartSector'), {
     type: 'bar',
     data: {
@@ -922,8 +1172,9 @@ async function renderResCharts(sectorLabels, sectorVentas, ano) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
-  // Comparison chart - current campaign vs 2 previous
-  var campanaId = document.getElementById('resCampana').value;
+  if (resChartComp) resChartComp.destroy();
+  resChartComp = null;
+
   if (!campanaId) return;
 
   var campNum = 0;
@@ -933,105 +1184,130 @@ async function renderResCharts(sectorLabels, sectorVentas, ano) {
   var compLabels = [], compVentas = [];
   for (var i = 0; i < compareCamps.length; i++) {
     compLabels.push('C' + compareCamps[i].numero);
-    var p = await api('/rest/v1/pedidos?gerente_id=eq.' + session.id + '&campana_id=eq.' + compareCamps[i].id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
-    var t = 0; p.forEach(function(r){ t += parseFloat(r.subtotal_catalogo || 0); });
-    compVentas.push(t);
+    try {
+      var p = await api('/rest/v1/pedidos?gerente_id=eq.' + session.id + '&campana_id=eq.' + compareCamps[i].id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
+      var t = 0; p.forEach(function(r){ t += parseFloat(r.subtotal_catalogo || 0); });
+      compVentas.push(t);
+    } catch(e) { compVentas.push(0); }
   }
 
-  if (resChartComp) resChartComp.destroy();
   resChartComp = new Chart(document.getElementById('resChartComp'), {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: compLabels,
-      datasets: [{ label: 'Venta Bruta (L)', data: compVentas, backgroundColor: ['rgba(203,170,99,0.3)','rgba(203,170,99,0.6)','rgba(203,170,99,1)'], borderColor: '#CBAA63', borderWidth: 1 }]
+      datasets: [{
+        label: 'Venta Bruta (L)',
+        data: compVentas,
+        borderColor: '#CBAA63',
+        backgroundColor: 'rgba(203,170,99,0.15)',
+        fill: true,
+        tension: 0.3,
+        pointBackgroundColor: '#CBAA63',
+        pointBorderColor: '#1C1C1C',
+        pointBorderWidth: 2,
+        pointRadius: 5
+      }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 }
 
-// ══════════════════════════════════════════
-// TAB 5: MENSAJERÍA (bidireccional)
-// ══════════════════════════════════════════
-
-// Photo preview for compose
-(function() {
-  setTimeout(function() {
-    var inp = document.getElementById('gzMsgFotos');
-    if (inp) inp.addEventListener('change', function() {
-      var prev = document.getElementById('gzMsgFotosPreview');
-      prev.innerHTML = '';
-      var files = this.files;
-      for (var i = 0; i < Math.min(files.length, 3); i++) {
-        var img = document.createElement('img');
-        img.src = URL.createObjectURL(files[i]);
-        img.style.cssText = 'width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--borde);';
-        prev.appendChild(img);
-      }
-    });
-  }, 300);
-})();
-
-async function loadMensajesGZ() {
-  if (!session.gerencia_divisional_id) {
-    document.getElementById('gzMsgFeed').innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin mensajes disponibles.</p>';
+function renderSalary(totalNeto, totalNoms, campanaId) {
+  var el = document.getElementById('salaryContent');
+  if (!campanaId) {
+    el.innerHTML = '<p style="color:rgba(250,249,246,0.5);font-size:0.8rem;">Seleccione una campana para ver su salario estimado.</p>';
     return;
   }
 
-  // Load divisional messages
+  var baseSalary = 15000;
+  var nomPayRate = totalNoms < 20 ? 220 : 320;
+  var nomPayment = totalNoms * nomPayRate;
+  var commission = totalNeto * 0.03;
+  var totalSalary = baseSalary + nomPayment + commission;
+
+  el.innerHTML =
+    '<div class="salary-row"><span class="sr-label">Salario Base</span><span class="sr-value">' + fmtL(baseSalary) + '</span></div>' +
+    '<div class="salary-row"><span class="sr-label">Nombramientos (' + totalNoms + ' x L' + nomPayRate + (totalNoms < 20 ? ' [<20]' : ' [>=20]') + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
+    '<div class="salary-row"><span class="sr-label">Comision 3% sobre Venta Neta (' + fmtL(totalNeto) + ')</span><span class="sr-value">' + fmtL(commission) + '</span></div>' +
+    '<div class="salary-total">' + fmtL(totalSalary) + '</div>' +
+    '<div style="text-align:center;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(250,249,246,0.5);margin-top:4px;">Salario Total Estimado</div>';
+}
+
+/* ══════════════════════════════════════════
+   TAB 5: MENSAJERIA (bidireccional)
+   ══════════════════════════════════════════ */
+function startChatRefresh() {
+  loadMensajesGZ();
+  if (chatInterval) clearInterval(chatInterval);
+  chatInterval = setInterval(loadMensajesGZ, 10000);
+}
+
+(function() {
+  setTimeout(function() {
+    var inp = document.getElementById('chatFotos');
+    if (inp) inp.addEventListener('change', function() {
+      var prev = document.getElementById('chatFotosPreview');
+      prev.innerHTML = '';
+      var files = this.files;
+      for (var i = 0; i < Math.min(files.length, 2); i++) {
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(files[i]);
+        img.style.cssText = 'width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--borde);';
+        prev.appendChild(img);
+      }
+    });
+  }, 500);
+})();
+
+async function loadMensajesGZ() {
+  if (!session || !session.gerencia_divisional_id) {
+    var feed = document.getElementById('chatFeed');
+    if (feed) feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin gerencia divisional asignada.</p>';
+    return;
+  }
+
   var divMensajes = [];
   try {
     divMensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_divisional_fotos(*),mensajes_reacciones(id,gerente_zona_id)&order=created_at.asc');
-    if (divMensajes.error) {
+    if (!Array.isArray(divMensajes)) {
       divMensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.asc');
+      if (!Array.isArray(divMensajes)) divMensajes = [];
     }
   } catch(e) { divMensajes = []; }
 
-  // Load zona messages
   var zonaMensajes = [];
   try {
     zonaMensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + session.id + '&gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&select=*,mensajes_zona_fotos(*)&order=created_at.asc');
-    if (zonaMensajes.error) {
+    if (!Array.isArray(zonaMensajes)) {
       zonaMensajes = await api('/rest/v1/mensajes_zona?gerente_zona_id=eq.' + session.id + '&gerencia_divisional_id=eq.' + session.gerencia_divisional_id + '&order=created_at.asc');
-      if (zonaMensajes.error) zonaMensajes = [];
+      if (!Array.isArray(zonaMensajes)) zonaMensajes = [];
     }
   } catch(e) { zonaMensajes = []; }
 
-  // Merge and sort by date
   var allMsgs = [];
-  (Array.isArray(divMensajes) ? divMensajes : []).forEach(function(m) {
-    m._tipo = 'divisional';
-    allMsgs.push(m);
-  });
-  (Array.isArray(zonaMensajes) ? zonaMensajes : []).forEach(function(m) {
-    m._tipo = 'zona';
-    allMsgs.push(m);
-  });
+  divMensajes.forEach(function(m) { m._tipo = 'divisional'; allMsgs.push(m); });
+  zonaMensajes.forEach(function(m) { m._tipo = 'zona'; allMsgs.push(m); });
   allMsgs.sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
 
-  var feed = document.getElementById('gzMsgFeed');
+  var feed = document.getElementById('chatFeed');
   if (!allMsgs.length) {
-    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a&uacute;n. Inicia la conversaci&oacute;n.</p>';
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes. Inicia la conversacion.</p>';
     return;
   }
 
   feed.innerHTML = allMsgs.map(function(m) {
     var isZona = m._tipo === 'zona';
-    var cssClass = isZona ? 'msg-item msg-right' : 'msg-item msg-left';
-    var senderLabel = isZona ? 'T&uacute; (' + session.nombre + ')' : 'Gerencia Divisional';
+    var cssClass = isZona ? 'chat-bubble right' : 'chat-bubble left';
+    var senderLabel = isZona ? 'Tu (' + esc(session.nombre) + ')' : 'Gerencia Divisional';
 
     var fotos = '';
-    if (!isZona && m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
-      fotos = '<div class="msg-photos">' + m.mensajes_divisional_fotos.map(function(f) {
-        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
-      }).join('') + '</div>';
-    }
-    if (isZona && m.mensajes_zona_fotos && m.mensajes_zona_fotos.length) {
-      fotos = '<div class="msg-photos">' + m.mensajes_zona_fotos.map(function(f) {
-        return '<img src="' + f.url_foto + '" onclick="window.open(this.src)" />';
+    var fotosArr = isZona ? (m.mensajes_zona_fotos || []) : (m.mensajes_divisional_fotos || []);
+    if (fotosArr.length) {
+      fotos = '<div class="chat-photos">' + fotosArr.map(function(f) {
+        return '<img src="' + esc(f.url_foto) + '" onclick="window.open(this.src)" />';
       }).join('') + '</div>';
     }
 
-    // Heart reactions (only for divisional messages)
     var reactHtml = '';
     if (!isZona) {
       var totalReactions = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
@@ -1039,48 +1315,44 @@ async function loadMensajesGZ() {
       if (m.mensajes_reacciones) {
         m.mensajes_reacciones.forEach(function(r) { if (r.gerente_zona_id === session.id) yaReacciono = true; });
       }
-      var reactClass = yaReacciono ? 'react-btn reacted' : 'react-btn';
-      reactHtml = '<button class="' + reactClass + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')" ' + (yaReacciono ? 'title="Ya reaccionaste"' : '') + '>&#10084;&#65039; ' + totalReactions + '</button>';
+      reactHtml = '<button class="react-btn' + (yaReacciono ? ' reacted' : '') + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')">&#10084;&#65039; ' + totalReactions + '</button>';
     }
 
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
 
     return '<div class="' + cssClass + '">' +
-      '<div class="msg-sender">' + senderLabel + '</div>' +
-      '<div class="msg-text">' + (m.texto || '').replace(/\n/g, '<br>') + '</div>' +
+      '<div class="chat-sender">' + senderLabel + '</div>' +
+      '<div style="font-size:0.85rem;line-height:1.6;">' + esc(m.texto || '').replace(/\n/g, '<br>') + '</div>' +
       fotos +
-      '<div class="msg-meta">' +
-        '<span>' + fecha + '</span>' +
-        '<div class="msg-reactions">' + reactHtml + '</div>' +
-      '</div></div>';
+      '<div class="chat-time">' + fecha + '</div>' +
+      reactHtml +
+      '</div>';
   }).join('');
 
-  // Scroll to bottom
   feed.scrollTop = feed.scrollHeight;
 }
 
 async function enviarMensajeZona() {
-  var err = document.getElementById('gzMsgError');
-  var suc = document.getElementById('gzMsgSuccess');
-  err.textContent = ''; suc.textContent = '';
+  var errEl = document.getElementById('chatError');
+  errEl.textContent = '';
 
-  var texto = document.getElementById('gzMsgTexto').value.trim();
-  if (!texto) { err.textContent = 'Escribe un mensaje.'; return; }
-  if (!session.gerencia_divisional_id) { err.textContent = 'No tienes una Gerencia Divisional asignada.'; return; }
+  var texto = document.getElementById('chatInput').value.trim();
+  if (!texto) { errEl.textContent = 'Escribe un mensaje.'; return; }
+  if (!session.gerencia_divisional_id) { errEl.textContent = 'No tienes una Gerencia Divisional asignada.'; return; }
 
   try {
     var msg = await apiPost('/rest/v1/mensajes_zona', {
       gerente_zona_id: session.id,
       gerencia_divisional_id: session.gerencia_divisional_id,
-      texto: texto
+      texto: texto,
+      emisor: 'ZONA'
     });
 
     var msgId = msg[0] ? msg[0].id : null;
 
-    // Upload photos
     if (msgId) {
-      var files = document.getElementById('gzMsgFotos').files;
-      for (var f = 0; f < Math.min(files.length, 3); f++) {
+      var files = document.getElementById('chatFotos').files;
+      for (var f = 0; f < Math.min(files.length, 2); f++) {
         var file = files[f];
         var ext = file.name.split('.').pop();
         var path = 'mensajes_zona/' + msgId + '/' + (f + 1) + '.' + ext;
@@ -1089,7 +1361,6 @@ async function enviarMensajeZona() {
           headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
           body: file
         });
-
         if (upRes.ok) {
           var fotoUrl = SB + '/storage/v1/object/public/archivos-corporativos/' + path;
           await apiPost('/rest/v1/mensajes_zona_fotos', {
@@ -1100,14 +1371,12 @@ async function enviarMensajeZona() {
       }
     }
 
-    document.getElementById('gzMsgTexto').value = '';
-    document.getElementById('gzMsgFotos').value = '';
-    document.getElementById('gzMsgFotosPreview').innerHTML = '';
-    suc.textContent = 'Mensaje enviado.';
-    setTimeout(function() { suc.textContent = ''; }, 2000);
+    document.getElementById('chatInput').value = '';
+    document.getElementById('chatFotos').value = '';
+    document.getElementById('chatFotosPreview').innerHTML = '';
     loadMensajesGZ();
   } catch(e) {
-    err.textContent = e.message || 'Error al enviar mensaje.';
+    errEl.textContent = e.message || 'Error al enviar mensaje.';
     console.error(e);
   }
 }
@@ -1127,6 +1396,146 @@ async function toggleReaction(msgId, yaReacciono) {
     }
     loadMensajesGZ();
   } catch(e) { console.error(e); }
+}
+
+/* ══════════════════════════════════════════
+   TAB 6: REGISTROS
+   ══════════════════════════════════════════ */
+function switchRegistro(mode) {
+  regMode = mode;
+  document.getElementById('regBtnNom').className = mode === 'nom' ? 'btn' : 'btn btn-outline';
+  document.getElementById('regBtnPed').className = mode === 'ped' ? 'btn' : 'btn btn-outline';
+  loadRegistros();
+}
+
+async function loadRegistros() {
+  var campanaId = document.getElementById('regCampana').value;
+  var container = document.getElementById('regContent');
+  container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p>';
+
+  try {
+    if (regMode === 'nom') {
+      var filter = 'gerente_id=eq.' + session.id;
+      if (campanaId) filter += '&campana_ingreso_id=eq.' + campanaId;
+      var noms = await api('/rest/v1/nombramientos?' + filter + '&order=created_at.desc&limit=200');
+
+      if (!noms.length) {
+        container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin nombramientos.</p>';
+        return;
+      }
+
+      var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Direccion</th><th>Email</th><th>Sector</th><th>Campana</th><th>Fecha</th><th>Archivos</th></tr></thead><tbody>';
+      for (var i = 0; i < noms.length; i++) {
+        var n = noms[i];
+        var sNum = '';
+        sectores.forEach(function(s){ if (s.id === n.sector_id) sNum = 'S' + s.numero_sector; });
+
+        var archivosHtml = '';
+        try {
+          var archivos = await fetch(SB + '/storage/v1/object/list/archivos-corporativos/nombramientos/' + n.id, { headers: H });
+          if (archivos.ok) {
+            var fileList = await archivos.json();
+            if (fileList.length) {
+              archivosHtml = fileList.map(function(af) {
+                var url = SB + '/storage/v1/object/public/archivos-corporativos/nombramientos/' + n.id + '/' + af.name;
+                var isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(af.name);
+                return isImg ?
+                  '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width:40px;height:40px;object-fit:cover;border-radius:3px;"/></a>' :
+                  '<a href="' + url + '" target="_blank" class="btn btn-sm btn-outline" style="font-size:0.55rem;">PDF</a>';
+              }).join(' ');
+            }
+          }
+        } catch(fe) {}
+
+        html += '<tr>' +
+          '<td style="color:var(--dorado);font-weight:600;">' + esc(n.codigo_nombramiento) + '</td>' +
+          '<td>' + esc(n.nombre) + '</td>' +
+          '<td>' + esc(n.dni) + '</td>' +
+          '<td>' + esc(n.telefono || '-') + '</td>' +
+          '<td>' + esc(n.direccion || '-') + '</td>' +
+          '<td>' + esc(n.email || '-') + '</td>' +
+          '<td>' + sNum + '</td>' +
+          '<td>C' + getCampNum(n.campana_ingreso_id) + '</td>' +
+          '<td>' + new Date(n.created_at).toLocaleDateString('es-HN') + '</td>' +
+          '<td>' + (archivosHtml || '-') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+
+    } else {
+      var filter = 'gerente_id=eq.' + session.id;
+      if (campanaId) filter += '&campana_id=eq.' + campanaId;
+      var peds = await api('/rest/v1/pedidos?' + filter + '&order=created_at.desc&limit=200');
+
+      if (!peds.length) {
+        container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin pedidos.</p>';
+        return;
+      }
+
+      var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Vendedora</th><th>Sector</th><th>Campana</th><th>Venta Bruta</th><th>Venta Neta</th><th>Fecha</th><th>Archivos</th></tr></thead><tbody>';
+      for (var i = 0; i < peds.length; i++) {
+        var p = peds[i];
+        var sNum = '';
+        sectores.forEach(function(s){ if (s.id === p.sector_id) sNum = 'S' + s.numero_sector; });
+
+        var vendNombre = '-';
+        try {
+          if (p.vendedora_id) {
+            var v = await api('/rest/v1/vendedoras?id=eq.' + p.vendedora_id + '&select=nombre,codigo');
+            if (v.length) vendNombre = v[0].nombre + ' (' + v[0].codigo + ')';
+          }
+        } catch(ve) {}
+
+        var archivosHtml = '';
+        try {
+          var archivos = await fetch(SB + '/storage/v1/object/list/archivos-corporativos/pedidos/' + p.id, { headers: H });
+          if (archivos.ok) {
+            var fileList = await archivos.json();
+            if (fileList.length) {
+              archivosHtml = fileList.map(function(af) {
+                var url = SB + '/storage/v1/object/public/archivos-corporativos/pedidos/' + p.id + '/' + af.name;
+                var isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(af.name);
+                return isImg ?
+                  '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width:40px;height:40px;object-fit:cover;border-radius:3px;"/></a>' :
+                  '<a href="' + url + '" target="_blank" class="btn btn-sm btn-outline" style="font-size:0.55rem;">PDF</a>';
+              }).join(' ');
+            }
+          }
+        } catch(fe) {}
+
+        html += '<tr>' +
+          '<td style="color:var(--dorado);font-weight:600;">' + esc(p.codigo_pedido) + '</td>' +
+          '<td>' + esc(vendNombre) + '</td>' +
+          '<td>' + sNum + '</td>' +
+          '<td>C' + getCampNum(p.campana_id) + '</td>' +
+          '<td>' + fmtL(p.subtotal_catalogo) + '</td>' +
+          '<td>' + fmtL(p.total_venta_neta) + '</td>' +
+          '<td>' + new Date(p.created_at).toLocaleDateString('es-HN') + '</td>' +
+          '<td>' + (archivosHtml || '-') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--danger);text-align:center;padding:40px;">Error al cargar registros.</p>';
+    console.error(e);
+  }
+}
+
+/* ══════════════════════════════════════════
+   FILE INFO LISTENERS
+   ══════════════════════════════════════════ */
+function setupFileInfoListeners() {
+  var pedFiles = document.getElementById('pedArchivos');
+  if (pedFiles) pedFiles.addEventListener('change', function() {
+    var info = document.getElementById('pedFilesInfo');
+    info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
+  });
+  var nomFiles = document.getElementById('nomArchivos');
+  if (nomFiles) nomFiles.addEventListener('change', function() {
+    var info = document.getElementById('nomFilesInfo');
+    info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
+  });
 }
 </script>
 </body>
