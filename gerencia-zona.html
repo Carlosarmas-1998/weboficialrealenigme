@@ -787,7 +787,7 @@ async function guardarCoordinador() {
 async function bajaCoordinador(coordId, sectorId) {
   if (!confirm('Dar de baja al coordinador actual? Sus datos se conservan. Debera asignar uno nuevo.')) return;
   try {
-    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null });
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString().split('T')[0] });
     await loadSectores();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }

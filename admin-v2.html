@@ -482,7 +482,7 @@
     <div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Desglose por <em style="color:var(--gold);font-style:italic;">Gerencia Divisional</em></h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Gerencia Divisional</th><th>Venta Neta</th><th>Com. GD (5%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L16,000)</th><th>Com. Asesoras (15%)</th><th>Com. Ger. Gral. (5%)</th></tr></thead>
+        <thead><tr><th>Gerencia Divisional</th><th>Venta Bruta</th><th>Venta Neta</th><th>Com. GD (5%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L16,000)</th><th>Com. Asesoras (15%)</th><th>Com. Ger. Gral. (5%)</th></tr></thead>
         <tbody id="comisionesDesglose"></tbody>
       </table></div>
     </div>
@@ -1641,7 +1641,7 @@ function renderGerencias() {
   if (!cachedGerencias.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   body.innerHTML = cachedGerencias.map(function(g) {
-    var estado = g.activo ? '<span style="color:var(--success);">Activo</span>' : '<span style="color:var(--danger);">Inactivo</span>';
+    var estado = g.activo ? '<span style="color:var(--success);">Activo</span>' : '<span style="color:var(--danger);">' + (g.fecha_baja ? 'BAJA (' + g.fecha_baja + ')' : 'Inactivo') + '</span>';
     return '<tr>' +
       '<td style="font-weight:500;color:var(--gold);">' + (g.codigo || '') + '</td>' +
       '<td>' + (g.nombre || '') + '</td>' +
@@ -1652,7 +1652,7 @@ function renderGerencias() {
       '<td style="font-size:.7rem;">' + (g.fecha_ingreso || g.created_at ? (g.fecha_ingreso || g.created_at.split('T')[0]) : '-') + '</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;"><input type="text" id="gdPw_' + g.id + '" value="' + esc(g.password_temporal || '') + '" style="width:120px;padding:4px 6px;font-size:.75rem;" onkeydown="if(event.key===\'Enter\')changeGdPassword(\'' + g.id + '\')"/><button class="btn btn-gold btn-sm" style="padding:3px 10px;font-size:.55rem;" onclick="changeGdPassword(\'' + g.id + '\')"><span>OK</span></button></div></td>' +
       '<td>' + estado + '</td>' +
-      '<td><button class="btn" style="padding:4px 10px;font-size:.6rem;" onclick="toggleGerencia(\'' + g.id + '\',' + !g.activo + ')"><span>' + (g.activo ? 'Desactivar' : 'Activar') + '</span></button> <button class="btn btn-danger" style="padding:4px 10px;font-size:.6rem;" onclick="eliminarGerencia(\'' + g.id + '\')"><span>Eliminar</span></button></td>' +
+      '<td><button class="btn" style="padding:4px 10px;font-size:.6rem;" onclick="toggleGerencia(\'' + g.id + '\',' + !g.activo + ')"><span>' + (g.activo ? 'Desactivar' : 'Activar') + '</span></button> <button class="btn btn-danger" style="padding:4px 10px;font-size:.6rem;" onclick="eliminarGerencia(\'' + g.id + '\')"><span>Baja</span></button></td>' +
       '</tr>';
   }).join('');
 }
@@ -1749,20 +1749,20 @@ async function toggleGerencia(id, nuevoEstado) {
 }
 
 async function eliminarGerencia(id) {
-  if (!confirm('¿Eliminar esta gerencia divisional permanentemente? Se eliminarán también todos sus gerentes de zona, zonas, mensajes y datos asociados.')) return;
-  if (!confirm('SEGUNDA CONFIRMACIÓN: ¿Está seguro? Esta acción NO se puede deshacer.')) return;
+  if (!confirm('¿Dar de BAJA esta gerencia divisional? Se desactivará pero se conservarán su nombre, código y datos de ventas.')) return;
   try {
     var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activo: false, fecha_baja: new Date().toISOString().split('T')[0] })
     });
     if (res.ok) {
-      showToast('Gerencia divisional eliminada correctamente');
+      showToast('Gerencia divisional dada de baja (nombre, código y ventas conservados)');
       loadGerenciasDivisionales();
     } else {
       var errData = await res.text();
-      console.error('Error eliminando gerencia:', res.status, errData);
-      showToast('Error al eliminar: ' + res.status, true);
+      console.error('Error dando baja gerencia:', res.status, errData);
+      showToast('Error al dar de baja: ' + res.status, true);
     }
   } catch(e) { showToast('Error de conexión: ' + e.message, true); }
 }
@@ -2106,7 +2106,6 @@ var chartComisionesPie = null, chartComisionesBar = null;
 
 var COMISION_ESTRUCTURA = [
   { concepto: 'Precio de Inserci\u00f3n (Producto/Coste)', pct: 22, color: '#5a8fa0' },
-  { concepto: 'Comisi\u00f3n Asesoras', pct: 15, color: '#b08fd0' },
   { concepto: 'Log\u00edstica', pct: 8, color: '#9e6b6b' },
   { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5, color: '#c9a96e' },
   { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
@@ -2127,7 +2126,7 @@ async function loadComisiones() {
 
   var gStats = {};
   gerencias.forEach(function(gd) {
-    gStats[gd.id] = { nombre: gd.nombre, codigo: gd.codigo, neta: 0, gerentesCount: 0 };
+    gStats[gd.id] = { nombre: gd.nombre, codigo: gd.codigo, bruta: 0, neta: 0, gerentesCount: 0 };
   });
   gerentes.forEach(function(g) {
     if (g.gerencia_divisional_id && gStats[g.gerencia_divisional_id]) {
@@ -2135,36 +2134,42 @@ async function loadComisiones() {
     }
   });
 
-  var totalNeta = 0;
+  var totalBruta = 0, totalNeta = 0;
   pedidos.forEach(function(p) {
     var gdId = gerenteToGerencia[p.gerente_id];
+    var bruta = parseFloat(p.subtotal_catalogo || 0);
     var neta = parseFloat(p.total_venta_neta || 0);
-    if (gdId && gStats[gdId]) gStats[gdId].neta += neta;
+    if (gdId && gStats[gdId]) { gStats[gdId].bruta += bruta; gStats[gdId].neta += neta; }
+    totalBruta += bruta;
     totalNeta += neta;
   });
 
   // Stats row
   var totalGerentesZona = gerentes.length;
   var baseGZ = totalGerentesZona * 16000;
+  var comAsesoras = totalBruta * 0.15;
   document.getElementById('comisionesStats').innerHTML =
-    '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22%)</div><div class="stat-value">L' + (totalNeta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10%)</div><div class="stat-value" style="color:var(--success);">L' + (totalNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28%)</div><div class="stat-value">L' + (totalNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. Asesoras (15%)</div><div class="stat-value">L' + (totalNeta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. GD (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.4rem;">L' + totalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">(-) Com. Asesoras (15% Bruta)</div><div class="stat-value" style="color:#b08fd0;">-L' + comAsesoras.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Venta Neta Total</div><div class="stat-value" style="color:var(--success);font-size:1.4rem;">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22% Bruta)</div><div class="stat-value">L' + (totalBruta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10% Bruta)</div><div class="stat-value" style="color:var(--success);">L' + (totalBruta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Bruta)</div><div class="stat-value">L' + (totalBruta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GD (5% Bruta)</div><div class="stat-value">L' + (totalBruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5% Bruta)</div><div class="stat-value">L' + (totalBruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
-  // Estructura table
+  // Estructura table - Asesoras (15%) se descuenta de Bruta, el resto sale de Neta
   var estHtml = '';
+  estHtml += '<tr style="background:rgba(176,143,208,0.08);"><td>Comisi\u00f3n Asesoras (15% de Venta Bruta)</td><td style="color:#b08fd0;font-weight:400;">15%</td><td style="color:#b08fd0;">L' + comAsesoras.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA (Bruta - 15%)</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   var totalPct = 0;
   COMISION_ESTRUCTURA.forEach(function(c) {
-    var monto = totalNeta * (c.pct / 100);
+    var monto = totalBruta * (c.pct / 100);
     totalPct += c.pct;
     var notaHtml = c.nota ? ' <span style="font-size:.7rem;color:var(--text-muted);">' + esc(c.nota) + '</span>' : '';
     estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '%</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
-  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">' + totalPct + '%</td><td style="font-weight:500;color:var(--gold);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL (Asesoras + Distribuci\u00f3n)</td><td style="font-weight:500;color:var(--gold);">' + (totalPct + 15) + '%</td><td style="font-weight:500;color:var(--gold);">L' + totalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   document.getElementById('comisionesEstructuraBody').innerHTML = estHtml;
 
   // Load nombramientos for pago calculation
@@ -2211,16 +2216,17 @@ async function loadComisiones() {
 
     desHtml += '<tr>' +
       '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
+      '<td>L' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>L' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.bruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.bruta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>' + pagoNomHtml + '</td>' +
       '<td>L' + baseGZGd.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' <span style="font-size:.6rem;color:var(--text-muted);">(' + gdGerentes.length + ' GZ)</span></td>' +
-      '<td>L' + (s.neta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.bruta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.bruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '</tr>';
   });
-  if (!desHtml) desHtml = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
+  if (!desHtml) desHtml = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
   document.getElementById('comisionesDesglose').innerHTML = desHtml;
 
   // ── PUNTO DE EQUILIBRIO POR GERENCIA DE ZONA ──
@@ -2253,10 +2259,11 @@ async function loadComisiones() {
 
     // --- INGRESOS ---
     var ventaBruta = numAsesoras * ventaPromedio;
+    var ventaNeta = ventaBruta * 0.85;
 
-    // --- DISTRIBUCION POR MODELO ---
-    var dInsercion = ventaBruta * MODELO.insercion;
+    // --- DISTRIBUCION: 15% asesoras sale de Bruta, el resto de Bruta (sumando 85% = Neta) ---
     var dAsesoras = ventaBruta * MODELO.asesoras;
+    var dInsercion = ventaBruta * MODELO.insercion;
     var dLogistica = ventaBruta * MODELO.logistica;
     var dDivisional = ventaBruta * MODELO.divisional;
     var dZona = ventaBruta * MODELO.zona;
@@ -2279,6 +2286,7 @@ async function loadComisiones() {
     // HEADER - Resumen r\u00e1pido
     html += '<div class="stats-row" style="margin-bottom:20px;">';
     html += '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.6rem;">' + L(ventaBruta) + '</div></div>';
+    html += '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Venta Neta (-15%)</div><div class="stat-value" style="font-size:1.4rem;color:var(--success);">' + L(ventaNeta) + '</div></div>';
     html += '<div class="stat-card"><div class="stat-label">Asesoras Activas</div><div class="stat-value" style="font-size:1.6rem;">' + numAsesoras + '</div></div>';
     html += '<div class="stat-card"><div class="stat-label">Venta Promedio c/u</div><div class="stat-value" style="font-size:1.6rem;">' + L(ventaPromedio) + '</div></div>';
     html += '<div class="stat-card" style="border-color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';"><div class="stat-label">' + (esRentable ? '\u2705 RENTABLE' : '\ud83d\udd34 NO RENTABLE') + '</div><div class="stat-value" style="font-size:1.6rem;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</div></div>';
@@ -2288,10 +2296,11 @@ async function loadComisiones() {
     html += '<div style="margin-bottom:24px;">';
     html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:var(--gold);margin-bottom:12px;letter-spacing:.1em;">\ud83d\udcb0 SE GENERA &mdash; Distribuci\u00f3n de la Venta</h3>';
     html += '<div class="table-wrap"><table>';
-    html += '<thead><tr><th>Concepto</th><th>%</th><th>Monto Generado</th></tr></thead><tbody>';
+    html += '<thead><tr><th>Concepto</th><th>% de Bruta</th><th>Monto</th></tr></thead><tbody>';
+    html += '<tr style="background:rgba(176,143,208,0.08);"><td>Comisi\u00f3n Asesoras (se descuenta de Bruta)</td><td style="color:#b08fd0;font-weight:500;">15%</td><td style="color:#b08fd0;">' + L(dAsesoras) + '</td></tr>';
+    html += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">' + L(ventaNeta) + '</td></tr>';
     var distribucion = [
       ['Precio de Inserci\u00f3n (Producto)', '22%', dInsercion, 'var(--info)'],
-      ['Comisi\u00f3n Asesoras', '15%', dAsesoras, '#b08fd0'],
       ['Log\u00edstica', '8%', dLogistica, '#9e6b6b'],
       ['Comisi\u00f3n Gerencia Divisional', '5%', dDivisional, 'var(--gold)'],
       ['Comisi\u00f3n Gerencia de Zona', '3%', dZona, 'var(--success)'],
@@ -2304,7 +2313,7 @@ async function loadComisiones() {
       var isEmpresa = r[1] === '10%';
       html += '<tr><td>' + r[0] + '</td><td style="color:' + r[3] + ';font-weight:500;">' + r[1] + '</td><td style="' + (isEmpresa ? 'color:var(--success);font-weight:600;' : '') + '">' + L(r[2]) + '</td></tr>';
     });
-    html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:600;color:var(--gold);">TOTAL</td><td style="font-weight:600;color:var(--gold);">100%</td><td style="font-weight:600;color:var(--gold);">' + L(ventaBruta) + '</td></tr>';
+    html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:600;color:var(--gold);">TOTAL (15% + 85%)</td><td style="font-weight:600;color:var(--gold);">100%</td><td style="font-weight:600;color:var(--gold);">' + L(ventaBruta) + '</td></tr>';
     html += '</tbody></table></div></div>';
 
     // TABLA 2 - SE PAGA (del 28%)
@@ -2367,7 +2376,7 @@ async function loadComisiones() {
     '</div>' +
     '</div>' +
     '<div style="font-size:.68rem;color:var(--text-muted);padding:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;line-height:1.7;">' +
-    '<strong style="color:var(--gold);">MODELO:</strong> 22% inserci\u00f3n + 15% asesoras + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 100%<br>' +
+    '<strong style="color:var(--gold);">MODELO:</strong> Venta Bruta - <strong style="color:#b08fd0;">15% asesoras</strong> = <strong style="color:var(--success);">Venta Neta (85%)</strong>. De la Neta: 22% inserci\u00f3n + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 85%<br>' +
     '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u226419 \u2192 L220 c/u &bull; \u226520 \u2192 L320 c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
     '</div>' +
     '<div id="simResultado"></div>' +
@@ -2399,7 +2408,7 @@ async function loadComisiones() {
       labels: COMISION_ESTRUCTURA.map(function(c){return c.concepto;}),
       datasets: [{
         label: 'Monto (L)',
-        data: COMISION_ESTRUCTURA.map(function(c){return totalNeta * (c.pct/100);}),
+        data: COMISION_ESTRUCTURA.map(function(c){return totalBruta * (c.pct/100);}),
         backgroundColor: COMISION_ESTRUCTURA.map(function(c){return c.color;}),
         borderWidth: 0
       }]

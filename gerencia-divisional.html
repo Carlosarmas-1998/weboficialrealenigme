@@ -763,7 +763,7 @@ async function changeGzPw(id) {
 
 async function bajaGerente(id) {
   if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos se conservar\u00e1n.')) return;
-  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false });
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, fecha_baja: new Date().toISOString().split('T')[0] });
   loadGerentesZona();
 }
 
