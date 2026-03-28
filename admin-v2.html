@@ -2062,84 +2062,154 @@ async function loadComisiones() {
   // ── PUNTO DE EQUILIBRIO POR GERENCIA DE ZONA ──
   var peContainer = document.getElementById('puntoEquilibrio');
   var peExpl = document.getElementById('peExplicacion');
-  var sueldoGZ = 16000;
-  var pctGastos = 0.28; // Gastos de Pagos 28%
-  var pctEmpresa = 0.10; // Ganancia neta empresa 10%
-  var ventaMinAsesora = 2499; // Venta mínima por asesora (pedido mínimo)
-  var ventaNetaMinGZ = sueldoGZ / pctGastos;
-  var ventaBrutaMinGZ = ventaNetaMinGZ / 0.85;
 
-  // Calculadora dinámica de nombramientos
-  function calcNombramientos() {
-    var inputNom = document.getElementById('peNomInput');
-    var nomCount = parseInt(inputNom ? inputNom.value : 0) || 0;
-    var pagoPerNom = nomCount >= 20 ? 320 : 220;
-    var costoNombramientos = nomCount * pagoPerNom;
-    var costoTotalGZ = sueldoGZ + costoNombramientos;
-    var ventaNetaMin = costoTotalGZ / pctGastos;
-    var ventaBrutaMin = ventaNetaMin / 0.85;
-    // Cada asesora vende mínimo L2,499. ¿Cuántas asesoras se necesitan?
-    var asesorasNecesarias = Math.ceil(ventaBrutaMin / ventaMinAsesora);
-    // Cuántos nombramientos mínimos para ser rentable (ingresos > costos)
-    var ingresosPorNom = ventaMinAsesora; // cada nombramiento = 1 asesora que vende L2,499
-    var gananciaNetoPerAsesora = ventaMinAsesora * 0.85; // venta neta por asesora
-    var fondoPerAsesora = gananciaNetoPerAsesora * pctGastos; // lo que queda del 28% per asesora
-    // nombramientos mínimos para cubrir salario GZ:  sueldoGZ / (fondoPerAsesora - pagoPerNom)
-    var margenPerNom19 = (ventaMinAsesora * 0.85 * pctGastos) - 220;
-    var margenPerNom20 = (ventaMinAsesora * 0.85 * pctGastos) - 320;
-    var nomMinRentable19 = margenPerNom19 > 0 ? Math.ceil(sueldoGZ / margenPerNom19) : 999;
-    var nomMinRentable20 = margenPerNom20 > 0 ? Math.ceil(sueldoGZ / margenPerNom20) : 999;
+  // Modelo financiero ENIGME
+  var MODELO = {
+    insercion: 0.22,
+    asesoras: 0.15,
+    logistica: 0.08,
+    divisional: 0.05,
+    zona: 0.03,
+    gerenciaGral: 0.05,
+    marketing: 0.04,
+    gastosPagos: 0.28,
+    empresa: 0.10
+  };
+  var SUELDO_GZ = 16000;
+  var PEDIDO_MIN = 2499;
 
-    var detailEl = document.getElementById('peNomDetail');
-    if (detailEl) {
-      detailEl.innerHTML =
-        '<div class="stats-row" style="margin-top:12px;">' +
-        '<div class="stat-card"><div class="stat-label">Nombramientos</div><div class="stat-value">' + nomCount + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Pago/Nomb.</div><div class="stat-value">L' + pagoPerNom + (nomCount >= 20 ? ' (\u226520)' : ' (<20)') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Costo Nombramientos</div><div class="stat-value">L' + costoNombramientos.toLocaleString('es-HN') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Costo Total GZ</div><div class="stat-value" style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Venta Neta Min.</div><div class="stat-value" style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Venta Bruta Min.</div><div class="stat-value">L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Asesoras Necesarias (L2,499 c/u)</div><div class="stat-value" style="color:var(--success);">' + asesorasNecesarias + '</div></div>' +
-        '</div>' +
-        '<div style="margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);font-size:.75rem;line-height:1.8;">' +
-        '<strong style="color:var(--gold);">Desglose:</strong><br>' +
-        'Salario base GZ: <strong>L' + sueldoGZ.toLocaleString('es-HN') + '</strong><br>' +
-        'Pago ' + nomCount + ' nombramientos x L' + pagoPerNom + ' = <strong>L' + costoNombramientos.toLocaleString('es-HN') + '</strong><br>' +
-        'Total a cubrir del 28%: <strong style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</strong><br>' +
-        'Venta neta requerida: L' + costoTotalGZ.toLocaleString('es-HN') + ' / 0.28 = <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</strong><br>' +
-        'Venta bruta requerida: L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + ' / 0.85 = <strong>L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</strong><br>' +
-        'Si cada asesora vende m\u00ednimo <strong>L2,499</strong> brutos \u2192 se necesitan <strong style="color:var(--success);">' + asesorasNecesarias + ' asesoras activas</strong> vendiendo.' +
-        '</div>';
+  function L(n) { return 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  function simular() {
+    var numAsesoras = parseInt(document.getElementById('simAsesoras').value) || 0;
+    var ventaPromedio = parseFloat(document.getElementById('simVentaPromedio').value) || 0;
+    var numGZ = parseInt(document.getElementById('simNumGZ').value) || 1;
+    var out = document.getElementById('simResultado');
+    if (numAsesoras <= 0 || ventaPromedio <= 0) { out.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Ingrese valores para ver la simulaci\u00f3n.</p>'; return; }
+
+    // --- INGRESOS ---
+    var ventaBruta = numAsesoras * ventaPromedio;
+
+    // --- DISTRIBUCION POR MODELO ---
+    var dInsercion = ventaBruta * MODELO.insercion;
+    var dAsesoras = ventaBruta * MODELO.asesoras;
+    var dLogistica = ventaBruta * MODELO.logistica;
+    var dDivisional = ventaBruta * MODELO.divisional;
+    var dZona = ventaBruta * MODELO.zona;
+    var dGerenciaGral = ventaBruta * MODELO.gerenciaGral;
+    var dMarketing = ventaBruta * MODELO.marketing;
+    var dGastosPagos = ventaBruta * MODELO.gastosPagos;
+    var dEmpresa = ventaBruta * MODELO.empresa;
+
+    // --- GASTOS DEL 28% (lo que hay que pagar) ---
+    var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
+    var costoNombramientos = numAsesoras * pagoPerNom;
+    var costoSalariosGZ = SUELDO_GZ * numGZ;
+    var totalGastosReales = costoSalariosGZ + costoNombramientos;
+    var sobranteFondo28 = dGastosPagos - totalGastosReales;
+    var esRentable = sobranteFondo28 >= 0;
+
+    // --- RENDER ---
+    var html = '';
+
+    // HEADER - Resumen r\u00e1pido
+    html += '<div class="stats-row" style="margin-bottom:20px;">';
+    html += '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.6rem;">' + L(ventaBruta) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Asesoras Activas</div><div class="stat-value" style="font-size:1.6rem;">' + numAsesoras + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Venta Promedio c/u</div><div class="stat-value" style="font-size:1.6rem;">' + L(ventaPromedio) + '</div></div>';
+    html += '<div class="stat-card" style="border-color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';"><div class="stat-label">' + (esRentable ? '\u2705 RENTABLE' : '\ud83d\udd34 NO RENTABLE') + '</div><div class="stat-value" style="font-size:1.6rem;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</div></div>';
+    html += '</div>';
+
+    // TABLA 1 - SE GENERA (distribuci\u00f3n del 100%)
+    html += '<div style="margin-bottom:24px;">';
+    html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:var(--gold);margin-bottom:12px;letter-spacing:.1em;">\ud83d\udcb0 SE GENERA &mdash; Distribuci\u00f3n de la Venta</h3>';
+    html += '<div class="table-wrap"><table>';
+    html += '<thead><tr><th>Concepto</th><th>%</th><th>Monto Generado</th></tr></thead><tbody>';
+    var distribucion = [
+      ['Precio de Inserci\u00f3n (Producto)', '22%', dInsercion, 'var(--info)'],
+      ['Comisi\u00f3n Asesoras', '15%', dAsesoras, '#b08fd0'],
+      ['Log\u00edstica', '8%', dLogistica, '#9e6b6b'],
+      ['Comisi\u00f3n Gerencia Divisional', '5%', dDivisional, 'var(--gold)'],
+      ['Comisi\u00f3n Gerencia de Zona', '3%', dZona, 'var(--success)'],
+      ['Gerencia General', '5%', dGerenciaGral, '#8b7355'],
+      ['Marketing y Web', '4%', dMarketing, 'var(--warn)'],
+      ['Gastos de Pagos (Salarios + Nomb. + Op.)', '28%', dGastosPagos, '#d08050'],
+      ['Empresa \u2014 Ganancia Neta (INTOCABLE)', '10%', dEmpresa, 'var(--success)']
+    ];
+    distribucion.forEach(function(r) {
+      var isEmpresa = r[1] === '10%';
+      html += '<tr><td>' + r[0] + '</td><td style="color:' + r[3] + ';font-weight:500;">' + r[1] + '</td><td style="' + (isEmpresa ? 'color:var(--success);font-weight:600;' : '') + '">' + L(r[2]) + '</td></tr>';
+    });
+    html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:600;color:var(--gold);">TOTAL</td><td style="font-weight:600;color:var(--gold);">100%</td><td style="font-weight:600;color:var(--gold);">' + L(ventaBruta) + '</td></tr>';
+    html += '</tbody></table></div></div>';
+
+    // TABLA 2 - SE PAGA (del 28%)
+    html += '<div style="margin-bottom:24px;">';
+    html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:#d08050;margin-bottom:12px;letter-spacing:.1em;">\ud83d\udcdd SE PAGA &mdash; Del Fondo 28% (' + L(dGastosPagos) + ')</h3>';
+    html += '<div class="table-wrap"><table>';
+    html += '<thead><tr><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead><tbody>';
+    html += '<tr><td>Salario Gerente(s) de Zona</td><td>' + numGZ + ' GZ x ' + L(SUELDO_GZ) + '</td><td style="color:var(--warn);">' + L(costoSalariosGZ) + '</td></tr>';
+    html += '<tr><td>Pago por Nombramientos</td><td>' + numAsesoras + ' nomb. x ' + L(pagoPerNom) + (numAsesoras >= 20 ? ' (\u226520)' : ' (<20)') + '</td><td style="color:var(--warn);">' + L(costoNombramientos) + '</td></tr>';
+    html += '<tr style="border-top:2px solid var(--border);"><td style="font-weight:600;">Total Pagos</td><td></td><td style="font-weight:600;color:var(--warn);">' + L(totalGastosReales) + '</td></tr>';
+    html += '<tr style="border-top:2px solid ' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';background:' + (esRentable ? 'rgba(107,158,120,0.08)' : 'rgba(158,107,107,0.08)') + ';"><td style="font-weight:700;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '\u2705 SOBRANTE OPERATIVO' : '\ud83d\udd34 D\u00c9FICIT') + '</td><td style="font-size:.75rem;color:var(--text-muted);">' + L(dGastosPagos) + ' - ' + L(totalGastosReales) + '</td><td style="font-weight:700;font-size:1.1rem;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</td></tr>';
+    html += '</tbody></table></div></div>';
+
+    // TABLA 3 - RESUMEN FINAL: QUEDA
+    html += '<div style="margin-bottom:16px;">';
+    html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:var(--success);margin-bottom:12px;letter-spacing:.1em;">\u2728 QUEDA &mdash; Resumen Final</h3>';
+    html += '<div class="stats-row">';
+    html += '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Ganancia Empresa (10%)</div><div class="stat-value" style="color:var(--success);">' + L(dEmpresa) + '</div></div>';
+    html += '<div class="stat-card" style="border-color:#d08050;"><div class="stat-label">Sobrante Fondo 28%</div><div class="stat-value" style="color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</div></div>';
+    html += '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Comisi\u00f3n GD recibe</div><div class="stat-value">' + L(dDivisional) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Comisi\u00f3n GZ recibe</div><div class="stat-value">' + L(dZona) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">GZ cobra total (salario+comisi\u00f3n)</div><div class="stat-value" style="color:var(--gold);">' + L(costoSalariosGZ + dZona) + '</div></div>';
+    html += '<div class="stat-card"><div class="stat-label">Cada asesora recibe (15%)</div><div class="stat-value">' + L(dAsesoras / numAsesoras) + '</div></div>';
+    html += '</div></div>';
+
+    // ALERTA si no es rentable
+    if (!esRentable) {
+      var faltante = Math.abs(sobranteFondo28);
+      var ventaMinNecesaria = totalGastosReales / MODELO.gastosPagos;
+      var ventaMinPorAsesora = ventaMinNecesaria / numAsesoras;
+      html += '<div style="background:rgba(158,107,107,0.1);border:1px solid var(--danger);padding:16px;margin-top:8px;">';
+      html += '<strong style="color:var(--danger);">\u26a0\ufe0f ZONA NO RENTABLE</strong><br>';
+      html += '<span style="font-size:.8rem;">Faltan <strong>' + L(faltante) + '</strong> para cubrir gastos. ';
+      html += 'Cada asesora deber\u00eda vender al menos <strong>' + L(Math.ceil(ventaMinPorAsesora)) + '</strong> para ser rentable.</span>';
+      html += '</div>';
     }
+
+    out.innerHTML = html;
   }
 
-  peContainer.innerHTML =
-    '<div class="stat-card"><div class="stat-label">Sueldo Bruto G. Zona</div><div class="stat-value" style="font-size:1.5rem;">L' + sueldoGZ.toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gastos de Pagos</div><div class="stat-value" style="font-size:1.5rem;">28%</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Ganancia</div><div class="stat-value" style="font-size:1.5rem;color:var(--success);">10%</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Venta Neta Min / GZ (solo salario)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Venta Bruta Min / GZ</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Venta Min. por Asesora</div><div class="stat-value" style="font-size:1.3rem;">L' + ventaMinAsesora.toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Nomb. min rentable (<20=L220)</div><div class="stat-value" style="font-size:1.3rem;color:var(--success);">' + nomMinRentable19 + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Nomb. min rentable (\u226520=L320)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">' + nomMinRentable20 + '</div></div>';
+  // Render calculadora
+  peContainer.innerHTML = '';
 
-  // Calculadora de nombramientos
-  peExpl.innerHTML = '<strong style="color:var(--gold);">MODELO FINANCIERO \u00c8NIGME:</strong><br><br>' +
-    '22% inserci\u00f3n + 15% asesoras + 8% log\u00edstica + 5% divisional + 3% zona + 5% gerencia general + 4% marketing = <strong>62% costos variables</strong><br>' +
-    '<strong style="color:var(--success);">10% Empresa (INTOCABLE)</strong> = ganancia neta pura, no se toca.<br>' +
-    '<strong>28% Gastos de Pagos</strong> = salarios GZ (L16,000 brutos) + nombramientos + operativo.<br><br>' +
-    '<strong style="color:var(--gold);">PAGO POR NOMBRAMIENTO:</strong><br>' +
-    '&bull; \u226419 nombramientos \u2192 <strong>L220</strong> c/u &bull; \u226520 nombramientos \u2192 <strong>L320</strong> c/u<br><br>' +
-    '<strong style="color:var(--gold);">VENTA M\u00cdNIMA POR ASESORA: L2,499</strong><br><br>' +
-    '<div style="background:var(--surface2);border:1px solid var(--gold);padding:16px;border-radius:4px;margin:12px 0;">' +
-    '<strong style="color:var(--gold);">CALCULADORA DE RENTABILIDAD POR ZONA</strong><br><br>' +
-    '<label style="font-size:.75rem;color:var(--text-muted);">\u00bfCu\u00e1ntos nombramientos espera dar en la zona?</label><br>' +
-    '<input type="number" id="peNomInput" min="0" max="100" value="10" style="padding:8px 12px;font-size:1rem;width:100px;margin:8px 0;border:1px solid var(--border);" oninput="calcNombramientos()"/>' +
-    '<div id="peNomDetail"></div></div>';
+  peExpl.innerHTML =
+    '<div style="background:var(--surface);border:1px solid var(--gold);padding:24px;margin-bottom:20px;">' +
+    '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.3rem;color:var(--gold);margin-bottom:16px;letter-spacing:.12em;">SIMULADOR DE RENTABILIDAD POR ZONA</h3>' +
+    '<p style="font-size:.75rem;color:var(--text-muted);margin-bottom:20px;">Ingrese los valores y vea en tiempo real: cu\u00e1nto se genera, cu\u00e1nto se paga y cu\u00e1nto queda.</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;">' +
+    '<div>' +
+    '<label style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">\u00bfCu\u00e1ntas Asesoras Ingresan?</label>' +
+    '<input type="number" id="simAsesoras" min="1" max="500" value="20" style="width:100%;padding:12px;font-size:1.1rem;background:var(--surface2);border:1px solid var(--border);color:var(--gold);font-weight:500;text-align:center;" oninput="simular()"/>' +
+    '</div>' +
+    '<div>' +
+    '<label style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Venta Promedio por Asesora (L)</label>' +
+    '<input type="number" id="simVentaPromedio" min="1" max="100000" value="2499" style="width:100%;padding:12px;font-size:1.1rem;background:var(--surface2);border:1px solid var(--border);color:var(--gold);font-weight:500;text-align:center;" oninput="simular()"/>' +
+    '</div>' +
+    '<div>' +
+    '<label style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Gerentes de Zona</label>' +
+    '<input type="number" id="simNumGZ" min="1" max="7" value="1" style="width:100%;padding:12px;font-size:1.1rem;background:var(--surface2);border:1px solid var(--border);color:var(--gold);font-weight:500;text-align:center;" oninput="simular()"/>' +
+    '</div>' +
+    '</div>' +
+    '<div style="font-size:.68rem;color:var(--text-muted);padding:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;line-height:1.7;">' +
+    '<strong style="color:var(--gold);">MODELO:</strong> 22% inserci\u00f3n + 15% asesoras + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 100%<br>' +
+    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u226419 \u2192 L220 c/u &bull; \u226520 \u2192 L320 c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
+    '</div>' +
+    '<div id="simResultado"></div>' +
+    '</div>';
 
-  // Auto-calculate on load
-  setTimeout(calcNombramientos, 100);
+  setTimeout(simular, 100);
 
   // Pie chart
   if (chartComisionesPie) chartComisionesPie.destroy();
