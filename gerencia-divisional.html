@@ -135,6 +135,11 @@
       .chat-right-panel{min-height:400px;}
       .chat-bubble{max-width:90%;}
     }
+    .upload-field{margin-top:8px;}
+    .upload-field label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dorado);display:block;margin-bottom:6px;font-weight:600;}
+    .upload-field input[type=file]{width:100%;padding:8px;background:var(--marfil);border:1px solid var(--borde);color:var(--carbon);font-size:.8rem;cursor:pointer;}
+    .upload-field input[type=file]::-webkit-file-upload-button{background:var(--dorado);color:#0a0a0a;border:none;padding:6px 14px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-right:10px;}
+    .upload-field .file-preview{margin-top:6px;max-width:80px;max-height:80px;object-fit:cover;border:1px solid var(--borde);display:none;}
   </style>
 </head>
 <body>
@@ -202,6 +207,24 @@
       <div class="form-grid" style="margin-top:14px;">
         <div class="form-group"><label>Nombre de la Zona *</label><input id="gzZonaNombre" placeholder="Ej: Zona Sur Choluteca"/></div>
         <div class="form-group"><label>Contrase&ntilde;a del Gerente *</label><input id="gzPassword" type="text" placeholder="M&iacute;n. 6 caracteres"/></div>
+      </div>
+
+      <div style="margin-top:18px;border-top:1px solid var(--borde);padding-top:16px;">
+        <div style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dorado);margin-bottom:12px;font-weight:600;">&#9672; Documentos de Alta (Fotos o PDF)</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+          <div class="upload-field">
+            <label>1. Documento de Identidad (DNI) *</label>
+            <input type="file" id="gzFileDni" accept="image/*,.pdf"/>
+          </div>
+          <div class="upload-field">
+            <label>2. Confirmaci&oacute;n de Cuenta Bancaria *</label>
+            <input type="file" id="gzFileCuenta" accept="image/*,.pdf"/>
+          </div>
+          <div class="upload-field">
+            <label>3. Documento Adicional (opcional)</label>
+            <input type="file" id="gzFileExtra" accept="image/*,.pdf"/>
+          </div>
+        </div>
       </div>
 
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -592,6 +615,7 @@ function clearGZForm() {
   document.getElementById('formGZTitle').textContent = 'Registrar Gerente de Zona';
   document.getElementById('btnGuardarGZ').textContent = 'Guardar Gerente';
   ['gzDni','gzNombre','gzTelefono','gzEmail','gzFechaNac','gzCuenta','gzBanco','gzRtn','gzDireccion','gzFechaIngreso','gzZonaNombre','gzPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
+  ['gzFileDni','gzFileCuenta','gzFileExtra'].forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('gzDepto').value = '';
   document.getElementById('gzError').textContent = '';
   document.getElementById('gzSuccess').textContent = '';
@@ -669,6 +693,12 @@ async function guardarGerenteZona() {
   }
   if (gzPassword.length < 6) { err.textContent = 'La contrase\u00f1a debe tener al menos 6 caracteres.'; return; }
 
+  var fileDni = document.getElementById('gzFileDni').files[0];
+  var fileCuenta = document.getElementById('gzFileCuenta').files[0];
+  var fileExtra = document.getElementById('gzFileExtra').files[0];
+  var editId = document.getElementById('gzEditId').value;
+  if (!editId && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar el DNI y la confirmaci\u00f3n de cuenta bancaria.'; return; }
+
   // Auto-get ALL municipios of the selected department
   var allMunis = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&select=id');
   var municipiosSeleccionados = (allMunis && !allMunis.error) ? allMunis.map(function(m){ return m.id; }) : [];
@@ -723,6 +753,38 @@ async function guardarGerenteZona() {
 
     // 5. Create 14 sectores for this gerente
     var gerenteId = gzData[0].id;
+
+    // Upload documents
+    var archivoDni = '', archivoCuenta = '', archivoExtra = '';
+    async function uploadDoc(file, folder) {
+      var ext = file.name.split('.').pop();
+      var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+      var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+        method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
+      });
+      return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
+    }
+    if (fileDni) archivoDni = await uploadDoc(fileDni, 'altas/gz-' + codigo);
+    if (fileCuenta) archivoCuenta = await uploadDoc(fileCuenta, 'altas/gz-' + codigo);
+    if (fileExtra) archivoExtra = await uploadDoc(fileExtra, 'altas/gz-' + codigo);
+
+    // Save registro de alta
+    var deptoSelect = document.getElementById('gzDepto');
+    var deptoName = deptoSelect.options[deptoSelect.selectedIndex] ? deptoSelect.options[deptoSelect.selectedIndex].text : '';
+    await fetch(SB + '/rest/v1/registros_alta', {
+      method: 'POST', headers: HJ,
+      body: JSON.stringify({
+        tipo: 'gerente_zona', nombre: nombre, dni: dni, telefono: telefono,
+        email: email || null, direccion: direccion, codigo: codigo,
+        rtn: rtn || null, numero_cuenta: cuenta, nombre_banco: banco,
+        fecha_nacimiento: fechaNac || null, fecha_ingreso: fechaIngreso || null,
+        departamento: deptoName, zona: zonaNombre,
+        gerencia_divisional: session.nombre || session.codigo || '',
+        password_temporal: gzPassword,
+        archivo_dni: archivoDni, archivo_cuenta: archivoCuenta, archivo_extra: archivoExtra
+      })
+    }).catch(function(e){ console.warn('registro_alta:', e); });
+
     var sectoresData = [];
     for (var s = 1; s <= 14; s++) {
       sectoresData.push({

@@ -145,6 +145,10 @@
       .chat-bubble{max-width:90%;}
       .login-box{padding:32px 24px;}
     }
+    .upload-field{margin-top:8px;}
+    .upload-field label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;font-weight:600;}
+    .upload-field input[type=file]{width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.8rem;cursor:pointer;}
+    .upload-field input[type=file]::-webkit-file-upload-button{background:var(--gold);color:#0a0a0a;border:none;padding:6px 14px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-right:10px;}
   </style>
 </head>
 <body>
@@ -445,6 +449,14 @@
       <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="mcCuenta" placeholder="Cuenta bancaria"/></div>
       <div class="form-group"><label>Nombre del Banco</label><input id="mcBanco" placeholder="Ej: BAC, Ficohsa"/></div>
     </div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:600;">◈ Documentos de Alta</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+        <div class="upload-field"><label>1. DNI (Foto/PDF) *</label><input type="file" id="mcFileDni" accept="image/*,.pdf"/></div>
+        <div class="upload-field"><label>2. Confirm. Cuenta *</label><input type="file" id="mcFileCuenta" accept="image/*,.pdf"/></div>
+        <div class="upload-field"><label>3. Doc. Adicional</label><input type="file" id="mcFileExtra" accept="image/*,.pdf"/></div>
+      </div>
+    </div>
     <div style="margin-top:16px;display:flex;gap:10px;">
       <button class="btn" onclick="guardarCoordinador()">Guardar</button>
       <button class="btn btn-outline" onclick="cerrarModalCoord()">Cancelar</button>
@@ -705,6 +717,7 @@ function abrirEditarCoord(sectorId, sectorNum, coordId) {
 
 function cerrarModalCoord() {
   document.getElementById('modalCoord').classList.remove('active');
+  ['mcFileDni','mcFileCuenta','mcFileExtra'].forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
 }
 
 async function guardarCoordinador() {
@@ -723,6 +736,12 @@ async function guardarCoordinador() {
   if (!nombre || !dni || !telefono || !direccion) {
     err.textContent = 'Nombre, DNI, telefono y direccion son obligatorios.'; return;
   }
+
+  var fileDni = document.getElementById('mcFileDni').files[0];
+  var fileCuenta = document.getElementById('mcFileCuenta').files[0];
+  var fileExtra = document.getElementById('mcFileExtra').files[0];
+  var coordIdVal = document.getElementById('mcCoordId').value;
+  if (!coordIdVal && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar DNI y confirmación de cuenta.'; return; }
 
   var payload = {
     nombre: nombre,
@@ -774,6 +793,37 @@ async function guardarCoordinador() {
       } catch(ve) { console.warn('vendedora entry:', ve); }
 
       suc.textContent = 'Coordinador asignado. Codigo: ' + codigo;
+
+      // Upload documents
+      async function uploadDocCoord(file, folder) {
+        var ext = file.name.split('.').pop();
+        var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+        var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+          method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
+        });
+        return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
+      }
+      var aDni = await uploadDocCoord(fileDni, 'altas/coord-' + codigo);
+      var aCuenta = await uploadDocCoord(fileCuenta, 'altas/coord-' + codigo);
+      var aExtra = fileExtra ? await uploadDocCoord(fileExtra, 'altas/coord-' + codigo) : '';
+      var sectorNum = document.getElementById('mcSectorNum').value || '';
+      await fetch(SB + '/rest/v1/registros_alta', {
+        method: 'POST', headers: HJ,
+        body: JSON.stringify({
+          tipo: 'coordinador', nombre: nombre, dni: dni, telefono: telefono,
+          email: email || null, direccion: direccion, codigo: String(codigo),
+          rtn: document.getElementById('mcRtn').value.trim() || null,
+          numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
+          nombre_banco: document.getElementById('mcBanco').value.trim() || null,
+          fecha_nacimiento: document.getElementById('mcFechaNac').value || null,
+          fecha_ingreso: document.getElementById('mcFechaIngreso').value || null,
+          sector: 'S' + sectorNum,
+          zona: session.zona_nombre || '',
+          gerencia_divisional: session.gerencia_nombre || '',
+          archivo_dni: aDni, archivo_cuenta: aCuenta, archivo_extra: aExtra
+        })
+      }).catch(function(e){ console.warn('registro_alta coord:', e); });
+
       // Send welcome email
       var coordEmail = document.getElementById('coordEmail').value.trim();
       var coordNombre = document.getElementById('coordNombre').value.trim();

@@ -213,6 +213,7 @@
   <div class="nav-item" data-tab="msg_admin" onclick="switchTab('msg_admin')">Mensajer&iacute;a</div>
   <div class="nav-item" data-tab="comisiones" onclick="switchTab('comisiones')">Comisiones</div>
   <div class="nav-item" data-tab="bajas" onclick="switchTab('bajas');loadBajas();">Bajas</div>
+  <div class="nav-item" data-tab="registros_zonas" onclick="switchTab('registros_zonas');loadRegistrosAlta();">Registros Zonas</div>
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -407,6 +408,14 @@
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Contrase&ntilde;a Temporal *</label><input id="gdPassword" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Mín. 6 caracteres" /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Fecha de Ingreso *</label><input id="gdFechaIngreso" type="date" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;" /></div>
         <div style="grid-column:1/-1;"><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Departamentos a asignar * (seleccione los que desee)</label><div id="gdDeptosContainer" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;max-height:200px;overflow-y:auto;"></div></div>
+        <div style="grid-column:1/-1;border-top:1px solid var(--border);padding-top:14px;margin-top:8px;">
+          <label style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:10px;font-weight:500;">&#9830; Documentos de Alta (Foto o PDF)</label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+            <div><label style="font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">1. Documento DNI *</label><input type="file" id="gdFileDni" accept="image/*,.pdf" style="width:100%;padding:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.78rem;"/></div>
+            <div><label style="font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">2. Confirm. Cuenta Bancaria *</label><input type="file" id="gdFileCuenta" accept="image/*,.pdf" style="width:100%;padding:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.78rem;"/></div>
+            <div><label style="font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">3. Documento Adicional</label><input type="file" id="gdFileExtra" accept="image/*,.pdf" style="width:100%;padding:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.78rem;"/></div>
+          </div>
+        </div>
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;">
         <button class="btn btn-gold" onclick="crearGerenciaDivisional()"><span>Guardar</span></button>
@@ -642,6 +651,28 @@
       </table></div>
       <div class="empty-state" id="bajasCoordEmpty" style="display:none;">No hay coordinadores de baja</div>
     </div>
+  </div>
+
+  <!-- TAB: REGISTROS DE ZONAS -->
+  <div class="tab-content" id="tab-registros_zonas">
+    <div class="page-header">
+      <div class="page-title"><h1>Registros de <em>Zonas</em></h1><p>Documentos de alta &mdash; Gerentes Divisionales, Gerentes de Zona y Coordinadores</p></div>
+      <div class="header-actions">
+        <button class="btn btn-gold" onclick="exportExcel('registros_alta')"><span>Exportar Excel</span></button>
+        <button class="btn" onclick="loadRegistrosAlta()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div id="regAltaStats" class="stats-row"></div>
+
+    <!-- Filtro por tipo -->
+    <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-gold btn-sm" onclick="filtrarRegistros('todos')" id="regFiltroTodos">Todos</button>
+      <button class="btn btn-sm" onclick="filtrarRegistros('gerente_divisional')" id="regFiltroGD">Ger. Divisionales</button>
+      <button class="btn btn-sm" onclick="filtrarRegistros('gerente_zona')" id="regFiltroGZ">Ger. de Zona</button>
+      <button class="btn btn-sm" onclick="filtrarRegistros('coordinador')" id="regFiltroCoord">Coordinadores</button>
+    </div>
+
+    <div id="regAltaContent"></div>
   </div>
 
 </div>
@@ -1799,6 +1830,13 @@ function exportExcel(type) {
       filename = 'analytics_enigme.xlsx';
       sheetName = 'Analytics';
       break;
+    case 'registros_alta':
+      data = cachedRegistrosAlta.map(function(r){
+        return { 'Tipo': r.tipo, 'Codigo': r.codigo, 'Nombre': r.nombre, 'DNI': r.dni, 'Telefono': r.telefono, 'Email': r.email, 'Direccion': r.direccion, 'RTN': r.rtn, 'Cuenta': r.numero_cuenta, 'Banco': r.nombre_banco, 'F.Nacimiento': r.fecha_nacimiento, 'F.Ingreso': r.fecha_ingreso, 'Departamento': r.departamento, 'Zona': r.zona, 'Sector': r.sector, 'Gerencia Div.': r.gerencia_divisional, 'Doc DNI': r.archivo_dni, 'Doc Cuenta': r.archivo_cuenta, 'Doc Extra': r.archivo_extra, 'Fecha Registro': r.created_at };
+      });
+      filename = 'registros_alta_enigme.xlsx';
+      sheetName = 'Registros Alta';
+      break;
     default:
       showToast('Tipo de exportacion no reconocido', true);
       return;
@@ -2100,6 +2138,10 @@ async function crearGerenciaDivisional() {
   if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
   if (!deptosChecked.length) { errEl.textContent = 'Debe seleccionar al menos un departamento.'; return; }
   if (!fechaIngreso) { errEl.textContent = 'Fecha de ingreso es obligatoria.'; return; }
+  var gdFileDni = document.getElementById('gdFileDni').files[0];
+  var gdFileCuenta = document.getElementById('gdFileCuenta').files[0];
+  var gdFileExtra = document.getElementById('gdFileExtra').files[0];
+  if (!gdFileDni || !gdFileCuenta) { errEl.textContent = 'Debe adjuntar el documento DNI y la confirmación de cuenta bancaria.'; return; }
 
   try {
     var bodyData = { nombre: nombre, codigo: codigo, email: email || null, telefono: telefono || null, dni: dni || null, direccion: direccion || null, numero_cuenta: cuenta || null, nombre_banco: banco || null, password_temporal: password, activo: true, departamento_id: deptosChecked[0], departamentos_ids: deptosChecked, fecha_ingreso: fechaIngreso };
@@ -2113,6 +2155,25 @@ async function crearGerenciaDivisional() {
       errEl.textContent = errData.message || 'Error al crear.';
       return;
     }
+    // Upload documents
+    async function uploadDocGD(file, folder) {
+      var ext = file.name.split('.').pop();
+      var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+      var r = await fetch(SUPA_URL + '/storage/v1/object/archivos-corporativos/' + path, {
+        method: 'POST', headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
+      });
+      return r.ok ? (SUPA_URL + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
+    }
+    var urlDni = await uploadDocGD(gdFileDni, 'altas/gd-' + codigo);
+    var urlCuenta = await uploadDocGD(gdFileCuenta, 'altas/gd-' + codigo);
+    var urlExtra = gdFileExtra ? await uploadDocGD(gdFileExtra, 'altas/gd-' + codigo) : '';
+    // Save registro de alta
+    var deptoNombres = [];
+    if (deptosContainer) { deptosContainer.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb){ deptoNombres.push(cb.parentElement.textContent.trim()); }); }
+    await fetch(SUPA_URL + '/rest/v1/registros_alta', {
+      method: 'POST', headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ tipo: 'gerente_divisional', nombre: nombre, dni: dni || null, telefono: telefono || null, email: email || null, direccion: direccion || null, codigo: codigo, numero_cuenta: cuenta || null, nombre_banco: banco || null, fecha_ingreso: fechaIngreso, departamento: deptoNombres.join(', '), password_temporal: password, archivo_dni: urlDni, archivo_cuenta: urlCuenta, archivo_extra: urlExtra })
+    }).catch(function(e){ console.warn('registro_alta GD:', e); });
     showToast('Gerencia divisional creada exitosamente');
     // Send welcome email
     if (email) {
@@ -2126,7 +2187,7 @@ async function crearGerenciaDivisional() {
       }).catch(function(){});
     }
     document.getElementById('gdFormWrap').style.display = 'none';
-    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword','gdFechaIngreso'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword','gdFechaIngreso','gdFileDni','gdFileCuenta','gdFileExtra'].forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
     loadGerenciasDivisionales();
   } catch(e) { errEl.textContent = 'Error de conexión.'; }
 }
@@ -3533,6 +3594,104 @@ function installPWA() {
     }
     deferredInstallPrompt = null;
   });
+}
+
+// ================================================================
+// REGISTROS DE ZONAS (ALTAS)
+// ================================================================
+var cachedRegistrosAlta = [];
+var filtroRegistroActual = 'todos';
+
+async function loadRegistrosAlta() {
+  var data = await supaGet('registros_alta', '&order=created_at.desc');
+  cachedRegistrosAlta = data || [];
+  renderRegistrosAlta();
+}
+
+function filtrarRegistros(tipo) {
+  filtroRegistroActual = tipo;
+  ['regFiltroTodos','regFiltroGD','regFiltroGZ','regFiltroCoord'].forEach(function(id){
+    document.getElementById(id).className = 'btn btn-sm';
+  });
+  var map = { 'todos':'regFiltroTodos', 'gerente_divisional':'regFiltroGD', 'gerente_zona':'regFiltroGZ', 'coordinador':'regFiltroCoord' };
+  if (map[tipo]) document.getElementById(map[tipo]).className = 'btn btn-gold btn-sm';
+  renderRegistrosAlta();
+}
+
+function renderRegistrosAlta() {
+  var data = cachedRegistrosAlta;
+  if (filtroRegistroActual !== 'todos') {
+    data = data.filter(function(r){ return r.tipo === filtroRegistroActual; });
+  }
+  var totalGD = cachedRegistrosAlta.filter(function(r){ return r.tipo === 'gerente_divisional'; }).length;
+  var totalGZ = cachedRegistrosAlta.filter(function(r){ return r.tipo === 'gerente_zona'; }).length;
+  var totalCoord = cachedRegistrosAlta.filter(function(r){ return r.tipo === 'coordinador'; }).length;
+
+  document.getElementById('regAltaStats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Total Registros</div><div class="stat-value">' + cachedRegistrosAlta.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Ger. Divisionales</div><div class="stat-value" style="color:var(--gold);">' + totalGD + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Ger. de Zona</div><div class="stat-value" style="color:var(--info);">' + totalGZ + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Coordinadores</div><div class="stat-value" style="color:var(--success);">' + totalCoord + '</div></div>';
+
+  if (!data.length) {
+    document.getElementById('regAltaContent').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:.8rem;">No hay registros de alta</div>';
+    return;
+  }
+
+  var html = '';
+  data.forEach(function(r) {
+    var tipoLabel = r.tipo === 'gerente_divisional' ? 'GERENTE DIVISIONAL' : r.tipo === 'gerente_zona' ? 'GERENTE DE ZONA' : 'COORDINADOR';
+    var tipoColor = r.tipo === 'gerente_divisional' ? 'var(--gold)' : r.tipo === 'gerente_zona' ? 'var(--info)' : 'var(--success)';
+
+    html += '<div style="background:var(--surface);border:1px solid var(--border);padding:20px 24px;margin-bottom:16px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">';
+    html += '<div><span style="font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:' + tipoColor + ';font-weight:500;background:rgba(201,169,110,0.08);padding:4px 12px;border:1px solid ' + tipoColor + ';">' + tipoLabel + '</span>';
+    html += ' <span style="font-size:.65rem;color:var(--text-muted);margin-left:8px;">' + formatDate(r.created_at) + '</span></div>';
+    html += '<span style="font-family:\'Cormorant Garamond\',serif;font-size:1.3rem;color:var(--gold);font-weight:300;">' + esc(r.codigo || '-') + '</span></div>';
+
+    // Data grid
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;">';
+    var fields = [
+      ['Nombre', r.nombre], ['DNI', r.dni], ['Tel\u00e9fono', r.telefono], ['Email', r.email],
+      ['Direcci\u00f3n', r.direccion], ['RTN', r.rtn], ['No. Cuenta', r.numero_cuenta], ['Banco', r.nombre_banco],
+      ['F. Nacimiento', r.fecha_nacimiento], ['F. Ingreso', r.fecha_ingreso],
+      ['Departamento', r.departamento], ['Zona', r.zona], ['Sector', r.sector],
+      ['Gerencia Div.', r.gerencia_divisional]
+    ];
+    fields.forEach(function(f) {
+      if (f[1]) {
+        html += '<div><div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;">' + f[0] + '</div>';
+        html += '<div style="font-size:.82rem;color:var(--text);">' + esc(f[1]) + '</div></div>';
+      }
+    });
+    html += '</div>';
+
+    // Documents
+    html += '<div style="border-top:1px solid var(--border);padding-top:14px;">';
+    html += '<div style="font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">&#9830; DOCUMENTOS DE ALTA</div>';
+    html += '<div style="display:flex;gap:16px;flex-wrap:wrap;">';
+    var docs = [['DNI', r.archivo_dni], ['Cuenta', r.archivo_cuenta], ['Adicional', r.archivo_extra]];
+    docs.forEach(function(d) {
+      if (d[1]) {
+        var isPdf = /\.pdf$/i.test(d[1]);
+        if (isPdf) {
+          html += '<a href="' + esc(d[1]) + '" target="_blank" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;">';
+          html += '<div style="width:80px;height:80px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">&#128196;</div>';
+          html += '<span style="font-size:.6rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">' + d[0] + ' (PDF)</span></a>';
+        } else {
+          html += '<a href="' + esc(d[1]) + '" target="_blank" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;">';
+          html += '<img src="' + esc(d[1]) + '" style="width:80px;height:80px;object-fit:cover;border:1px solid var(--border);"/>';
+          html += '<span style="font-size:.6rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">' + d[0] + '</span></a>';
+        }
+      } else {
+        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">';
+        html += '<div style="width:80px;height:80px;background:var(--bg);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--text-muted);">Sin archivo</div>';
+        html += '<span style="font-size:.6rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;">' + d[0] + '</span></div>';
+      }
+    });
+    html += '</div></div></div>';
+  });
+  document.getElementById('regAltaContent').innerHTML = html;
 }
 </script>
 </body>
