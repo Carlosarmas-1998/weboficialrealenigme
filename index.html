@@ -80,7 +80,7 @@
   <link rel="preload" as="image" href="portada.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Jost:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
@@ -173,16 +173,9 @@
     }
     .dropbtn svg { width: 9px; height: 9px; transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); fill: currentColor; }
     
-    .dropdown-content { 
-      position: absolute; top: 100%; left: 0; background-color: var(--blanco-dior); 
-      min-width: 220px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
-      border: 1px solid var(--linea-fina); border-top: 2px solid var(--dorado); 
-      opacity: 0; visibility: hidden; transform: translateY(15px); transition: var(--transition); 
-      display: flex; flex-direction: column; z-index: 9999;
-      max-height: 75vh; overflow-y: auto;
-    }
+    .dropdown-content { position: absolute; top: 100%; left: 0; background: rgba(28, 28, 28, 0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); min-width: 220px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border: 1px solid rgba(201, 169, 110, 0.15); border-top: 2px solid rgba(201, 169, 110, 0.3); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s ease; display: flex; flex-direction: column; z-index: 9999; }
     .dropdown-content::-webkit-scrollbar { width: 4px; }
-    .dropdown-content::-webkit-scrollbar-thumb { background: var(--dorado); }
+    .dropdown-content::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.5); border-radius: 2px; }
     .dropdown-content::before { content: ''; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; background: transparent; }
     
     /* ── LÓGICA DE APERTURA (HOVER PC + ACTIVE MÓVIL) ── */
@@ -194,9 +187,9 @@
     .dropdown.active .dropdown-content { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
     .dropdown.active .dropbtn svg { transform: rotate(180deg); }
 
-    .dropdown-content a { color: var(--carbon) !important; font-weight: 600; padding: 14px 20px; font-size: clamp(0.5rem, 0.7vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--fondo-galeria); transition: var(--transition); }
+    .dropdown-content a { color: #e8e0d4 !important; font-family: "Jost", sans-serif; font-weight: 500; padding: 12px 24px; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.04); transition: all 0.3s ease; }
     .dropdown-content a:last-child { border-bottom: none; }
-    .dropdown-content a:hover { background-color: var(--fondo-galeria); color: var(--dorado) !important; padding-left: 28px; }
+    .dropdown-content a:hover { background: rgba(201, 169, 110, 0.08); color: #CBAA63 !important; padding-left: 28px; }
 
     /* ── HERO ── */
     .hero { position: relative; width: 100%; background-color: var(--marfil); display: flex; justify-content: center; align-items: center; overflow: hidden; border-bottom: 1px solid var(--linea-fina); }
@@ -276,13 +269,14 @@
       .dropdown { position: relative; width: auto; display: inline-block; }
       .dropbtn { font-size: 0.55rem; letter-spacing: 1.5px; padding: 10px 5px; }
       
-      .dropdown-content { 
-        top: 100%; left: 50%; transform: translateX(-50%) translateY(15px); 
-        width: auto; min-width: 200px; text-align: center; 
-        border-left: 1px solid var(--linea-fina); border-right: 1px solid var(--linea-fina); 
+      .dropdown-content {
+        top: 100%; left: 50%; transform: translateX(-50%) translateY(10px);
+        width: auto; min-width: 200px; text-align: center;
+        background: rgba(28, 28, 28, 0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(201, 169, 110, 0.15);
       }
       
-      .dropdown-content a { font-size: 0.55rem; padding: 15px; }
+      .dropdown-content a { font-size: 0.55rem; padding: 15px;  color: #e8e0d4 !important; }
       .dropdown-content a:hover { padding-left: 15px; }
       .nav-link:not(.dropbtn) { width: auto; display: inline-block; margin-top: 0; padding: 10px 5px; font-size: 0.55rem; }
       
@@ -314,7 +308,7 @@
       .nav-group.right { gap: 10px; flex-direction: row; flex-wrap: wrap; }
       .dropbtn { font-size: 0.55rem; letter-spacing: 1px; }
       .dropdown-content { min-width: 180px; }
-      .dropdown-content a { font-size: 0.55rem; padding: 12px; }
+      .dropdown-content a { font-size: 0.55rem; padding: 12px;  color: #e8e0d4 !important; }
       .nav-link:not(.dropbtn) { font-size: 0.55rem; }
       
       .top-announcement { padding: 8px 0; }
@@ -340,9 +334,225 @@
       .whatsapp-float { bottom: 15px; right: 15px; width: 35px; height: 35px; }
       .whatsapp-float svg { width: 16px; height: 16px; }
     }
+    /* ── COOKIE POPUP ── */
+    .cookie-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.6s ease;
+      padding: 20px;
+    }
+    .cookie-overlay.visible { opacity: 1; }
+    .cookie-overlay.hiding { opacity: 0; pointer-events: none; }
+    .cookie-modal {
+      background: linear-gradient(145deg, #1C1C1C 0%, #2A2A2A 100%);
+      border: 1px solid rgba(203, 170, 99, 0.3);
+      border-radius: 8px; max-width: 480px; width: 100%;
+      padding: 45px 40px 35px; text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(203,170,99,0.1);
+      transform: translateY(30px) scale(0.95);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .cookie-overlay.visible .cookie-modal { transform: translateY(0) scale(1); }
+    .cookie-modal-brand {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+      letter-spacing: 0.35em; color: #CBAA63; margin-bottom: 8px; font-weight: 500;
+    }
+    .cookie-modal-divider {
+      width: 50px; height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+      margin: 0 auto 24px;
+    }
+    .cookie-modal-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
+      color: #fff; margin-bottom: 12px; font-weight: 400; letter-spacing: 0.05em;
+    }
+    .cookie-modal-text {
+      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+      color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 8px;
+    }
+    .cookie-modal-section {
+      margin-top: 20px; padding-top: 18px;
+      border-top: 1px solid rgba(203,170,99,0.15);
+    }
+    .cookie-modal-section-title {
+      font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500;
+      color: #CBAA63; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .cookie-btns { display: flex; gap: 12px; margin-top: 28px; justify-content: center; flex-wrap: wrap; }
+    .cookie-btn-accept {
+      padding: 13px 36px; background: linear-gradient(135deg, #CBAA63, #E8D090);
+      border: none; color: #1C1C1C; font-family: 'Jost', sans-serif;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer; border-radius: 4px;
+      transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(203,170,99,0.3);
+    }
+    .cookie-btn-accept:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(203,170,99,0.5); }
+    .cookie-btn-decline {
+      padding: 13px 36px; background: transparent;
+      border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5);
+      font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 400;
+      letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+      border-radius: 4px; transition: all 0.3s ease;
+    }
+    .cookie-btn-decline:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
+
+    /* ── VIDEO HERO ── */
+    .video-hero {
+      position: relative; width: 100%; background: #000;
+      overflow: hidden; border-bottom: 1px solid var(--linea-fina);
+    }
+    .video-hero video {
+      width: 100%; display: block; object-fit: cover;
+    }
+
+    /* ── EMAIL SUBSCRIPTION ── */
+    .subscribe-section {
+      background: linear-gradient(160deg, #1C1C1C 0%, #252525 50%, #1C1C1C 100%);
+      padding: clamp(50px, 8vw, 90px) 5vw;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .subscribe-section::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+    }
+    .subscribe-section::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+    }
+    .subscribe-inner { max-width: 580px; margin: 0 auto; }
+    .subscribe-brand {
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 3vw, 2.2rem);
+      color: #CBAA63; letter-spacing: 0.3em; margin-bottom: 8px; font-weight: 400;
+    }
+    .subscribe-divider {
+      width: 60px; height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+      margin: 0 auto 22px;
+    }
+    .subscribe-title {
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.5rem);
+      color: #fff; margin-bottom: 16px; font-weight: 400; letter-spacing: 0.05em;
+    }
+    .subscribe-text {
+      font-family: 'Jost', sans-serif; font-size: clamp(0.78rem, 1vw, 0.88rem);
+      color: rgba(255,255,255,0.6); line-height: 1.9; margin-bottom: 30px;
+    }
+    .subscribe-form {
+      display: flex; gap: 0; max-width: 480px; margin: 0 auto;
+      border: 1px solid rgba(203,170,99,0.3); border-radius: 4px; overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    .subscribe-form:focus-within { border-color: #CBAA63; }
+    .subscribe-input {
+      flex: 1; padding: 15px 20px; background: rgba(255,255,255,0.05);
+      border: none; color: #fff; font-family: 'Jost', sans-serif;
+      font-size: 0.85rem; outline: none;
+    }
+    .subscribe-input::placeholder { color: rgba(255,255,255,0.3); }
+    .subscribe-submit {
+      padding: 15px 28px; background: linear-gradient(135deg, #CBAA63, #E8D090);
+      border: none; color: #1C1C1C; font-family: 'Jost', sans-serif;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer; transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .subscribe-submit:hover { filter: brightness(1.1); }
+    .subscribe-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .subscribe-success {
+      display: none; margin-top: 18px; padding: 14px 20px;
+      background: rgba(203,170,99,0.1); border: 1px solid rgba(203,170,99,0.3);
+      border-radius: 4px; color: #CBAA63;
+      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+    }
+    .subscribe-error {
+      display: none; margin-top: 12px; color: #E53935;
+      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+    }
+    .subscribe-discount {
+      display: inline-block; margin-top: 22px; padding: 8px 20px;
+      border: 1px solid rgba(203,170,99,0.25); border-radius: 3px;
+      font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
+      color: rgba(255,255,255,0.4); letter-spacing: 0.15em;
+    }
+
+    /* ── TOAST NOTIFICATION ── */
+    .enigme-toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, #1C1C1C, #2A2A2A); color: #CBAA63;
+      font-family: 'Jost', sans-serif; font-size: 0.85rem; padding: 16px 30px;
+      border: 1px solid rgba(203,170,99,0.3); border-radius: 6px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 100001;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .enigme-toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── CHATBOT TOOLTIP ── */
+    .abril-tooltip {
+      position: fixed; bottom: 90px; left: 24px; z-index: 99998;
+      background: linear-gradient(135deg, #1C1C1C, #2A2A2A);
+      color: #CBAA63; font-family: 'Jost', sans-serif; font-size: 0.72rem;
+      font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+      padding: 10px 18px; border-radius: 6px;
+      border: 1px solid rgba(203,170,99,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none; white-space: nowrap;
+    }
+    .abril-tooltip::after {
+      content: ''; position: absolute; bottom: -6px; left: 24px;
+      width: 12px; height: 12px; background: #1C1C1C;
+      border-right: 1px solid rgba(203,170,99,0.3);
+      border-bottom: 1px solid rgba(203,170,99,0.3);
+      transform: rotate(45deg);
+    }
+    .abril-tooltip.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .cookie-modal { padding: 35px 25px 30px; }
+      .cookie-modal-brand { font-size: 1.4rem; }
+      .subscribe-form { flex-direction: column; }
+      .subscribe-submit { padding: 14px 20px; }
+      .abril-tooltip { bottom: 78px; left: 16px; font-size: 0.65rem; padding: 8px 14px; }
+    }
+    @media (max-width: 480px) {
+      .cookie-modal { padding: 30px 20px 25px; }
+      .cookie-modal-brand { font-size: 1.2rem; letter-spacing: 0.25em; }
+      .cookie-btns { flex-direction: column; }
+      .cookie-btn-accept, .cookie-btn-decline { width: 100%; }
+      .abril-tooltip { bottom: 76px; left: 16px; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ══ COOKIE & NOTIFICATION POPUP ══ -->
+  <div class="cookie-overlay" id="cookieOverlay" style="display:none">
+    <div class="cookie-modal">
+      <div class="cookie-modal-brand">&Egrave;NIGME</div>
+      <div class="cookie-modal-divider"></div>
+      <h3 class="cookie-modal-title">Tu Experiencia Importa</h3>
+      <p class="cookie-modal-text">
+        Utilizamos cookies para mejorar tu experiencia de navegaci&oacute;n y ofrecerte contenido personalizado de nuestras colecciones exclusivas.
+      </p>
+      <div class="cookie-modal-section">
+        <div class="cookie-modal-section-title">Notificaciones</div>
+        <p class="cookie-modal-text">
+          Activa las notificaciones para recibir alertas sobre nuevas colecciones, descuentos exclusivos y lanzamientos de La Casa &Egrave;NIGME.
+        </p>
+      </div>
+      <div class="cookie-btns">
+        <button class="cookie-btn-accept" onclick="acceptCookies()">Aceptar Todo</button>
+        <button class="cookie-btn-decline" onclick="declineCookies()">Solo Necesarias</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHATBOT TOOLTIP ══ -->
+  <div class="abril-tooltip" id="abrilTooltip">ESTOY AQU&Iacute; PARA AYUDARTE</div>
+
+  <!-- ══ TOAST ══ -->
+  <div class="enigme-toast" id="enigmeToast"></div>
 
   <a href="catalogo.html" class="top-announcement">
     <div class="marquee-track">
@@ -389,9 +599,32 @@
     </svg>
   </a>
 
-  <main class="hero">
-    <img src="portada.png" alt="ÈNIGME Colección Cero - Alta Joyería en Honduras" class="hero-img fade-in">
+  <!-- ══ VIDEO HERO ══ -->
+  <main class="video-hero">
+    <video autoplay muted loop playsinline preload="auto" poster="portada.png">
+      <source src="bv6.mp4" type="video/mp4">
+      <img src="portada.png" alt="ENIGME Coleccion Cero" class="hero-img">
+    </video>
   </main>
+
+  <!-- ══ EMAIL SUBSCRIPTION SECTION ══ -->
+  <section class="subscribe-section" id="subscribeSection">
+    <div class="subscribe-inner fade-in">
+      <div class="subscribe-brand">ENIGME</div>
+      <div class="subscribe-divider"></div>
+      <h2 class="subscribe-title">Unirse al Club Exclusivo</h2>
+      <p class="subscribe-text">
+        Suscr&iacute;bete al club exclusivo de La Casa &Egrave;NIGME. Recibe descuentos exclusivos y colecciones nuevas. Tu primera compra tendr&aacute; un <strong style="color:#CBAA63;">10% de descuento</strong>.
+      </p>
+      <form class="subscribe-form" id="subscribeForm" onsubmit="return handleSubscribe(event)">
+        <input type="email" class="subscribe-input" id="subscribeEmail" placeholder="Tu correo electr&oacute;nico" required autocomplete="email" />
+        <button type="submit" class="subscribe-submit" id="subscribeBtn">Unirse al Club</button>
+      </form>
+      <div class="subscribe-success" id="subscribeSuccess">Bienvenido/a al Club &Egrave;NIGME. Revisa tu correo para tu descuento exclusivo del 10%.</div>
+      <div class="subscribe-error" id="subscribeError"></div>
+      <div class="subscribe-discount">10% en tu primera compra</div>
+    </div>
+  </section>
 
   <section class="cert-banner fade-in">
     <a href="certificado.html" class="cert-banner-link" title="Ver Certificado Oficial">
@@ -625,6 +858,194 @@
         ENIGME.initFadeObserver();
       }
     };
+  </script>
+
+  <!-- ══ COOKIE, SUBSCRIPTION & CHATBOT LOGIC ══ -->
+  <script>
+    var RESEND_KEY = 're_3Ae3tcB8_PGAMi3mDFexY49XnW3zN7E8y';
+
+    // ── Cookie Popup ──
+    function showCookiePopup() {
+      if (localStorage.getItem('enigme_cookies_accepted')) return;
+      setTimeout(function() {
+        var overlay = document.getElementById('cookieOverlay');
+        overlay.style.display = 'flex';
+        requestAnimationFrame(function() {
+          overlay.classList.add('visible');
+        });
+      }, 1000);
+    }
+
+    function dismissCookiePopup() {
+      var overlay = document.getElementById('cookieOverlay');
+      overlay.classList.remove('visible');
+      overlay.classList.add('hiding');
+      setTimeout(function() {
+        overlay.style.display = 'none';
+        overlay.classList.remove('hiding');
+        showAbrilTooltip();
+      }, 600);
+    }
+
+    function acceptCookies() {
+      localStorage.setItem('enigme_cookies_accepted', 'true');
+      localStorage.setItem('enigme_cookies_date', new Date().toISOString());
+      // Request notification permission
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(function(permission) {
+          if (permission === 'granted') {
+            localStorage.setItem('enigme_notifications', 'granted');
+          }
+        });
+      }
+      dismissCookiePopup();
+    }
+
+    function declineCookies() {
+      localStorage.setItem('enigme_cookies_accepted', 'minimal');
+      dismissCookiePopup();
+    }
+
+    // ── Chatbot Tooltip ──
+    function showAbrilTooltip() {
+      var tooltip = document.getElementById('abrilTooltip');
+      setTimeout(function() {
+        tooltip.classList.add('visible');
+        setTimeout(function() {
+          tooltip.classList.remove('visible');
+        }, 5000);
+      }, 800);
+    }
+
+    // ── Toast ──
+    function showToast(message) {
+      var toast = document.getElementById('enigmeToast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    // ── Email Subscription ──
+    async function handleSubscribe(e) {
+      e.preventDefault();
+      var email = document.getElementById('subscribeEmail').value.trim();
+      var btn = document.getElementById('subscribeBtn');
+      var successEl = document.getElementById('subscribeSuccess');
+      var errorEl = document.getElementById('subscribeError');
+
+      if (!email) return false;
+
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+
+      try {
+        // 1) Save to Supabase
+        var sbRes = await fetch(SB_URL + '/rest/v1/suscriptores', {
+          method: 'POST',
+          headers: {
+            'apikey': SB_KEY,
+            'Authorization': 'Bearer ' + SB_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            email: email,
+            fecha_suscripcion: new Date().toISOString(),
+            descuento_usado: false
+          })
+        });
+
+        if (sbRes.status === 409 || sbRes.status === 23505) {
+          errorEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Unirse al Club';
+          return false;
+        }
+
+        if (!sbRes.ok) {
+          var errData = await sbRes.json().catch(function() { return {}; });
+          if (errData.code === '23505') {
+            errorEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
+            errorEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Unirse al Club';
+            return false;
+          }
+          throw new Error('Error al guardar');
+        }
+
+        // 2) Send welcome email via Resend
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + RESEND_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'ENIGME <info@enigmeofficial.com>',
+              to: [email],
+              subject: 'Bienvenido al Club de La Casa ENIGME \u2728',
+              html: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0D0D0D;font-family:Georgia,serif;">' +
+                '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0D0D0D;padding:40px 20px;">' +
+                '<tr><td align="center">' +
+                '<table width="580" cellpadding="0" cellspacing="0" style="background:#1C1C1C;border:1px solid rgba(203,170,99,0.2);border-radius:4px;">' +
+                '<tr><td style="padding:50px 40px 30px;text-align:center;">' +
+                '<div style="font-family:Georgia,serif;font-size:28px;letter-spacing:12px;color:#CBAA63;margin-bottom:8px;">\u00c8NIGME</div>' +
+                '<div style="width:50px;height:1px;background:linear-gradient(90deg,transparent,#CBAA63,transparent);margin:0 auto 30px;"></div>' +
+                '<div style="font-family:Georgia,serif;font-size:20px;color:#FFFFFF;margin-bottom:20px;letter-spacing:2px;">Bienvenido/a al Club Exclusivo</div>' +
+                '<div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:30px;">' +
+                'Gracias por unirte al club exclusivo de La Casa \u00c8NIGME. Ahora formas parte de un c\u00edrculo selecto que recibir\u00e1 acceso anticipado a nuevas colecciones, descuentos exclusivos y novedades de nuestra firma.' +
+                '</div>' +
+                '<div style="background:rgba(203,170,99,0.1);border:1px solid rgba(203,170,99,0.3);border-radius:4px;padding:25px;margin-bottom:30px;">' +
+                '<div style="font-family:Georgia,serif;font-size:13px;color:#CBAA63;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">Tu beneficio exclusivo</div>' +
+                '<div style="font-family:Georgia,serif;font-size:36px;color:#CBAA63;font-weight:700;margin-bottom:8px;">10% OFF</div>' +
+                '<div style="font-size:13px;color:rgba(255,255,255,0.5);">En tu primera compra en La Casa \u00c8NIGME</div>' +
+                '</div>' +
+                '<div style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7;margin-bottom:25px;">' +
+                'Menciona tu suscripci\u00f3n al momento de realizar tu pedido para aplicar el descuento. V\u00e1lido para tu primera compra.' +
+                '</div>' +
+                '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:14px 35px;background:linear-gradient(135deg,#CBAA63,#E8D090);color:#1C1C1C;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;text-decoration:none;border-radius:3px;">Explorar Cat\u00e1logo</a>' +
+                '</td></tr>' +
+                '<tr><td style="padding:20px 40px 30px;text-align:center;border-top:1px solid rgba(203,170,99,0.1);">' +
+                '<div style="font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:1px;">\u00a9 2026 \u00c8NIGME \u2022 Alta Joyer\u00eda y Boutique</div>' +
+                '</td></tr>' +
+                '</table></td></tr></table></body></html>'
+            })
+          });
+        } catch(emailErr) {
+          // Email sending failed silently - subscription still saved
+          console.warn('Welcome email could not be sent:', emailErr);
+        }
+
+        // 3) Show success
+        document.getElementById('subscribeForm').style.display = 'none';
+        successEl.style.display = 'block';
+        showToast('Bienvenido/a al Club \u00c8NIGME');
+
+      } catch(err) {
+        errorEl.textContent = 'Error al suscribirse. Int\u00e9ntalo de nuevo.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unirse al Club';
+      }
+
+      return false;
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', function() {
+      showCookiePopup();
+      // If cookies already accepted, show tooltip directly
+      if (localStorage.getItem('enigme_cookies_accepted')) {
+        setTimeout(showAbrilTooltip, 2000);
+      }
+    });
   </script>
 
   <!-- ABRIL - Asistente Virtual ÈNIGME -->

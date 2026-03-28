@@ -203,6 +203,7 @@
   <div class="nav-item" data-tab="ventas_corp" onclick="switchTab('ventas_corp')">Ventas Corp.</div>
   <div class="nav-item" data-tab="msg_admin" onclick="switchTab('msg_admin')">Mensajer&iacute;a</div>
   <div class="nav-item" data-tab="comisiones" onclick="switchTab('comisiones')">Comisiones</div>
+  <div class="nav-item" data-tab="bajas" onclick="switchTab('bajas');loadBajas();">Bajas</div>
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -514,6 +515,49 @@
           <button class="btn btn-gold btn-sm" onclick="sendAdminMsg()">Enviar</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- TAB: BAJAS -->
+  <div class="tab-content" id="tab-bajas">
+    <div class="page-header">
+      <div class="page-title"><h1>Registro de <em>Bajas</em></h1><p>Entidades desactivadas &mdash; datos personales eliminados, ventas conservadas</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="loadBajas()"><span>Refrescar</span></button>
+      </div>
+    </div>
+
+    <!-- Sub-section: Gerencias Divisionales de Baja -->
+    <div style="margin-bottom:36px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Gerencias Divisionales <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
+      <div class="stats-row" id="bajasGdStats"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <tbody id="bajasGdBody"></tbody>
+      </table></div>
+      <div class="empty-state" id="bajasGdEmpty" style="display:none;">No hay gerencias divisionales de baja</div>
+    </div>
+
+    <!-- Sub-section: Gerentes de Zona de Baja -->
+    <div style="margin-bottom:36px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Gerentes de Zona <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
+      <div class="stats-row" id="bajasGzStats"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerencia Div.</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Nombramientos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <tbody id="bajasGzBody"></tbody>
+      </table></div>
+      <div class="empty-state" id="bajasGzEmpty" style="display:none;">No hay gerentes de zona de baja</div>
+    </div>
+
+    <!-- Sub-section: Coordinadores de Baja -->
+    <div style="margin-bottom:36px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Coordinadores <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
+      <div class="stats-row" id="bajasCoordStats"></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerente de Zona</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <tbody id="bajasCoordBody"></tbody>
+      </table></div>
+      <div class="empty-state" id="bajasCoordEmpty" style="display:none;">No hay coordinadores de baja</div>
     </div>
   </div>
 
@@ -1541,10 +1585,11 @@ function exportSimulacion() {
   if (numAsesoras <= 0 || ventaPromedio <= 0) { showToast('Ingrese valores primero', true); return; }
 
   var ventaBruta = numAsesoras * ventaPromedio;
+  var ventaNeta = ventaBruta * 0.85;
   var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
   var costoNom = numAsesoras * pagoPerNom;
   var costoSalGZ = SUELDO_GZ * numGZ;
-  var dGastos = ventaBruta * MODELO.gastosPagos;
+  var dGastos = ventaNeta * MODELO.gastosPagos;
   var sobrante = dGastos - costoSalGZ - costoNom;
 
   var data = [
@@ -1557,30 +1602,32 @@ function exportSimulacion() {
     { 'Concepto': '', '%': '', 'Monto (L)': '' },
     { 'Concepto': '--- SE GENERA (Distribucion de Venta) ---', '%': '', 'Monto (L)': '' },
     { 'Concepto': 'Venta Bruta Total', '%': '100%', 'Monto (L)': ventaBruta },
-    { 'Concepto': 'Precio de Insercion (Producto)', '%': '22%', 'Monto (L)': ventaBruta * 0.22 },
-    { 'Concepto': 'Comision Asesoras', '%': '15%', 'Monto (L)': ventaBruta * 0.15 },
-    { 'Concepto': 'Logistica', '%': '8%', 'Monto (L)': ventaBruta * 0.08 },
-    { 'Concepto': 'Comision Gerencia Divisional', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
-    { 'Concepto': 'Comision Gerencia de Zona', '%': '3%', 'Monto (L)': ventaBruta * 0.03 },
-    { 'Concepto': 'Gerencia General', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
-    { 'Concepto': 'Marketing y Web', '%': '4%', 'Monto (L)': ventaBruta * 0.04 },
-    { 'Concepto': 'Gastos de Pagos (Salarios+Nomb+Op)', '%': '28%', 'Monto (L)': dGastos },
-    { 'Concepto': 'Empresa - Ganancia Neta (INTOCABLE)', '%': '10%', 'Monto (L)': ventaBruta * 0.10 },
+    { 'Concepto': 'Impuestos (15% de Bruta)', '%': '15% de Bruta', 'Monto (L)': ventaBruta * 0.15 },
+    { 'Concepto': '= VENTA NETA', '%': '85%', 'Monto (L)': ventaNeta },
+    { 'Concepto': 'Precio de Insercion (Producto)', '%': '22% de Neta', 'Monto (L)': ventaNeta * 0.22 },
+    { 'Concepto': 'Comision Asesoras', '%': '15% de Neta', 'Monto (L)': ventaNeta * 0.15 },
+    { 'Concepto': 'Logistica', '%': '8% de Neta', 'Monto (L)': ventaNeta * 0.08 },
+    { 'Concepto': 'Comision Gerencia Divisional', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
+    { 'Concepto': 'Comision Gerencia de Zona', '%': '3% de Neta', 'Monto (L)': ventaNeta * 0.03 },
+    { 'Concepto': 'Gerencia General', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
+    { 'Concepto': 'Marketing y Web', '%': '4% de Neta', 'Monto (L)': ventaNeta * 0.04 },
+    { 'Concepto': 'Gastos de Pagos (Salarios+Nomb+Op)', '%': '28% de Neta', 'Monto (L)': dGastos },
+    { 'Concepto': 'Empresa - Ganancia Neta (INTOCABLE)', '%': '10% de Neta', 'Monto (L)': ventaNeta * 0.10 },
     { 'Concepto': '', '%': '', 'Monto (L)': '' },
-    { 'Concepto': '--- SE PAGA (Del Fondo 28%) ---', '%': '', 'Monto (L)': '' },
-    { 'Concepto': 'Fondo 28% disponible', '%': '28%', 'Monto (L)': dGastos },
+    { 'Concepto': '--- SE PAGA (Del Fondo 28% de Neta) ---', '%': '', 'Monto (L)': '' },
+    { 'Concepto': 'Fondo 28% disponible', '%': '28% de Neta', 'Monto (L)': dGastos },
     { 'Concepto': 'Salario GZ (' + numGZ + ' x L16,000)', '%': '', 'Monto (L)': costoSalGZ },
     { 'Concepto': 'Nombramientos (' + numAsesoras + ' x L' + pagoPerNom + ')', '%': '', 'Monto (L)': costoNom },
     { 'Concepto': 'Total Pagos', '%': '', 'Monto (L)': costoSalGZ + costoNom },
     { 'Concepto': sobrante >= 0 ? 'SOBRANTE OPERATIVO' : 'DEFICIT', '%': '', 'Monto (L)': sobrante },
     { 'Concepto': '', '%': '', 'Monto (L)': '' },
     { 'Concepto': '--- QUEDA (Resumen Final) ---', '%': '', 'Monto (L)': '' },
-    { 'Concepto': 'Ganancia Empresa (10%)', '%': '10%', 'Monto (L)': ventaBruta * 0.10 },
+    { 'Concepto': 'Ganancia Empresa (10% de Neta)', '%': '10% de Neta', 'Monto (L)': ventaNeta * 0.10 },
     { 'Concepto': 'Sobrante Fondo 28%', '%': '', 'Monto (L)': sobrante },
-    { 'Concepto': 'Comision GD recibe', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
-    { 'Concepto': 'Comision GZ recibe', '%': '3%', 'Monto (L)': ventaBruta * 0.03 },
-    { 'Concepto': 'GZ cobra total (salario+comision)', '%': '', 'Monto (L)': costoSalGZ + (ventaBruta * 0.03) },
-    { 'Concepto': 'Cada asesora recibe (15%)', '%': '', 'Monto (L)': (ventaBruta * 0.15) / numAsesoras }
+    { 'Concepto': 'Comision GD recibe', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
+    { 'Concepto': 'Comision GZ recibe', '%': '3% de Neta', 'Monto (L)': ventaNeta * 0.03 },
+    { 'Concepto': 'GZ cobra total (salario+comision)', '%': '', 'Monto (L)': costoSalGZ + (ventaNeta * 0.03) },
+    { 'Concepto': 'Cada asesora recibe (15% de Neta)', '%': '', 'Monto (L)': (ventaNeta * 0.15) / numAsesoras }
   ];
 
   enigmeExcel(data, 'Simulacion', 'simulacion_enigme_' + numAsesoras + 'asesoras.xlsx');
@@ -1749,15 +1796,15 @@ async function toggleGerencia(id, nuevoEstado) {
 }
 
 async function eliminarGerencia(id) {
-  if (!confirm('¿Dar de BAJA esta gerencia divisional? Se desactivará pero se conservarán su nombre, código y datos de ventas.')) return;
+  if (!confirm('¿Dar de BAJA esta gerencia divisional?\n\nSe conservarán: nombre, código y datos de ventas.\nSe eliminarán: teléfono, email, dirección, DNI, cuenta bancaria y contraseña.')) return;
   try {
     var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
       method: 'PATCH',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activo: false, fecha_baja: new Date().toISOString().split('T')[0] })
+      body: JSON.stringify({ activo: false, fecha_baja: new Date().toISOString().split('T')[0], telefono: null, email: null, direccion: null, dni: null, numero_cuenta: null, nombre_banco: null, password_temporal: null })
     });
     if (res.ok) {
-      showToast('Gerencia divisional dada de baja (nombre, código y ventas conservados)');
+      showToast('Gerencia divisional dada de baja (datos personales eliminados, nombre/código/ventas conservados)');
       loadGerenciasDivisionales();
     } else {
       var errData = await res.text();
@@ -1765,6 +1812,235 @@ async function eliminarGerencia(id) {
       showToast('Error al dar de baja: ' + res.status, true);
     }
   } catch(e) { showToast('Error de conexión: ' + e.message, true); }
+}
+
+async function eliminarGerenteZona(id) {
+  if (!confirm('¿Dar de BAJA este gerente de zona?\n\nSe conservarán: nombre, código y datos de ventas.\nSe eliminarán: teléfono, email, dirección, DNI y contraseña.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activo: false, fecha_baja: new Date().toISOString().split('T')[0], telefono: null, email: null, direccion: null, dni: null, password_temporal: null })
+    });
+    if (res.ok) {
+      showToast('Gerente de zona dado de baja (datos personales eliminados, nombre/código/ventas conservados)');
+      if (typeof loadGerenciasDivisionales === 'function') loadGerenciasDivisionales();
+    } else {
+      var errData = await res.text();
+      console.error('Error dando baja gerente zona:', res.status, errData);
+      showToast('Error al dar de baja: ' + res.status, true);
+    }
+  } catch(e) { showToast('Error de conexión: ' + e.message, true); }
+}
+
+async function eliminarCoordinador(id) {
+  if (!confirm('¿Dar de BAJA este coordinador?\n\nSe conservarán: nombre, código y datos de ventas.\nSe eliminarán: teléfono, email, dirección, DNI y contraseña.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/coordinadores?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activo: false, fecha_baja: new Date().toISOString().split('T')[0], telefono: null, email: null, direccion: null, dni: null, password_temporal: null })
+    });
+    if (res.ok) {
+      showToast('Coordinador dado de baja (datos personales eliminados, nombre/código/ventas conservados)');
+    } else {
+      var errData = await res.text();
+      console.error('Error dando baja coordinador:', res.status, errData);
+      showToast('Error al dar de baja: ' + res.status, true);
+    }
+  } catch(e) { showToast('Error de conexión: ' + e.message, true); }
+}
+
+// ================================================================
+// BAJAS - Load and display all deactivated entities
+// ================================================================
+function calcTiempoTrabajado(fechaInicio, fechaBaja) {
+  if (!fechaInicio || !fechaBaja) return '-';
+  var start = new Date(fechaInicio);
+  var end = new Date(fechaBaja);
+  var totalMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+  if (end.getDate() < start.getDate()) totalMonths--;
+  if (totalMonths < 0) totalMonths = 0;
+  var years = Math.floor(totalMonths / 12);
+  var months = totalMonths % 12;
+  if (years > 0 && months > 0) return years + (years === 1 ? ' a\u00f1o ' : ' a\u00f1os ') + months + (months === 1 ? ' mes' : ' meses');
+  if (years > 0) return years + (years === 1 ? ' a\u00f1o' : ' a\u00f1os');
+  if (months > 0) return months + (months === 1 ? ' mes' : ' meses');
+  return 'Menos de 1 mes';
+}
+
+async function loadBajas() {
+  try {
+    // Fetch inactive gerencias divisionales
+    var gdRes = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?activo=eq.false&select=*&order=fecha_baja.desc', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var gdBajas = await gdRes.json();
+    if (!Array.isArray(gdBajas)) gdBajas = [];
+
+    // Fetch inactive gerentes de zona
+    var gzRes = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?activo=eq.false&select=*&order=fecha_baja.desc', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var gzBajas = [];
+    if (gzRes.ok) { gzBajas = await gzRes.json(); if (!Array.isArray(gzBajas)) gzBajas = []; }
+
+    // Fetch inactive coordinadores
+    var coordRes = await fetch(SUPA_URL + '/rest/v1/coordinadores?activo=eq.false&select=*&order=fecha_baja.desc', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var coordBajas = [];
+    if (coordRes.ok) { coordBajas = await coordRes.json(); if (!Array.isArray(coordBajas)) coordBajas = []; }
+
+    // Fetch all pedidos and nombramientos for sales data
+    var ano = new Date().getFullYear();
+    var pedidos = await supaGet('pedidos', '');
+    var nombramientos = await supaGet('nombramientos', '');
+
+    // Fetch all gerentes_zona for mapping gerente -> gerencia
+    var allGerentes = await supaGet('gerentes_zona', '&select=id,nombre,gerencia_divisional_id');
+    var gerenteToGerencia = {};
+    var gerenteNames = {};
+    allGerentes.forEach(function(g) { gerenteToGerencia[g.id] = g.gerencia_divisional_id; gerenteNames[g.id] = g.nombre; });
+
+    // Fetch all gerencias for name mapping
+    var allGerencias = await supaGet('gerencias_divisionales', '&select=id,nombre,codigo');
+    var gerenciaNames = {};
+    allGerencias.forEach(function(gd) { gerenciaNames[gd.id] = gd.nombre; });
+
+    // ---- GERENCIAS DIVISIONALES DE BAJA ----
+    var gdBody = document.getElementById('bajasGdBody');
+    var gdEmpty = document.getElementById('bajasGdEmpty');
+    if (gdBajas.length) {
+      gdEmpty.style.display = 'none';
+      var gdTotalBruta = 0, gdTotalNeta = 0;
+      gdBody.innerHTML = gdBajas.map(function(gd) {
+        // Calculate sales for this GD
+        var bruta = 0, neta = 0;
+        pedidos.forEach(function(p) {
+          var gdId = gerenteToGerencia[p.gerente_id];
+          if (gdId === gd.id) {
+            bruta += parseFloat(p.subtotal_catalogo || 0);
+            neta += parseFloat(p.total_venta_neta || 0);
+          }
+        });
+        gdTotalBruta += bruta;
+        gdTotalNeta += neta;
+        var fechaIngreso = gd.fecha_ingreso || (gd.created_at ? gd.created_at.split('T')[0] : null);
+        var tiempo = calcTiempoTrabajado(fechaIngreso, gd.fecha_baja);
+        return '<tr>' +
+          '<td style="font-weight:500;color:var(--gold);">' + esc(gd.codigo || '') + '</td>' +
+          '<td>' + esc(gd.nombre || '') + '</td>' +
+          '<td style="font-size:.75rem;">' + (fechaIngreso || '-') + '</td>' +
+          '<td style="font-size:.75rem;color:var(--danger);">' + (gd.fecha_baja || '-') + '</td>' +
+          '<td style="font-size:.75rem;">' + tiempo + '</td>' +
+          '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '</tr>';
+      }).join('');
+      document.getElementById('bajasGdStats').innerHTML =
+        '<div class="stat-card"><div class="stat-label">GD de Baja</div><div class="stat-value" style="color:var(--danger);">' + gdBajas.length + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Bruta Acumulada</div><div class="stat-value">L' + gdTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Neta Acumulada</div><div class="stat-value">L' + gdTotalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    } else {
+      gdBody.innerHTML = '';
+      gdEmpty.style.display = '';
+      document.getElementById('bajasGdStats').innerHTML = '';
+    }
+
+    // ---- GERENTES DE ZONA DE BAJA ----
+    var gzBody = document.getElementById('bajasGzBody');
+    var gzEmpty = document.getElementById('bajasGzEmpty');
+    if (gzBajas.length) {
+      gzEmpty.style.display = 'none';
+      var gzTotalBruta = 0, gzTotalNeta = 0, gzTotalPed = 0, gzTotalNomb = 0;
+      gzBody.innerHTML = gzBajas.map(function(gz) {
+        var bruta = 0, neta = 0, pedCount = 0, nombCount = 0;
+        pedidos.forEach(function(p) {
+          if (p.gerente_id === gz.id) {
+            bruta += parseFloat(p.subtotal_catalogo || 0);
+            neta += parseFloat(p.total_venta_neta || 0);
+            pedCount++;
+          }
+        });
+        nombramientos.forEach(function(n) {
+          if (n.gerente_id === gz.id) nombCount++;
+        });
+        gzTotalBruta += bruta; gzTotalNeta += neta; gzTotalPed += pedCount; gzTotalNomb += nombCount;
+        var fechaIngreso = gz.fecha_ingreso || (gz.created_at ? gz.created_at.split('T')[0] : null);
+        var tiempo = calcTiempoTrabajado(fechaIngreso, gz.fecha_baja);
+        var gdNombre = gz.gerencia_divisional_id ? (gerenciaNames[gz.gerencia_divisional_id] || '-') : '-';
+        return '<tr>' +
+          '<td style="font-weight:500;color:var(--gold);">' + esc(gz.codigo || '') + '</td>' +
+          '<td>' + esc(gz.nombre || '') + '</td>' +
+          '<td style="font-size:.75rem;">' + esc(gdNombre) + '</td>' +
+          '<td style="font-size:.75rem;">' + (fechaIngreso || '-') + '</td>' +
+          '<td style="font-size:.75rem;color:var(--danger);">' + (gz.fecha_baja || '-') + '</td>' +
+          '<td style="font-size:.75rem;">' + tiempo + '</td>' +
+          '<td>' + pedCount + '</td>' +
+          '<td>' + nombCount + '</td>' +
+          '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '</tr>';
+      }).join('');
+      document.getElementById('bajasGzStats').innerHTML =
+        '<div class="stat-card"><div class="stat-label">GZ de Baja</div><div class="stat-value" style="color:var(--danger);">' + gzBajas.length + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Pedidos Acumulados</div><div class="stat-value">' + gzTotalPed + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Nombramientos</div><div class="stat-value">' + gzTotalNomb + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L' + gzTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + gzTotalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    } else {
+      gzBody.innerHTML = '';
+      gzEmpty.style.display = '';
+      document.getElementById('bajasGzStats').innerHTML = '';
+    }
+
+    // ---- COORDINADORES DE BAJA ----
+    var coordBody = document.getElementById('bajasCoordBody');
+    var coordEmpty = document.getElementById('bajasCoordEmpty');
+    if (coordBajas.length) {
+      coordEmpty.style.display = 'none';
+      var coordTotalBruta = 0, coordTotalNeta = 0, coordTotalPed = 0;
+      coordBody.innerHTML = coordBajas.map(function(c) {
+        var bruta = 0, neta = 0, pedCount = 0;
+        pedidos.forEach(function(p) {
+          if (p.coordinador_id === c.id) {
+            bruta += parseFloat(p.subtotal_catalogo || 0);
+            neta += parseFloat(p.total_venta_neta || 0);
+            pedCount++;
+          }
+        });
+        coordTotalBruta += bruta; coordTotalNeta += neta; coordTotalPed += pedCount;
+        var fechaIngreso = c.fecha_ingreso || (c.created_at ? c.created_at.split('T')[0] : null);
+        var tiempo = calcTiempoTrabajado(fechaIngreso, c.fecha_baja);
+        var gzNombre = c.gerente_zona_id ? (gerenteNames[c.gerente_zona_id] || '-') : '-';
+        return '<tr>' +
+          '<td style="font-weight:500;color:var(--gold);">' + esc(c.codigo || '') + '</td>' +
+          '<td>' + esc(c.nombre || '') + '</td>' +
+          '<td style="font-size:.75rem;">' + esc(gzNombre) + '</td>' +
+          '<td style="font-size:.75rem;">' + (fechaIngreso || '-') + '</td>' +
+          '<td style="font-size:.75rem;color:var(--danger);">' + (c.fecha_baja || '-') + '</td>' +
+          '<td style="font-size:.75rem;">' + tiempo + '</td>' +
+          '<td>' + pedCount + '</td>' +
+          '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '</tr>';
+      }).join('');
+      document.getElementById('bajasCoordStats').innerHTML =
+        '<div class="stat-card"><div class="stat-label">Coordinadores de Baja</div><div class="stat-value" style="color:var(--danger);">' + coordBajas.length + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Pedidos Acumulados</div><div class="stat-value">' + coordTotalPed + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L' + coordTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + coordTotalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    } else {
+      coordBody.innerHTML = '';
+      coordEmpty.style.display = '';
+      document.getElementById('bajasCoordStats').innerHTML = '';
+    }
+
+  } catch(e) {
+    console.error('Error loading bajas:', e);
+    showToast('Error cargando registro de bajas: ' + e.message, true);
+  }
 }
 
 async function eliminarNombramiento(id) {
@@ -2105,7 +2381,9 @@ async function loadGdMessages(gdId) {
 var chartComisionesPie = null, chartComisionesBar = null;
 
 var COMISION_ESTRUCTURA = [
+  { concepto: 'Impuestos (15% de Venta Bruta)', pct: 15, color: '#b08fd0', deBruta: true },
   { concepto: 'Precio de Inserci\u00f3n (Producto/Coste)', pct: 22, color: '#5a8fa0' },
+  { concepto: 'Comisi\u00f3n Asesoras', pct: 15, color: '#6ba896' },
   { concepto: 'Log\u00edstica', pct: 8, color: '#9e6b6b' },
   { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5, color: '#c9a96e' },
   { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
@@ -2147,29 +2425,33 @@ async function loadComisiones() {
   // Stats row
   var totalGerentesZona = gerentes.length;
   var baseGZ = totalGerentesZona * 16000;
-  var comAsesoras = totalBruta * 0.15;
+  var impuestos = totalBruta * 0.15;
+  var comAsesoras = totalNeta * 0.15;
   document.getElementById('comisionesStats').innerHTML =
     '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.4rem;">L' + totalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">(-) Com. Asesoras (15% Bruta)</div><div class="stat-value" style="color:#b08fd0;">-L' + comAsesoras.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">(-) Impuestos (15% Bruta)</div><div class="stat-value" style="color:#b08fd0;">-L' + impuestos.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Venta Neta Total</div><div class="stat-value" style="color:var(--success);font-size:1.4rem;">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22% Bruta)</div><div class="stat-value">L' + (totalBruta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10% Bruta)</div><div class="stat-value" style="color:var(--success);">L' + (totalBruta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Bruta)</div><div class="stat-value">L' + (totalBruta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. GD (5% Bruta)</div><div class="stat-value">L' + (totalBruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5% Bruta)</div><div class="stat-value">L' + (totalBruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22% Neta)</div><div class="stat-value">L' + (totalNeta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10% Neta)</div><div class="stat-value" style="color:var(--success);">L' + (totalNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Neta)</div><div class="stat-value">L' + (totalNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GD (5% Neta)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5% Neta)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
-  // Estructura table - Asesoras (15%) se descuenta de Bruta, el resto sale de Neta
+  // Estructura table - Impuestos (15%) se descuentan de Bruta, el resto sale de Neta
   var estHtml = '';
-  estHtml += '<tr style="background:rgba(176,143,208,0.08);"><td>Comisi\u00f3n Asesoras (15% de Venta Bruta)</td><td style="color:#b08fd0;font-weight:400;">15%</td><td style="color:#b08fd0;">L' + comAsesoras.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="background:rgba(176,143,208,0.08);"><td>Impuestos (15% de Venta Bruta)</td><td style="color:#b08fd0;font-weight:400;">15%</td><td style="color:#b08fd0;">L' + impuestos.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   estHtml += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA (Bruta - 15%)</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   var totalPct = 0;
+  var totalMonto = impuestos;
   COMISION_ESTRUCTURA.forEach(function(c) {
-    var monto = totalBruta * (c.pct / 100);
+    if (c.deBruta) return; // skip Impuestos row (already shown above)
+    var monto = totalNeta * (c.pct / 100);
     totalPct += c.pct;
+    totalMonto += monto;
     var notaHtml = c.nota ? ' <span style="font-size:.7rem;color:var(--text-muted);">' + esc(c.nota) + '</span>' : '';
-    estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '%</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '% de Neta</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
-  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL (Asesoras + Distribuci\u00f3n)</td><td style="font-weight:500;color:var(--gold);">' + (totalPct + 15) + '%</td><td style="font-weight:500;color:var(--gold);">L' + totalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL (Impuestos + Distribuci\u00f3n de Neta)</td><td style="font-weight:500;color:var(--gold);">' + (totalPct) + '% de Neta + 15% imp.</td><td style="font-weight:500;color:var(--gold);">L' + totalMonto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   document.getElementById('comisionesEstructuraBody').innerHTML = estHtml;
 
   // Load nombramientos for pago calculation
@@ -2218,12 +2500,12 @@ async function loadComisiones() {
       '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
       '<td>L' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>L' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.bruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.bruta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '<td>' + pagoNomHtml + '</td>' +
       '<td>L' + baseGZGd.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' <span style="font-size:.6rem;color:var(--text-muted);">(' + gdGerentes.length + ' GZ)</span></td>' +
-      '<td>L' + (s.bruta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.bruta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
       '</tr>';
   });
   if (!desHtml) desHtml = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
@@ -2261,16 +2543,17 @@ async function loadComisiones() {
     var ventaBruta = numAsesoras * ventaPromedio;
     var ventaNeta = ventaBruta * 0.85;
 
-    // --- DISTRIBUCION: 15% asesoras sale de Bruta, el resto de Bruta (sumando 85% = Neta) ---
-    var dAsesoras = ventaBruta * MODELO.asesoras;
-    var dInsercion = ventaBruta * MODELO.insercion;
-    var dLogistica = ventaBruta * MODELO.logistica;
-    var dDivisional = ventaBruta * MODELO.divisional;
-    var dZona = ventaBruta * MODELO.zona;
-    var dGerenciaGral = ventaBruta * MODELO.gerenciaGral;
-    var dMarketing = ventaBruta * MODELO.marketing;
-    var dGastosPagos = ventaBruta * MODELO.gastosPagos;
-    var dEmpresa = ventaBruta * MODELO.empresa;
+    // --- DISTRIBUCION: Impuestos 15% de Bruta, el resto de Neta ---
+    var impuestos = ventaBruta * 0.15;
+    var dAsesoras = ventaNeta * MODELO.asesoras;
+    var dInsercion = ventaNeta * MODELO.insercion;
+    var dLogistica = ventaNeta * MODELO.logistica;
+    var dDivisional = ventaNeta * MODELO.divisional;
+    var dZona = ventaNeta * MODELO.zona;
+    var dGerenciaGral = ventaNeta * MODELO.gerenciaGral;
+    var dMarketing = ventaNeta * MODELO.marketing;
+    var dGastosPagos = ventaNeta * MODELO.gastosPagos;
+    var dEmpresa = ventaNeta * MODELO.empresa;
 
     // --- GASTOS DEL 28% (lo que hay que pagar) ---
     var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
@@ -2296,11 +2579,12 @@ async function loadComisiones() {
     html += '<div style="margin-bottom:24px;">';
     html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:var(--gold);margin-bottom:12px;letter-spacing:.1em;">\ud83d\udcb0 SE GENERA &mdash; Distribuci\u00f3n de la Venta</h3>';
     html += '<div class="table-wrap"><table>';
-    html += '<thead><tr><th>Concepto</th><th>% de Bruta</th><th>Monto</th></tr></thead><tbody>';
-    html += '<tr style="background:rgba(176,143,208,0.08);"><td>Comisi\u00f3n Asesoras (se descuenta de Bruta)</td><td style="color:#b08fd0;font-weight:500;">15%</td><td style="color:#b08fd0;">' + L(dAsesoras) + '</td></tr>';
+    html += '<thead><tr><th>Concepto</th><th>% de Neta</th><th>Monto</th></tr></thead><tbody>';
+    html += '<tr style="background:rgba(176,143,208,0.08);"><td>Impuestos (15% de Bruta)</td><td style="color:#b08fd0;font-weight:500;">15% de Bruta</td><td style="color:#b08fd0;">' + L(impuestos) + '</td></tr>';
     html += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">' + L(ventaNeta) + '</td></tr>';
     var distribucion = [
       ['Precio de Inserci\u00f3n (Producto)', '22%', dInsercion, 'var(--info)'],
+      ['Comisi\u00f3n Asesoras', '15%', dAsesoras, '#6ba896'],
       ['Log\u00edstica', '8%', dLogistica, '#9e6b6b'],
       ['Comisi\u00f3n Gerencia Divisional', '5%', dDivisional, 'var(--gold)'],
       ['Comisi\u00f3n Gerencia de Zona', '3%', dZona, 'var(--success)'],
@@ -2309,11 +2593,13 @@ async function loadComisiones() {
       ['Gastos de Pagos (Salarios + Nomb. + Op.)', '28%', dGastosPagos, '#d08050'],
       ['Empresa \u2014 Ganancia Neta (INTOCABLE)', '10%', dEmpresa, 'var(--success)']
     ];
+    var totalDistribucion = impuestos;
     distribucion.forEach(function(r) {
       var isEmpresa = r[1] === '10%';
+      totalDistribucion += r[2];
       html += '<tr><td>' + r[0] + '</td><td style="color:' + r[3] + ';font-weight:500;">' + r[1] + '</td><td style="' + (isEmpresa ? 'color:var(--success);font-weight:600;' : '') + '">' + L(r[2]) + '</td></tr>';
     });
-    html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:600;color:var(--gold);">TOTAL (15% + 85%)</td><td style="font-weight:600;color:var(--gold);">100%</td><td style="font-weight:600;color:var(--gold);">' + L(ventaBruta) + '</td></tr>';
+    html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:600;color:var(--gold);">TOTAL (Impuestos + Distribuci\u00f3n de Neta)</td><td style="font-weight:600;color:var(--gold);"></td><td style="font-weight:600;color:var(--gold);">' + L(totalDistribucion) + '</td></tr>';
     html += '</tbody></table></div></div>';
 
     // TABLA 2 - SE PAGA (del 28%)
@@ -2342,7 +2628,8 @@ async function loadComisiones() {
     // ALERTA si no es rentable
     if (!esRentable) {
       var faltante = Math.abs(sobranteFondo28);
-      var ventaMinNecesaria = totalGastosReales / MODELO.gastosPagos;
+      var ventaNetaMinNecesaria = totalGastosReales / MODELO.gastosPagos;
+      var ventaMinNecesaria = ventaNetaMinNecesaria / 0.85;
       var ventaMinPorAsesora = ventaMinNecesaria / numAsesoras;
       html += '<div style="background:rgba(158,107,107,0.1);border:1px solid var(--danger);padding:16px;margin-top:8px;">';
       html += '<strong style="color:var(--danger);">\u26a0\ufe0f ZONA NO RENTABLE</strong><br>';
@@ -2408,7 +2695,7 @@ async function loadComisiones() {
       labels: COMISION_ESTRUCTURA.map(function(c){return c.concepto;}),
       datasets: [{
         label: 'Monto (L)',
-        data: COMISION_ESTRUCTURA.map(function(c){return totalBruta * (c.pct/100);}),
+        data: COMISION_ESTRUCTURA.map(function(c){return (c.deBruta ? totalBruta : totalNeta) * (c.pct/100);}),
         backgroundColor: COMISION_ESTRUCTURA.map(function(c){return c.color;}),
         borderWidth: 0
       }]
@@ -2431,12 +2718,15 @@ function calcularInversion() {
     return;
   }
 
-  // Inversion = 22% (precio de inserción), so venta neta = inversion / 0.22
+  // Inversion = 22% de Neta, so ventaNeta = inversion / 0.22, ventaBruta = ventaNeta / 0.85
   var ventaNeta = inversion / 0.22;
-  ventaNetaLabel.innerHTML = 'Venta Neta calculada: <strong>L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong>';
+  var ventaBruta = ventaNeta / 0.85;
+  var impuestos = ventaBruta * 0.15;
+  ventaNetaLabel.innerHTML = 'Venta Neta calculada: <strong>L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong> &mdash; Venta Bruta: <strong>L' + ventaBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong>';
   resultWrap.style.display = 'block';
 
   var breakdown = [
+    { concepto: 'Impuestos (15% de Bruta)', pct: 15, deBruta: true },
     { concepto: 'Precio de Inserción (inversi\u00f3n)', pct: 22 },
     { concepto: 'Comisi\u00f3n Asesoras', pct: 15 },
     { concepto: 'Log\u00edstica', pct: 8 },
@@ -2450,21 +2740,23 @@ function calcularInversion() {
 
   // Stats
   document.getElementById('inversionStats').innerHTML =
-    '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (22%)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Ganancia Empresa (10%)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28%)</div><div class="stat-value">L' + (ventaNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (22% de Neta)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L' + ventaBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Neta (85%)</div><div class="stat-value">L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Ganancia Empresa (10% Neta)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Neta)</div><div class="stat-value">L' + (ventaNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
   // Table
   var html = '';
   var totalCalc = 0;
   breakdown.forEach(function(b) {
-    var monto = ventaNeta * (b.pct / 100);
+    var monto = b.deBruta ? (ventaBruta * (b.pct / 100)) : (ventaNeta * (b.pct / 100));
     totalCalc += monto;
-    var highlight = b.pct === 10 ? ' style="color:var(--success);font-weight:500;"' : '';
-    html += '<tr><td>' + b.concepto + '</td><td style="color:var(--gold);">' + b.pct + '%</td><td' + highlight + '>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    var highlight = b.pct === 10 && !b.deBruta ? ' style="color:var(--success);font-weight:500;"' : '';
+    var pctLabel = b.deBruta ? (b.pct + '% de Bruta') : (b.pct + '% de Neta');
+    html += '<tr><td>' + b.concepto + '</td><td style="color:var(--gold);">' + pctLabel + '</td><td' + highlight + '>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
-  html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">100%</td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);"></td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   document.getElementById('inversionBody').innerHTML = html;
 }
 

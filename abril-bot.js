@@ -181,6 +181,14 @@
       '#abril-chat-widget, #abril-chat-widget * { box-sizing: border-box; margin: 0; padding: 0; }',
 
       /* Toggle Button */
+      '@keyframes abrilDiamondGlow {',
+      '  0%, 100% { box-shadow: 0 4px 20px rgba(203,170,99,0.4), 0 0 8px rgba(203,170,99,0.2); }',
+      '  50% { box-shadow: 0 4px 25px rgba(203,170,99,0.6), 0 0 20px rgba(203,170,99,0.35), 0 0 40px rgba(203,170,99,0.15); }',
+      '}',
+      '@keyframes abrilShimmer {',
+      '  0% { background-position: -200% center; }',
+      '  100% { background-position: 200% center; }',
+      '}',
       '#abril-toggle-btn {',
       '  position: fixed;',
       '  bottom: 24px;',
@@ -188,19 +196,21 @@
       '  width: 60px;',
       '  height: 60px;',
       '  border-radius: 50%;',
-      '  background: ' + CONFIG.brandGold + ';',
+      '  background: linear-gradient(135deg, ' + CONFIG.brandGold + ' 0%, #E8D090 40%, ' + CONFIG.brandGold + ' 70%, #d4b66a 100%);',
+      '  background-size: 300% 300%;',
       '  border: none;',
       '  cursor: pointer;',
       '  z-index: ' + CONFIG.zIndex + ';',
-      '  box-shadow: 0 4px 20px rgba(203, 170, 99, 0.4);',
+      '  animation: abrilDiamondGlow 2.5s ease-in-out infinite, abrilShimmer 4s linear infinite;',
       '  display: flex;',
       '  align-items: center;',
       '  justify-content: center;',
-      '  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;',
+      '  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);',
       '}',
       '#abril-toggle-btn:hover {',
-      '  transform: scale(1.08);',
-      '  box-shadow: 0 6px 28px rgba(203, 170, 99, 0.55);',
+      '  transform: scale(1.12);',
+      '  animation: none;',
+      '  box-shadow: 0 8px 35px rgba(203, 170, 99, 0.65);',
       '}',
       '#abril-toggle-btn svg { width: 28px; height: 28px; fill: #1C1C1C; transition: transform 0.3s ease; }',
       '#abril-toggle-btn.abril-open svg { transform: rotate(90deg); }',
@@ -478,7 +488,7 @@
 
   // ── SVG Icons ──────────────────────────────────────────
   var ICON_CHAT =
-    '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h10v2H7zm0-3h10v2H7z"/></svg>';
+    '<svg viewBox="0 0 24 24"><path d="M12 2L2 9.5l4 2.5v5.5L12 22l6-4.5V12l2-1.25V17h2V9.5L12 2zm0 2.5l6.8 5.1L12 14.7 5.2 9.6 12 4.5zM17 16.7l-5 3.8-5-3.8v-4l5 3.8 5-3.8v4z"/><polygon points="12,6.5 10.5,10 12,9 13.5,10" fill="#CBAA63" opacity="0.6"/></svg>';
   var ICON_CLOSE =
     '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
   var ICON_SEND =
