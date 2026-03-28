@@ -1008,62 +1008,112 @@
       }
     }
 
-    // Check if returning from Stripe — show receipt
+    // Check if returning from Stripe
     function checkStripeReturn() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentSuccess = urlParams.get('payment_success');
+      const paymentCancelled = urlParams.get('payment_cancelled');
       const pendingOrder = localStorage.getItem('enigme_pending_order');
-      if (!pendingOrder) return;
 
-      // Show receipt overlay
-      try {
-        const po = JSON.parse(pendingOrder);
-        localStorage.removeItem('enigme_pending_order');
+      // Clean URL params
+      if (paymentSuccess || paymentCancelled) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
 
-        const moneda = po.moneda || 'HNL';
-        const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
-        const itemsHtml = (po.items || []).map(it => {
-          const hnlTotal = it.price * it.qty;
-          const displayPrice = moneda === 'EUR'
-            ? psychologicalPrice(hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2)
-            : hnlTotal.toLocaleString('es-HN');
-          return `<tr><td style="padding:8px 4px;border-bottom:1px solid #333;color:#ccc;text-align:left;">${it.qty}x ${it.name}</td><td style="padding:8px 4px;border-bottom:1px solid #333;color:#B8860B;text-align:right;">${symbol} ${displayPrice}</td></tr>`;
-        }).join('');
-
+      // CANCELLED - user didn't pay
+      if (paymentCancelled) {
         const overlay = document.createElement('div');
         overlay.id = 'receipt-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;padding:20px;';
         overlay.innerHTML = `
-          <div style="background:#1C1C1C;border:1px solid #B8860B;border-radius:16px;padding:32px;max-width:520px;width:100%;color:#fff;font-family:Montserrat,sans-serif;max-height:90vh;overflow-y:auto;">
-            <div style="text-align:center;margin-bottom:24px;">
-              <div style="font-size:48px;margin-bottom:8px;">✓</div>
-              <h2 style="font-family:Cinzel,serif;color:#B8860B;margin:0;font-size:1.3rem;">PEDIDO ENVIADO A PAGO</h2>
-              <p style="color:#888;font-size:0.85rem;margin:8px 0 0;">Pedido ${po.orderId}</p>
-            </div>
-            <div style="background:#111;border-radius:12px;padding:20px;margin-bottom:20px;">
-              <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
-                <thead><tr><th style="text-align:left;padding:8px 4px;border-bottom:2px solid #B8860B;color:#B8860B;">Producto</th><th style="text-align:right;padding:8px 4px;border-bottom:2px solid #B8860B;color:#B8860B;">Precio</th></tr></thead>
-                <tbody>${itemsHtml}</tbody>
-                <tfoot><tr><td style="padding:12px 4px 0;font-weight:700;color:#fff;">SUBTOTAL</td><td style="padding:12px 4px 0;font-weight:700;color:#B8860B;text-align:right;font-size:1.1rem;">${symbol} ${po.displayTotal}</td></tr></tfoot>
-              </table>
-            </div>
-            <div style="font-size:0.8rem;color:#888;margin-bottom:20px;">
-              <p style="margin:4px 0;">Cliente: ${po.nombre}</p>
-              <p style="margin:4px 0;">Fecha: ${new Date().toLocaleDateString('es', {day:'2-digit',month:'long',year:'numeric'})}</p>
-              <p style="margin:4px 0;">Moneda: ${moneda}</p>
-              <p style="margin:8px 0 0;color:#B8860B;font-weight:600;">Complete el pago en la pestaña de Stripe que se ha abierto.</p>
-              <p style="margin:4px 0;color:#666;">Al confirmar el pago, recibirá una notificación y su pedido será procesado.</p>
-            </div>
-            <div style="display:flex;gap:10px;justify-content:center;">
-              <button onclick="document.getElementById('receipt-overlay').remove();" style="padding:12px 28px;background:linear-gradient(135deg,#B8860B,#DAA520);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;">ENTENDIDO</button>
-            </div>
+          <div style="background:#1C1C1C;border:1px solid #c0392b;border-radius:16px;padding:40px;max-width:480px;width:100%;color:#fff;font-family:Montserrat,sans-serif;text-align:center;">
+            <div style="font-size:48px;margin-bottom:12px;opacity:0.7;">✕</div>
+            <h2 style="font-family:Cinzel,serif;color:#c0392b;margin:0 0 12px;font-size:1.2rem;letter-spacing:3px;">PAGO CANCELADO</h2>
+            <p style="color:#888;font-size:0.85rem;margin:0 0 24px;">El pago no fue completado. Su carrito se mantiene intacto.</p>
+            <button onclick="document.getElementById('receipt-overlay').remove();" style="padding:14px 36px;background:transparent;border:1px solid #CBAA63;color:#CBAA63;border-radius:4px;font-weight:600;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;transition:all .3s;" onmouseover="this.style.background='#CBAA63';this.style.color='#1C1C1C'" onmouseout="this.style.background='transparent';this.style.color='#CBAA63'">VOLVER AL CARRITO</button>
           </div>`;
         document.body.appendChild(overlay);
+        localStorage.removeItem('enigme_pending_order');
+        localStorage.removeItem('enigme_order_email_data');
+        return;
+      }
 
-        // Clear cart
-        cart = []; localStorage.setItem('enigme_cart', '[]');
-        renderCart(); updateCounts();
-        sendPaymentNotification(po.orderId, po.displayTotal);
+      // SUCCESS - payment confirmed
+      if (paymentSuccess && pendingOrder) {
+        try {
+          const po = JSON.parse(pendingOrder);
+          localStorage.removeItem('enigme_pending_order');
 
-      } catch (e) { console.error('Error showing receipt:', e); }
+          const moneda = po.moneda || 'HNL';
+          const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
+          const isHonduras = moneda !== 'EUR';
+          const tiempoEnvio = isHonduras ? '25-31 d\u00edas h\u00e1biles' : '15-18 d\u00edas h\u00e1biles';
+          const itemsHtml = (po.items || []).map(it => {
+            const hnlTotal = it.price * it.qty;
+            const displayPrice = moneda === 'EUR'
+              ? psychologicalPrice(hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2)
+              : hnlTotal.toLocaleString('es-HN');
+            return `<tr><td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#ccc;text-align:left;">${it.qty}x ${it.name}</td><td style="padding:10px 8px;border-bottom:1px solid #2a2a2a;color:#CBAA63;text-align:right;font-weight:600;">${symbol} ${displayPrice}</td></tr>`;
+          }).join('');
+
+          const overlay = document.createElement('div');
+          overlay.id = 'receipt-overlay';
+          overlay.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .5s ease;';
+          overlay.innerHTML = `
+            <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes scaleIn{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}} @keyframes checkPop{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}} @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}</style>
+            <div style="background:#1C1C1C;border:1px solid #CBAA63;border-radius:4px;padding:40px;max-width:540px;width:100%;color:#fff;font-family:Montserrat,sans-serif;max-height:90vh;overflow-y:auto;animation:scaleIn .4s ease;">
+              <div style="text-align:center;margin-bottom:28px;">
+                <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:linear-gradient(135deg,#CBAA63,#E8D090);border-radius:50%;margin-bottom:16px;animation:checkPop .6s ease .2s both;">
+                  <span style="font-size:32px;color:#1C1C1C;">&#10003;</span>
+                </div>
+                <h2 style="font-family:Cinzel,serif;color:#CBAA63;margin:0;font-size:1.4rem;letter-spacing:4px;">PAGO CONFIRMADO</h2>
+                <p style="color:#888;font-size:0.8rem;margin:8px 0 0;letter-spacing:2px;">Pedido #${po.orderId}</p>
+              </div>
+              <div style="background:#111;border-radius:4px;padding:20px;margin-bottom:20px;border:1px solid #222;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                  <thead><tr><th style="text-align:left;padding:10px 8px;border-bottom:2px solid #CBAA63;color:#CBAA63;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;font-weight:400;">Producto</th><th style="text-align:right;padding:10px 8px;border-bottom:2px solid #CBAA63;color:#CBAA63;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;font-weight:400;">Precio</th></tr></thead>
+                  <tbody>${itemsHtml}</tbody>
+                  <tfoot><tr><td style="padding:14px 8px 0;font-weight:700;color:#fff;font-size:0.9rem;letter-spacing:2px;">TOTAL PAGADO</td><td style="padding:14px 8px 0;font-weight:700;color:#CBAA63;text-align:right;font-size:1.2rem;">${symbol} ${po.displayTotal}</td></tr></tfoot>
+                </table>
+              </div>
+              <div style="background:#111;border:1px solid #222;border-radius:4px;padding:16px 20px;margin-bottom:20px;font-size:0.8rem;">
+                <p style="margin:6px 0;color:#888;">Cliente: <span style="color:#ccc;">${po.nombre}</span></p>
+                <p style="margin:6px 0;color:#888;">Fecha: <span style="color:#ccc;">${new Date().toLocaleDateString('es', {day:'2-digit',month:'long',year:'numeric'})}</span></p>
+                <p style="margin:6px 0;color:#888;">Env\u00edo estimado: <span style="color:#CBAA63;font-weight:600;">${tiempoEnvio}</span></p>
+              </div>
+              <p style="text-align:center;font-size:0.8rem;color:#CBAA63;margin:0 0 8px;font-weight:600;">Se ha enviado un correo de confirmaci\u00f3n a su email.</p>
+              <p style="text-align:center;font-size:0.7rem;color:#666;margin:0 0 24px;">Recibir\u00e1 actualizaciones sobre el estado de su pedido.</p>
+              <div style="text-align:center;margin-bottom:16px;">
+                <button onclick="document.getElementById('receipt-overlay').remove();" style="padding:14px 40px;background:linear-gradient(135deg,#CBAA63,#E8D090);background-size:300% 300%;animation:shimmer 3s infinite linear;color:#1C1C1C;border:none;border-radius:4px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;">SEGUIR COMPRANDO</button>
+              </div>
+              <p style="text-align:center;font-size:0.65rem;letter-spacing:3px;color:#555;margin:0;">AURA &middot; MISTERIO &middot; PRESENCIA</p>
+            </div>`;
+          document.body.appendChild(overlay);
+
+          // Clear cart
+          cart = []; localStorage.setItem('enigme_cart', '[]');
+          renderCart(); updateCounts();
+          sendPaymentNotification(po.orderId, po.displayTotal);
+
+          // Send confirmation email ONLY now (after successful payment)
+          const emailData = JSON.parse(localStorage.getItem('enigme_order_email_data') || 'null');
+          if (emailData) {
+            localStorage.removeItem('enigme_order_email_data');
+            fetch('https://hajmyntnvurlcuwshjdd.supabase.co/functions/v1/send-order-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(emailData)
+            }).then(r => r.json()).then(d => console.log('Order email sent:', d)).catch(e => console.warn('Email failed:', e));
+          }
+
+        } catch (e) { console.error('Error showing receipt:', e); }
+        return;
+      }
+
+      // No params but pending order exists (user closed Stripe tab without paying) - clean up silently
+      if (pendingOrder && !paymentSuccess) {
+        // Don't remove - user might still be paying in another tab
+      }
     }
     // ═══════════════════════════════════════════════════════
 
@@ -1470,7 +1520,20 @@
         }));
         localStorage.setItem('enigme_last_order_id', orderId);
 
-        // 6. Redirect to Stripe Checkout (secure page with exact prices)
+        // 6. Save email data for post-payment confirmation email
+        localStorage.setItem('enigme_order_email_data', JSON.stringify({
+          customer_email: data.correo,
+          customer_name: data.nombre,
+          order_id: orderId,
+          items: stripeItems.map(function(it) { return { name: it.name, price: it.price, qty: it.qty }; }),
+          currency: stripeCurrency,
+          shipping_address: data.direccion + ', ' + data.departamento,
+          total: displayTotal,
+          moneda: moneda,
+          departamento: data.departamento
+        }));
+
+        // 7. Redirect to Stripe Checkout (secure page with exact prices)
         window.location.href = checkoutData.url;
 
       } catch (err) {
