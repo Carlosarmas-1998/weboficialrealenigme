@@ -762,18 +762,12 @@ async function guardarCoordinador() {
       await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, payload);
       suc.textContent = 'Coordinador actualizado.';
     } else {
-      var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
-      var codigo;
-      if (codeResp.ok) {
-        codigo = await codeResp.json();
-      } else {
-        var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-        var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
-        var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
-        var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-        var maxNum = Math.max(numVend, numCoord, 301200);
-        codigo = maxNum + 1;
-      }
+      // Código secuencial desde 301201 — consulta vendedoras Y coordinadores
+      var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+      var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+      var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
+      var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
+      var codigo = Math.max(numVend, numCoord, 301200) + 1;
 
       payload.codigo = String(codigo);
       payload.sector_id = sectorId;
@@ -1175,18 +1169,12 @@ async function guardarNombramiento() {
   }
 
   try {
-    var codeResp = await fetch(SB + '/rest/v1/rpc/generar_codigo_profesional', { method: 'POST', headers: HJ, body: '{}' });
-    var codigo;
-    if (codeResp.ok) {
-      codigo = await codeResp.json();
-    } else {
-      var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-      var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
-      var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
-      var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-      var maxNum = Math.max(numVend, numCoord, 301200);
-      codigo = maxNum + 1;
-    }
+    // Código secuencial desde 301201 — consulta vendedoras Y coordinadores
+    var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+    var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+    var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
+    var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
+    var codigo = Math.max(numVend, numCoord, 301200) + 1;
 
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
