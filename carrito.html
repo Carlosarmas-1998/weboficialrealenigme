@@ -885,13 +885,7 @@
         </button>
       </div>
 
-      <div class="mis-registros-toggle" onclick="toggleMisRegistros()" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--carbon);cursor:pointer;margin-top:20px;border:1px solid rgba(203,170,99,0.3);user-select:none;">
-        <span style="font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;color:var(--dorado);font-weight:500;">Mis Registros</span>
-        <svg id="mis-registros-arrow" viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--dorado);transition:transform 0.4s;"><path d="M7 10l5 5 5-5z"/></svg>
-      </div>
-      <div id="mis-registros-body" style="max-height:0;overflow:hidden;transition:max-height 0.6s cubic-bezier(0.25,0.46,0.45,0.94);">
-
-      <div class="order-tracking" id="order-tracking-section">
+      <div class="order-tracking" id="order-tracking-section" style="display:none;">
         <h3 style="font-family:'Cinzel',serif;font-size:clamp(0.85rem,2vw,1rem);letter-spacing:3px;text-transform:uppercase;color:var(--carbon);margin-bottom:20px;text-align:center;">Seguimiento de Pedido</h3>
         <p style="text-align:center;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--dorado);margin-bottom:5px;" id="tracking-order-id"></p>
         <p style="text-align:center;font-size:0.55rem;letter-spacing:1px;color:var(--gris-suave);margin-bottom:20px;" id="tracking-delivery-estimate"></p>
@@ -934,8 +928,6 @@
         <div id="review-items-container"></div>
       </div>
 
-      </div><!-- close mis-registros-body -->
-
     </div>
   </main>
 
@@ -945,61 +937,74 @@
     <div class="lb-indicator" id="lb-indicator"></div>
   </div>
 
-  <section class="historial-section fade-in">
-    <div class="historial-header">
-      <h2>Historial V.I.P</h2>
-      <p>Registro de solicitudes y pagos</p>
+  <!-- ══ MIS REGISTROS — COLLAPSIBLE MASTER SECTION ══ -->
+  <div style="max-width:1300px;margin:30px auto;padding:0 5vw;width:100%;">
+    <div class="mis-registros-toggle" onclick="toggleMisRegistros()" style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;background:var(--carbon);cursor:pointer;border:1px solid rgba(203,170,99,0.3);user-select:none;">
+      <span style="font-family:'Cinzel',serif;font-size:clamp(0.85rem,2vw,1rem);letter-spacing:3px;text-transform:uppercase;color:var(--dorado);font-weight:500;">Mis Registros</span>
+      <svg id="mis-registros-arrow" viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--dorado);transition:transform 0.4s;"><path d="M7 10l5 5 5-5z"/></svg>
     </div>
+    <div id="mis-registros-body" style="max-height:0;overflow:hidden;transition:max-height 0.7s cubic-bezier(0.25,0.46,0.45,0.94);border:1px solid rgba(203,170,99,0.15);border-top:none;">
 
-    <div class="historial-tabs">
-      <button class="htab active" onclick="switchTab('tarjeta', this)">
-        Pagos con Tarjeta
-      </button>
-      <button class="htab" onclick="switchTab('whatsapp', this)">
-        Solicitudes WhatsApp
-      </button>
-    </div>
-
-    <div class="historial-panel active" id="panel-tarjeta">
-      <div class="historial-list" id="lista-tarjeta"></div>
-    </div>
-
-    <div class="historial-panel" id="panel-whatsapp">
-      <div class="historial-list" id="lista-whatsapp"></div>
-    </div>
-
-    <div style="text-align:center">
-      <button class="btn-limpiar" onclick="limpiarHistorial()">Borrar historial</button>
-    </div>
-  </section>
-
-  <!-- ══ NOTIFICATIONS PANEL ══ -->
-  <div class="notif-panel fade-in" id="notif-panel">
-    <div class="notif-header" onclick="toggleNotifPanel()">
-      <div class="notif-header-left">
-        <svg class="notif-icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-        <h3>Notificaciones</h3>
-        <span class="notif-count-badge hidden" id="notif-unread-count">0</span>
+      <!-- SUB-SECTION: Mis Pedidos VIP -->
+      <div class="mis-reg-sub" style="border-bottom:1px solid var(--linea-fina);">
+        <div onclick="toggleSubReg('pedidosVip')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;cursor:pointer;background:rgba(250,249,246,0.5);">
+          <span style="font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--carbon);font-weight:500;">Pedidos V.I.P</span>
+          <svg class="sub-reg-arrow" id="arrow-pedidosVip" viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--dorado);transition:transform 0.3s;"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+        <div id="body-pedidosVip" style="max-height:0;overflow:hidden;transition:max-height 0.5s ease;">
+          <div style="padding:0 24px 20px;">
+            <div id="mis-pedidos-container"></div>
+          </div>
+        </div>
       </div>
-      <svg class="notif-expand-icon" id="notif-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-    </div>
-    <div class="notif-body" id="notif-body">
-      <div class="notif-list" id="notif-list"></div>
-      <div class="notif-actions" id="notif-actions" style="display:none;">
-        <button class="notif-action-btn" onclick="markAllNotifsRead()">Marcar todo como leido</button>
-        <button class="notif-action-btn" onclick="clearAllNotifs()">Limpiar notificaciones</button>
+
+      <!-- SUB-SECTION: Notificaciones -->
+      <div class="mis-reg-sub" style="border-bottom:1px solid var(--linea-fina);">
+        <div onclick="toggleSubReg('notifs')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;cursor:pointer;background:rgba(250,249,246,0.5);">
+          <span style="font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--carbon);font-weight:500;">Notificaciones</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="notif-count-badge hidden" id="notif-unread-count">0</span>
+            <svg class="sub-reg-arrow" id="arrow-notifs" viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--dorado);transition:transform 0.3s;"><path d="M7 10l5 5 5-5z"/></svg>
+          </div>
+        </div>
+        <div id="body-notifs" style="max-height:0;overflow:hidden;transition:max-height 0.5s ease;">
+          <div style="padding:0 24px 20px;">
+            <div class="notif-list" id="notif-list"></div>
+            <div class="notif-actions" id="notif-actions" style="display:none;">
+              <button class="notif-action-btn" onclick="markAllNotifsRead()">Marcar todo como leido</button>
+              <button class="notif-action-btn" onclick="clearAllNotifs()">Limpiar notificaciones</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- SUB-SECTION: Historial de Pedidos -->
+      <div class="mis-reg-sub">
+        <div onclick="toggleSubReg('historial')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;cursor:pointer;background:rgba(250,249,246,0.5);">
+          <span style="font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--carbon);font-weight:500;">Historial de Pedidos</span>
+          <svg class="sub-reg-arrow" id="arrow-historial" viewBox="0 0 24 24" style="width:16px;height:16px;fill:var(--dorado);transition:transform 0.3s;"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+        <div id="body-historial" style="max-height:0;overflow:hidden;transition:max-height 0.5s ease;">
+          <div style="padding:0 24px 20px;">
+            <div class="historial-tabs" style="margin-bottom:12px;">
+              <button class="htab active" onclick="switchTab('tarjeta', this)">Pagos con Tarjeta</button>
+              <button class="htab" onclick="switchTab('whatsapp', this)">Solicitudes WhatsApp</button>
+            </div>
+            <div class="historial-panel active" id="panel-tarjeta">
+              <div class="historial-list" id="lista-tarjeta"></div>
+            </div>
+            <div class="historial-panel" id="panel-whatsapp">
+              <div class="historial-list" id="lista-whatsapp"></div>
+            </div>
+            <div style="text-align:center;margin-top:12px;">
+              <button class="btn-limpiar" onclick="limpiarHistorial()">Borrar historial</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- close mis-registros-body -->
   </div>
-
-  <!-- ══ MIS PEDIDOS — ORDER HISTORY WITH STATUS + CHAT ══ -->
-  <section class="mis-pedidos-section fade-in" id="mis-pedidos-section">
-    <div class="mis-pedidos-header">
-      <h2>Mis Pedidos</h2>
-      <p>Seguimiento y soporte de sus compras</p>
-    </div>
-    <div id="mis-pedidos-container"></div>
-  </section>
 
   <footer class="footer">
     &copy; 2026 ÈNIGME &middot; MARCA DE JOYERÍA ESPAÑOLA CON OPERACIONES EN HONDURAS
@@ -1428,12 +1433,12 @@
       if (!noticeEl) return;
 
       if (moneda === 'EUR') {
-        // EUR is supported by Stripe directly
-        const eurAmount = psychologicalPrice(hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2);
+        // EUR supported by Stripe — show exact same EUR amount as displayed total
+        const eurAmount = (hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2);
         noticeEl.innerText = '\u20AC ' + eurAmount;
         if (conversionNote) { conversionNote.style.display = 'none'; }
       } else {
-        // HNL not supported by Stripe — convert to USD and show both
+        // HNL not supported by Stripe — convert to USD
         const usdAmount = (Math.round((hnlTotal / TASA_HNL_USD) * 100) / 100).toFixed(2);
         noticeEl.innerText = 'L ' + hnlTotal.toLocaleString('es-HN') + ' \u2248 $' + usdAmount + ' USD';
         if (conversionNote) {
@@ -1640,22 +1645,24 @@
         const discountBanner = document.getElementById('subscriber-discount-banner');
         const discountSummary = document.getElementById('subscriber-discount-summary');
         if (subscriberDiscountActive && total > 0) {
-          const discountHNL = Math.round(total * 0.10);
-          const discountedHNL = total - discountHNL;
-          currentTotalGlobal = discountedHNL;
-
-          // Calculate discount in display currency (no psychological pricing for discount)
-          let discountDisplay, discountedDisplay;
+          // Use the DISPLAYED prices for consistency (with psychological pricing for EUR)
+          let discountDisplay, discountedDisplay, stripeHNL;
           if (monedaCart === 'EUR') {
-            const totalEUR = parseFloat((total / TASA_CAMBIO_CHECKOUT).toFixed(2));
-            const discEUR = parseFloat((totalEUR * 0.10).toFixed(2));
-            const finalEUR = parseFloat((totalEUR - discEUR).toFixed(2));
+            // Get the psychological EUR total (same as what's shown)
+            const eurTotal = psychologicalPrice(total / TASA_CAMBIO_CHECKOUT);
+            const discEUR = parseFloat((eurTotal * 0.10).toFixed(2));
+            const finalEUR = parseFloat((eurTotal - discEUR).toFixed(2));
             discountDisplay = '- \u20AC ' + discEUR.toFixed(2);
             discountedDisplay = '\u20AC ' + finalEUR.toFixed(2);
+            // Convert final EUR back to HNL for internal tracking
+            stripeHNL = Math.round(finalEUR * TASA_CAMBIO_CHECKOUT);
           } else {
+            const discountHNL = Math.round(total * 0.10);
+            stripeHNL = total - discountHNL;
             discountDisplay = '- L ' + discountHNL.toLocaleString('es-HN');
-            discountedDisplay = 'L ' + discountedHNL.toLocaleString('es-HN');
+            discountedDisplay = 'L ' + stripeHNL.toLocaleString('es-HN');
           }
+          currentTotalGlobal = stripeHNL;
 
           discountBanner.style.display = 'flex';
           discountSummary.style.display = 'block';
@@ -1663,12 +1670,11 @@
           document.getElementById('original-price-display').innerText = totalDisplay;
           document.getElementById('discounted-total-display').innerText = discountedDisplay;
 
-          // Stripe notice shows actual Stripe charge amount
-          updateStripeNotice(discountedTotal);
+          // Stripe notice shows the SAME final amount
+          updateStripeNotice(stripeHNL);
         } else {
           discountBanner.style.display = 'none';
           discountSummary.style.display = 'none';
-          // Stripe notice shows SAME amount as total
           updateStripeNotice(total);
         }
         updateCurrencyHint();
@@ -2106,8 +2112,20 @@
         body.style.maxHeight = '0';
         arrow.style.transform = 'rotate(0deg)';
       } else {
-        body.style.maxHeight = body.scrollHeight + 'px';
+        body.style.maxHeight = '5000px';
         arrow.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function toggleSubReg(id) {
+      const body = document.getElementById('body-' + id);
+      const arrow = document.getElementById('arrow-' + id);
+      if (body.style.maxHeight && body.style.maxHeight !== '0px') {
+        body.style.maxHeight = '0';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      } else {
+        body.style.maxHeight = '3000px';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
       }
     }
 
