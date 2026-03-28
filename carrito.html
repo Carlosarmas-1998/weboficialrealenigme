@@ -1047,24 +1047,51 @@
         return;
       }
 
-      container.innerHTML = historial.map(e => `
-        <div class="historial-item ${tipo === 'whatsapp' ? 'whatsapp-item' : ''}">
-          <div class="hi-top">
+      container.innerHTML = historial.map((e, idx) => `
+        <div class="historial-item ${tipo === 'whatsapp' ? 'whatsapp-item' : ''}" id="hist-${tipo}-${idx}">
+          <div class="hi-top" style="cursor:pointer;" onclick="toggleHistDetail('hist-detail-${tipo}-${idx}', this)">
             <span class="hi-fecha">${e.fecha} &nbsp;&middot;&nbsp; ${e.hora}</span>
-            <span class="hi-badge ${tipo === 'whatsapp' ? 'whatsapp' : 'tarjeta'}">
-              ${tipo === 'whatsapp' ? 'WhatsApp' : 'Tarjeta'}
-            </span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="hi-total">${e.moneda === 'EUR' ? '\u20AC' + e.total : getCartPriceDisplay(e.totalHNL || e.total)}</span>
+              <span class="hi-badge ${tipo === 'whatsapp' ? 'whatsapp' : 'tarjeta'}">${tipo === 'whatsapp' ? 'WhatsApp' : 'Tarjeta'}</span>
+              <span style="font-size:0.7rem;color:var(--gris-suave);transition:transform 0.3s;" class="hist-arrow">▼</span>
+            </div>
           </div>
-          <div class="hi-productos">
-            <strong>Productos:</strong>
-            ${e.productos.map(p => `&middot; ${p}`).join('<br>')}
-          </div>
-          <div class="hi-bottom">
-            <span class="hi-cliente">${e.nombre} &nbsp;&middot;&nbsp; ${e.direccion}</span>
-            <span class="hi-total">${e.moneda === 'EUR' ? '\u20AC' + e.total : getCartPriceDisplay(e.totalHNL || e.total)}</span>
+          <div class="hi-detail" id="hist-detail-${tipo}-${idx}" style="max-height:0;overflow:hidden;transition:max-height 0.4s ease;">
+            <div style="padding:12px 0;">
+              <div class="hi-productos">
+                <strong>Productos:</strong>
+                ${e.productos.map(p => `&middot; ${p}`).join('<br>')}
+              </div>
+              <div class="hi-bottom">
+                <span class="hi-cliente">${e.nombre} &nbsp;&middot;&nbsp; ${e.direccion}</span>
+              </div>
+              <button onclick="eliminarHistorial('${clave}', ${idx})" style="margin-top:10px;padding:6px 16px;font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;background:transparent;border:1px solid #c0392b;color:#c0392b;font-family:Montserrat,sans-serif;cursor:pointer;font-weight:600;transition:all 0.3s;">ELIMINAR ESTE PEDIDO</button>
+            </div>
           </div>
         </div>
       `).join('');
+    }
+
+    function toggleHistDetail(id, headerEl) {
+      var detail = document.getElementById(id);
+      if (!detail) return;
+      var arrow = headerEl.querySelector('.hist-arrow');
+      if (detail.style.maxHeight && detail.style.maxHeight !== '0px') {
+        detail.style.maxHeight = '0';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      } else {
+        detail.style.maxHeight = detail.scrollHeight + 'px';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function eliminarHistorial(clave, idx) {
+      if (!confirm('¿Eliminar este pedido del historial?')) return;
+      var historial = JSON.parse(localStorage.getItem(clave)) || [];
+      historial.splice(idx, 1);
+      localStorage.setItem(clave, JSON.stringify(historial));
+      renderHistorial();
     }
 
     function switchTab(tipo, btn) {
@@ -1385,7 +1412,37 @@
       syncCartAnalytics();
       // Check subscriber discount (async, will re-render if discount found)
       checkSubscriberDiscount();
+
+    // Pre-fill client data from localStorage
+    var savedClient = JSON.parse(localStorage.getItem('enigme_client_data') || 'null');
+    if (savedClient) {
+      if (savedClient.nombre) document.getElementById('cliente-nombre').value = savedClient.nombre;
+      if (savedClient.correo) document.getElementById('cliente-correo').value = savedClient.correo;
+      if (savedClient.telefono) document.getElementById('cliente-telefono').value = savedClient.telefono;
+      if (savedClient.departamento) {
+        var deptoSelect = document.getElementById('cliente-departamento');
+        deptoSelect.value = savedClient.departamento;
+        deptoSelect.dispatchEvent(new Event('change'));
+      }
+      if (savedClient.direccion) document.getElementById('cliente-direccion').value = savedClient.direccion;
     }
+    }
+
+    // Confirm before changing saved client data (except direccion)
+    ['cliente-nombre','cliente-correo','cliente-telefono','cliente-departamento'].forEach(function(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (!el) return;
+      var origVal = el.value;
+      el.addEventListener('focus', function() { origVal = this.value; });
+      el.addEventListener('change', function() {
+        var saved = JSON.parse(localStorage.getItem('enigme_client_data') || 'null');
+        if (saved && origVal && this.value !== origVal) {
+          if (!confirm('¿Estás seguro de cambiar este dato? El valor anterior era: ' + origVal)) {
+            this.value = origVal;
+          }
+        }
+      });
+    });
 
     function calculateCartRules() {
       let totalLqItems = 0;
@@ -1600,6 +1657,9 @@
       if(!nombre || !correo || !telefono || !departamento || !direccion) {
         alert("Estimado cliente, necesitamos todos sus datos para procesar el envío."); return false;
       }
+      // Save client data for future orders
+      localStorage.setItem('enigme_client_data', JSON.stringify({nombre, correo, telefono, departamento, direccion}));
+
       return {nombre, correo, telefono, departamento, direccion};
     }
 
@@ -1629,11 +1689,12 @@
 
     function clearCartAndUI() {
       justOrdered = true; cart = []; localStorage.setItem('enigme_cart', JSON.stringify(cart));
-      document.getElementById('cliente-nombre').value = '';
-      document.getElementById('cliente-correo').value = '';
-      document.getElementById('cliente-telefono').value = '';
-      document.getElementById('cliente-departamento').value = '';
-      document.getElementById('cliente-direccion').value = '';
+      // Client fields no longer cleared — data persists via localStorage
+      // document.getElementById('cliente-nombre').value = '';
+      // document.getElementById('cliente-correo').value = '';
+      // document.getElementById('cliente-telefono').value = '';
+      // document.getElementById('cliente-departamento').value = '';
+      // document.getElementById('cliente-direccion').value = '';
       renderCart(); updateCounts();
       syncCartAnalytics();
     }

@@ -695,7 +695,7 @@
     <div class="hero-title-overlay">
       <h1>Colecci&oacute;n Cero &mdash; Lanzamiento</h1>
     </div>
-    <div class="hero-overlay">
+    <div class="hero-overlay" id="heroSubscribeOverlay">
       <h2>Obt&eacute;n 10% en tu Primera Compra</h2>
       <p class="hero-subtitle">Ingresa tu correo y &uacute;nete al Club Exclusivo de La Casa &Egrave;NIGME</p>
       <form class="hero-subscribe-form" onsubmit="handleHeroSubscribe(event)">
@@ -1153,6 +1153,11 @@
     // ── Init ──
     document.addEventListener('DOMContentLoaded', function() {
       showCookiePopup();
+      // Hide subscription overlay if already subscribed
+      if (localStorage.getItem('enigme_subscriber_email')) {
+        var subOverlay = document.getElementById('heroSubscribeOverlay');
+        if (subOverlay) subOverlay.style.display = 'none';
+      }
       // If cookies already accepted, show tooltip directly
       if (localStorage.getItem('enigme_cookies_accepted')) {
         setTimeout(showAbrilTooltip, 2000);
