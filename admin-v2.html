@@ -197,7 +197,7 @@
   <div class="nav-item" data-tab="postulaciones" onclick="switchTab('postulaciones')">Postulaciones</div>
   <div class="nav-item" data-tab="cookies" onclick="switchTab('cookies')">Cookies</div>
   <div class="nav-item" data-tab="suscripciones" onclick="switchTab('suscripciones')">Suscripciones</div>
-  <div class="nav-item" data-tab="analytics" onclick="switchTab('analytics')">Analytics</div>
+  <div class="nav-item" data-tab="analytics" onclick="switchTab('analytics');loadAnalytics();">◈ Analytics</div>
   <div class="nav-item" data-tab="notificaciones" onclick="switchTab('notificaciones')">Notificaciones <span class="nav-badge" id="notifBadge" style="display:none;">0</span></div>
   <div class="nav-item" data-tab="gerencia" onclick="switchTab('gerencia')">Gerencia Div.</div>
   <div class="nav-item" data-tab="ventas_corp" onclick="switchTab('ventas_corp')">Ventas Corp.</div>
@@ -295,20 +295,27 @@
   </div>
 
   <!-- TAB: ANALYTICS -->
-  <div class="tab-content" id="tab-analytics">
+  <div id="tab-analytics" class="tab-content">
     <div class="page-header">
-      <div class="page-title"><h1>Analy<em>tics</em></h1><p>Estad&iacute;sticas del sitio</p></div>
+      <div class="page-title"><h1>Analytics <em>&amp; M&eacute;tricas</em></h1><p>Ubicaciones, visitas y art&iacute;culos m&aacute;s vistos</p></div>
       <div class="header-actions">
         <button class="btn btn-gold" onclick="exportExcel('analytics')"><span>Exportar Excel</span></button>
         <button class="btn" onclick="loadAnalytics()"><span>Refrescar</span></button>
       </div>
     </div>
-    <div class="stats-row" id="analyticsStats"></div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Evento</th><th>P&aacute;gina</th><th>T&iacute;tulo</th><th>Pa&iacute;s</th><th>Ciudad</th><th>Dispositivo</th><th>Navegador</th><th>Pantalla</th><th>Idioma</th><th>Referrer</th><th>Fecha</th></tr></thead>
-      <tbody id="analyticsBody"></tbody>
-    </table></div>
-    <div class="empty-state" id="analyticsEmpty" style="display:none;">No hay datos</div>
+    <div id="analyticsStats" class="stats-row"></div>
+
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Visitantes por Pa&iacute;s</h3>
+    <div class="table-wrap"><table><thead><tr><th>Pa&iacute;s</th><th>Ciudad</th><th>Visitas</th><th>&Uacute;ltima Visita</th></tr></thead><tbody id="analyticsGeoBody"></tbody></table></div>
+
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">P&aacute;ginas M&aacute;s Visitadas</h3>
+    <div class="table-wrap"><table><thead><tr><th>P&aacute;gina</th><th>Categor&iacute;a</th><th>Visitas</th></tr></thead><tbody id="analyticsViewsBody"></tbody></table></div>
+
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Visitantes Recientes</h3>
+    <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>P&aacute;gina</th><th>Ciudad</th><th>Pa&iacute;s</th><th>Cookies</th></tr></thead><tbody id="analyticsRecentBody"></tbody></table></div>
+
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Suscriptores del Club</h3>
+    <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
   </div>
 
   <!-- TAB: NOTIFICACIONES -->
@@ -576,7 +583,7 @@ var ADMIN_PASSWORD = 'Gusiteamo.1998';
 var WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
 var RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
 var SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 
 // ---- DATA CACHES ----
 var cachedPedidos = [];
@@ -1286,54 +1293,107 @@ async function loadSuscripciones() {
 // ANALYTICS
 // ================================================================
 async function loadAnalytics() {
-  var data = await supaGet('web_analytics', '&order=created_at.desc');
-  cachedAnalytics = data;
+  // Fetch all three data sources in parallel
+  var results = await Promise.all([
+    supaGet('web_analytics', '&order=created_at.desc'),
+    supaGet('web_page_views', '&order=created_at.desc'),
+    supaGet('suscriptores', '&order=created_at.desc')
+  ]);
+  var analytics = results[0] || [];
+  var pageViews = results[1] || [];
+  var suscriptores = results[2] || [];
+  cachedAnalytics = analytics;
 
-  var totalVisits = data.length;
-  var countries = {};
-  var devices = {};
-  data.forEach(function(a){
-    var country = a.pais || 'Desconocido';
-    var device = a.dispositivo || 'Desconocido';
-    countries[country] = (countries[country] || 0) + 1;
-    devices[device] = (devices[device] || 0) + 1;
+  // --- Stats Row ---
+  var totalVisitas = analytics.length;
+  var uniqueIPs = {};
+  var uniqueCountries = {};
+  var cookiesAccepted = 0;
+  analytics.forEach(function(a){
+    if (a.ip) uniqueIPs[a.ip] = true;
+    if (a.pais) uniqueCountries[a.pais] = true;
+    if (a.cookies === true || a.cookies === 'accepted' || a.cookies === 'si') cookiesAccepted++;
   });
-  var topCountry = Object.entries(countries).sort(function(a,b){ return b[1]-a[1]; })[0];
-  var topDevice = Object.entries(devices).sort(function(a,b){ return b[1]-a[1]; })[0];
 
   document.getElementById('analyticsStats').innerHTML =
-    '<div class="stat-card"><div class="stat-label">Total Visitas</div><div class="stat-value">' + totalVisits + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Paises Unicos</div><div class="stat-value">' + Object.keys(countries).length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Top Pais</div><div class="stat-value" style="font-size:1.4rem;">' + (topCountry ? esc(topCountry[0]) : '-') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Top Dispositivo</div><div class="stat-value" style="font-size:1.4rem;">' + (topDevice ? esc(topDevice[0]) : '-') + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Total Visitas</div><div class="stat-value" style="color:var(--success);">' + totalVisitas + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Visitantes &Uacute;nicos</div><div class="stat-value">' + Object.keys(uniqueIPs).length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Pa&iacute;ses &Uacute;nicos</div><div class="stat-value">' + Object.keys(uniqueCountries).length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Suscriptores</div><div class="stat-value" style="color:var(--success);">' + suscriptores.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Cookies Aceptadas</div><div class="stat-value">' + cookiesAccepted + '</div></div>';
 
-  var tbody = document.getElementById('analyticsBody');
-  var emptyEl = document.getElementById('analyticsEmpty');
-
-  if (!data.length) {
-    tbody.innerHTML = '';
-    emptyEl.style.display = '';
-    return;
-  }
-  emptyEl.style.display = 'none';
-
-  var html = '';
-  data.forEach(function(a){
-    html += '<tr>';
-    html += '<td>' + esc(a.tipo_evento || '-') + '</td>';
-    html += '<td>' + esc(a.pagina || '-') + '</td>';
-    html += '<td>' + esc(a.titulo_pagina || '-') + '</td>';
-    html += '<td>' + esc(a.pais || '-') + '</td>';
-    html += '<td>' + esc(a.ciudad || '-') + '</td>';
-    html += '<td>' + esc(a.dispositivo || '-') + '</td>';
-    html += '<td>' + esc(a.navegador || '-') + '</td>';
-    html += '<td>' + esc(a.pantalla || '-') + '</td>';
-    html += '<td>' + esc(a.idioma || '-') + '</td>';
-    html += '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(a.referrer || '') + '">' + esc(a.referrer || '-') + '</td>';
-    html += '<td style="white-space:nowrap;">' + formatDate(a.created_at) + '</td>';
-    html += '</tr>';
+  // --- Geo Table: group by pais + ciudad ---
+  var geoMap = {};
+  analytics.forEach(function(a){
+    var key = (a.pais || 'Desconocido') + '||' + (a.ciudad || 'Desconocido');
+    if (!geoMap[key]) {
+      geoMap[key] = { pais: a.pais || 'Desconocido', ciudad: a.ciudad || 'Desconocido', count: 0, lastVisit: a.created_at };
+    }
+    geoMap[key].count++;
+    if (a.created_at && a.created_at > geoMap[key].lastVisit) {
+      geoMap[key].lastVisit = a.created_at;
+    }
   });
-  tbody.innerHTML = html;
+  var geoArr = Object.values(geoMap).sort(function(a,b){ return b.count - a.count; });
+  var geoHtml = '';
+  geoArr.forEach(function(g){
+    geoHtml += '<tr>';
+    geoHtml += '<td>' + esc(g.pais) + '</td>';
+    geoHtml += '<td>' + esc(g.ciudad) + '</td>';
+    geoHtml += '<td style="color:var(--success);font-weight:500;">' + g.count + '</td>';
+    geoHtml += '<td style="white-space:nowrap;">' + formatDate(g.lastVisit) + '</td>';
+    geoHtml += '</tr>';
+  });
+  document.getElementById('analyticsGeoBody').innerHTML = geoHtml;
+
+  // --- Pages Table: group by pagina ---
+  var pageMap = {};
+  pageViews.forEach(function(p){
+    var pageName = p.pagina || 'Desconocido';
+    if (!pageMap[pageName]) {
+      pageMap[pageName] = { pagina: pageName, categoria: p.categoria || '-', count: 0 };
+    }
+    pageMap[pageName].count++;
+  });
+  var pageArr = Object.values(pageMap).sort(function(a,b){ return b.count - a.count; });
+  var pageHtml = '';
+  pageArr.forEach(function(p){
+    pageHtml += '<tr>';
+    pageHtml += '<td>' + esc(p.pagina) + '</td>';
+    pageHtml += '<td>' + esc(p.categoria) + '</td>';
+    pageHtml += '<td style="color:var(--success);font-weight:500;">' + p.count + '</td>';
+    pageHtml += '</tr>';
+  });
+  document.getElementById('analyticsViewsBody').innerHTML = pageHtml;
+
+  // --- Recent Visitors: last 50 from web_analytics ---
+  var recentHtml = '';
+  var recentData = analytics.slice(0, 50);
+  recentData.forEach(function(a){
+    var cookieStatus = (a.cookies === true || a.cookies === 'accepted' || a.cookies === 'si')
+      ? '<span style="color:var(--success);">Aceptadas</span>'
+      : '<span style="color:var(--text-muted);">No</span>';
+    recentHtml += '<tr>';
+    recentHtml += '<td style="white-space:nowrap;">' + formatDate(a.created_at) + '</td>';
+    recentHtml += '<td>' + esc(a.pagina || '-') + '</td>';
+    recentHtml += '<td>' + esc(a.ciudad || '-') + '</td>';
+    recentHtml += '<td>' + esc(a.pais || '-') + '</td>';
+    recentHtml += '<td>' + cookieStatus + '</td>';
+    recentHtml += '</tr>';
+  });
+  document.getElementById('analyticsRecentBody').innerHTML = recentHtml;
+
+  // --- Suscriptores del Club ---
+  var suscHtml = '';
+  suscriptores.forEach(function(s){
+    var descuento = s.descuento_usado ? '<span style="color:var(--success);">S&iacute;</span>' : '<span style="color:var(--text-muted);">No</span>';
+    suscHtml += '<tr>';
+    suscHtml += '<td>' + esc(s.email || '-') + '</td>';
+    suscHtml += '<td style="white-space:nowrap;">' + formatDate(s.created_at) + '</td>';
+    suscHtml += '<td>' + descuento + '</td>';
+    suscHtml += '</tr>';
+  });
+  document.getElementById('analyticsSuscBody').innerHTML = suscHtml;
 }
 
 // ================================================================

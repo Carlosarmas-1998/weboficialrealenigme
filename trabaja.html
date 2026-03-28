@@ -491,7 +491,7 @@
        SUPABASE SAVE (PARALLEL TO WEB3FORMS)
        ========================================= */
     const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 
     const appForm = document.querySelector('#application-modal form');
     if (appForm) {
@@ -594,5 +594,20 @@
 <script src="enigme-shared.js"></script>
 <script src="enigme-core.js"></script>
 <script src="abril-bot.js"></script>
+
+<script>
+(function(){
+  var SB='https://hajmyntnvurlcuwshjdd.supabase.co';
+  var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+  var pagina=location.pathname.split('/').pop()||'index.html';
+  var titulo=document.title;
+  fetch(SB+'/rest/v1/web_page_views',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({pagina:pagina,titulo:titulo,categoria:pagina.replace('.html','')})}).catch(function(){});
+  fetch('https://ip-api.com/json/?fields=status,country,regionName,city,query').then(function(r){return r.json()}).then(function(geo){
+    if(geo.status==='success'){
+      fetch(SB+'/rest/v1/web_analytics',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({pagina:pagina,ciudad:geo.city,pais:geo.country,region:geo.regionName,ip:geo.query,user_agent:navigator.userAgent,referrer:document.referrer||null,cookies_accepted:localStorage.getItem('enigme_cookies_accepted')==='true'})}).catch(function(){});
+    }
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>
