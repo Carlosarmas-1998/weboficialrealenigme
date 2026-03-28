@@ -888,9 +888,11 @@ async function loadPedidos() {
     var mon = String(p.moneda || '').toUpperCase();
     var sym = currencySymbol(mon);
     var total = parseFloat(p.total) || 0;
-    var estado = p.estado || 'enviado';
+    var estado = p.estado || 'Recibido';
     var isEntregado = estado === 'Entregado';
     var isCancelado = estado === 'Cancelado';
+    var estadoColors = {'Recibido':'#5a8fa0','Confirmado':'#CBAA63','En Preparación':'#b08fd0','Enviado':'#6b9e78','Entregado':'#CBAA63','Cancelado':'#9e6b6b'};
+    var estadoColor = estadoColors[estado] || '#CBAA63';
     var itemsStr = parseItems(p.items);
 
     html += '<tr>';
@@ -900,8 +902,8 @@ async function loadPedidos() {
     html += '<td><div style="font-size:.8rem;">' + esc(p.direccion_envio || '-') + '</div><div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">' + esc(p.departamento || '') + (p.ciudad ? ', ' + esc(p.ciudad) : '') + '</div></td>';
     html += '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(itemsStr) + '">' + esc(itemsStr) + '</td>';
     html += '<td style="white-space:nowrap;">' + sym + total.toFixed(2) + '</td>';
-    html += '<td><select class="btn-sm" onchange="changePedidoStatus(' + p.id + ', this.value, \'' + esc(estado) + '\')" ' + (isEntregado ? 'disabled' : '') + '>';
-    ['enviado','Pagado','Preparando','En Reparto','Entregado','Cancelado'].forEach(function(st){
+    html += '<td><select class="btn-sm" style="border-color:' + estadoColor + ';color:' + estadoColor + ';" onchange="changePedidoStatus(' + p.id + ', this.value, \'' + esc(estado) + '\')" ' + (isEntregado ? 'disabled' : '') + '>';
+    ['Recibido','Confirmado','En Preparación','Enviado','Entregado','Cancelado'].forEach(function(st){
       html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st + '</option>';
     });
     html += '</select></td>';
@@ -1001,6 +1003,83 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
     })();
 
     showToast('Estado actualizado: ' + newStatus);
+
+    // Step 4: Send status email to client
+    (function() {
+      try {
+        var pedido = cachedPedidos.find(function(p){ return p.id === id || p.id === parseInt(id); });
+        if (pedido && pedido.email_cliente) {
+          var codigo = pedido.codigo || 'PED-' + id;
+          var nombre = pedido.nombre_cliente || 'Cliente';
+          var statusCfg = {
+            'Recibido':        { color: '#5a8fa0', msg: 'Hemos recibido tu pedido y est\u00e1 siendo procesado por nuestro equipo.', icon: '\ud83d\udccb' },
+            'Confirmado':      { color: '#CBAA63', msg: 'Tu pedido ha sido confirmado y pronto comenzar\u00e1 su preparaci\u00f3n artesanal.', icon: '\u2713' },
+            'En Preparaci\u00f3n': { color: '#b08fd0', msg: 'Tu pedido est\u00e1 siendo preparado con el cuidado y la excelencia que mereces.', icon: '\u2728' },
+            'Enviado':         { color: '#6b9e78', msg: '\u00a1Tu pedido ha sido enviado! Pronto lo tendr\u00e1s en tus manos.', icon: '\ud83d\udce6' },
+            'Entregado':       { color: '#CBAA63', msg: '\u00a1Tu pedido ha sido entregado! Esperamos que disfrutes tu compra ENIGME.', icon: '\ud83c\udf89' },
+            'Cancelado':       { color: '#9e6b6b', msg: 'Tu pedido ha sido cancelado. Si tienes preguntas, cont\u00e1ctanos.', icon: '\u274c' }
+          };
+          var cfg = statusCfg[newStatus] || { color: '#CBAA63', msg: 'El estado de tu pedido ha sido actualizado a: ' + newStatus, icon: '\ud83d\udccb' };
+
+          var steps = ['Recibido','Confirmado','En Preparaci\u00f3n','Enviado','Entregado'];
+          var currentIdx = steps.indexOf(newStatus);
+          if (newStatus === 'Cancelado') currentIdx = -1;
+
+          var trackerHtml = steps.map(function(s, i) {
+            var isPast = i <= currentIdx;
+            var isActive = i === currentIdx;
+            var border = isPast ? '#CBAA63' : '#444';
+            var textColor = isPast ? '#CBAA63' : '#666';
+            var bgCircle = isActive ? 'rgba(203,170,99,0.25)' : (isPast ? 'rgba(203,170,99,0.1)' : 'transparent');
+            return '<td style="text-align:center;padding:6px 4px;"><div style="width:32px;height:32px;border-radius:50%;background:' + bgCircle + ';border:2px solid ' + border + ';margin:0 auto 6px;display:flex;align-items:center;justify-content:center;">' +
+              '<span style="font-size:11px;color:' + (isPast ? '#CBAA63' : '#555') + ';">' + (isPast ? '\u2713' : '\u25cb') + '</span></div>' +
+              '<span style="font-size:8px;letter-spacing:1px;color:' + textColor + ';text-transform:uppercase;">' + s + '</span></td>';
+          }).join('');
+
+          var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">' +
+            '<table width="100%" style="background:#0a0a0a;padding:40px 0;"><tr><td align="center">' +
+            '<table width="600" style="max-width:600px;width:100%;">' +
+            '<tr><td style="text-align:center;padding:40px 40px 20px;">' +
+            '<div style="width:50px;height:1px;background:#CBAA63;margin:0 auto 16px;"></div>' +
+            '<h1 style="font-family:Georgia,serif;font-size:28px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
+            '<p style="font-size:9px;letter-spacing:6px;color:#6b6259;margin:8px 0 0;text-transform:uppercase;">La Casa</p></td></tr>' +
+            '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div></td></tr>' +
+            '<tr><td style="padding:30px 40px 15px;text-align:center;">' +
+            '<h2 style="font-family:Georgia,serif;font-size:20px;font-weight:300;color:#CBAA63;letter-spacing:2px;margin:0 0 6px;">Actualizaci\u00f3n de Pedido</h2>' +
+            '<p style="font-size:11px;color:#6b6259;letter-spacing:2px;margin:0;">PEDIDO ' + esc(codigo) + '</p></td></tr>' +
+            '<tr><td style="padding:16px 20px;">' +
+            '<table width="100%" cellpadding="0" cellspacing="0"><tr>' + trackerHtml + '</tr></table></td></tr>' +
+            '<tr><td style="padding:16px 40px;text-align:center;">' +
+            '<div style="display:inline-block;padding:12px 28px;border:1px solid ' + cfg.color + ';color:' + cfg.color + ';font-size:13px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">' + newStatus + '</div></td></tr>' +
+            '<tr><td style="padding:20px 40px;text-align:center;">' +
+            '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(nombre) + '</strong>,</p>' +
+            '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0;">' + cfg.msg + '</p></td></tr>' +
+            '<tr><td style="padding:24px 40px;text-align:center;">' +
+            '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:14px 36px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Seguir Explorando</a></td></tr>' +
+            '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+            '<tr><td style="padding:20px 40px;text-align:center;">' +
+            '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">\u00bfPreguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+            '<p style="font-size:8px;color:#4a4540;letter-spacing:2px;margin:0;">\u00a9 2026 ENIGME \u00b7 TODOS LOS DERECHOS RESERVADOS</p></td></tr>' +
+            '</table></td></tr></table></body></html>';
+
+          fetch(SUPA_URL + '/functions/v1/send-email', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: [pedido.email_cliente],
+              subject: 'Pedido ' + codigo + ' \u2014 ' + newStatus + ' | ENIGME',
+              html: emailHtml
+            })
+          }).then(function(r) {
+            if (r.ok) { showToast('Email enviado a ' + pedido.email_cliente); console.log('Status email sent to', pedido.email_cliente); }
+            else console.warn('Status email failed:', r.status);
+          }).catch(function(e) { console.warn('Status email error:', e); });
+        }
+      } catch(emailErr) {
+        console.warn('Email send exception:', emailErr);
+      }
+    })();
+
     loadPedidos();
     loadNotificaciones();
   } catch(e) {
