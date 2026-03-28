@@ -66,7 +66,7 @@
     .manifesto-kicker{font-family:'Cinzel',serif;font-style:italic;font-size:0.85rem;color:var(--dorado);letter-spacing:0.15em;margin-bottom:20px;font-weight:400;}
     .manifesto-title{font-family:'Cinzel',serif;font-size:clamp(2.5rem,4.5vw,4.5rem);letter-spacing:0.08em;line-height:1.1;color:var(--carbon);margin-bottom:12px;text-transform:uppercase;font-weight:500;}
     .manifesto-line{width:60px;height:1px;background:var(--dorado);margin:24px 0;}
-    .manifesto-price{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--dorado);letter-spacing:0.1em;margin-bottom:30px;font-weight:400;}
+
 
     .manifesto-text{font-family:'Cormorant Garamond',serif;font-size:1.15rem;line-height:2.2;color:var(--carbon);margin-bottom:30px;font-weight:300;font-style:italic;max-width:500px;}
 
@@ -194,7 +194,6 @@
         <div class="manifesto-kicker fade-up" id="kickerText">La Casa ÈNIGME presenta</div>
         <h1 class="manifesto-title fade-up fade-up-delay1" id="productTitle">---</h1>
         <div class="manifesto-line fade-up fade-up-delay1"></div>
-        <div class="manifesto-price fade-up fade-up-delay2" id="productPrice">---</div>
         <p class="manifesto-text fade-up fade-up-delay2" id="manifestoText"></p>
         <div class="destila-section fade-up fade-up-delay3">
           <div class="destila-title">Con esta pieza destilas</div>
@@ -222,7 +221,6 @@
     var params = new URLSearchParams(window.location.search);
     var productRef = params.get('ref') || '---';
     var productName = decodeURIComponent(params.get('name') || '---');
-    var productPrice = decodeURIComponent(params.get('price') || 'L 0');
     var productImg = decodeURIComponent(params.get('img') || 'portada.png');
     var productLema = decodeURIComponent(params.get('lema') || '');
     var productCategory = params.get('cat') || 'joyeria';
@@ -233,36 +231,6 @@
     document.getElementById('refBadge').textContent = 'REF: ' + productRef;
     document.getElementById('heroImg').src = productImg;
     document.getElementById('productTitle').textContent = productName;
-    // Geolocation-based pricing
-    var TASA_CAMBIO = 31.50; // HNL to EUR
-    var priceNumRaw = parseInt(productPrice.replace(/[^0-9]/g, '')) || 0;
-
-    function renderPrice(country) {
-      var priceEl = document.getElementById('productPrice');
-      var europeanCountries = ['Spain','France','Germany','Italy','Portugal','Netherlands','Belgium','Austria','Ireland','Greece','Finland','Luxembourg'];
-
-      if (europeanCountries.indexOf(country) !== -1) {
-        var eur = (priceNumRaw / TASA_CAMBIO).toFixed(2);
-        // Psychological pricing
-        var eurNum = parseFloat(eur);
-        if (eurNum > 10) eur = (Math.ceil(eurNum) - 0.01).toFixed(2);
-        priceEl.innerHTML = '€' + eur + ' <span style="font-size:0.7rem;color:var(--gris-suave);font-family:Montserrat,sans-serif;font-weight:300;letter-spacing:0;">(' + productPrice + ')</span>';
-        // Update cart price for EUR
-        window.cartPriceDisplay = '€' + eur;
-        window.cartPriceNum = eur;
-        window.cartCurrency = 'EUR';
-      } else {
-        priceEl.textContent = productPrice;
-        window.cartPriceDisplay = productPrice;
-        window.cartCurrency = 'HNL';
-      }
-    }
-
-    // Try geolocation
-    fetch('https://ip-api.com/json/?fields=status,country').then(function(r){ return r.json(); }).then(function(geo){
-      if (geo.status === 'success') renderPrice(geo.country);
-      else renderPrice('Honduras');
-    }).catch(function(){ renderPrice('Honduras'); });
 
     // ======= MANIFESTO GENERATOR =======
     function generateManifesto(name, category, lema) {
@@ -344,13 +312,12 @@
 
     function addProductToCart() {
       var cart = JSON.parse(localStorage.getItem('enigme_cart')) || [];
-      var priceNum = productPrice.replace(/[^0-9]/g, '');
+      var rawPrice = decodeURIComponent(params.get('price') || 'L 0');
       var existing = cart.findIndex(function(i){ return i.ref === productRef; });
       if (existing !== -1) {
         cart[existing].qty = (cart[existing].qty || 1) + 1;
       } else {
-        var cartPrice = window.cartCurrency === 'EUR' ? '€' + window.cartPriceNum : 'L ' + priceNum;
-        cart.push({ ref: productRef, name: productName, price: cartPrice, img: productImg, qty: 1 });
+        cart.push({ ref: productRef, name: productName, price: rawPrice, img: productImg, qty: 1 });
       }
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       updateCounts();
