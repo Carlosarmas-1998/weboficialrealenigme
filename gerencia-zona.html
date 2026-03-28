@@ -290,6 +290,7 @@
           <label>Campa&ntilde;a de Ingreso *</label>
           <select id="nomCampana"><option value="">Seleccione...</option></select>
         </div>
+        <div class="form-group"><label>Fecha de Ingreso *</label><input id="nomFechaIngreso" type="date"/></div>
       </div>
 
       <div id="nomExisteAlert" style="display:none;background:rgba(192,57,43,0.08);border:1px solid var(--danger);border-radius:4px;padding:12px;margin-top:12px;">
@@ -433,6 +434,7 @@
       <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="mcDireccion" placeholder="Direcci&oacute;n"/></div>
       <div class="form-group"><label>RTN</label><input id="mcRtn" placeholder="RTN"/></div>
       <div class="form-group"><label>Fecha de Nacimiento</label><input id="mcFechaNac" type="date"/></div>
+      <div class="form-group"><label>Fecha de Ingreso</label><input id="mcFechaIngreso" type="date"/></div>
       <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="mcCuenta" placeholder="Cuenta bancaria"/></div>
       <div class="form-group"><label>Nombre del Banco</label><input id="mcBanco" placeholder="Ej: BAC, Ficohsa"/></div>
     </div>
@@ -665,7 +667,7 @@ function abrirAsignarCoord(sectorId, sectorNum) {
   document.getElementById('mcSectorId').value = sectorId;
   document.getElementById('mcSectorNum').value = sectorNum;
   document.getElementById('mcCoordId').value = '';
-  ['mcNombre','mcDni','mcTelefono','mcEmail','mcDireccion','mcRtn','mcFechaNac','mcCuenta','mcBanco'].forEach(function(id){ document.getElementById(id).value = ''; });
+  ['mcNombre','mcDni','mcTelefono','mcEmail','mcDireccion','mcRtn','mcFechaNac','mcFechaIngreso','mcCuenta','mcBanco'].forEach(function(id){ document.getElementById(id).value = ''; });
   document.getElementById('mcError').textContent = '';
   document.getElementById('mcSuccess').textContent = '';
   document.getElementById('modalCoord').classList.add('active');
@@ -685,6 +687,7 @@ function abrirEditarCoord(sectorId, sectorNum, coordId) {
   document.getElementById('mcDireccion').value = coord.direccion || '';
   document.getElementById('mcRtn').value = coord.rtn || '';
   document.getElementById('mcFechaNac').value = coord.fecha_nacimiento || '';
+  document.getElementById('mcFechaIngreso').value = coord.fecha_ingreso || '';
   document.getElementById('mcCuenta').value = coord.numero_cuenta || '';
   document.getElementById('mcBanco').value = coord.nombre_banco || '';
   document.getElementById('mcError').textContent = '';
@@ -721,6 +724,7 @@ async function guardarCoordinador() {
     direccion: direccion,
     rtn: document.getElementById('mcRtn').value.trim() || null,
     fecha_nacimiento: document.getElementById('mcFechaNac').value || null,
+    fecha_ingreso: document.getElementById('mcFechaIngreso').value || null,
     numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
     nombre_banco: document.getElementById('mcBanco').value.trim() || null
   };
@@ -756,7 +760,8 @@ async function guardarCoordinador() {
           email: email || null,
           sector_id: sectorId,
           gerente_id: session.id,
-          activo: true
+          activo: true,
+          fecha_ingreso: document.getElementById('mcFechaIngreso').value || null
         });
       } catch(ve) { console.warn('vendedora entry:', ve); }
 
@@ -1026,6 +1031,8 @@ async function guardarNombramiento() {
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
 
+    var fechaIngreso = document.getElementById('nomFechaIngreso').value || null;
+
     var vendedora = await apiPost('/rest/v1/vendedoras', {
       codigo: String(codigo),
       nombre: nombre,
@@ -1036,7 +1043,8 @@ async function guardarNombramiento() {
       sector_id: sectorId,
       gerente_id: session.id,
       activo: true,
-      campana_ingreso_id: parseInt(campanaId)
+      campana_ingreso_id: parseInt(campanaId),
+      fecha_ingreso: fechaIngreso
     });
 
     var vendedoraId = vendedora[0] ? vendedora[0].id : null;
@@ -1053,7 +1061,8 @@ async function guardarNombramiento() {
       telefono: telefono,
       direccion: direccion,
       email: email || null,
-      ano: new Date().getFullYear()
+      ano: new Date().getFullYear(),
+      fecha_ingreso: fechaIngreso
     });
 
     var files = document.getElementById('nomArchivos').files;

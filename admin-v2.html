@@ -334,7 +334,8 @@
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">N&uacute;mero de Cuenta</label><input id="gdCuenta" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Número de cuenta bancaria" /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre del Banco</label><input id="gdBanco" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Ej: BAC, Ficohsa..." /></div>
         <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Contrase&ntilde;a Temporal *</label><input id="gdPassword" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;letter-spacing:.05em;" placeholder="Mín. 6 caracteres" /></div>
-        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Departamento (se asigna completo)</label><select id="gdDepto" style="padding:8px;font-size:.85rem;"><option value="">Seleccione...</option></select></div>
+        <div><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Fecha de Ingreso *</label><input id="gdFechaIngreso" type="date" class="login-input" style="margin-bottom:0;text-align:left;font-size:.85rem;" /></div>
+        <div style="grid-column:1/-1;"><label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Departamentos a asignar * (seleccione los que desee)</label><div id="gdDeptosContainer" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;max-height:200px;overflow-y:auto;"></div></div>
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;">
         <button class="btn btn-gold" onclick="crearGerenciaDivisional()"><span>Guardar</span></button>
@@ -344,7 +345,7 @@
     </div>
 
     <div class="table-wrap"><table>
-      <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Email</th><th>Tel&eacute;fono</th><th>DNI</th><th>Depto.</th><th>Contrase&ntilde;a</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Email</th><th>Tel&eacute;fono</th><th>DNI</th><th>Departamentos</th><th>Ingreso</th><th>Contrase&ntilde;a</th><th>Estado</th><th>Acciones</th></tr></thead>
       <tbody id="gerenciaBody"></tbody>
     </table></div>
     <div class="empty-state" id="gerenciaEmpty" style="display:none;">No hay gerencias divisionales creadas</div>
@@ -1424,19 +1425,30 @@ function exportExcel(type) {
 
 // ========== GERENCIA DIVISIONAL ==========
 var cachedGerencias = [];
-var gdDeptosLoaded = false;
-
 async function loadGdDeptos() {
-  if (gdDeptosLoaded) return;
   var deptos = await supaGet('departamentos', '&order=nombre');
-  var sel = document.getElementById('gdDepto');
-  if (!sel) return;
-  deptos.forEach(function(d) {
-    var opt = document.createElement('option');
-    opt.value = d.id; opt.textContent = d.nombre;
-    sel.appendChild(opt);
+  // Get already assigned departamentos from existing gerencias
+  var gerencias = await supaGet('gerencias_divisionales', '&select=departamentos_ids');
+  var usedIds = [];
+  gerencias.forEach(function(g) {
+    if (g.departamentos_ids && Array.isArray(g.departamentos_ids)) {
+      g.departamentos_ids.forEach(function(id) { if (usedIds.indexOf(id) === -1) usedIds.push(id); });
+    }
   });
-  gdDeptosLoaded = true;
+  var container = document.getElementById('gdDeptosContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  deptos.forEach(function(d) {
+    var isUsed = usedIds.indexOf(d.id) !== -1;
+    var label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:5px;padding:4px 10px;font-size:.75rem;border-radius:4px;cursor:' + (isUsed ? 'not-allowed' : 'pointer') + ';background:' + (isUsed ? 'rgba(192,57,43,0.1)' : 'var(--surface)') + ';border:1px solid ' + (isUsed ? 'var(--danger)' : 'var(--border)') + ';opacity:' + (isUsed ? '0.5' : '1') + ';';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = d.id; cb.disabled = isUsed;
+    cb.style.accentColor = 'var(--gold)';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(d.nombre + (isUsed ? ' (asignado)' : '')));
+    container.appendChild(label);
+  });
 }
 
 // Municipios no longer needed - departamento is assigned as a whole
@@ -1472,7 +1484,8 @@ function renderGerencias() {
       '<td>' + (g.email || '-') + '</td>' +
       '<td>' + (g.telefono || '-') + '</td>' +
       '<td>' + (g.dni || '-') + '</td>' +
-      '<td>' + (g.departamento_id ? (deptosMap[g.departamento_id] || '-') : '-') + '</td>' +
+      '<td>' + (g.departamentos_ids && g.departamentos_ids.length ? g.departamentos_ids.map(function(id){ return deptosMap[id] || id; }).join(', ') : (g.departamento_id ? (deptosMap[g.departamento_id] || '-') : '-')) + '</td>' +
+      '<td style="font-size:.7rem;">' + (g.fecha_ingreso || g.created_at ? (g.fecha_ingreso || g.created_at.split('T')[0]) : '-') + '</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;"><input type="text" id="gdPw_' + g.id + '" value="' + esc(g.password_temporal || '') + '" style="width:120px;padding:4px 6px;font-size:.75rem;" onkeydown="if(event.key===\'Enter\')changeGdPassword(\'' + g.id + '\')"/><button class="btn btn-gold btn-sm" style="padding:3px 10px;font-size:.55rem;" onclick="changeGdPassword(\'' + g.id + '\')"><span>OK</span></button></div></td>' +
       '<td>' + estado + '</td>' +
       '<td><button class="btn" style="padding:4px 10px;font-size:.6rem;" onclick="toggleGerencia(\'' + g.id + '\',' + !g.activo + ')"><span>' + (g.activo ? 'Desactivar' : 'Activar') + '</span></button> <button class="btn btn-danger" style="padding:4px 10px;font-size:.6rem;" onclick="eliminarGerencia(\'' + g.id + '\')"><span>Eliminar</span></button></td>' +
@@ -1490,15 +1503,23 @@ async function crearGerenciaDivisional() {
   var cuenta = document.getElementById('gdCuenta').value.trim();
   var banco = document.getElementById('gdBanco').value.trim();
   var password = document.getElementById('gdPassword').value.trim();
-  var deptoId = document.getElementById('gdDepto').value;
+  var fechaIngreso = document.getElementById('gdFechaIngreso').value;
+  // Get selected departamentos from checkboxes
+  var deptosChecked = [];
+  var deptosContainer = document.getElementById('gdDeptosContainer');
+  if (deptosContainer) {
+    deptosContainer.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb) { deptosChecked.push(parseInt(cb.value)); });
+  }
   var errEl = document.getElementById('gdFormError');
   errEl.textContent = '';
 
   if (!nombre || !codigo || !password) { errEl.textContent = 'Nombre, código y contraseña son obligatorios.'; return; }
   if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  if (!deptosChecked.length) { errEl.textContent = 'Debe seleccionar al menos un departamento.'; return; }
+  if (!fechaIngreso) { errEl.textContent = 'Fecha de ingreso es obligatoria.'; return; }
 
   try {
-    var bodyData = { nombre: nombre, codigo: codigo, email: email || null, telefono: telefono || null, dni: dni || null, direccion: direccion || null, numero_cuenta: cuenta || null, nombre_banco: banco || null, password_temporal: password, activo: true, departamento_id: deptoId ? parseInt(deptoId) : null };
+    var bodyData = { nombre: nombre, codigo: codigo, email: email || null, telefono: telefono || null, dni: dni || null, direccion: direccion || null, numero_cuenta: cuenta || null, nombre_banco: banco || null, password_temporal: password, activo: true, departamento_id: deptosChecked[0], departamentos_ids: deptosChecked, fecha_ingreso: fechaIngreso };
     var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales', {
       method: 'POST',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
@@ -1512,17 +1533,17 @@ async function crearGerenciaDivisional() {
     showToast('Gerencia divisional creada exitosamente');
     // Send welcome email
     if (email) {
-      var deptoNombre = '';
-      var deptoSel = document.getElementById('gdDepto');
-      if (deptoSel.selectedIndex > 0) deptoNombre = deptoSel.options[deptoSel.selectedIndex].text;
+      var deptoNames = [];
+      if (deptosContainer) {
+        deptosContainer.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb) { deptoNames.push(cb.parentElement.textContent.trim()); });
+      }
       fetch(SUPA_URL + '/functions/v1/send-welcome-email', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo: 'gerencia_divisional', nombre: nombre, email: email, codigo: codigo, departamento: deptoNombre })
+        body: JSON.stringify({ tipo: 'gerencia_divisional', nombre: nombre, email: email, codigo: codigo, departamento: deptoNames.join(', ') })
       }).catch(function(){});
     }
     document.getElementById('gdFormWrap').style.display = 'none';
-    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword'].forEach(function(id){ document.getElementById(id).value = ''; });
-    document.getElementById('gdDepto').value = '';
+    ['gdNombre','gdCodigo','gdEmail','gdTelefono','gdDni','gdDireccion','gdCuenta','gdBanco','gdPassword','gdFechaIngreso'].forEach(function(id){ document.getElementById(id).value = ''; });
     loadGerenciasDivisionales();
   } catch(e) { errEl.textContent = 'Error de conexión.'; }
 }
@@ -1920,14 +1941,14 @@ async function loadGdMessages(gdId) {
 var chartComisionesPie = null, chartComisionesBar = null;
 
 var COMISION_ESTRUCTURA = [
-  { concepto: 'Producto / Coste', pct: 30, color: '#5a8fa0' },
-  { concepto: 'Comision Asesoras', pct: 15, color: '#b08fd0' },
-  { concepto: 'Logistica', pct: 8, color: '#9e6b6b' },
-  { concepto: 'Comision Gerencia Divisional', pct: 5, color: '#c9a96e' },
-  { concepto: 'Comision Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
+  { concepto: 'Precio de Inserci\u00f3n (Producto/Coste)', pct: 22, color: '#5a8fa0' },
+  { concepto: 'Comisi\u00f3n Asesoras', pct: 15, color: '#b08fd0' },
+  { concepto: 'Log\u00edstica', pct: 8, color: '#9e6b6b' },
+  { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5, color: '#c9a96e' },
+  { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
   { concepto: 'Gerencia General', pct: 5, color: '#8b7355' },
   { concepto: 'Marketing y Web', pct: 4, color: '#a08840' },
-  { concepto: 'Fondo Operativo (Salarios GZ L16k + Nombramientos)', pct: 20, color: '#d08050' },
+  { concepto: 'Gastos de Pagos (Salarios GZ + Nombramientos + Operativo)', pct: 28, color: '#d08050' },
   { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10, color: '#d0a84f' }
 ];
 
@@ -1963,9 +1984,9 @@ async function loadComisiones() {
   var baseGZ = totalGerentesZona * 16000;
   document.getElementById('comisionesStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Producto/Coste (30%)</div><div class="stat-value">L' + (totalNeta*0.30).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22%)</div><div class="stat-value">L' + (totalNeta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10%)</div><div class="stat-value" style="color:var(--success);">L' + (totalNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Fondo Operativo (20%)</div><div class="stat-value">L' + (totalNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28%)</div><div class="stat-value">L' + (totalNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Asesoras (15%)</div><div class="stat-value">L' + (totalNeta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. GD (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
@@ -2042,48 +2063,83 @@ async function loadComisiones() {
   var peContainer = document.getElementById('puntoEquilibrio');
   var peExpl = document.getElementById('peExplicacion');
   var sueldoGZ = 16000;
-  var pctFondo = 0.20; // Fondo Operativo 20%
+  var pctGastos = 0.28; // Gastos de Pagos 28%
   var pctEmpresa = 0.10; // Ganancia neta empresa 10%
-  var ventaNetaMinGZ = sueldoGZ / pctFondo; // 80,000
+  var ventaMinAsesora = 1999; // Venta mínima por asesora
+  var ventaNetaMinGZ = sueldoGZ / pctGastos;
   var ventaBrutaMinGZ = ventaNetaMinGZ / 0.85;
 
-  // With 10 nombramientos (<=19 → L220 c/u)
-  var nom10 = 10 * 220;
-  var ventaNeta10nom = (sueldoGZ + nom10) / pctFondo;
-  // With 19 nombramientos (<=19 → L220 c/u)
-  var nom19 = 19 * 220;
-  var ventaNeta19nom = (sueldoGZ + nom19) / pctFondo;
-  // With 20 nombramientos (>=20 → L320 c/u)
-  var nom20 = 20 * 320;
-  var ventaNeta20nom = (sueldoGZ + nom20) / pctFondo;
-  // With 30 nombramientos (>=20 → L320 c/u)
-  var nom30 = 30 * 320;
-  var ventaNeta30nom = (sueldoGZ + nom30) / pctFondo;
+  // Calculadora dinámica de nombramientos
+  function calcNombramientos() {
+    var inputNom = document.getElementById('peNomInput');
+    var nomCount = parseInt(inputNom ? inputNom.value : 0) || 0;
+    var pagoPerNom = nomCount >= 20 ? 320 : 220;
+    var costoNombramientos = nomCount * pagoPerNom;
+    var costoTotalGZ = sueldoGZ + costoNombramientos;
+    var ventaNetaMin = costoTotalGZ / pctGastos;
+    var ventaBrutaMin = ventaNetaMin / 0.85;
+    // Cada asesora vende mínimo L1,999. ¿Cuántas asesoras se necesitan?
+    var asesorasNecesarias = Math.ceil(ventaBrutaMin / ventaMinAsesora);
+    // Cuántos nombramientos mínimos para ser rentable (ingresos > costos)
+    var ingresosPorNom = ventaMinAsesora; // cada nombramiento = 1 asesora que vende L1,999
+    var gananciaNetoPerAsesora = ventaMinAsesora * 0.85; // venta neta por asesora
+    var fondoPerAsesora = gananciaNetoPerAsesora * pctGastos; // lo que queda del 28% per asesora
+    // nombramientos mínimos para cubrir salario GZ:  sueldoGZ / (fondoPerAsesora - pagoPerNom)
+    var margenPerNom19 = (ventaMinAsesora * 0.85 * pctGastos) - 220;
+    var margenPerNom20 = (ventaMinAsesora * 0.85 * pctGastos) - 320;
+    var nomMinRentable19 = margenPerNom19 > 0 ? Math.ceil(sueldoGZ / margenPerNom19) : 999;
+    var nomMinRentable20 = margenPerNom20 > 0 ? Math.ceil(sueldoGZ / margenPerNom20) : 999;
+
+    var detailEl = document.getElementById('peNomDetail');
+    if (detailEl) {
+      detailEl.innerHTML =
+        '<div class="stats-row" style="margin-top:12px;">' +
+        '<div class="stat-card"><div class="stat-label">Nombramientos</div><div class="stat-value">' + nomCount + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Pago/Nomb.</div><div class="stat-value">L' + pagoPerNom + (nomCount >= 20 ? ' (\u226520)' : ' (<20)') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Costo Nombramientos</div><div class="stat-value">L' + costoNombramientos.toLocaleString('es-HN') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Costo Total GZ</div><div class="stat-value" style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Neta Min.</div><div class="stat-value" style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Venta Bruta Min.</div><div class="stat-value">L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Asesoras Necesarias (L1,999 c/u)</div><div class="stat-value" style="color:var(--success);">' + asesorasNecesarias + '</div></div>' +
+        '</div>' +
+        '<div style="margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);font-size:.75rem;line-height:1.8;">' +
+        '<strong style="color:var(--gold);">Desglose:</strong><br>' +
+        'Salario base GZ: <strong>L' + sueldoGZ.toLocaleString('es-HN') + '</strong><br>' +
+        'Pago ' + nomCount + ' nombramientos x L' + pagoPerNom + ' = <strong>L' + costoNombramientos.toLocaleString('es-HN') + '</strong><br>' +
+        'Total a cubrir del 28%: <strong style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</strong><br>' +
+        'Venta neta requerida: L' + costoTotalGZ.toLocaleString('es-HN') + ' / 0.28 = <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</strong><br>' +
+        'Venta bruta requerida: L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + ' / 0.85 = <strong>L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</strong><br>' +
+        'Si cada asesora vende m\u00ednimo <strong>L1,999</strong> brutos \u2192 se necesitan <strong style="color:var(--success);">' + asesorasNecesarias + ' asesoras activas</strong> vendiendo.' +
+        '</div>';
+    }
+  }
 
   peContainer.innerHTML =
     '<div class="stat-card"><div class="stat-label">Sueldo Bruto G. Zona</div><div class="stat-value" style="font-size:1.5rem;">L' + sueldoGZ.toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Fondo Operativo</div><div class="stat-value" style="font-size:1.5rem;">20%</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos</div><div class="stat-value" style="font-size:1.5rem;">28%</div></div>' +
     '<div class="stat-card"><div class="stat-label">Empresa Ganancia</div><div class="stat-value" style="font-size:1.5rem;color:var(--success);">10%</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Neta Min / GZ (solo salario)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Bruta Min / GZ</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 10 nomb. (L220 c/u)</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 19 nomb. (L220 c/u)</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta19nom).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 20 nomb. (L320 c/u)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 30 nomb. (L320 c/u)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNeta30nom).toLocaleString('es-HN') + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Venta Min. por Asesora</div><div class="stat-value" style="font-size:1.3rem;">L' + ventaMinAsesora.toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Nomb. min rentable (<20=L220)</div><div class="stat-value" style="font-size:1.3rem;color:var(--success);">' + nomMinRentable19 + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Nomb. min rentable (\u226520=L320)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">' + nomMinRentable20 + '</div></div>';
 
-  peExpl.innerHTML = '<strong style="color:var(--gold);">MODELO FINANCIERO ÈNIGME:</strong><br><br>' +
-    '30% producto + 15% asesoras + 8% logística + 5% divisional + 3% zona + 5% gerencia general + 4% marketing = <strong>70% costos variables</strong><br>' +
-    '<strong style="color:var(--success);">10% Empresa (INTOCABLE)</strong> = ganancia neta pura, no se toca para nada.<br>' +
-    '<strong>20% Fondo Operativo</strong> = cubre salarios GZ (L16,000 brutos fijos) + pago nombramientos + gastos operativos.<br><br>' +
+  // Calculadora de nombramientos
+  peExpl.innerHTML = '<strong style="color:var(--gold);">MODELO FINANCIERO \u00c8NIGME:</strong><br><br>' +
+    '22% inserci\u00f3n + 15% asesoras + 8% log\u00edstica + 5% divisional + 3% zona + 5% gerencia general + 4% marketing = <strong>62% costos variables</strong><br>' +
+    '<strong style="color:var(--success);">10% Empresa (INTOCABLE)</strong> = ganancia neta pura, no se toca.<br>' +
+    '<strong>28% Gastos de Pagos</strong> = salarios GZ (L16,000 brutos) + nombramientos + operativo.<br><br>' +
     '<strong style="color:var(--gold);">PAGO POR NOMBRAMIENTO:</strong><br>' +
-    '&bull; Si el GZ tiene <strong>19 o menos</strong> nombramientos en la campaña → <strong>L220</strong> por nombramiento.<br>' +
-    '&bull; Si el GZ tiene <strong>20 o más</strong> nombramientos en la campaña → <strong>L320</strong> por nombramiento.<br><br>' +
-    '<strong style="color:var(--warn);">Punto de equilibrio:</strong> Cada zona debe vender mínimo <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + ' en venta neta</strong> (L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + ' bruta) solo para cubrir el salario del GZ.<br>' +
-    'Con 10 nombramientos (L220): <strong>L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
-    'Con 19 nombramientos (L220): <strong>L' + Math.ceil(ventaNeta19nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
-    'Con 20 nombramientos (L320): <strong>L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
-    'Con 30 nombramientos (L320): <strong>L' + Math.ceil(ventaNeta30nom).toLocaleString('es-HN') + '</strong> neta mínima.<br><br>' +
-    'Toda venta por encima del punto de equilibrio genera <strong style="color:var(--success);">ganancia extra al fondo operativo</strong> (para bonos, expansión, etc). El 10% de la empresa SIEMPRE se genera desde la primera venta.';
+    '&bull; \u226419 nombramientos \u2192 <strong>L220</strong> c/u &bull; \u226520 nombramientos \u2192 <strong>L320</strong> c/u<br><br>' +
+    '<strong style="color:var(--gold);">VENTA M\u00cdNIMA POR ASESORA: L1,999</strong><br><br>' +
+    '<div style="background:var(--surface2);border:1px solid var(--gold);padding:16px;border-radius:4px;margin:12px 0;">' +
+    '<strong style="color:var(--gold);">CALCULADORA DE RENTABILIDAD POR ZONA</strong><br><br>' +
+    '<label style="font-size:.75rem;color:var(--text-muted);">\u00bfCu\u00e1ntos nombramientos espera dar en la zona?</label><br>' +
+    '<input type="number" id="peNomInput" min="0" max="100" value="10" style="padding:8px 12px;font-size:1rem;width:100px;margin:8px 0;border:1px solid var(--border);" oninput="calcNombramientos()"/>' +
+    '<div id="peNomDetail"></div></div>';
+
+  // Auto-calculate on load
+  setTimeout(calcNombramientos, 100);
 
   // Pie chart
   if (chartComisionesPie) chartComisionesPie.destroy();
@@ -2131,29 +2187,29 @@ function calcularInversion() {
     return;
   }
 
-  // Inversion = 30% (producto/coste), so venta neta = inversion / 0.30
-  var ventaNeta = inversion / 0.30;
+  // Inversion = 22% (precio de inserción), so venta neta = inversion / 0.22
+  var ventaNeta = inversion / 0.22;
   ventaNetaLabel.innerHTML = 'Venta Neta calculada: <strong>L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong>';
   resultWrap.style.display = 'block';
 
   var breakdown = [
-    { concepto: 'Producto / Coste (inversi\u00f3n)', pct: 30 },
+    { concepto: 'Precio de Inserción (inversi\u00f3n)', pct: 22 },
     { concepto: 'Comisi\u00f3n Asesoras', pct: 15 },
     { concepto: 'Log\u00edstica', pct: 8 },
     { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5 },
     { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3 },
     { concepto: 'Gerencia General', pct: 5 },
     { concepto: 'Marketing y Web', pct: 4 },
-    { concepto: 'Fondo Operativo (Salarios GZ + Nombramientos)', pct: 20 },
+    { concepto: 'Gastos de Pagos (Salarios GZ + Nombramientos + Operativo)', pct: 28 },
     { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10 }
   ];
 
   // Stats
   document.getElementById('inversionStats').innerHTML =
-    '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (30%)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (22%)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Ganancia Empresa (10%)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Fondo Operativo (20%)</div><div class="stat-value">L' + (ventaNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28%)</div><div class="stat-value">L' + (ventaNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
   // Table
   var html = '';
