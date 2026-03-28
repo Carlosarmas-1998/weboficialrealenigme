@@ -2064,7 +2064,7 @@ async function loadComisiones() {
   var peExpl = document.getElementById('peExplicacion');
 
   // Modelo financiero ENIGME
-  var MODELO = {
+  window.MODELO = {
     insercion: 0.22,
     asesoras: 0.15,
     logistica: 0.08,
@@ -2075,12 +2075,12 @@ async function loadComisiones() {
     gastosPagos: 0.28,
     empresa: 0.10
   };
-  var SUELDO_GZ = 16000;
-  var PEDIDO_MIN = 2499;
+  window.SUELDO_GZ = 16000;
+  window.PEDIDO_MIN = 2499;
 
-  function L(n) { return 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  window.L = function(n) { return 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); };
 
-  function simular() {
+  window.simular = function() {
     var numAsesoras = parseInt(document.getElementById('simAsesoras').value) || 0;
     var ventaPromedio = parseFloat(document.getElementById('simVentaPromedio').value) || 0;
     var numGZ = parseInt(document.getElementById('simNumGZ').value) || 1;
@@ -2179,7 +2179,7 @@ async function loadComisiones() {
     }
 
     out.innerHTML = html;
-  }
+  };
 
   // Render calculadora
   peContainer.innerHTML = '';
@@ -2209,7 +2209,7 @@ async function loadComisiones() {
     '<div id="simResultado"></div>' +
     '</div>';
 
-  setTimeout(simular, 100);
+  setTimeout(window.simular, 100);
 
   // Pie chart
   if (chartComisionesPie) chartComisionesPie.destroy();
