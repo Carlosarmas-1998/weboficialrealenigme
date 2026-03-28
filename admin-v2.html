@@ -373,6 +373,14 @@
     </table></div>
     <div class="empty-state" id="gerenciaEmpty" style="display:none;">No hay gerencias divisionales creadas</div>
     <div id="rentabilidadMsgs" style="margin-top:20px;"></div>
+
+    <!-- PEDIDOS POR GERENTE DE ZONA -->
+    <div style="margin-top:32px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:8px;">Pedidos por <em style="color:var(--gold);font-style:italic;">Gerente de Zona</em></h3>
+      <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:16px;letter-spacing:.06em;">Pedidos subidos por cada Gerente de Zona, agrupados por Gerencia Divisional</p>
+      <button class="btn btn-gold btn-sm" onclick="loadPedidosPorGZ()" style="margin-bottom:16px;"><span>Cargar Pedidos por GZ</span></button>
+      <div id="pedidosGZContainer"></div>
+    </div>
   </div>
 
   <!-- TAB: VENTAS CORPORATIVAS -->
@@ -1967,6 +1975,116 @@ async function changeGdPassword(id) {
   }
 }
 
+// ========== PEDIDOS POR GERENTE DE ZONA (en tab Gerencia Divisional) ==========
+async function loadPedidosPorGZ() {
+  var container = document.getElementById('pedidosGZContainer');
+  container.innerHTML = '<p style="color:var(--text-muted);font-size:.75rem;">Cargando pedidos...</p>';
+
+  try {
+    // Load all gerentes de zona with their gerencia divisional
+    var gzRes = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?select=id,codigo,nombre,gerencia_divisional_id,activo&order=codigo', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var allGZ = await gzRes.json();
+
+    // Load all pedidos with gerente info
+    var pedRes = await fetch(SUPA_URL + '/rest/v1/pedidos?select=id,codigo_pedido,subtotal_catalogo,total_venta_neta,total_con_iva,gerente_id,created_at,observaciones&order=created_at.desc', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var allPedidos = await pedRes.json();
+
+    // Group pedidos by gerente_id
+    var pedidosByGZ = {};
+    allPedidos.forEach(function(p) {
+      if (!p.gerente_id) return;
+      if (!pedidosByGZ[p.gerente_id]) pedidosByGZ[p.gerente_id] = [];
+      pedidosByGZ[p.gerente_id].push(p);
+    });
+
+    // Group GZ by gerencia divisional
+    var gzByGD = {};
+    allGZ.forEach(function(gz) {
+      var gdId = gz.gerencia_divisional_id || 'sin_asignar';
+      if (!gzByGD[gdId]) gzByGD[gdId] = [];
+      gzByGD[gdId].push(gz);
+    });
+
+    var html = '';
+
+    // Iterate over each gerencia divisional
+    cachedGerencias.forEach(function(gd) {
+      var gzList = gzByGD[gd.id] || [];
+      var gdTotalBruta = 0;
+      var gdTotalPedidos = 0;
+
+      var gzHtml = '';
+      gzList.forEach(function(gz) {
+        var pedidos = pedidosByGZ[gz.id] || [];
+        var gzBruta = 0;
+        var gzNeta = 0;
+        pedidos.forEach(function(p) {
+          gzBruta += parseFloat(p.subtotal_catalogo || p.total_con_iva || 0);
+          gzNeta += parseFloat(p.total_venta_neta || 0);
+        });
+        gdTotalBruta += gzBruta;
+        gdTotalPedidos += pedidos.length;
+
+        var statusBadge = gz.activo !== false
+          ? '<span style="color:var(--success);font-size:.65rem;">● Activo</span>'
+          : '<span style="color:var(--danger);font-size:.65rem;">● Baja</span>';
+
+        gzHtml += '<div style="background:var(--surface2);border:1px solid var(--border);padding:16px;margin-bottom:8px;">';
+        gzHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+        gzHtml += '<div><span style="color:var(--gold);font-weight:500;font-size:.85rem;">' + esc(gz.codigo || '-') + '</span> &mdash; ' + esc(gz.nombre || '-') + ' ' + statusBadge + '</div>';
+        gzHtml += '<div style="font-size:.75rem;color:var(--text-muted);">' + pedidos.length + ' pedido' + (pedidos.length !== 1 ? 's' : '') + ' &middot; Bruta: <strong style="color:var(--gold);">L' + gzBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong></div>';
+        gzHtml += '</div>';
+
+        if (pedidos.length > 0) {
+          gzHtml += '<table style="width:100%;font-size:.75rem;"><thead><tr>';
+          gzHtml += '<th style="padding:6px 8px;font-size:.6rem;">Código</th><th style="padding:6px 8px;font-size:.6rem;">Subtotal</th><th style="padding:6px 8px;font-size:.6rem;">Venta Neta</th><th style="padding:6px 8px;font-size:.6rem;">Fecha</th><th style="padding:6px 8px;font-size:.6rem;">Observaciones</th>';
+          gzHtml += '</tr></thead><tbody>';
+          pedidos.forEach(function(p) {
+            gzHtml += '<tr>';
+            gzHtml += '<td style="padding:5px 8px;font-size:.72rem;">' + esc(p.codigo_pedido || '-') + '</td>';
+            gzHtml += '<td style="padding:5px 8px;font-size:.72rem;">L' + parseFloat(p.subtotal_catalogo || 0).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
+            gzHtml += '<td style="padding:5px 8px;font-size:.72rem;color:var(--gold);">L' + parseFloat(p.total_venta_neta || 0).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
+            gzHtml += '<td style="padding:5px 8px;font-size:.72rem;">' + (p.created_at ? p.created_at.split('T')[0] : '-') + '</td>';
+            gzHtml += '<td style="padding:5px 8px;font-size:.72rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(p.observaciones || '-') + '</td>';
+            gzHtml += '</tr>';
+          });
+          gzHtml += '</tbody></table>';
+        } else {
+          gzHtml += '<p style="font-size:.7rem;color:var(--text-muted);font-style:italic;">Sin pedidos registrados</p>';
+        }
+        gzHtml += '</div>';
+      });
+
+      // GD Card
+      html += '<div style="background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:20px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">';
+      html += '<div><span style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem;font-weight:300;color:var(--gold);">' + esc(gd.codigo || '-') + '</span> <span style="font-size:.9rem;color:var(--text);">' + esc(gd.nombre || '-') + '</span></div>';
+      html += '<div style="text-align:right;font-size:.75rem;">';
+      html += '<div style="color:var(--text-muted);">' + gzList.length + ' Gerente' + (gzList.length !== 1 ? 's' : '') + ' de Zona &middot; ' + gdTotalPedidos + ' pedidos</div>';
+      html += '<div style="color:var(--gold);font-weight:500;margin-top:2px;">Venta Bruta Total: L' + gdTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div>';
+      html += '</div></div>';
+
+      if (gzList.length > 0) {
+        html += gzHtml;
+      } else {
+        html += '<p style="font-size:.75rem;color:var(--text-muted);font-style:italic;">No tiene Gerentes de Zona asignados</p>';
+      }
+      html += '</div>';
+    });
+
+    if (!html) html = '<p style="font-size:.75rem;color:var(--text-muted);">No hay gerencias divisionales para mostrar.</p>';
+    container.innerHTML = html;
+
+  } catch(e) {
+    console.error('loadPedidosPorGZ error:', e);
+    container.innerHTML = '<p style="color:var(--danger);font-size:.75rem;">Error al cargar pedidos: ' + e.message + '</p>';
+  }
+}
+
 async function toggleGerencia(id, nuevoEstado) {
   try {
     await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
@@ -2429,7 +2547,7 @@ var origSwitchTab = switchTab;
 switchTab = function(tab) {
   origSwitchTab(tab);
   if (tab === 'postulaciones') loadPostulaciones();
-  if (tab === 'gerencia') loadGerenciasDivisionales();
+  if (tab === 'gerencia') { loadGerenciasDivisionales(); loadPedidosPorGZ(); }
   if (tab === 'ventas_corp') loadVentasCorp();
   if (tab === 'comisiones') loadComisiones();
   if (tab === 'msg_admin') loadMsgAdmin();
