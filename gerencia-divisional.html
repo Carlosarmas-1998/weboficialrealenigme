@@ -236,7 +236,7 @@
       <div class="card comision-highlight" style="margin-bottom:20px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;">
           <div style="text-align:center;">
-            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Comisi&oacute;n Divisional (4% Venta Neta)</div>
+            <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Comisi&oacute;n Divisional (5% Venta Neta)</div>
             <div class="stat-value" id="dashComDiv">L 0.00</div>
           </div>
           <div style="text-align:center;">
@@ -333,7 +333,7 @@
     <div class="card comision-highlight" style="margin-bottom:20px;">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;text-align:center;">
         <div>
-          <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Tu Comisi&oacute;n Divisional (4%)</div>
+          <div style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,249,246,0.6);margin-bottom:6px;">Tu Comisi&oacute;n Divisional (5%)</div>
           <div class="stat-value" id="comDivTotal">L 0.00</div>
         </div>
         <div>
@@ -889,7 +889,7 @@ async function loadDashboard() {
     '<div class="stat-card"><div class="stat-value">' + fmtL(totalNeta) + '</div><div class="stat-label">Venta Neta</div></div>';
 
   // Payments section
-  var comisionDiv = totalNeta * 0.04;
+  var comisionDiv = totalNeta * 0.05;
   var totalNomina = comisionDiv;
   var rows = '';
   var gLabels = [], gVentas = [];
@@ -1211,7 +1211,7 @@ async function loadComisiones() {
     if (gs[n.gerente_id]) gs[n.gerente_id].nombramientos++;
   });
 
-  var comDiv = totalNetaDiv * 0.04;
+  var comDiv = totalNetaDiv * 0.05;
   var totalNominaGZ = 0;
   var rows = '';
   var chartLabels = [], chartPagos = [];
@@ -1239,7 +1239,7 @@ async function loadComisiones() {
   chartComDist = new Chart(document.getElementById('chartComDist'), {
     type: 'doughnut',
     data: {
-      labels: ['Comisi\u00f3n Divisional (4%)', 'N\u00f3mina Gerentes Zona'],
+      labels: ['Comisi\u00f3n Divisional (5%)', 'N\u00f3mina Gerentes Zona'],
       datasets: [{ data: [comDiv, totalNominaGZ], backgroundColor: ['#CBAA63','#1C1C1C'], borderWidth: 0 }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
