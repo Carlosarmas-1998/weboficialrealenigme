@@ -205,6 +205,45 @@
 
     .summary-total { display: flex; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--carbon); font-size: 1.2rem; font-weight: 700; color: var(--carbon); }
 
+    /* ── CLUB ENIGME SUBSCRIBER DISCOUNT ── */
+    .subscriber-discount-banner {
+      background: linear-gradient(135deg, #1C1C1C 0%, #2a2a2a 100%);
+      border: 1px solid var(--dorado);
+      border-left: 4px solid var(--dorado);
+      padding: 18px 22px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-radius: 2px;
+      box-shadow: 0 4px 20px rgba(203, 170, 99, 0.15);
+      animation: subscriberGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes subscriberGlow {
+      0% { box-shadow: 0 4px 20px rgba(203, 170, 99, 0.15); }
+      100% { box-shadow: 0 4px 30px rgba(203, 170, 99, 0.3); }
+    }
+    .subscriber-discount-banner svg {
+      width: 22px; height: 22px; fill: var(--dorado); flex-shrink: 0;
+    }
+    .subscriber-discount-banner .sdb-text {
+      font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--dorado); font-weight: 600; line-height: 1.8;
+    }
+    .subscriber-discount-banner .sdb-text span {
+      display: block; font-size: 0.55rem; color: #ccc; font-weight: 400;
+      letter-spacing: 1px; margin-top: 2px;
+    }
+    .discount-line {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; font-size: 0.85rem; color: var(--dorado); font-weight: 600;
+    }
+    .discount-line .dl-label { font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; }
+    .original-price-struck {
+      text-decoration: line-through; color: var(--gris-suave); font-weight: 400; font-size: 0.95rem; margin-right: 10px;
+    }
+    .discounted-total { color: var(--dorado); font-size: 1.3rem; font-weight: 700; }
+
     .stripe-notice { background-color: rgba(203, 170, 99, 0.1); border-left: 3px solid var(--dorado); padding: 15px; margin-top: 25px; font-size: 0.65rem; line-height: 1.6; color: var(--carbon); text-align: justify; }
     .stripe-notice strong { color: var(--dorado); }
 
@@ -601,6 +640,13 @@
 
   <main class="cart-container" id="main-cart-container">
     <div class="cart-items">
+      <div id="subscriber-discount-banner" class="subscriber-discount-banner" style="display:none;">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <div class="sdb-text">
+          Club ENIGME: 10% de descuento aplicado en su primera compra
+          <span>Beneficio exclusivo para suscriptores</span>
+        </div>
+      </div>
       <div id="promo-banner" class="promo-banner"></div>
       <div id="cart-items-container"></div>
     </div>
@@ -683,6 +729,20 @@
       <div class="summary-total">
         <span>Total de Inversión</span>
         <span id="summary-total">L 0</span>
+      </div>
+
+      <div id="subscriber-discount-summary" style="display:none;">
+        <div class="discount-line">
+          <span class="dl-label">Descuento Club ENIGME (10%)</span>
+          <span id="discount-amount">- L 0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 4px;border-top:1px solid var(--dorado);">
+          <span style="font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--carbon);">Total Final</span>
+          <span>
+            <span class="original-price-struck" id="original-price-display"></span>
+            <span class="discounted-total" id="discounted-total-display"></span>
+          </span>
+        </div>
       </div>
 
       <div class="stripe-notice" id="stripe-notice-block">
@@ -925,6 +985,44 @@
 
     // Stripe Checkout via Supabase Edge Function (secure, fixed prices)
     const STRIPE_CHECKOUT_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co/functions/v1/stripe-checkout';
+
+    // ═══════════════════════════════════════════════════════
+    // CLUB ENIGME — SUBSCRIBER 10% DISCOUNT
+    // ═══════════════════════════════════════════════════════
+    let subscriberDiscountActive = false;
+    let subscriberEmail = null;
+
+    async function checkSubscriberDiscount() {
+      subscriberDiscountActive = false;
+      subscriberEmail = localStorage.getItem('enigme_subscriber_email');
+      if (!subscriberEmail) return;
+
+      try {
+        const res = await supaFetch('/suscriptores?email=eq.' + encodeURIComponent(subscriberEmail) + '&descuento_usado=eq.false&select=id,email,descuento_usado', {
+          method: 'GET'
+        });
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          subscriberDiscountActive = true;
+        }
+      } catch (e) {
+        console.warn('Club ENIGME: No se pudo verificar suscripción', e);
+      }
+      renderCart();
+    }
+
+    async function markSubscriberDiscountUsed() {
+      if (!subscriberEmail) return;
+      try {
+        await supaFetch('/suscriptores?email=eq.' + encodeURIComponent(subscriberEmail), {
+          method: 'PATCH',
+          body: JSON.stringify({ descuento_usado: true })
+        });
+        subscriberDiscountActive = false;
+      } catch (e) {
+        console.warn('Club ENIGME: No se pudo marcar descuento como usado', e);
+      }
+    }
 
     function supaFetch(path, opts = {}) {
       return fetch(SUPABASE_URL + '/rest/v1' + path, {
@@ -1178,6 +1276,8 @@
       renderCart();
       updateCounts();
       syncCartAnalytics();
+      // Check subscriber discount (async, will re-render if discount found)
+      checkSubscriberDiscount();
     }
 
     function calculateCartRules() {
@@ -1231,6 +1331,7 @@
         mainContainer.classList.add('cart-empty');
         panelCheckout.style.display = 'none';
         promoBanner.style.display = 'none';
+        document.getElementById('subscriber-discount-banner').style.display = 'none';
 
         let titleText = justOrdered ? "Solicitud Recibida" : "Bolsa Vacía";
         let descText = justOrdered ? "Su información ha sido procesada con éxito." : "Explore el catálogo para descubrir nuestras colecciones de Alta Costura.";
@@ -1306,8 +1407,29 @@
         const monedaCart = getCartCurrency();
         const totalDisplay = getCartPriceDisplay(total);
         document.getElementById('summary-total').innerText = totalDisplay;
-        // Stripe notice shows SAME amount as total
-        document.getElementById('stripe-amount-notice').innerText = totalDisplay;
+
+        // ── CLUB ENIGME SUBSCRIBER 10% DISCOUNT ──
+        const discountBanner = document.getElementById('subscriber-discount-banner');
+        const discountSummary = document.getElementById('subscriber-discount-summary');
+        if (subscriberDiscountActive && total > 0) {
+          const discountAmount = Math.round(total * 0.10);
+          const discountedTotal = total - discountAmount;
+          currentTotalGlobal = discountedTotal;
+
+          discountBanner.style.display = 'flex';
+          discountSummary.style.display = 'block';
+          document.getElementById('discount-amount').innerText = '- ' + getCartPriceDisplay(discountAmount);
+          document.getElementById('original-price-display').innerText = totalDisplay;
+          document.getElementById('discounted-total-display').innerText = getCartPriceDisplay(discountedTotal);
+
+          // Stripe notice shows discounted amount
+          document.getElementById('stripe-amount-notice').innerText = getCartPriceDisplay(discountedTotal);
+        } else {
+          discountBanner.style.display = 'none';
+          discountSummary.style.display = 'none';
+          // Stripe notice shows SAME amount as total
+          document.getElementById('stripe-amount-notice').innerText = totalDisplay;
+        }
         updateCurrencyHint();
       }
     }
@@ -1365,6 +1487,14 @@
           details += `${item.qty}x [${item.ref}] ${item.name} - L ${subtotal}\n`;
         }
       });
+
+      // Apply Club ENIGME subscriber 10% discount
+      if (subscriberDiscountActive && totalGlobal > 0) {
+        const discountAmount = Math.round(totalGlobal * 0.10);
+        details += `\nDESCUENTO CLUB ENIGME (10%): -L ${discountAmount}\n`;
+        totalGlobal = totalGlobal - discountAmount;
+      }
+
       return {totalGlobal, details};
     }
 
@@ -1395,6 +1525,9 @@
       const orderItems = cart.map(item => ({
         name: item.name, ref: item.ref, qty: item.qty, price: parseInt(item.price.replace(/\D/g, ''))
       }));
+
+      // Mark subscriber discount as used if active
+      if (subscriberDiscountActive) await markSubscriberDiscountUsed();
 
       guardarEnHistorial(data, order, 'whatsapp');
       await guardarPedidoEnSupabase(data, order, orderId, 'WhatsApp');
@@ -1483,6 +1616,13 @@
           name: item.name, ref: item.ref, qty: item.qty, price: parseInt(item.price.replace(/\D/g, ''))
         }));
 
+        // Apply Club ENIGME subscriber discount to Stripe items
+        if (subscriberDiscountActive) {
+          stripeItems.forEach(item => {
+            item.price = Math.round(item.price * 0.90 * 100) / 100;
+          });
+        }
+
         // 1. Create Stripe Checkout Session via Edge Function (SECURE - prices set server-side)
         const checkoutRes = await fetch(STRIPE_CHECKOUT_URL, {
           method: 'POST',
@@ -1506,6 +1646,9 @@
         if (!checkoutData.url) {
           throw new Error('No se pudo crear la sesión de pago');
         }
+
+        // Mark subscriber discount as used if active
+        if (subscriberDiscountActive) await markSubscriberDiscountUsed();
 
         // 2. Save to Supabase
         await guardarPedidoEnSupabase(data, order, orderId, 'Stripe');

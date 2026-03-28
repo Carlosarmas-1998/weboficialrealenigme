@@ -491,22 +491,25 @@
        SUPABASE SAVE (PARALLEL TO WEB3FORMS)
        ========================================= */
     const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
 
     const appForm = document.querySelector('#application-modal form');
     if (appForm) {
       appForm.addEventListener('submit', function(e) {
         // Save to Supabase in parallel (don't block web3forms submission)
+        const applicantName = document.getElementById('nombre').value;
+        const applicantEmail = document.getElementById('correo').value;
         const data = {
           puesto: document.getElementById('puesto').value,
-          nombre_completo: document.getElementById('nombre').value,
+          nombre_completo: applicantName,
           dni: document.getElementById('dni').value,
           fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
           telefono: document.getElementById('telefono').value,
-          email: document.getElementById('correo').value,
+          email: applicantEmail,
           departamento: document.getElementById('departamento').value,
           municipio: document.getElementById('municipio').value,
-          carta_motivacion: document.getElementById('mensaje').value
+          carta_motivacion: document.getElementById('mensaje').value,
+          estado: 'Pendiente'
         };
 
         fetch(SUPABASE_URL + '/rest/v1/web_postulaciones', {
@@ -518,6 +521,67 @@
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(data)
+        }).then(function(res) {
+          if (res.ok && applicantEmail) {
+            // Send elegant auto-response email via Resend
+            var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">' +
+              '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 0;">' +
+              '<tr><td align="center">' +
+              '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
+              // Header
+              '<tr><td style="text-align:center;padding:50px 40px 30px;">' +
+              '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>' +
+              '<h1 style="font-family:Georgia,serif;font-size:32px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
+              '<p style="font-size:10px;letter-spacing:8px;color:#6b6259;margin:10px 0 0;text-transform:uppercase;">La Casa</p>' +
+              '</td></tr>' +
+              // Gold divider
+              '<tr><td style="padding:0 40px;">' +
+              '<div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div>' +
+              '</td></tr>' +
+              // Main content
+              '<tr><td style="padding:50px 40px 30px;text-align:center;">' +
+              '<h2 style="font-family:Georgia,serif;font-size:24px;font-weight:300;color:#CBAA63;margin:0 0 25px;letter-spacing:3px;">Hemos Recibido tu Postulación</h2>' +
+              '<p style="font-size:15px;color:#e8e0d4;line-height:1.8;margin:0 0 20px;">' +
+              'Estimado/a <strong style="color:#CBAA63;">' + applicantName + '</strong>,</p>' +
+              '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0 0 20px;">' +
+              'Gracias por tu interés en formar parte de <strong style="color:#CBAA63;">La Casa ENIGME</strong>. Nuestro equipo revisará tu solicitud y pronto nos pondremos en contacto contigo.</p>' +
+              '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0;">' +
+              'Mientras tanto, te invitamos a explorar nuestro catálogo.</p>' +
+              '</td></tr>' +
+              // CTA Button
+              '<tr><td style="padding:10px 40px 50px;text-align:center;">' +
+              '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:16px 44px;background:transparent;border:1px solid #CBAA63;color:#CBAA63;font-size:11px;letter-spacing:4px;text-transform:uppercase;text-decoration:none;font-weight:600;transition:all 0.3s;">Explorar Catálogo</a>' +
+              '</td></tr>' +
+              // Divider
+              '<tr><td style="padding:0 40px;">' +
+              '<div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div>' +
+              '</td></tr>' +
+              // Footer
+              '<tr><td style="padding:30px 40px;text-align:center;">' +
+              '<p style="font-size:11px;color:#6b6259;letter-spacing:1px;margin:0 0 8px;">¿Preguntas? Escríbenos a <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+              '<p style="font-size:9px;color:#4a4540;letter-spacing:3px;margin:0;text-transform:uppercase;">© 2026 ENIGME · Todos los derechos reservados</p>' +
+              '</td></tr>' +
+              '</table></td></tr></table></body></html>';
+
+            fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer re_3Ae3tcB8_PGAMi3mDFexY49XnW3zN7E8y',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: 'ENIGME <info@enigmeofficial.com>',
+                to: [applicantEmail],
+                subject: 'Hemos recibido tu postulación — ENIGME',
+                html: emailHtml
+              })
+            }).then(function(r) {
+              if (r.ok) console.log('Confirmation email sent to', applicantEmail);
+              else console.warn('Confirmation email failed:', r.status);
+            }).catch(function(e) {
+              console.warn('Confirmation email error:', e);
+            });
+          }
         }).catch(function(err) {
           console.warn('Supabase save error:', err);
         });

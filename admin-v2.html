@@ -532,7 +532,7 @@
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Gerencias Divisionales <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
       <div class="stats-row" id="bajasGdStats"></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Venta Bruta</th><th>Venta Neta</th><th>Acciones</th></tr></thead>
         <tbody id="bajasGdBody"></tbody>
       </table></div>
       <div class="empty-state" id="bajasGdEmpty" style="display:none;">No hay gerencias divisionales de baja</div>
@@ -543,7 +543,7 @@
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Gerentes de Zona <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
       <div class="stats-row" id="bajasGzStats"></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerencia Div.</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Nombramientos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerencia Div.</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Nombramientos</th><th>Venta Bruta</th><th>Venta Neta</th><th>Acciones</th></tr></thead>
         <tbody id="bajasGzBody"></tbody>
       </table></div>
       <div class="empty-state" id="bajasGzEmpty" style="display:none;">No hay gerentes de zona de baja</div>
@@ -554,7 +554,7 @@
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Coordinadores <em style="color:var(--danger);font-style:italic;">de Baja</em></h3>
       <div class="stats-row" id="bajasCoordStats"></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerente de Zona</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th></tr></thead>
+        <thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>Gerente de Zona</th><th>Fecha Ingreso</th><th>Fecha Baja</th><th>Tiempo Trabajado</th><th>Pedidos</th><th>Venta Bruta</th><th>Venta Neta</th><th>Acciones</th></tr></thead>
         <tbody id="bajasCoordBody"></tbody>
       </table></div>
       <div class="empty-state" id="bajasCoordEmpty" style="display:none;">No hay coordinadores de baja</div>
@@ -576,7 +576,7 @@ var ADMIN_PASSWORD = 'Gusiteamo.1998';
 var WEB3FORMS_KEY = 'd79e2bbc-89ef-46f0-a498-7714f86e04c1';
 var RECOVERY_EMAIL = 'carlosarmas@enigmeofficial.com';
 var SUPA_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
 
 // ---- DATA CACHES ----
 var cachedPedidos = [];
@@ -1082,7 +1082,7 @@ async function loadPostulaciones() {
 
   var html = '';
   data.forEach(function(p){
-    var estado = p.estado || 'Recibida';
+    var estado = p.estado || 'Pendiente';
     html += '<tr>';
     html += '<td>' + esc(p.nombre_completo || '-') + '</td>';
     html += '<td>' + esc(p.dni || '-') + '</td>';
@@ -1092,7 +1092,7 @@ async function loadPostulaciones() {
     html += '<td>' + esc(p.departamento || '-') + (p.municipio ? ', ' + esc(p.municipio) : '') + '</td>';
     html += '<td style="max-width:250px;"><details><summary style="cursor:pointer;color:var(--gold);font-size:.75rem;">Ver carta</summary><div style="margin-top:6px;font-size:.78rem;white-space:pre-wrap;">' + esc(p.carta_motivacion || '-') + '</div></details></td>';
     html += '<td><select class="btn-sm" onchange="changePostulacionStatus(' + p.id + ', this.value)">';
-    ['Recibida','En Revision','Entrevista','Aceptada','Rechazada'].forEach(function(st){
+    ['Pendiente','En Revisión','Entrevista','Aceptado','Rechazado'].forEach(function(st){
       html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st + '</option>';
     });
     html += '</select></td>';
@@ -1108,6 +1108,77 @@ async function changePostulacionStatus(id, newStatus) {
   var result = await supaPatch('web_postulaciones', id, { estado: newStatus });
   if (result) {
     showToast('Postulacion actualizada: ' + newStatus);
+    // Send status change email via Resend
+    var postulacion = cachedPostulaciones.find(function(p){ return p.id === id || p.id === parseInt(id); });
+    if (postulacion && postulacion.email) {
+      var statusMessages = {
+        'Pendiente': 'Tu solicitud ha sido recibida y se encuentra pendiente de revisión.',
+        'En Revisión': 'Tu solicitud está siendo evaluada por nuestro equipo.',
+        'Entrevista': '¡Felicidades! Queremos conocerte. Te contactaremos para agendar una entrevista.',
+        'Aceptado': '¡Bienvenido/a a La Casa ENIGME! Nos complace informarte que has sido aceptado/a.',
+        'Rechazado': 'Agradecemos tu interés. En este momento no podemos avanzar con tu solicitud, pero te mantendremos en consideración para futuras oportunidades.'
+      };
+      var statusColors = {
+        'Pendiente': '#a08840',
+        'En Revisión': '#5a8fa0',
+        'Entrevista': '#b08fd0',
+        'Aceptado': '#6b9e78',
+        'Rechazado': '#9e6b6b'
+      };
+      var msg = statusMessages[newStatus] || 'El estado de tu postulación ha sido actualizado a: ' + newStatus;
+      var color = statusColors[newStatus] || '#CBAA63';
+      var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">' +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 0;">' +
+        '<tr><td align="center">' +
+        '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
+        '<tr><td style="text-align:center;padding:40px 40px 30px;">' +
+        '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>' +
+        '<h1 style="font-family:Georgia,serif;font-size:28px;font-weight:300;color:#e8e0d4;letter-spacing:4px;margin:0;">ENIGME</h1>' +
+        '<p style="font-size:10px;letter-spacing:6px;color:#6b6259;margin:8px 0 0;text-transform:uppercase;">La Casa</p>' +
+        '</td></tr>' +
+        '<tr><td style="padding:0 40px;">' +
+        '<div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div>' +
+        '</td></tr>' +
+        '<tr><td style="padding:40px;text-align:center;">' +
+        '<h2 style="font-family:Georgia,serif;font-size:22px;font-weight:300;color:#CBAA63;margin:0 0 10px;letter-spacing:2px;">Actualización de tu Postulación</h2>' +
+        '<p style="font-size:13px;color:#6b6259;letter-spacing:1px;margin:0 0 30px;">ESTADO ACTUAL</p>' +
+        '<div style="display:inline-block;padding:12px 32px;border:1px solid ' + color + ';color:' + color + ';font-size:14px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">' + newStatus + '</div>' +
+        '</td></tr>' +
+        '<tr><td style="padding:0 40px 40px;">' +
+        '<p style="font-size:15px;color:#e8e0d4;line-height:1.8;text-align:center;margin:0;">' +
+        'Estimado/a <strong style="color:#CBAA63;">' + esc(postulacion.nombre_completo || 'Candidato/a') + '</strong>,</p>' +
+        '<p style="font-size:15px;color:#b0a898;line-height:1.8;text-align:center;margin:16px 0 0;">' + msg + '</p>' +
+        '</td></tr>' +
+        '<tr><td style="padding:0 40px 40px;text-align:center;">' +
+        '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:14px 36px;background:transparent;border:1px solid #CBAA63;color:#CBAA63;font-size:11px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Explorar Catálogo</a>' +
+        '</td></tr>' +
+        '<tr><td style="padding:0 40px;">' +
+        '<div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div>' +
+        '</td></tr>' +
+        '<tr><td style="padding:30px 40px;text-align:center;">' +
+        '<p style="font-size:10px;color:#4a4540;letter-spacing:2px;margin:0;">© 2026 ENIGME · TODOS LOS DERECHOS RESERVADOS</p>' +
+        '</td></tr>' +
+        '</table></td></tr></table></body></html>';
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer re_3Ae3tcB8_PGAMi3mDFexY49XnW3zN7E8y',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: 'ENIGME <info@enigmeofficial.com>',
+          to: [postulacion.email],
+          subject: 'Tu postulación en ENIGME — Actualización',
+          html: emailHtml
+        })
+      }).then(function(r) {
+        if (r.ok) console.log('Status email sent to', postulacion.email);
+        else console.warn('Status email failed:', r.status);
+      }).catch(function(e) {
+        console.warn('Status email error:', e);
+      });
+    }
+    loadPostulaciones();
   } else {
     showToast('Error al actualizar', true);
   }
@@ -1685,21 +1756,25 @@ async function loadGerenciasDivisionales() {
 function renderGerencias() {
   var body = document.getElementById('gerenciaBody');
   var empty = document.getElementById('gerenciaEmpty');
-  if (!cachedGerencias.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
+  // Only show active gerencias in the main table
+  var activas = cachedGerencias.filter(function(g) { return g.activo !== false; });
+  if (!activas.length) { body.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  body.innerHTML = cachedGerencias.map(function(g) {
-    var estado = g.activo ? '<span style="color:var(--success);">Activo</span>' : '<span style="color:var(--danger);">' + (g.fecha_baja ? 'BAJA (' + g.fecha_baja + ')' : 'Inactivo') + '</span>';
+  body.innerHTML = activas.map(function(g) {
     return '<tr>' +
       '<td style="font-weight:500;color:var(--gold);">' + (g.codigo || '') + '</td>' +
-      '<td>' + (g.nombre || '') + '</td>' +
-      '<td>' + (g.email || '-') + '</td>' +
-      '<td>' + (g.telefono || '-') + '</td>' +
-      '<td>' + (g.dni || '-') + '</td>' +
+      '<td>' + esc(g.nombre || '') + '</td>' +
+      '<td>' + esc(g.email || '-') + '</td>' +
+      '<td>' + esc(g.telefono || '-') + '</td>' +
+      '<td>' + esc(g.dni || '-') + '</td>' +
       '<td>' + (g.departamentos_ids && g.departamentos_ids.length ? g.departamentos_ids.map(function(id){ return deptosMap[id] || id; }).join(', ') : (g.departamento_id ? (deptosMap[g.departamento_id] || '-') : '-')) + '</td>' +
       '<td style="font-size:.7rem;">' + (g.fecha_ingreso || g.created_at ? (g.fecha_ingreso || g.created_at.split('T')[0]) : '-') + '</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;"><input type="text" id="gdPw_' + g.id + '" value="' + esc(g.password_temporal || '') + '" style="width:120px;padding:4px 6px;font-size:.75rem;" onkeydown="if(event.key===\'Enter\')changeGdPassword(\'' + g.id + '\')"/><button class="btn btn-gold btn-sm" style="padding:3px 10px;font-size:.55rem;" onclick="changeGdPassword(\'' + g.id + '\')"><span>OK</span></button></div></td>' +
-      '<td>' + estado + '</td>' +
-      '<td><button class="btn" style="padding:4px 10px;font-size:.6rem;" onclick="toggleGerencia(\'' + g.id + '\',' + !g.activo + ')"><span>' + (g.activo ? 'Desactivar' : 'Activar') + '</span></button> <button class="btn btn-danger" style="padding:4px 10px;font-size:.6rem;" onclick="eliminarGerencia(\'' + g.id + '\')"><span>Baja</span></button></td>' +
+      '<td><span style="color:var(--success);">Activo</span></td>' +
+      '<td style="white-space:nowrap;">' +
+        '<button class="btn" style="padding:4px 10px;font-size:.6rem;margin-right:4px;" onclick="editarGerencia(\'' + g.id + '\')"><span>Editar</span></button>' +
+        '<button class="btn btn-danger" style="padding:4px 10px;font-size:.6rem;" onclick="eliminarGerencia(\'' + g.id + '\')"><span>Baja</span></button>' +
+      '</td>' +
       '</tr>';
   }).join('');
 }
@@ -1812,6 +1887,113 @@ async function eliminarGerencia(id) {
       showToast('Error al dar de baja: ' + res.status, true);
     }
   } catch(e) { showToast('Error de conexión: ' + e.message, true); }
+}
+
+// ---- EDIT GERENCIA DIVISIONAL ----
+function editarGerencia(id) {
+  var g = cachedGerencias.find(function(x) { return x.id === id; });
+  if (!g) return;
+  var html = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99998;display:flex;align-items:center;justify-content:center;" id="editGdOverlay" onclick="if(event.target===this)this.remove()">' +
+    '<div style="background:var(--surface);border:1px solid var(--border);padding:28px;max-width:600px;width:95%;max-height:85vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
+    '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.4rem;font-weight:300;margin-bottom:20px;">Editar <em style="color:var(--gold);font-style:italic;">' + esc(g.nombre) + '</em></h3>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre</label><input id="editGdNombre" value="' + esc(g.nombre || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">C&oacute;digo</label><input id="editGdCodigo" value="' + esc(g.codigo || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Email</label><input id="editGdEmail" value="' + esc(g.email || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Tel&eacute;fono</label><input id="editGdTelefono" value="' + esc(g.telefono || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">DNI</label><input id="editGdDni" value="' + esc(g.dni || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Direcci&oacute;n</label><input id="editGdDireccion" value="' + esc(g.direccion || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">N&uacute;mero de Cuenta</label><input id="editGdCuenta" value="' + esc(g.numero_cuenta || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre del Banco</label><input id="editGdBanco" value="' + esc(g.nombre_banco || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Fecha Ingreso</label><input id="editGdFechaIngreso" type="date" value="' + esc(g.fecha_ingreso || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '</div>' +
+    '<p id="editGdError" style="color:var(--danger);font-size:.7rem;margin-top:10px;"></p>' +
+    '<div style="margin-top:18px;display:flex;gap:10px;">' +
+    '<button class="btn btn-gold" onclick="guardarEdicionGerencia(\'' + id + '\')"><span>Guardar Cambios</span></button>' +
+    '<button class="btn" onclick="document.getElementById(\'editGdOverlay\').remove()"><span>Cancelar</span></button>' +
+    '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function guardarEdicionGerencia(id) {
+  var errEl = document.getElementById('editGdError');
+  errEl.textContent = '';
+  var data = {
+    nombre: document.getElementById('editGdNombre').value.trim(),
+    codigo: document.getElementById('editGdCodigo').value.trim(),
+    email: document.getElementById('editGdEmail').value.trim() || null,
+    telefono: document.getElementById('editGdTelefono').value.trim() || null,
+    dni: document.getElementById('editGdDni').value.trim() || null,
+    direccion: document.getElementById('editGdDireccion').value.trim() || null,
+    numero_cuenta: document.getElementById('editGdCuenta').value.trim() || null,
+    nombre_banco: document.getElementById('editGdBanco').value.trim() || null,
+    fecha_ingreso: document.getElementById('editGdFechaIngreso').value || null
+  };
+  if (!data.nombre || !data.codigo) { errEl.textContent = 'Nombre y codigo son obligatorios.'; return; }
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      showToast('Gerencia actualizada correctamente');
+      var overlay = document.getElementById('editGdOverlay');
+      if (overlay) overlay.remove();
+      loadGerenciasDivisionales();
+    } else {
+      var errData = await res.text();
+      errEl.textContent = 'Error al actualizar: ' + res.status;
+      console.error('guardarEdicionGerencia error:', errData);
+    }
+  } catch(e) { errEl.textContent = 'Error de conexion: ' + e.message; }
+}
+
+// ---- REACTIVAR GERENCIA (from Bajas tab) ----
+async function reactivarGerencia(id) {
+  if (!confirm('Reactivar esta gerencia divisional? Se marcara como activa nuevamente.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ activo: true, fecha_baja: null })
+    });
+    if (res.ok) {
+      showToast('Gerencia reactivada exitosamente');
+      loadBajas();
+      loadGerenciasDivisionales();
+    } else { showToast('Error al reactivar: ' + res.status, true); }
+  } catch(e) { showToast('Error: ' + e.message, true); }
+}
+
+async function reactivarGerenteZona(id) {
+  if (!confirm('Reactivar este gerente de zona? Se marcara como activo nuevamente.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ activo: true, fecha_baja: null })
+    });
+    if (res.ok) {
+      showToast('Gerente de zona reactivado exitosamente');
+      loadBajas();
+    } else { showToast('Error al reactivar: ' + res.status, true); }
+  } catch(e) { showToast('Error: ' + e.message, true); }
+}
+
+async function reactivarCoordinador(id) {
+  if (!confirm('Reactivar este coordinador? Se marcara como activo nuevamente.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/coordinadores?id=eq.' + id, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ activo: true, fecha_baja: null })
+    });
+    if (res.ok) {
+      showToast('Coordinador reactivado exitosamente');
+      loadBajas();
+    } else { showToast('Error al reactivar: ' + res.status, true); }
+  } catch(e) { showToast('Error: ' + e.message, true); }
 }
 
 async function eliminarGerenteZona(id) {
@@ -1936,6 +2118,7 @@ async function loadBajas() {
           '<td style="font-size:.75rem;">' + tiempo + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerencia(\'' + gd.id + '\')"><span>Reactivar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasGdStats').innerHTML =
@@ -1981,6 +2164,7 @@ async function loadBajas() {
           '<td>' + nombCount + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerenteZona(\'' + gz.id + '\')"><span>Reactivar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasGzStats').innerHTML =
@@ -2024,6 +2208,7 @@ async function loadBajas() {
           '<td>' + pedCount + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarCoordinador(\'' + c.id + '\')"><span>Reactivar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasCoordStats').innerHTML =
@@ -2076,6 +2261,7 @@ async function eliminarTodosNombramientos() {
 var origSwitchTab = switchTab;
 switchTab = function(tab) {
   origSwitchTab(tab);
+  if (tab === 'postulaciones') loadPostulaciones();
   if (tab === 'gerencia') loadGerenciasDivisionales();
   if (tab === 'ventas_corp') loadVentasCorp();
   if (tab === 'comisiones') loadComisiones();

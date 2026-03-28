@@ -182,8 +182,13 @@
 
       /* Toggle Button */
       '@keyframes abrilDiamondGlow {',
-      '  0%, 100% { box-shadow: 0 4px 20px rgba(203,170,99,0.4), 0 0 8px rgba(203,170,99,0.2); }',
-      '  50% { box-shadow: 0 4px 25px rgba(203,170,99,0.6), 0 0 20px rgba(203,170,99,0.35), 0 0 40px rgba(203,170,99,0.15); }',
+      '  0%, 100% { box-shadow: 0 4px 20px rgba(255,255,255,0.3), 0 0 8px rgba(203,170,99,0.3); }',
+      '  50% { box-shadow: 0 4px 25px rgba(203,170,99,0.6), 0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(203,170,99,0.2); }',
+      '}',
+      '@keyframes abrilDiamondRotate {',
+      '  0% { filter: hue-rotate(0deg) brightness(1); }',
+      '  50% { filter: hue-rotate(10deg) brightness(1.1); }',
+      '  100% { filter: hue-rotate(0deg) brightness(1); }',
       '}',
       '@keyframes abrilShimmer {',
       '  0% { background-position: -200% center; }',
@@ -196,12 +201,12 @@
       '  width: 60px;',
       '  height: 60px;',
       '  border-radius: 50%;',
-      '  background: linear-gradient(135deg, ' + CONFIG.brandGold + ' 0%, #E8D090 40%, ' + CONFIG.brandGold + ' 70%, #d4b66a 100%);',
+      '  background: radial-gradient(circle at 30% 30%, #fff, #e8e0f0, #CBAA63);',
       '  background-size: 300% 300%;',
       '  border: none;',
       '  cursor: pointer;',
       '  z-index: ' + CONFIG.zIndex + ';',
-      '  animation: abrilDiamondGlow 2.5s ease-in-out infinite, abrilShimmer 4s linear infinite;',
+      '  animation: abrilDiamondGlow 2.5s ease-in-out infinite, abrilShimmer 4s linear infinite, abrilDiamondRotate 6s ease-in-out infinite;',
       '  display: flex;',
       '  align-items: center;',
       '  justify-content: center;',
@@ -487,8 +492,28 @@
   }
 
   // ── SVG Icons ──────────────────────────────────────────
-  var ICON_CHAT =
-    '<svg viewBox="0 0 24 24"><path d="M12 2L2 9.5l4 2.5v5.5L12 22l6-4.5V12l2-1.25V17h2V9.5L12 2zm0 2.5l6.8 5.1L12 14.7 5.2 9.6 12 4.5zM17 16.7l-5 3.8-5-3.8v-4l5 3.8 5-3.8v4z"/><polygon points="12,6.5 10.5,10 12,9 13.5,10" fill="#CBAA63" opacity="0.6"/></svg>';
+  var ICON_CHAT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<polygon points="12,2 4,9 12,22 20,9" fill="url(#diamondGrad)" stroke="#fff" stroke-width="0.3"/>' +
+    '<polygon points="12,2 4,9 12,9.5 20,9" fill="url(#topFacet)" opacity="0.9"/>' +
+    '<polygon points="4,9 12,9.5 12,22" fill="#e8e8ff" opacity="0.5"/>' +
+    '<polygon points="20,9 12,9.5 12,22" fill="#d0d0f0" opacity="0.4"/>' +
+    '<polygon points="8,9 12,2 16,9 12,12" fill="#fff" opacity="0.6"/>' +
+    '<path d="M19,3 L19.5,4.5 L21,5 L19.5,5.5 L19,7 L18.5,5.5 L17,5 L18.5,4.5Z" fill="#CBAA63" opacity="0.9"/>' +
+    '<path d="M5,4 L5.3,5 L6.3,5.3 L5.3,5.6 L5,6.6 L4.7,5.6 L3.7,5.3 L4.7,5Z" fill="#fff" opacity="0.8"/>' +
+    '<path d="M22,11 L22.3,12 L23.3,12.3 L22.3,12.6 L22,13.6 L21.7,12.6 L20.7,12.3 L21.7,12Z" fill="#CBAA63" opacity="0.7"/>' +
+    '<defs>' +
+    '<linearGradient id="diamondGrad" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0%" stop-color="#f0f0ff"/>' +
+    '<stop offset="30%" stop-color="#e0e8ff"/>' +
+    '<stop offset="60%" stop-color="#d8d0f0"/>' +
+    '<stop offset="100%" stop-color="#c8c0e8"/>' +
+    '</linearGradient>' +
+    '<linearGradient id="topFacet" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="#ffffff"/>' +
+    '<stop offset="100%" stop-color="#e8e0f8"/>' +
+    '</linearGradient>' +
+    '</defs>' +
+    '</svg>';
   var ICON_CLOSE =
     '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
   var ICON_SEND =

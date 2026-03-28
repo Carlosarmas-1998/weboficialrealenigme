@@ -280,7 +280,14 @@
         <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="nomEmail" type="email" placeholder="Opcional"/></div>
         <div class="form-group">
           <label>Departamento *</label>
-          <select id="nomDepto"><option value="">Seleccione...</option></select>
+          <select id="nomDepto" onchange="loadMunicipiosForDepto()"><option value="">Seleccione...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Municipios</label>
+          <div id="nomMuniBox" style="max-height:150px;overflow-y:auto;border:1px solid var(--borde);border-radius:4px;padding:8px;font-size:0.78rem;background:var(--surface);">
+            <span style="color:var(--gris);font-size:0.75rem;">Seleccione un departamento primero</span>
+          </div>
+          <div id="nomMuniSelected" style="margin-top:6px;font-size:0.72rem;color:var(--dorado);"></div>
         </div>
         <div class="form-group">
           <label>Sector *</label>
@@ -461,6 +468,7 @@ var sectores  = [];
 var campanas  = [];
 var coordMap  = {};
 var profData  = null;
+var selectedMunicipios = [];
 var resChartComp   = null;
 var resChartSector = null;
 var chatInterval   = null;
@@ -982,6 +990,57 @@ async function loadDepartamentosNom() {
   } catch(e) { console.warn('deptos:', e); }
 }
 
+async function loadMunicipiosForDepto() {
+  var deptoId = document.getElementById('nomDepto').value;
+  var box = document.getElementById('nomMuniBox');
+  var infoEl = document.getElementById('nomMuniSelected');
+  if (!deptoId) {
+    box.innerHTML = '<span style="color:var(--gris);font-size:0.75rem;">Seleccione un departamento primero</span>';
+    infoEl.textContent = '';
+    return;
+  }
+  box.innerHTML = '<span style="color:var(--gris);font-size:0.75rem;">Cargando municipios...</span>';
+  try {
+    var munis = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&order=nombre');
+    if (!munis || !munis.length) {
+      box.innerHTML = '<span style="color:var(--gris);font-size:0.75rem;">No hay municipios para este departamento</span>';
+      return;
+    }
+    var html = '';
+    munis.forEach(function(m) {
+      var checked = selectedMunicipios.some(function(s){ return s.id === m.id; }) ? ' checked' : '';
+      html += '<label style="display:block;padding:3px 0;cursor:pointer;"><input type="checkbox" value="' + m.id + '" data-nombre="' + esc(m.nombre) + '"' + checked + ' onchange="toggleMunicipio(this)" style="margin-right:6px;"/> ' + esc(m.nombre) + '</label>';
+    });
+    box.innerHTML = html;
+    updateMuniInfo();
+  } catch(e) {
+    box.innerHTML = '<span style="color:var(--danger);font-size:0.75rem;">Error al cargar municipios</span>';
+    console.error('municipios:', e);
+  }
+}
+
+function toggleMunicipio(cb) {
+  var id = cb.value;
+  var nombre = cb.getAttribute('data-nombre');
+  if (cb.checked) {
+    if (!selectedMunicipios.some(function(s){ return s.id === id; })) {
+      selectedMunicipios.push({ id: id, nombre: nombre });
+    }
+  } else {
+    selectedMunicipios = selectedMunicipios.filter(function(s){ return s.id !== id; });
+  }
+  updateMuniInfo();
+}
+
+function updateMuniInfo() {
+  var infoEl = document.getElementById('nomMuniSelected');
+  if (!selectedMunicipios.length) {
+    infoEl.textContent = '';
+    return;
+  }
+  infoEl.textContent = 'Seleccionados (' + selectedMunicipios.length + '): ' + selectedMunicipios.map(function(s){ return s.nombre; }).join(', ');
+}
+
 async function buscarExistente() {
   var dni = document.getElementById('nomDni').value.trim();
   var alert = document.getElementById('nomExisteAlert');
@@ -1013,6 +1072,8 @@ async function guardarNombramiento() {
   var email     = document.getElementById('nomEmail').value.trim();
   var sectorId  = document.getElementById('nomSector').value;
   var campanaId = document.getElementById('nomCampana').value;
+  var deptoId   = document.getElementById('nomDepto').value;
+  var muniIds   = selectedMunicipios.map(function(s){ return s.id; });
 
   if (!dni || !nombre || !direccion || !telefono || !sectorId || !campanaId) {
     err.textContent = 'Complete todos los campos obligatorios.'; return;
@@ -1033,7 +1094,7 @@ async function guardarNombramiento() {
 
     var fechaIngreso = document.getElementById('nomFechaIngreso').value || null;
 
-    var vendedora = await apiPost('/rest/v1/vendedoras', {
+    var vendPayload = {
       codigo: String(codigo),
       nombre: nombre,
       dni: dni,
@@ -1045,12 +1106,15 @@ async function guardarNombramiento() {
       activo: true,
       campana_ingreso_id: parseInt(campanaId),
       fecha_ingreso: fechaIngreso
-    });
+    };
+    if (deptoId) vendPayload.departamento_id = deptoId;
+    if (muniIds.length) vendPayload.municipio_ids = muniIds;
+    var vendedora = await apiPost('/rest/v1/vendedoras', vendPayload);
 
     var vendedoraId = vendedora[0] ? vendedora[0].id : null;
     if (!vendedoraId && existentes.length) vendedoraId = existentes[0].id;
 
-    var nomData = await apiPost('/rest/v1/nombramientos', {
+    var nomPayload = {
       codigo_nombramiento: 'NOM-' + String(codigo),
       campana_ingreso_id: parseInt(campanaId),
       vendedora_id: vendedoraId,
@@ -1063,7 +1127,10 @@ async function guardarNombramiento() {
       email: email || null,
       ano: new Date().getFullYear(),
       fecha_ingreso: fechaIngreso
-    });
+    };
+    if (deptoId) nomPayload.departamento_id = deptoId;
+    if (muniIds.length) nomPayload.municipio_ids = muniIds;
+    var nomData = await apiPost('/rest/v1/nombramientos', nomPayload);
 
     var files = document.getElementById('nomArchivos').files;
     if (nomData[0] && files.length) {
@@ -1095,6 +1162,9 @@ async function guardarNombramiento() {
     document.getElementById('nomDepto').value = '';
     document.getElementById('nomSector').value = '';
     document.getElementById('nomCampana').value = '';
+    selectedMunicipios = [];
+    document.getElementById('nomMuniBox').innerHTML = '<span style="color:var(--gris);font-size:0.75rem;">Seleccione un departamento primero</span>';
+    document.getElementById('nomMuniSelected').textContent = '';
     document.getElementById('nomExisteAlert').style.display = 'none';
     document.getElementById('nomArchivos').value = '';
     document.getElementById('nomFilesInfo').textContent = '';

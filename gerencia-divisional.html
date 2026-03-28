@@ -684,9 +684,11 @@ async function guardarGerenteZona() {
       existing = await api('/rest/v1/gerentes_zona?codigo=eq.' + codigo + '&select=id');
     }
 
-    // 2. Create zona
+    // 2. Create zona (generate a unique zona code)
+    var zonaCodigo = 'Z-' + codigo;
     var zonaData = await apiPost('/rest/v1/zonas', {
       nombre: zonaNombre,
+      codigo: zonaCodigo,
       gerencia_divisional_id: session.id
     });
     var zonaId = zonaData[0].id;

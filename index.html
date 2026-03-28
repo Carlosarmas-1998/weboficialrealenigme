@@ -398,80 +398,124 @@
 
     /* ── VIDEO HERO ── */
     .video-hero {
-      position: relative; width: 100%; background: #000;
-      overflow: hidden; border-bottom: 1px solid var(--linea-fina);
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      cursor: pointer;
+      background: #000;
     }
     .video-hero video {
-      width: 100%; display: block; object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
-
-    /* ── EMAIL SUBSCRIPTION ── */
-    .subscribe-section {
-      background: linear-gradient(160deg, #1C1C1C 0%, #252525 50%, #1C1C1C 100%);
-      padding: clamp(50px, 8vw, 90px) 5vw;
-      text-align: center; position: relative; overflow: hidden;
+    .hero-title-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 60px 20px 30px;
+      background: linear-gradient(rgba(0,0,0,0.7), transparent);
+      text-align: center;
+      pointer-events: none;
     }
-    .subscribe-section::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
-      height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+    .hero-title-overlay h1 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #CBAA63;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      font-weight: 400;
     }
-    .subscribe-section::after {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-      height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
+    .hero-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 40px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .subscribe-inner { max-width: 580px; margin: 0 auto; }
-    .subscribe-brand {
-      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 3vw, 2.2rem);
-      color: #CBAA63; letter-spacing: 0.3em; margin-bottom: 8px; font-weight: 400;
+    .hero-overlay h2 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #CBAA63;
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 16px;
+      text-transform: uppercase;
     }
-    .subscribe-divider {
-      width: 60px; height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
-      margin: 0 auto 22px;
+    .hero-subscribe-form {
+      display: flex;
+      gap: 0;
+      max-width: 500px;
+      width: 100%;
     }
-    .subscribe-title {
-      font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.5rem);
-      color: #fff; margin-bottom: 16px; font-weight: 400; letter-spacing: 0.05em;
+    .hero-subscribe-form input {
+      flex: 1;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(201,169,110,0.3);
+      border-right: none;
+      color: #fff;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
     }
-    .subscribe-text {
-      font-family: 'Jost', sans-serif; font-size: clamp(0.78rem, 1vw, 0.88rem);
-      color: rgba(255,255,255,0.6); line-height: 1.9; margin-bottom: 30px;
+    .hero-subscribe-form input::placeholder {
+      color: rgba(255,255,255,0.5);
     }
-    .subscribe-form {
-      display: flex; gap: 0; max-width: 480px; margin: 0 auto;
-      border: 1px solid rgba(203,170,99,0.3); border-radius: 4px; overflow: hidden;
-      transition: border-color 0.3s ease;
-    }
-    .subscribe-form:focus-within { border-color: #CBAA63; }
-    .subscribe-input {
-      flex: 1; padding: 15px 20px; background: rgba(255,255,255,0.05);
-      border: none; color: #fff; font-family: 'Jost', sans-serif;
-      font-size: 0.85rem; outline: none;
-    }
-    .subscribe-input::placeholder { color: rgba(255,255,255,0.3); }
-    .subscribe-submit {
-      padding: 15px 28px; background: linear-gradient(135deg, #CBAA63, #E8D090);
-      border: none; color: #1C1C1C; font-family: 'Jost', sans-serif;
-      font-size: 0.72rem; font-weight: 600; letter-spacing: 2px;
-      text-transform: uppercase; cursor: pointer; transition: all 0.3s ease;
+    .hero-subscribe-form button {
+      padding: 14px 28px;
+      background: #CBAA63;
+      border: 1px solid #CBAA63;
+      color: #0a0a0a;
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
       white-space: nowrap;
+      transition: all 0.3s;
     }
-    .subscribe-submit:hover { filter: brightness(1.1); }
-    .subscribe-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .subscribe-success {
-      display: none; margin-top: 18px; padding: 14px 20px;
-      background: rgba(203,170,99,0.1); border: 1px solid rgba(203,170,99,0.3);
-      border-radius: 4px; color: #CBAA63;
-      font-family: 'Jost', sans-serif; font-size: 0.82rem;
+    .hero-subscribe-form button:hover {
+      background: #d4b76a;
     }
-    .subscribe-error {
-      display: none; margin-top: 12px; color: #E53935;
-      font-family: 'Jost', sans-serif; font-size: 0.78rem;
+    .hero-subscribe-form button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
-    .subscribe-discount {
-      display: inline-block; margin-top: 22px; padding: 8px 20px;
-      border: 1px solid rgba(203,170,99,0.25); border-radius: 3px;
-      font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
-      color: rgba(255,255,255,0.4); letter-spacing: 0.15em;
+    .hero-subscribe-text {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 10px;
+      letter-spacing: 0.05em;
+    }
+    .hero-subscribe-text strong {
+      color: #CBAA63;
+    }
+    .sparkle-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #CBAA63;
+      border-radius: 50%;
+      animation: sparkleAnim 1.5s ease-out forwards;
+      box-shadow: 0 0 6px #CBAA63, 0 0 12px rgba(201,169,110,0.5);
+    }
+    @keyframes sparkleAnim {
+      0% { transform: scale(0) translate(0, 0); opacity: 1; }
+      50% { opacity: 1; }
+      100% { transform: scale(1.5) translate(var(--tx), var(--ty)); opacity: 0; }
     }
 
     /* ── TOAST NOTIFICATION ── */
@@ -511,8 +555,9 @@
     @media (max-width: 768px) {
       .cookie-modal { padding: 35px 25px 30px; }
       .cookie-modal-brand { font-size: 1.4rem; }
-      .subscribe-form { flex-direction: column; }
-      .subscribe-submit { padding: 14px 20px; }
+      .hero-subscribe-form { flex-direction: column; }
+      .hero-subscribe-form input { border-right: 1px solid rgba(201,169,110,0.3); }
+      .hero-subscribe-form button { padding: 14px 20px; }
       .abril-tooltip { bottom: 78px; left: 16px; font-size: 0.65rem; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
@@ -599,32 +644,24 @@
     </svg>
   </a>
 
-  <!-- ══ VIDEO HERO ══ -->
-  <main class="video-hero">
+  <!-- ══ VIDEO HERO + SUBSCRIPTION ══ -->
+  <main class="video-hero" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')window.location.href='catalogo.html'">
     <video autoplay muted loop playsinline preload="auto" poster="portada.png">
       <source src="bv6.mp4" type="video/mp4">
-      <img src="portada.png" alt="ENIGME Coleccion Cero" class="hero-img">
     </video>
-  </main>
-
-  <!-- ══ EMAIL SUBSCRIPTION SECTION ══ -->
-  <section class="subscribe-section" id="subscribeSection">
-    <div class="subscribe-inner fade-in">
-      <div class="subscribe-brand">ENIGME</div>
-      <div class="subscribe-divider"></div>
-      <h2 class="subscribe-title">Unirse al Club Exclusivo</h2>
-      <p class="subscribe-text">
-        Suscr&iacute;bete al club exclusivo de La Casa &Egrave;NIGME. Recibe descuentos exclusivos y colecciones nuevas. Tu primera compra tendr&aacute; un <strong style="color:#CBAA63;">10% de descuento</strong>.
-      </p>
-      <form class="subscribe-form" id="subscribeForm" onsubmit="return handleSubscribe(event)">
-        <input type="email" class="subscribe-input" id="subscribeEmail" placeholder="Tu correo electr&oacute;nico" required autocomplete="email" />
-        <button type="submit" class="subscribe-submit" id="subscribeBtn">Unirse al Club</button>
-      </form>
-      <div class="subscribe-success" id="subscribeSuccess">Bienvenido/a al Club &Egrave;NIGME. Revisa tu correo para tu descuento exclusivo del 10%.</div>
-      <div class="subscribe-error" id="subscribeError"></div>
-      <div class="subscribe-discount">10% en tu primera compra</div>
+    <div class="hero-title-overlay">
+      <h1>Colecci&oacute;n Cero &mdash; Lanzamiento</h1>
     </div>
-  </section>
+    <div class="hero-overlay">
+      <h2>Colecci&oacute;n Cero &mdash; Lanzamiento</h2>
+      <form class="hero-subscribe-form" onsubmit="handleHeroSubscribe(event)">
+        <input type="email" id="heroEmail" placeholder="Tu correo electr&oacute;nico" required>
+        <button type="submit" id="heroSubBtn">UNIRSE</button>
+      </form>
+      <p class="hero-subscribe-text">Al suscribirte aceptas recibir un <strong>10% de descuento</strong> en tu primera compra y notificaciones exclusivas de La Casa ENIGME</p>
+      <p id="heroSubMsg" style="display:none;font-size:0.75rem;margin-top:8px;color:#CBAA63;"></p>
+    </div>
+  </main>
 
   <section class="cert-banner fade-in">
     <a href="certificado.html" class="cert-banner-link" title="Ver Certificado Oficial">
@@ -927,20 +964,18 @@
       }, 4000);
     }
 
-    // ── Email Subscription ──
-    async function handleSubscribe(e) {
+    // ── Email Subscription (Hero) ──
+    async function handleHeroSubscribe(e) {
       e.preventDefault();
-      var email = document.getElementById('subscribeEmail').value.trim();
-      var btn = document.getElementById('subscribeBtn');
-      var successEl = document.getElementById('subscribeSuccess');
-      var errorEl = document.getElementById('subscribeError');
+      var email = document.getElementById('heroEmail').value.trim();
+      var btn = document.getElementById('heroSubBtn');
+      var msgEl = document.getElementById('heroSubMsg');
 
-      if (!email) return false;
+      if (!email) return;
 
       btn.disabled = true;
-      btn.textContent = 'Procesando...';
-      errorEl.style.display = 'none';
-      successEl.style.display = 'none';
+      btn.textContent = '...';
+      msgEl.style.display = 'none';
 
       try {
         // 1) Save to Supabase
@@ -960,24 +995,29 @@
         });
 
         if (sbRes.status === 409 || sbRes.status === 23505) {
-          errorEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
-          errorEl.style.display = 'block';
+          msgEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
+          msgEl.style.color = '#E53935';
+          msgEl.style.display = 'block';
           btn.disabled = false;
-          btn.textContent = 'Unirse al Club';
-          return false;
+          btn.textContent = 'UNIRSE';
+          return;
         }
 
         if (!sbRes.ok) {
           var errData = await sbRes.json().catch(function() { return {}; });
           if (errData.code === '23505') {
-            errorEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
-            errorEl.style.display = 'block';
+            msgEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
+            msgEl.style.color = '#E53935';
+            msgEl.style.display = 'block';
             btn.disabled = false;
-            btn.textContent = 'Unirse al Club';
-            return false;
+            btn.textContent = 'UNIRSE';
+            return;
           }
           throw new Error('Error al guardar');
         }
+
+        // Store subscriber email in localStorage for cart discount
+        localStorage.setItem('enigme_subscriber_email', email);
 
         // 2) Send welcome email via Resend
         try {
@@ -1019,23 +1059,43 @@
             })
           });
         } catch(emailErr) {
-          // Email sending failed silently - subscription still saved
           console.warn('Welcome email could not be sent:', emailErr);
         }
 
-        // 3) Show success
-        document.getElementById('subscribeForm').style.display = 'none';
-        successEl.style.display = 'block';
+        // 3) Show success with sparkle animation
+        function createSparkles() {
+          var container = document.createElement('div');
+          container.className = 'sparkle-container';
+          document.querySelector('.video-hero').appendChild(container);
+          for (var i = 0; i < 30; i++) {
+            var s = document.createElement('div');
+            s.className = 'sparkle';
+            s.style.left = (40 + Math.random() * 20) + '%';
+            s.style.top = (70 + Math.random() * 20) + '%';
+            s.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
+            s.style.setProperty('--ty', (Math.random() * -200 - 50) + 'px');
+            s.style.animationDelay = (Math.random() * 0.5) + 's';
+            s.style.width = s.style.height = (4 + Math.random() * 8) + 'px';
+            container.appendChild(s);
+          }
+        }
+        createSparkles();
+        msgEl.textContent = '\u00a1Bienvenido al Club ENIGME! Redirigiendo al cat\u00e1logo...';
+        msgEl.style.color = '#CBAA63';
+        msgEl.style.display = 'block';
+        btn.textContent = '\u2713';
+        document.getElementById('heroEmail').disabled = true;
         showToast('Bienvenido/a al Club \u00c8NIGME');
+        // Redirect after sparkles
+        setTimeout(function() { window.location.href = 'catalogo.html'; }, 2000);
 
       } catch(err) {
-        errorEl.textContent = 'Error al suscribirse. Int\u00e9ntalo de nuevo.';
-        errorEl.style.display = 'block';
+        msgEl.textContent = 'Error al suscribirse. Int\u00e9ntalo de nuevo.';
+        msgEl.style.color = '#E53935';
+        msgEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Unirse al Club';
+        btn.textContent = 'UNIRSE';
       }
-
-      return false;
     }
 
     // ── Init ──
