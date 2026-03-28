@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel &middot; Enigme</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root{
@@ -1412,15 +1412,164 @@ function exportExcel(type) {
   }
 
   try {
-    var ws = XLSX.utils.json_to_sheet(data);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    XLSX.writeFile(wb, filename);
+    enigmeExcel(data, sheetName, filename);
     showToast('Exportado: ' + filename);
   } catch(e) {
     console.error('Export error:', e);
     showToast('Error al exportar', true);
   }
+}
+
+// ═══════════════════════════════════════════════
+//  ENIGME STYLED EXCEL EXPORT
+// ═══════════════════════════════════════════════
+function enigmeExcel(data, sheetName, filename) {
+  var ws = XLSX.utils.json_to_sheet(data);
+  var range = XLSX.utils.decode_range(ws['!ref']);
+  var numCols = range.e.c + 1;
+  var numRows = range.e.r + 1;
+
+  // Column widths - auto based on content
+  var colWidths = [];
+  for (var c = 0; c <= range.e.c; c++) {
+    var maxLen = 12;
+    for (var r = 0; r <= range.e.r; r++) {
+      var cell = ws[XLSX.utils.encode_cell({r:r, c:c})];
+      if (cell && cell.v != null) {
+        var len = String(cell.v).length;
+        if (len > maxLen) maxLen = Math.min(len, 45);
+      }
+    }
+    colWidths.push({ wch: maxLen + 3 });
+  }
+  ws['!cols'] = colWidths;
+
+  // Styles - ENIGME branding
+  var headerStyle = {
+    font: { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'CBAA63' } },
+    fill: { fgColor: { rgb: '1C1C1C' } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+    border: {
+      top: { style: 'thin', color: { rgb: 'CBAA63' } },
+      bottom: { style: 'thin', color: { rgb: 'CBAA63' } },
+      left: { style: 'thin', color: { rgb: '333333' } },
+      right: { style: 'thin', color: { rgb: '333333' } }
+    }
+  };
+  var cellStyleEven = {
+    font: { name: 'Calibri', sz: 10, color: { rgb: '1C1C1C' } },
+    fill: { fgColor: { rgb: 'FAF9F6' } },
+    alignment: { vertical: 'center', wrapText: true },
+    border: {
+      bottom: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      left: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      right: { style: 'hair', color: { rgb: 'E8E4DD' } }
+    }
+  };
+  var cellStyleOdd = {
+    font: { name: 'Calibri', sz: 10, color: { rgb: '1C1C1C' } },
+    fill: { fgColor: { rgb: 'FFFFFF' } },
+    alignment: { vertical: 'center', wrapText: true },
+    border: {
+      bottom: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      left: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      right: { style: 'hair', color: { rgb: 'E8E4DD' } }
+    }
+  };
+  var goldNumStyle = {
+    font: { name: 'Calibri', sz: 10, bold: true, color: { rgb: '8B7355' } },
+    fill: { fgColor: { rgb: 'FAF9F6' } },
+    alignment: { vertical: 'center', horizontal: 'right' },
+    border: {
+      bottom: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      left: { style: 'hair', color: { rgb: 'E8E4DD' } },
+      right: { style: 'hair', color: { rgb: 'E8E4DD' } }
+    }
+  };
+
+  // Apply styles
+  for (var R = range.s.r; R <= range.e.r; R++) {
+    for (var C = range.s.c; C <= range.e.c; C++) {
+      var addr = XLSX.utils.encode_cell({r:R, c:C});
+      if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+      if (R === 0) {
+        ws[addr].s = headerStyle;
+      } else {
+        var val = ws[addr].v;
+        var isNum = typeof val === 'number';
+        if (isNum) {
+          ws[addr].s = goldNumStyle;
+          ws[addr].z = '#,##0.00';
+        } else {
+          ws[addr].s = (R % 2 === 0) ? cellStyleEven : cellStyleOdd;
+        }
+      }
+    }
+  }
+
+  // Row heights
+  ws['!rows'] = [{ hpt: 28 }]; // header taller
+  for (var rr = 1; rr <= range.e.r; rr++) {
+    if (!ws['!rows'][rr]) ws['!rows'][rr] = { hpt: 22 };
+  }
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, filename);
+}
+
+// Export simulación
+function exportSimulacion() {
+  var numAsesoras = parseInt(document.getElementById('simAsesoras').value) || 0;
+  var ventaPromedio = parseFloat(document.getElementById('simVentaPromedio').value) || 0;
+  var numGZ = parseInt(document.getElementById('simNumGZ').value) || 1;
+  if (numAsesoras <= 0 || ventaPromedio <= 0) { showToast('Ingrese valores primero', true); return; }
+
+  var ventaBruta = numAsesoras * ventaPromedio;
+  var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
+  var costoNom = numAsesoras * pagoPerNom;
+  var costoSalGZ = SUELDO_GZ * numGZ;
+  var dGastos = ventaBruta * MODELO.gastosPagos;
+  var sobrante = dGastos - costoSalGZ - costoNom;
+
+  var data = [
+    { 'Concepto': 'SIMULACION ENIGME - RENTABILIDAD POR ZONA', '%': '', 'Monto (L)': '' },
+    { 'Concepto': '', '%': '', 'Monto (L)': '' },
+    { 'Concepto': '--- PARAMETROS ---', '%': '', 'Monto (L)': '' },
+    { 'Concepto': 'Asesoras que ingresan', '%': '', 'Monto (L)': numAsesoras },
+    { 'Concepto': 'Venta promedio por asesora', '%': '', 'Monto (L)': ventaPromedio },
+    { 'Concepto': 'Gerentes de Zona', '%': '', 'Monto (L)': numGZ },
+    { 'Concepto': '', '%': '', 'Monto (L)': '' },
+    { 'Concepto': '--- SE GENERA (Distribucion de Venta) ---', '%': '', 'Monto (L)': '' },
+    { 'Concepto': 'Venta Bruta Total', '%': '100%', 'Monto (L)': ventaBruta },
+    { 'Concepto': 'Precio de Insercion (Producto)', '%': '22%', 'Monto (L)': ventaBruta * 0.22 },
+    { 'Concepto': 'Comision Asesoras', '%': '15%', 'Monto (L)': ventaBruta * 0.15 },
+    { 'Concepto': 'Logistica', '%': '8%', 'Monto (L)': ventaBruta * 0.08 },
+    { 'Concepto': 'Comision Gerencia Divisional', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
+    { 'Concepto': 'Comision Gerencia de Zona', '%': '3%', 'Monto (L)': ventaBruta * 0.03 },
+    { 'Concepto': 'Gerencia General', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
+    { 'Concepto': 'Marketing y Web', '%': '4%', 'Monto (L)': ventaBruta * 0.04 },
+    { 'Concepto': 'Gastos de Pagos (Salarios+Nomb+Op)', '%': '28%', 'Monto (L)': dGastos },
+    { 'Concepto': 'Empresa - Ganancia Neta (INTOCABLE)', '%': '10%', 'Monto (L)': ventaBruta * 0.10 },
+    { 'Concepto': '', '%': '', 'Monto (L)': '' },
+    { 'Concepto': '--- SE PAGA (Del Fondo 28%) ---', '%': '', 'Monto (L)': '' },
+    { 'Concepto': 'Fondo 28% disponible', '%': '28%', 'Monto (L)': dGastos },
+    { 'Concepto': 'Salario GZ (' + numGZ + ' x L16,000)', '%': '', 'Monto (L)': costoSalGZ },
+    { 'Concepto': 'Nombramientos (' + numAsesoras + ' x L' + pagoPerNom + ')', '%': '', 'Monto (L)': costoNom },
+    { 'Concepto': 'Total Pagos', '%': '', 'Monto (L)': costoSalGZ + costoNom },
+    { 'Concepto': sobrante >= 0 ? 'SOBRANTE OPERATIVO' : 'DEFICIT', '%': '', 'Monto (L)': sobrante },
+    { 'Concepto': '', '%': '', 'Monto (L)': '' },
+    { 'Concepto': '--- QUEDA (Resumen Final) ---', '%': '', 'Monto (L)': '' },
+    { 'Concepto': 'Ganancia Empresa (10%)', '%': '10%', 'Monto (L)': ventaBruta * 0.10 },
+    { 'Concepto': 'Sobrante Fondo 28%', '%': '', 'Monto (L)': sobrante },
+    { 'Concepto': 'Comision GD recibe', '%': '5%', 'Monto (L)': ventaBruta * 0.05 },
+    { 'Concepto': 'Comision GZ recibe', '%': '3%', 'Monto (L)': ventaBruta * 0.03 },
+    { 'Concepto': 'GZ cobra total (salario+comision)', '%': '', 'Monto (L)': costoSalGZ + (ventaBruta * 0.03) },
+    { 'Concepto': 'Cada asesora recibe (15%)', '%': '', 'Monto (L)': (ventaBruta * 0.15) / numAsesoras }
+  ];
+
+  enigmeExcel(data, 'Simulacion', 'simulacion_enigme_' + numAsesoras + 'asesoras.xlsx');
+  showToast('Simulacion exportada');
 }
 
 // ========== GERENCIA DIVISIONAL ==========
@@ -2207,6 +2356,7 @@ async function loadComisiones() {
     '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u226419 \u2192 L220 c/u &bull; \u226520 \u2192 L320 c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
     '</div>' +
     '<div id="simResultado"></div>' +
+    '<div style="margin-top:16px;text-align:right;"><button class="btn btn-gold" onclick="exportSimulacion()" style="padding:10px 24px;border:1px solid var(--gold-dim);color:var(--gold);background:transparent;font-family:\'Jost\',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Exportar Simulaci\u00f3n Excel</button></div>' +
     '</div>';
 
   setTimeout(window.simular, 100);
