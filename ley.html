@@ -135,6 +135,30 @@
     .email-instruction a { font-weight: 700; text-decoration: underline; text-decoration-color: var(--dorado); text-underline-offset: 4px; }
     .email-instruction a:hover { color: var(--dorado); }
 
+    /* UPLOAD ZONE */
+    .upload-zone { border: 2px dashed var(--linea-fina); padding: 30px 20px; text-align: center; cursor: pointer; transition: var(--transition); background: var(--fondo-galeria); border-radius: 4px; position: relative; }
+    .upload-zone:hover, .upload-zone.dragover { border-color: var(--dorado); background: rgba(203,170,99,0.04); }
+    .upload-zone svg { width: 36px; height: 36px; fill: var(--dorado); margin-bottom: 10px; }
+    .upload-zone p { font-size: 0.8rem; color: var(--gris-suave); line-height: 1.6; }
+    .upload-zone p strong { color: var(--dorado); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .file-preview-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 15px; }
+    .file-preview-item { position: relative; width: 90px; height: 90px; border: 1px solid var(--linea-fina); border-radius: 4px; overflow: hidden; background: var(--fondo-galeria); }
+    .file-preview-item img, .file-preview-item video { width: 100%; height: 100%; object-fit: cover; }
+    .file-preview-item .file-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 0.55rem; color: var(--gris-suave); text-align: center; padding: 5px; word-break: break-all; }
+    .file-preview-item .remove-file { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: rgba(28,28,28,0.8); color: #fff; border: none; border-radius: 50%; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .upload-progress { margin-top: 10px; font-size: 0.7rem; color: var(--dorado); letter-spacing: 1px; display: none; }
+
+    /* SUCCESS OVERLAY */
+    .success-overlay { position: fixed; inset: 0; background: rgba(28,28,28,0.92); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+    .success-overlay.show { display: flex; }
+    .success-box { background: var(--blanco-dior); padding: 50px 40px; max-width: 520px; text-align: center; animation: fadeInUp 0.6s ease; }
+    .success-box svg { width: 50px; height: 50px; fill: var(--dorado); margin-bottom: 20px; }
+    .success-box h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 15px; color: var(--carbon); }
+    .success-box p { font-size: 0.85rem; line-height: 1.8; color: var(--gris-suave); margin-bottom: 25px; }
+    .success-box .btn-success { display: inline-block; padding: 14px 36px; background: var(--carbon); color: var(--dorado); font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; border: 1px solid var(--carbon); transition: var(--transition); text-decoration: none; }
+    .success-box .btn-success:hover { background: var(--dorado); color: var(--carbon); border-color: var(--dorado); }
+
     /* =========================================
        BOTÓN FLOTANTE WHATSAPP
        ========================================= */
@@ -310,17 +334,37 @@
           <textarea id="detalles" name="detalles" required placeholder="Describa con exactitud clínica el problema técnico, estructural o de manufactura encontrado al momento de la apertura del paquete..."></textarea>
         </div>
 
-        <button type="submit" class="btn-submit">Radicar Solicitud Oficial de Evaluación</button>
+        <div class="form-group">
+          <label>Evidencia Probatoria (Fotos y/o Videos del Defecto)</label>
+          <div class="upload-zone" id="uploadZone">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            <p>Arrastra tus archivos aquí o <strong>haz clic para seleccionar</strong></p>
+            <p style="font-size:0.65rem;margin-top:5px;">Fotos (JPG, PNG, WEBP) y Videos (MP4, MOV) — Máx. 5 archivos, 50MB c/u</p>
+            <input type="file" id="fileInput" multiple accept="image/*,video/*" onchange="handleFiles(this.files)"/>
+          </div>
+          <div class="file-preview-list" id="filePreviewList"></div>
+          <div class="upload-progress" id="uploadProgress">Subiendo archivos...</div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmitExp">Radicar Solicitud Oficial de Evaluación</button>
 
         <div class="email-instruction">
-          <strong>Mandato Probatorio Fundamental:</strong><br>
-          Para que este expediente adquiera validez procesal dentro de nuestros sistemas, usted <strong>debe remitir</strong> la evidencia gráfica (Fotografías Macro y Video de Unboxing) al buzón oficial del departamento de auditoría:<br>
-          <a href="mailto:info@enigmeofficial.com"><strong>info@enigmeofficial.com</strong></a><br>
-          <em>El asunto del correo electrónico debe titularse estrictamente como: "Evidencia Garantía - [Su Número de Pedido]".</em>
+          <strong>Nota:</strong> Puede adjuntar las fotos y videos directamente en este formulario. Si necesita enviar archivos adicionales, remítalos a
+          <a href="mailto:info@enigmeofficial.com"><strong>info@enigmeofficial.com</strong></a>
+          indicando su Número de Pedido en el asunto.
         </div>
       </form>
     </div>
   </main>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-box">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      <h3>Expediente Radicado</h3>
+      <p>Su solicitud ha sido registrada exitosamente en nuestro sistema jurídico. El equipo de auditoría de La Casa ÈNIGME revisará su caso y le contactará a la brevedad posible.</p>
+      <a href="enigme.html" class="btn-success">Conoce ÈNIGME</a>
+    </div>
+  </div>
 
   <footer class="legal-banner">
     <div class="trust-badges-container">
@@ -348,11 +392,125 @@
   </footer>
 
   <script>
-    // Prevención básica de envío del formulario para la interfaz visual
-    document.getElementById('garantia-form').addEventListener('submit', function(e) {
+    var SB_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+    var selectedFiles = [];
+
+    // ======= DRAG & DROP =======
+    var dropZone = document.getElementById('uploadZone');
+    dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', function(){ dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', function(e){
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    function handleFiles(fileList) {
+      for (var i = 0; i < fileList.length; i++) {
+        if (selectedFiles.length >= 5) break;
+        var f = fileList[i];
+        if (f.size > 50 * 1024 * 1024) { alert('El archivo "' + f.name + '" excede 50MB.'); continue; }
+        if (!f.type.startsWith('image/') && !f.type.startsWith('video/')) { alert('"' + f.name + '" no es un formato válido.'); continue; }
+        selectedFiles.push(f);
+      }
+      renderPreviews();
+      document.getElementById('fileInput').value = '';
+    }
+
+    function renderPreviews() {
+      var container = document.getElementById('filePreviewList');
+      container.innerHTML = '';
+      selectedFiles.forEach(function(f, idx) {
+        var item = document.createElement('div');
+        item.className = 'file-preview-item';
+        if (f.type.startsWith('image/')) {
+          var img = document.createElement('img');
+          img.src = URL.createObjectURL(f);
+          item.appendChild(img);
+        } else if (f.type.startsWith('video/')) {
+          var vid = document.createElement('video');
+          vid.src = URL.createObjectURL(f);
+          vid.muted = true; vid.autoplay = false;
+          item.appendChild(vid);
+        }
+        var btn = document.createElement('button');
+        btn.className = 'remove-file';
+        btn.innerHTML = '✕';
+        btn.onclick = function(){ selectedFiles.splice(idx, 1); renderPreviews(); };
+        item.appendChild(btn);
+        container.appendChild(item);
+      });
+    }
+
+    // ======= UPLOAD FILES TO SUPABASE STORAGE =======
+    async function uploadFiles(codigoPedido) {
+      var urls = [];
+      for (var i = 0; i < selectedFiles.length; i++) {
+        var f = selectedFiles[i];
+        var ext = f.name.split('.').pop();
+        var path = codigoPedido + '/' + Date.now() + '_' + i + '.' + ext;
+        var res = await fetch(SB_URL + '/storage/v1/object/expedientes-evidencia/' + path, {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': f.type, 'x-upsert': 'true' },
+          body: f
+        });
+        if (res.ok) {
+          urls.push(SB_URL + '/storage/v1/object/public/expedientes-evidencia/' + path);
+        }
+      }
+      return urls;
+    }
+
+    // ======= FORM SUBMIT =======
+    document.getElementById('garantia-form').addEventListener('submit', async function(e) {
       e.preventDefault();
-      alert('Expediente Radicado Oficialmente. Es de carácter mandatorio enviar la evidencia fotográfica y videográfica a info@enigmeofficial.com indicando su Número de Pedido para proceder con la auditoría técnica de su caso.');
-      this.reset();
+      var btn = document.getElementById('btnSubmitExp');
+      var progress = document.getElementById('uploadProgress');
+      btn.disabled = true;
+      btn.textContent = 'PROCESANDO...';
+      btn.style.opacity = '0.5';
+
+      var nombre = document.getElementById('nombre').value.trim();
+      var correo = document.getElementById('correo').value.trim();
+      var telefono = document.getElementById('telefono').value.trim();
+      var direccion = document.getElementById('direccion').value.trim();
+      var pedido = document.getElementById('pedido').value.trim();
+      var detalles = document.getElementById('detalles').value.trim();
+
+      // Upload files
+      var archivos = [];
+      if (selectedFiles.length > 0) {
+        progress.style.display = 'block';
+        progress.textContent = 'Subiendo ' + selectedFiles.length + ' archivo(s)...';
+        try { archivos = await uploadFiles(pedido || 'sin-codigo'); } catch(err) { console.error(err); }
+        progress.style.display = 'none';
+      }
+
+      // Save to Supabase
+      try {
+        var res = await fetch(SB_URL + '/rest/v1/expedientes_juridicos', {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            nombre: nombre, correo: correo, telefono: telefono,
+            direccion: direccion, codigo_pedido: pedido,
+            detalles: detalles, archivos: archivos, estado: 'pendiente'
+          })
+        });
+        if (res.ok) {
+          document.getElementById('successOverlay').classList.add('show');
+          this.reset();
+          selectedFiles = [];
+          renderPreviews();
+        } else {
+          alert('Error al enviar. Intente de nuevo.');
+        }
+      } catch(err) {
+        alert('Error de conexión. Intente de nuevo.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'RADICAR SOLICITUD OFICIAL DE EVALUACIÓN';
+      btn.style.opacity = '1';
     });
   </script>
 

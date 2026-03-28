@@ -353,6 +353,17 @@
         <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th><th>Creado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
       </div>
     </div>
+
+    <div class="collapse-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');" style="border-left:3px solid var(--danger);">
+      <h3>&#9878; Expedientes Jur&iacute;dicos</h3>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="collapse-body">
+      <div class="collapse-body-inner">
+        <div id="expedientesStats" class="stats-row" style="margin-bottom:16px;"></div>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Tel&eacute;fono</th><th>Pedido</th><th>Estado</th><th>Evidencia</th><th>Detalles</th></tr></thead><tbody id="expedientesBody"></tbody></table></div>
+      </div>
+    </div>
   </div>
 
   <!-- TAB: NOTIFICACIONES -->
@@ -1441,11 +1452,13 @@ async function loadAnalytics() {
   var results = await Promise.all([
     supaGet('web_analytics', '&order=created_at.desc'),
     supaGet('web_page_views', '&order=created_at.desc'),
-    supaGet('suscriptores', '&order=created_at.desc')
+    supaGet('suscriptores', '&order=created_at.desc'),
+    supaGet('expedientes_juridicos', '&order=created_at.desc')
   ]);
   var analytics = results[0] || [];
   var pageViews = results[1] || [];
   var suscriptores = results[2] || [];
+  var expedientes = results[3] || [];
   cachedAnalytics = analytics;
 
   // --- Stats Row ---
@@ -1464,7 +1477,8 @@ async function loadAnalytics() {
     '<div class="stat-card"><div class="stat-label">Visitantes &Uacute;nicos</div><div class="stat-value">' + Object.keys(uniqueIPs).length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Pa&iacute;ses &Uacute;nicos</div><div class="stat-value">' + Object.keys(uniqueCountries).length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Suscriptores</div><div class="stat-value" style="color:var(--success);">' + suscriptores.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Cookies Aceptadas</div><div class="stat-value">' + cookiesAccepted + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Cookies Aceptadas</div><div class="stat-value">' + cookiesAccepted + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Expedientes Jur&iacute;dicos</div><div class="stat-value" style="color:var(--danger);">' + expedientes.length + '</div></div>';
 
   // --- Geo Table: group by pais + ciudad ---
   var geoMap = {};
@@ -1539,6 +1553,56 @@ async function loadAnalytics() {
     suscHtml += '</tr>';
   });
   document.getElementById('analyticsSuscBody').innerHTML = suscHtml;
+
+  // --- Expedientes Jurídicos ---
+  var pendExp = expedientes.filter(function(e){ return e.estado === 'pendiente'; }).length;
+  var totalExp = expedientes.length;
+  document.getElementById('expedientesStats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Total Expedientes</div><div class="stat-value" style="color:var(--danger);">' + totalExp + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" style="color:var(--warn);">' + pendExp + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Resueltos</div><div class="stat-value" style="color:var(--success);">' + (totalExp - pendExp) + '</div></div>';
+
+  var expHtml = '';
+  expedientes.forEach(function(ex){
+    var estadoColor = ex.estado === 'pendiente' ? 'var(--warn)' : ex.estado === 'resuelto' ? 'var(--success)' : 'var(--danger)';
+    var archivosHtml = '-';
+    if (ex.archivos && ex.archivos.length > 0) {
+      archivosHtml = ex.archivos.map(function(url, i){
+        var isVideo = /\.(mp4|mov|webm|avi)$/i.test(url);
+        if (isVideo) return '<a href="' + esc(url) + '" target="_blank" style="color:var(--info);text-decoration:underline;font-size:.75rem;">▶ Video ' + (i+1) + '</a>';
+        return '<a href="' + esc(url) + '" target="_blank"><img src="' + esc(url) + '" style="width:50px;height:50px;object-fit:cover;border:1px solid var(--border);border-radius:2px;margin:2px;"/></a>';
+      }).join(' ');
+    }
+    var estadoSelect = '<select onchange="cambiarEstadoExpediente(' + ex.id + ',this.value)" style="padding:4px 8px;font-size:.7rem;border-color:' + estadoColor + ';color:' + estadoColor + ';">' +
+      '<option value="pendiente"' + (ex.estado==='pendiente'?' selected':'') + '>Pendiente</option>' +
+      '<option value="en_revision"' + (ex.estado==='en_revision'?' selected':'') + '>En Revisión</option>' +
+      '<option value="resuelto"' + (ex.estado==='resuelto'?' selected':'') + '>Resuelto</option>' +
+      '<option value="rechazado"' + (ex.estado==='rechazado'?' selected':'') + '>Rechazado</option></select>';
+    expHtml += '<tr>';
+    expHtml += '<td style="white-space:nowrap;">' + formatDate(ex.created_at) + '</td>';
+    expHtml += '<td>' + esc(ex.nombre) + '</td>';
+    expHtml += '<td><a href="mailto:' + esc(ex.correo) + '" style="color:var(--info);text-decoration:underline;">' + esc(ex.correo) + '</a></td>';
+    expHtml += '<td style="white-space:nowrap;">' + esc(ex.telefono) + '</td>';
+    expHtml += '<td style="color:var(--gold);font-weight:500;">' + esc(ex.codigo_pedido) + '</td>';
+    expHtml += '<td>' + estadoSelect + '</td>';
+    expHtml += '<td style="max-width:200px;">' + archivosHtml + '</td>';
+    expHtml += '<td style="max-width:250px;font-size:.78rem;line-height:1.5;">' + esc(ex.detalles).substring(0,120) + (ex.detalles.length>120?'...':'') + '</td>';
+    expHtml += '</tr>';
+  });
+  document.getElementById('expedientesBody').innerHTML = expHtml || '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:30px;">No hay expedientes registrados</td></tr>';
+}
+
+// ================================================================
+// EXPEDIENTES JURÍDICOS - CAMBIAR ESTADO
+// ================================================================
+async function cambiarEstadoExpediente(id, nuevoEstado) {
+  try {
+    await fetch(SB + '/rest/v1/expedientes_juridicos?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
