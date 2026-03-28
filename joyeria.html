@@ -1627,38 +1627,23 @@
       });
     });
 
-    // ── SHARE BUTTON ──
-    function shareProduct(name, ref, imgSrc) {
-      var url = window.location.origin + '/joyeria.html#' + ref;
-      var text = 'Descubre esta pieza de ENIGME: ' + name;
-      var imgUrl = imgSrc ? (window.location.origin + '/' + imgSrc) : '';
-      if (navigator.share) {
-        var shareData = { title: 'ENIGME - ' + name, text: text + (imgUrl ? '\n' + imgUrl : ''), url: url };
-        navigator.share(shareData).catch(function(){});
-      } else {
-        navigator.clipboard.writeText(text + ' ' + url).then(function() {
-          var toast = document.createElement('div');
-          toast.textContent = 'Enlace copiado al portapapeles';
-          toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1C1C1C;color:#CBAA63;padding:12px 24px;font-size:0.7rem;letter-spacing:2px;z-index:99999;text-transform:uppercase;font-family:Montserrat,sans-serif;border-radius:2px;';
-          document.body.appendChild(toast);
-          setTimeout(function(){ toast.remove(); }, 2500);
-        });
-      }
-    }
-
-    // ── INJECT SHARE BUTTONS ──
+    // ── INJECT SHARE BUTTONS (share → manifiesto producto.html) ──
     document.querySelectorAll('.product-card').forEach(function(card) {
-      var ref = card.querySelector('.product-code');
-      var name = card.querySelector('.product-name');
+      var refEl = card.querySelector('.product-code');
+      var nameEl2 = card.querySelector('.product-name');
       var imgEl = card.querySelector('.product-media');
-      if (ref && name) {
-        var refText = ref.textContent.replace('REF: ', '').trim();
-        var nameText = name.textContent.trim();
+      var priceEl = card.querySelector('.product-price');
+      var lemaEl = card.querySelector('.product-lema');
+      if (refEl && nameEl2) {
+        var refText = refEl.textContent.replace('REF: ', '').trim();
+        var nameText = nameEl2.textContent.trim();
         var imgSrc = imgEl ? imgEl.getAttribute('src') : '';
+        var priceText = priceEl ? priceEl.textContent.trim() : '';
+        var lemaText = lemaEl ? lemaEl.textContent.trim() : '';
         var btn = document.createElement('button');
         btn.className = 'btn-share';
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span class="share-label">COMPARTIR</span>';
-        btn.onclick = function(e) { e.stopPropagation(); shareProduct(nameText, refText, imgSrc); };
+        btn.onclick = function(e) { e.stopPropagation(); shareProduct(nameText, refText, imgSrc, priceText, lemaText); };
         card.appendChild(btn);
       }
     });

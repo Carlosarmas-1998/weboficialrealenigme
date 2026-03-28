@@ -993,26 +993,41 @@
   /* ==========================================================
      SHARE PRODUCT (GLOBAL)
   ========================================================== */
-  function shareProduct(name, refOrImg, imgSrc) {
+  function shareProduct(name, ref, imgSrc, price, lema) {
+    // Build manifest URL so shared links go directly to the product page
     var pageName = window.location.pathname.split("/").pop() || "index.html";
-    var ref = refOrImg || "";
-    var url = window.location.origin + "/" + pageName + (ref ? "#" + ref : "");
-    var imgUrl = (imgSrc || ref || "");
-    if (imgUrl && imgUrl.indexOf("http") !== 0) imgUrl = window.location.origin + "/" + imgUrl;
+    var catMap = { "joyeria.html": "joyeria", "boutique.html": "boutique", "plata.html": "plata", "liquidacion.html": "liquidacion" };
+    var cat = catMap[pageName] || "joyeria";
+    var manifestUrl = window.location.origin + "/producto.html?ref=" + encodeURIComponent(ref || "") +
+      "&name=" + encodeURIComponent(name || "") +
+      "&price=" + encodeURIComponent(price || "") +
+      "&img=" + encodeURIComponent(imgSrc || "") +
+      "&lema=" + encodeURIComponent(lema || "") +
+      "&cat=" + encodeURIComponent(cat);
     var text = "Descubre esta pieza de \u00C8NIGME: " + name;
     if (navigator.share) {
-      var shareData = { title: "\u00C8NIGME \u00B7 " + name, text: text + (imgUrl ? "\n" + imgUrl : ""), url: url };
-      navigator.share(shareData).catch(function () {});
+      navigator.share({ title: "\u00C8NIGME \u00B7 " + name, text: text, url: manifestUrl }).catch(function () {});
     } else {
-      navigator.clipboard.writeText(text + " " + url + (imgUrl ? "\n" + imgUrl : "")).then(function () {
-        var toast = document.createElement("div");
-        toast.textContent = "Enlace copiado al portapapeles";
-        toast.style.cssText =
-          "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1C1C1C;color:#CBAA63;padding:12px 24px;font-size:0.7rem;letter-spacing:2px;z-index:99999;text-transform:uppercase;font-family:Montserrat,sans-serif;border-radius:2px;";
-        document.body.appendChild(toast);
-        setTimeout(function () { toast.remove(); }, 2500);
-      });
+      var copyUrl = text + " " + manifestUrl;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(copyUrl).then(function () { showShareToast(); });
+      } else {
+        var tmp = document.createElement("textarea");
+        tmp.value = copyUrl; document.body.appendChild(tmp);
+        tmp.select(); document.execCommand("copy");
+        document.body.removeChild(tmp);
+        showShareToast();
+      }
     }
+  }
+
+  function showShareToast() {
+    var toast = document.createElement("div");
+    toast.textContent = "Enlace copiado al portapapeles";
+    toast.style.cssText =
+      "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1C1C1C;color:#CBAA63;padding:12px 24px;font-size:0.7rem;letter-spacing:2px;z-index:99999;text-transform:uppercase;font-family:Montserrat,sans-serif;border-radius:2px;";
+    document.body.appendChild(toast);
+    setTimeout(function () { toast.remove(); }, 2500);
   }
 
   /* ==========================================================
@@ -1095,10 +1110,48 @@
     }
   }
 
+  // Auto-fix all share buttons on catalog pages to share manifest URLs
+  function initShareButtons() {
+    var pageName = window.location.pathname.split("/").pop() || "";
+    var catPages = ["joyeria.html", "boutique.html", "plata.html", "liquidacion.html", "catalogo.html"];
+    if (catPages.indexOf(pageName) === -1) return;
+    var catMap = { "joyeria.html": "joyeria", "boutique.html": "boutique", "plata.html": "plata", "liquidacion.html": "liquidacion", "catalogo.html": "joyeria" };
+    var cat = catMap[pageName] || "joyeria";
+
+    document.querySelectorAll(".product-card").forEach(function(card) {
+      var existingBtn = card.querySelector(".btn-share");
+      var refEl = card.querySelector(".product-code");
+      var nameEl = card.querySelector(".product-name");
+      var imgEl = card.querySelector(".product-media");
+      var priceEl = card.querySelector(".product-price");
+      var lemaEl = card.querySelector(".product-lema");
+      if (!refEl || !nameEl) return;
+
+      var ref = refEl.textContent.replace("REF: ", "").trim();
+      var name = nameEl.textContent.trim();
+      var img = imgEl ? imgEl.getAttribute("src") : "";
+      var price = priceEl ? priceEl.textContent.trim() : "";
+      var lema = lemaEl ? lemaEl.textContent.trim() : "";
+
+      if (existingBtn) {
+        // Replace the old onclick with the new manifest share
+        existingBtn.onclick = function(e) { e.stopPropagation(); shareProduct(name, ref, img, price, lema); };
+      } else {
+        // Inject share button if none exists
+        var btn = document.createElement("button");
+        btn.className = "btn-share";
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span class="share-label">COMPARTIR</span>';
+        btn.onclick = function(e) { e.stopPropagation(); shareProduct(name, ref, img, price, lema); };
+        card.appendChild(btn);
+      }
+    });
+  }
+
   onReady(function () {
     // initAbril() removed - abril-bot.js handles the bot
     initFadeObserver();
     initDropdownToggle();
     initDeepLinks();
+    initShareButtons();
   });
 })();
