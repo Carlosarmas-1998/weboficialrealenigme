@@ -121,7 +121,7 @@
     /* ── EDIT MODAL ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200;}
     .modal-overlay.show{display:flex;}
-    .modal-box{background:var(--surface);border-radius:4px;padding:30px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;}
+    .modal-box{background:var(--surface);border-radius:4px;padding:30px;max-width:720px;width:94%;max-height:90vh;overflow-y:auto;}
     .modal-box .card-title{margin-bottom:20px;}
 
     @media(max-width:768px){
@@ -412,6 +412,29 @@
       <div class="form-group"><label>Direcci&oacute;n</label><input id="editDireccion"/></div>
       <div class="form-group"><label>Fecha Ingreso</label><input id="editFechaIngreso" type="date"/></div>
     </div>
+
+    <!-- Document editing section -->
+    <div style="margin-top:18px;border-top:1px solid var(--borde);padding-top:16px;">
+      <div style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dorado);margin-bottom:12px;font-weight:600;">&#9672; Documentos de Alta (Reemplazar Fotos)</div>
+      <div id="editDocsCurrentContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:14px;">
+        <!-- Current docs will be loaded here -->
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+        <div class="upload-field">
+          <label>Reemplazar DNI</label>
+          <input type="file" id="editFileDni" accept="image/*,.pdf"/>
+        </div>
+        <div class="upload-field">
+          <label>Reemplazar Cuenta Bancaria</label>
+          <input type="file" id="editFileCuenta" accept="image/*,.pdf"/>
+        </div>
+        <div class="upload-field">
+          <label>Reemplazar Doc. Adicional</label>
+          <input type="file" id="editFileExtra" accept="image/*,.pdf"/>
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top:16px;display:flex;gap:10px;">
       <button class="btn" onclick="saveEditGZ()">Guardar Cambios</button>
       <button class="btn btn-outline" onclick="closeEditModal()">Cancelar</button>
@@ -839,7 +862,7 @@ async function altaGerente(id) {
 }
 
 /* ── EDIT MODAL ── */
-function openEditGZ(id) {
+async function openEditGZ(id) {
   var g = gerentes.find(function(x){ return x.id === id; });
   if (!g) return;
   document.getElementById('editId').value = g.id;
@@ -855,6 +878,48 @@ function openEditGZ(id) {
   document.getElementById('editFechaIngreso').value = g.fecha_ingreso || '';
   document.getElementById('editError').textContent = '';
   document.getElementById('editSuccess').textContent = '';
+  // Reset file inputs
+  var fi1 = document.getElementById('editFileDni'); if(fi1) fi1.value = '';
+  var fi2 = document.getElementById('editFileCuenta'); if(fi2) fi2.value = '';
+  var fi3 = document.getElementById('editFileExtra'); if(fi3) fi3.value = '';
+
+  // Load current documents from registros_alta
+  var docsContainer = document.getElementById('editDocsCurrentContainer');
+  docsContainer.innerHTML = '<p style="color:var(--gris);font-size:.75rem;">Cargando documentos...</p>';
+  try {
+    var registros = await api('/rest/v1/registros_alta?codigo=eq.' + g.codigo + '&tipo=eq.gerente_zona&select=archivo_dni,archivo_cuenta,archivo_extra&order=created_at.desc&limit=1');
+    if (registros && registros.length && !registros.error) {
+      var reg = registros[0];
+      var html = '';
+      if (reg.archivo_dni) {
+        var isDniPdf = reg.archivo_dni.toLowerCase().endsWith('.pdf');
+        html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">DNI Actual</div>' +
+          (isDniPdf ? '<a href="' + reg.archivo_dni + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+          '<img src="' + reg.archivo_dni + '" style="max-width:160px;max-height:120px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+          '</div>';
+      }
+      if (reg.archivo_cuenta) {
+        var isCuentaPdf = reg.archivo_cuenta.toLowerCase().endsWith('.pdf');
+        html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">Cuenta Actual</div>' +
+          (isCuentaPdf ? '<a href="' + reg.archivo_cuenta + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+          '<img src="' + reg.archivo_cuenta + '" style="max-width:160px;max-height:120px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+          '</div>';
+      }
+      if (reg.archivo_extra) {
+        var isExtraPdf = reg.archivo_extra.toLowerCase().endsWith('.pdf');
+        html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">Doc. Adicional</div>' +
+          (isExtraPdf ? '<a href="' + reg.archivo_extra + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+          '<img src="' + reg.archivo_extra + '" style="max-width:160px;max-height:120px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+          '</div>';
+      }
+      docsContainer.innerHTML = html || '<p style="color:var(--gris);font-size:.75rem;">No hay documentos subidos.</p>';
+    } else {
+      docsContainer.innerHTML = '<p style="color:var(--gris);font-size:.75rem;">No hay documentos subidos.</p>';
+    }
+  } catch(e) {
+    docsContainer.innerHTML = '<p style="color:var(--gris);font-size:.75rem;">No se pudieron cargar documentos.</p>';
+  }
+
   document.getElementById('editModal').classList.add('show');
 }
 
@@ -867,6 +932,9 @@ async function saveEditGZ() {
   var errEl = document.getElementById('editError');
   var sucEl = document.getElementById('editSuccess');
   errEl.textContent = ''; sucEl.textContent = '';
+
+  var g = gerentes.find(function(x){ return x.id === id; });
+  if (!g) { errEl.textContent = 'Gerente no encontrado.'; return; }
 
   var body = {
     dni: document.getElementById('editDni').value.trim(),
@@ -887,9 +955,58 @@ async function saveEditGZ() {
 
   try {
     await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, body);
-    sucEl.textContent = 'Datos actualizados.';
+
+    // Handle file uploads (replace documents)
+    var fileDni = document.getElementById('editFileDni').files[0];
+    var fileCuenta = document.getElementById('editFileCuenta').files[0];
+    var fileExtra = document.getElementById('editFileExtra').files[0];
+
+    if (fileDni || fileCuenta || fileExtra) {
+      async function uploadEditDoc(file, folder) {
+        var ext = file.name.split('.').pop();
+        var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+        var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+          method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
+        });
+        return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
+      }
+
+      var updateDocs = {};
+      if (fileDni) {
+        var newDniUrl = await uploadEditDoc(fileDni, 'altas/gz-' + g.codigo);
+        if (newDniUrl) updateDocs.archivo_dni = newDniUrl;
+      }
+      if (fileCuenta) {
+        var newCuentaUrl = await uploadEditDoc(fileCuenta, 'altas/gz-' + g.codigo);
+        if (newCuentaUrl) updateDocs.archivo_cuenta = newCuentaUrl;
+      }
+      if (fileExtra) {
+        var newExtraUrl = await uploadEditDoc(fileExtra, 'altas/gz-' + g.codigo);
+        if (newExtraUrl) updateDocs.archivo_extra = newExtraUrl;
+      }
+
+      // Update registros_alta with new document URLs
+      if (Object.keys(updateDocs).length) {
+        await fetch(SB + '/rest/v1/registros_alta?codigo=eq.' + g.codigo + '&tipo=eq.gerente_zona', {
+          method: 'PATCH', headers: HJ, body: JSON.stringify(updateDocs)
+        });
+      }
+    }
+
+    // Also update registros_alta basic data
+    await fetch(SB + '/rest/v1/registros_alta?codigo=eq.' + g.codigo + '&tipo=eq.gerente_zona', {
+      method: 'PATCH', headers: HJ,
+      body: JSON.stringify({
+        nombre: body.nombre, dni: body.dni, telefono: body.telefono,
+        email: body.email, direccion: body.direccion, rtn: body.rtn,
+        numero_cuenta: body.numero_cuenta, nombre_banco: body.nombre_banco,
+        fecha_nacimiento: body.fecha_nacimiento, fecha_ingreso: body.fecha_ingreso
+      })
+    });
+
+    sucEl.textContent = 'Datos y documentos actualizados.';
     loadGerentesZona();
-    setTimeout(closeEditModal, 1200);
+    setTimeout(closeEditModal, 1500);
   } catch(e) {
     errEl.textContent = 'Error al actualizar.';
     console.error(e);

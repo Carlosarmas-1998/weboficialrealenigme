@@ -763,12 +763,14 @@ async function guardarCoordinador() {
       await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, payload);
       suc.textContent = 'Coordinador actualizado.';
     } else {
-      // Código secuencial desde 301201 — consulta vendedoras Y coordinadores
+      // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
       var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
       var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+      var maxCodeGer = await api('/rest/v1/gerentes_zona?select=codigo&order=codigo.desc&limit=1');
       var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
       var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-      var codigo = Math.max(numVend, numCoord, 301200) + 1;
+      var numGer = maxCodeGer.length ? parseInt(maxCodeGer[0].codigo) : 0;
+      var codigo = Math.max(numVend, numCoord, numGer, 301200) + 1;
 
       payload.codigo = String(codigo);
       payload.sector_id = sectorId;
@@ -844,8 +846,10 @@ async function guardarCoordinador() {
 
 async function bajaCoordinador(coordId, sectorId) {
   if (!confirm('Dar de baja al coordinador actual? Sus datos se conservan. Debera asignar uno nuevo.')) return;
+  var motivo = prompt('Motivo de la baja:');
+  if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
   try {
-    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString().split('T')[0] });
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
     await loadSectores();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }
@@ -1170,12 +1174,14 @@ async function guardarNombramiento() {
   }
 
   try {
-    // Código secuencial desde 301201 — consulta vendedoras Y coordinadores
+    // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
     var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
     var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+    var maxCodeGer = await api('/rest/v1/gerentes_zona?select=codigo&order=codigo.desc&limit=1');
     var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
     var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-    var codigo = Math.max(numVend, numCoord, 301200) + 1;
+    var numGer = maxCodeGer.length ? parseInt(maxCodeGer[0].codigo) : 0;
+    var codigo = Math.max(numVend, numCoord, numGer, 301200) + 1;
 
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
