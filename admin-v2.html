@@ -1564,16 +1564,22 @@ async function toggleGerencia(id, nuevoEstado) {
 }
 
 async function eliminarGerencia(id) {
-  if (!confirm('¿Eliminar esta gerencia divisional permanentemente? Se eliminarán también todos sus gerentes de zona, sectores y datos asociados.')) return;
+  if (!confirm('¿Eliminar esta gerencia divisional permanentemente? Se eliminarán también todos sus gerentes de zona, zonas, mensajes y datos asociados.')) return;
   if (!confirm('SEGUNDA CONFIRMACIÓN: ¿Está seguro? Esta acción NO se puede deshacer.')) return;
   try {
-    await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
       method: 'DELETE',
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
-    showToast('Gerencia divisional eliminada');
-    loadGerenciasDivisionales();
-  } catch(e) { showToast('Error al eliminar', true); }
+    if (res.ok) {
+      showToast('Gerencia divisional eliminada correctamente');
+      loadGerenciasDivisionales();
+    } else {
+      var errData = await res.text();
+      console.error('Error eliminando gerencia:', res.status, errData);
+      showToast('Error al eliminar: ' + res.status, true);
+    }
+  } catch(e) { showToast('Error de conexión: ' + e.message, true); }
 }
 
 async function eliminarNombramiento(id) {
@@ -1918,11 +1924,11 @@ var COMISION_ESTRUCTURA = [
   { concepto: 'Comision Asesoras', pct: 15, color: '#b08fd0' },
   { concepto: 'Logistica', pct: 8, color: '#9e6b6b' },
   { concepto: 'Comision Gerencia Divisional', pct: 5, color: '#c9a96e' },
-  { concepto: 'Comision Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 base por gerente' },
+  { concepto: 'Comision Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
   { concepto: 'Gerencia General', pct: 5, color: '#8b7355' },
   { concepto: 'Marketing y Web', pct: 4, color: '#a08840' },
-  { concepto: 'Fondo Operativo (Salarios GZ + Nombramientos)', pct: 18, color: '#d08050' },
-  { concepto: 'Empresa - Utilidad Neta (INTOCABLE)', pct: 12, color: '#d0a84f' }
+  { concepto: 'Fondo Operativo (Salarios GZ L16k + Nombramientos)', pct: 20, color: '#d08050' },
+  { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10, color: '#d0a84f' }
 ];
 
 async function loadComisiones() {
@@ -1958,7 +1964,8 @@ async function loadComisiones() {
   document.getElementById('comisionesStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Venta Neta Total</div><div class="stat-value">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Producto/Coste (30%)</div><div class="stat-value">L' + (totalNeta*0.30).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Intocable (12%)</div><div class="stat-value">L' + (totalNeta*0.12).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10%)</div><div class="stat-value" style="color:var(--success);">L' + (totalNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Fondo Operativo (20%)</div><div class="stat-value">L' + (totalNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Asesoras (15%)</div><div class="stat-value">L' + (totalNeta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. GD (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5%)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
@@ -2035,35 +2042,48 @@ async function loadComisiones() {
   var peContainer = document.getElementById('puntoEquilibrio');
   var peExpl = document.getElementById('peExplicacion');
   var sueldoGZ = 16000;
-  var pctFondo = 0.18; // Fondo Operativo
-  var pctEmpresa = 0.12; // Utilidad neta intocable
-  var ventaNetaMinGZ = sueldoGZ / pctFondo; // ~88,889
+  var pctFondo = 0.20; // Fondo Operativo 20%
+  var pctEmpresa = 0.10; // Ganancia neta empresa 10%
+  var ventaNetaMinGZ = sueldoGZ / pctFondo; // 80,000
   var ventaBrutaMinGZ = ventaNetaMinGZ / 0.85;
 
-  // With 10 nombramientos
+  // With 10 nombramientos (<=19 → L220 c/u)
   var nom10 = 10 * 220;
   var ventaNeta10nom = (sueldoGZ + nom10) / pctFondo;
-  // With 20 nombramientos
+  // With 19 nombramientos (<=19 → L220 c/u)
+  var nom19 = 19 * 220;
+  var ventaNeta19nom = (sueldoGZ + nom19) / pctFondo;
+  // With 20 nombramientos (>=20 → L320 c/u)
   var nom20 = 20 * 320;
   var ventaNeta20nom = (sueldoGZ + nom20) / pctFondo;
+  // With 30 nombramientos (>=20 → L320 c/u)
+  var nom30 = 30 * 320;
+  var ventaNeta30nom = (sueldoGZ + nom30) / pctFondo;
 
   peContainer.innerHTML =
     '<div class="stat-card"><div class="stat-label">Sueldo Bruto G. Zona</div><div class="stat-value" style="font-size:1.5rem;">L' + sueldoGZ.toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Fondo Operativo</div><div class="stat-value" style="font-size:1.5rem;">18%</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Intocable</div><div class="stat-value" style="font-size:1.5rem;color:var(--success);">12%</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Fondo Operativo</div><div class="stat-value" style="font-size:1.5rem;">20%</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa Ganancia</div><div class="stat-value" style="font-size:1.5rem;color:var(--success);">10%</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Neta Min / GZ (solo salario)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Bruta Min / GZ</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 10 nombramientos</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Min con 20 nombramientos</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Min con 10 nomb. (L220 c/u)</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Min con 19 nomb. (L220 c/u)</div><div class="stat-value" style="font-size:1.3rem;">L' + Math.ceil(ventaNeta19nom).toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Min con 20 nomb. (L320 c/u)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Min con 30 nomb. (L320 c/u)</div><div class="stat-value" style="font-size:1.3rem;color:var(--warn);">L' + Math.ceil(ventaNeta30nom).toLocaleString('es-HN') + '</div></div>';
 
-  peExpl.innerHTML = '<strong style="color:var(--gold);">NUEVO MODELO FINANCIERO:</strong><br><br>' +
-    '30% producto + 15% asesoras + 8% logistica + 5% divisional + 3% zona + 5% gerencia general + 4% marketing = <strong>70% costos variables</strong><br>' +
-    '<strong style="color:var(--success);">12% Empresa (INTOCABLE)</strong> = utilidad neta pura, no se toca para nada.<br>' +
-    '<strong>18% Fondo Operativo</strong> = cubre salarios GZ (L16,000) + pago nombramientos + gastos operativos.<br><br>' +
-    '<strong style="color:var(--warn);">Punto de equilibrio:</strong> Cada zona debe vender minimo <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + ' en venta neta</strong> (L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + ' bruta) solo para cubrir el salario del GZ.<br>' +
-    'Con 10 nombramientos: <strong>L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</strong> neta minima.<br>' +
-    'Con 20 nombramientos: <strong>L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</strong> neta minima.<br><br>' +
-    'Toda venta por encima del punto de equilibrio genera <strong style="color:var(--success);">ganancia extra al fondo operativo</strong> (para bonos, expansion, etc). El 12% de la empresa SIEMPRE se genera desde la primera venta.';
+  peExpl.innerHTML = '<strong style="color:var(--gold);">MODELO FINANCIERO ÈNIGME:</strong><br><br>' +
+    '30% producto + 15% asesoras + 8% logística + 5% divisional + 3% zona + 5% gerencia general + 4% marketing = <strong>70% costos variables</strong><br>' +
+    '<strong style="color:var(--success);">10% Empresa (INTOCABLE)</strong> = ganancia neta pura, no se toca para nada.<br>' +
+    '<strong>20% Fondo Operativo</strong> = cubre salarios GZ (L16,000 brutos fijos) + pago nombramientos + gastos operativos.<br><br>' +
+    '<strong style="color:var(--gold);">PAGO POR NOMBRAMIENTO:</strong><br>' +
+    '&bull; Si el GZ tiene <strong>19 o menos</strong> nombramientos en la campaña → <strong>L220</strong> por nombramiento.<br>' +
+    '&bull; Si el GZ tiene <strong>20 o más</strong> nombramientos en la campaña → <strong>L320</strong> por nombramiento.<br><br>' +
+    '<strong style="color:var(--warn);">Punto de equilibrio:</strong> Cada zona debe vender mínimo <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMinGZ).toLocaleString('es-HN') + ' en venta neta</strong> (L' + Math.ceil(ventaBrutaMinGZ).toLocaleString('es-HN') + ' bruta) solo para cubrir el salario del GZ.<br>' +
+    'Con 10 nombramientos (L220): <strong>L' + Math.ceil(ventaNeta10nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
+    'Con 19 nombramientos (L220): <strong>L' + Math.ceil(ventaNeta19nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
+    'Con 20 nombramientos (L320): <strong>L' + Math.ceil(ventaNeta20nom).toLocaleString('es-HN') + '</strong> neta mínima.<br>' +
+    'Con 30 nombramientos (L320): <strong>L' + Math.ceil(ventaNeta30nom).toLocaleString('es-HN') + '</strong> neta mínima.<br><br>' +
+    'Toda venta por encima del punto de equilibrio genera <strong style="color:var(--success);">ganancia extra al fondo operativo</strong> (para bonos, expansión, etc). El 10% de la empresa SIEMPRE se genera desde la primera venta.';
 
   // Pie chart
   if (chartComisionesPie) chartComisionesPie.destroy();
@@ -2124,15 +2144,16 @@ function calcularInversion() {
     { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3 },
     { concepto: 'Gerencia General', pct: 5 },
     { concepto: 'Marketing y Web', pct: 4 },
-    { concepto: 'Fondo Operativo (Salarios GZ)', pct: 18 },
-    { concepto: 'Empresa - Utilidad Neta', pct: 12 }
+    { concepto: 'Fondo Operativo (Salarios GZ + Nombramientos)', pct: 20 },
+    { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10 }
   ];
 
   // Stats
   document.getElementById('inversionStats').innerHTML =
     '<div class="stat-card"><div class="stat-label">Inversi\u00f3n (30%)</div><div class="stat-value">L' + inversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + ventaNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Utilidad Empresa (12%)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.12).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Ganancia Empresa (10%)</div><div class="stat-value" style="color:var(--success);">L' + (ventaNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Fondo Operativo (20%)</div><div class="stat-value">L' + (ventaNeta*0.20).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
 
   // Table
   var html = '';
@@ -2140,7 +2161,7 @@ function calcularInversion() {
   breakdown.forEach(function(b) {
     var monto = ventaNeta * (b.pct / 100);
     totalCalc += monto;
-    var highlight = b.pct === 12 ? ' style="color:var(--success);font-weight:500;"' : '';
+    var highlight = b.pct === 10 ? ' style="color:var(--success);font-weight:500;"' : '';
     html += '<tr><td>' + b.concepto + '</td><td style="color:var(--gold);">' + b.pct + '%</td><td' + highlight + '>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
   html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);">100%</td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
