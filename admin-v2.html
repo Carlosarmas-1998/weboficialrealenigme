@@ -2065,7 +2065,7 @@ async function loadComisiones() {
   var sueldoGZ = 16000;
   var pctGastos = 0.28; // Gastos de Pagos 28%
   var pctEmpresa = 0.10; // Ganancia neta empresa 10%
-  var ventaMinAsesora = 1999; // Venta mínima por asesora
+  var ventaMinAsesora = 2499; // Venta mínima por asesora (pedido mínimo)
   var ventaNetaMinGZ = sueldoGZ / pctGastos;
   var ventaBrutaMinGZ = ventaNetaMinGZ / 0.85;
 
@@ -2078,10 +2078,10 @@ async function loadComisiones() {
     var costoTotalGZ = sueldoGZ + costoNombramientos;
     var ventaNetaMin = costoTotalGZ / pctGastos;
     var ventaBrutaMin = ventaNetaMin / 0.85;
-    // Cada asesora vende mínimo L1,999. ¿Cuántas asesoras se necesitan?
+    // Cada asesora vende mínimo L2,499. ¿Cuántas asesoras se necesitan?
     var asesorasNecesarias = Math.ceil(ventaBrutaMin / ventaMinAsesora);
     // Cuántos nombramientos mínimos para ser rentable (ingresos > costos)
-    var ingresosPorNom = ventaMinAsesora; // cada nombramiento = 1 asesora que vende L1,999
+    var ingresosPorNom = ventaMinAsesora; // cada nombramiento = 1 asesora que vende L2,499
     var gananciaNetoPerAsesora = ventaMinAsesora * 0.85; // venta neta por asesora
     var fondoPerAsesora = gananciaNetoPerAsesora * pctGastos; // lo que queda del 28% per asesora
     // nombramientos mínimos para cubrir salario GZ:  sueldoGZ / (fondoPerAsesora - pagoPerNom)
@@ -2100,7 +2100,7 @@ async function loadComisiones() {
         '<div class="stat-card"><div class="stat-label">Costo Total GZ</div><div class="stat-value" style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</div></div>' +
         '<div class="stat-card"><div class="stat-label">Venta Neta Min.</div><div class="stat-value" style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</div></div>' +
         '<div class="stat-card"><div class="stat-label">Venta Bruta Min.</div><div class="stat-value">L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Asesoras Necesarias (L1,999 c/u)</div><div class="stat-value" style="color:var(--success);">' + asesorasNecesarias + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Asesoras Necesarias (L2,499 c/u)</div><div class="stat-value" style="color:var(--success);">' + asesorasNecesarias + '</div></div>' +
         '</div>' +
         '<div style="margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);font-size:.75rem;line-height:1.8;">' +
         '<strong style="color:var(--gold);">Desglose:</strong><br>' +
@@ -2109,7 +2109,7 @@ async function loadComisiones() {
         'Total a cubrir del 28%: <strong style="color:var(--warn);">L' + costoTotalGZ.toLocaleString('es-HN') + '</strong><br>' +
         'Venta neta requerida: L' + costoTotalGZ.toLocaleString('es-HN') + ' / 0.28 = <strong style="color:var(--gold);">L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + '</strong><br>' +
         'Venta bruta requerida: L' + Math.ceil(ventaNetaMin).toLocaleString('es-HN') + ' / 0.85 = <strong>L' + Math.ceil(ventaBrutaMin).toLocaleString('es-HN') + '</strong><br>' +
-        'Si cada asesora vende m\u00ednimo <strong>L1,999</strong> brutos \u2192 se necesitan <strong style="color:var(--success);">' + asesorasNecesarias + ' asesoras activas</strong> vendiendo.' +
+        'Si cada asesora vende m\u00ednimo <strong>L2,499</strong> brutos \u2192 se necesitan <strong style="color:var(--success);">' + asesorasNecesarias + ' asesoras activas</strong> vendiendo.' +
         '</div>';
     }
   }
@@ -2131,7 +2131,7 @@ async function loadComisiones() {
     '<strong>28% Gastos de Pagos</strong> = salarios GZ (L16,000 brutos) + nombramientos + operativo.<br><br>' +
     '<strong style="color:var(--gold);">PAGO POR NOMBRAMIENTO:</strong><br>' +
     '&bull; \u226419 nombramientos \u2192 <strong>L220</strong> c/u &bull; \u226520 nombramientos \u2192 <strong>L320</strong> c/u<br><br>' +
-    '<strong style="color:var(--gold);">VENTA M\u00cdNIMA POR ASESORA: L1,999</strong><br><br>' +
+    '<strong style="color:var(--gold);">VENTA M\u00cdNIMA POR ASESORA: L2,499</strong><br><br>' +
     '<div style="background:var(--surface2);border:1px solid var(--gold);padding:16px;border-radius:4px;margin:12px 0;">' +
     '<strong style="color:var(--gold);">CALCULADORA DE RENTABILIDAD POR ZONA</strong><br><br>' +
     '<label style="font-size:.75rem;color:var(--text-muted);">\u00bfCu\u00e1ntos nombramientos espera dar en la zona?</label><br>' +
