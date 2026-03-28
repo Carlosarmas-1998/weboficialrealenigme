@@ -169,6 +169,15 @@
     @media(max-width:480px){
       .stats-row{grid-template-columns:1fr;}
     }
+    /* COLLAPSIBLE SECTIONS */
+    .collapse-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border:1px solid var(--border);cursor:pointer;margin-bottom:0;transition:all .2s;user-select:none;}
+    .collapse-header:hover{border-color:var(--gold-dim);background:var(--surface2);}
+    .collapse-header h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;color:var(--gold);margin:0;pointer-events:none;}
+    .collapse-header .collapse-icon{font-size:1.2rem;color:var(--text-muted);transition:transform .3s;pointer-events:none;}
+    .collapse-header.open .collapse-icon{transform:rotate(180deg);}
+    .collapse-body{max-height:0;overflow:hidden;transition:max-height .4s ease;border:1px solid var(--border);border-top:none;margin-bottom:16px;}
+    .collapse-body.open{max-height:5000px;}
+    .collapse-body-inner{padding:18px;}
   </style>
 </head>
 <body>
@@ -305,17 +314,45 @@
     </div>
     <div id="analyticsStats" class="stats-row"></div>
 
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Visitantes por Pa&iacute;s</h3>
-    <div class="table-wrap"><table><thead><tr><th>Pa&iacute;s</th><th>Ciudad</th><th>Visitas</th><th>&Uacute;ltima Visita</th></tr></thead><tbody id="analyticsGeoBody"></tbody></table></div>
+    <div class="collapse-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
+      <h3>Visitantes por Pa&iacute;s</h3>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="collapse-body">
+      <div class="collapse-body-inner">
+        <div class="table-wrap"><table><thead><tr><th>Pa&iacute;s</th><th>Ciudad</th><th>Visitas</th><th>&Uacute;ltima Visita</th></tr></thead><tbody id="analyticsGeoBody"></tbody></table></div>
+      </div>
+    </div>
 
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">P&aacute;ginas M&aacute;s Visitadas</h3>
-    <div class="table-wrap"><table><thead><tr><th>P&aacute;gina</th><th>Categor&iacute;a</th><th>Visitas</th></tr></thead><tbody id="analyticsViewsBody"></tbody></table></div>
+    <div class="collapse-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
+      <h3>P&aacute;ginas M&aacute;s Visitadas</h3>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="collapse-body">
+      <div class="collapse-body-inner">
+        <div class="table-wrap"><table><thead><tr><th>P&aacute;gina</th><th>Categor&iacute;a</th><th>Visitas</th></tr></thead><tbody id="analyticsViewsBody"></tbody></table></div>
+      </div>
+    </div>
 
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Visitantes Recientes</h3>
-    <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>P&aacute;gina</th><th>Ciudad</th><th>Pa&iacute;s</th><th>Cookies</th></tr></thead><tbody id="analyticsRecentBody"></tbody></table></div>
+    <div class="collapse-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
+      <h3>Visitantes Recientes</h3>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="collapse-body">
+      <div class="collapse-body-inner">
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>P&aacute;gina</th><th>Ciudad</th><th>Pa&iacute;s</th><th>Cookies</th></tr></thead><tbody id="analyticsRecentBody"></tbody></table></div>
+      </div>
+    </div>
 
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Suscriptores del Club</h3>
-    <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th><th>Creado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
+    <div class="collapse-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
+      <h3>Suscriptores del Club</h3>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="collapse-body">
+      <div class="collapse-body-inner">
+        <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th><th>Creado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
+      </div>
+    </div>
   </div>
 
   <!-- TAB: NOTIFICACIONES -->

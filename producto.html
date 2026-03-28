@@ -233,7 +233,36 @@
     document.getElementById('refBadge').textContent = 'REF: ' + productRef;
     document.getElementById('heroImg').src = productImg;
     document.getElementById('productTitle').textContent = productName;
-    document.getElementById('productPrice').textContent = productPrice;
+    // Geolocation-based pricing
+    var TASA_CAMBIO = 31.50; // HNL to EUR
+    var priceNumRaw = parseInt(productPrice.replace(/[^0-9]/g, '')) || 0;
+
+    function renderPrice(country) {
+      var priceEl = document.getElementById('productPrice');
+      var europeanCountries = ['Spain','France','Germany','Italy','Portugal','Netherlands','Belgium','Austria','Ireland','Greece','Finland','Luxembourg'];
+
+      if (europeanCountries.indexOf(country) !== -1) {
+        var eur = (priceNumRaw / TASA_CAMBIO).toFixed(2);
+        // Psychological pricing
+        var eurNum = parseFloat(eur);
+        if (eurNum > 10) eur = (Math.ceil(eurNum) - 0.01).toFixed(2);
+        priceEl.innerHTML = '€' + eur + ' <span style="font-size:0.7rem;color:var(--gris-suave);font-family:Montserrat,sans-serif;font-weight:300;letter-spacing:0;">(' + productPrice + ')</span>';
+        // Update cart price for EUR
+        window.cartPriceDisplay = '€' + eur;
+        window.cartPriceNum = eur;
+        window.cartCurrency = 'EUR';
+      } else {
+        priceEl.textContent = productPrice;
+        window.cartPriceDisplay = productPrice;
+        window.cartCurrency = 'HNL';
+      }
+    }
+
+    // Try geolocation
+    fetch('https://ip-api.com/json/?fields=status,country').then(function(r){ return r.json(); }).then(function(geo){
+      if (geo.status === 'success') renderPrice(geo.country);
+      else renderPrice('Honduras');
+    }).catch(function(){ renderPrice('Honduras'); });
 
     // ======= MANIFESTO GENERATOR =======
     function generateManifesto(name, category, lema) {
@@ -320,7 +349,8 @@
       if (existing !== -1) {
         cart[existing].qty = (cart[existing].qty || 1) + 1;
       } else {
-        cart.push({ ref: productRef, name: productName, price: 'L ' + priceNum, img: productImg, qty: 1 });
+        var cartPrice = window.cartCurrency === 'EUR' ? '€' + window.cartPriceNum : 'L ' + priceNum;
+        cart.push({ ref: productRef, name: productName, price: cartPrice, img: productImg, qty: 1 });
       }
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       updateCounts();
