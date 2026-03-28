@@ -483,10 +483,11 @@ async function doLogin() {
   if (!codigo || !password) { errEl.textContent = 'Ingrese su codigo y contrasena.'; return; }
 
   try {
-    var res = await fetch(SB + '/rest/v1/gerentes_zona?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true&select=*', { headers: H });
+    var res = await fetch(SB + '/rest/v1/gerentes_zona?codigo=eq.' + encodeURIComponent(codigo) + '&select=*', { headers: H });
     var data = await res.json();
-    if (!data.length) { errEl.textContent = 'Codigo no encontrado o cuenta inactiva.'; return; }
+    if (!data.length) { errEl.textContent = 'Codigo no encontrado.'; return; }
     var gerente = data[0];
+    if (!gerente.activo) { errEl.textContent = 'USUARIO DE BAJA. Su cuenta ha sido desactivada. Contacte a su Gerencia Divisional.'; errEl.style.fontWeight = '700'; return; }
     if (gerente.password_temporal !== password) { errEl.textContent = 'Contrasena incorrecta.'; return; }
 
     session = gerente;

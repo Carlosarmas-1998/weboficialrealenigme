@@ -137,9 +137,11 @@
     @keyframes goldShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
     @keyframes ripplePulse { 0% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0.5); } 70% { box-shadow: 0 0 0 12px rgba(203, 170, 99, 0); } 100% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0); } }
     @keyframes sparkle { 0%,100% { box-shadow: 0 0 4px rgba(203,170,99,0.4), 0 0 8px rgba(203,170,99,0.2); } 25% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 16px rgba(203,170,99,0.4), 4px -4px 6px rgba(255,255,255,0.3); } 50% { box-shadow: 0 0 12px rgba(203,170,99,0.6), 0 0 24px rgba(203,170,99,0.3), -4px 4px 8px rgba(255,255,255,0.2); } 75% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 18px rgba(203,170,99,0.4), 3px 3px 6px rgba(255,255,255,0.3); } }
-    .catalogo-btn { position:relative; display:inline-block; padding:9px 22px; font-weight:700; font-size:clamp(0.6rem,1vw,0.75rem); letter-spacing:4px; text-transform:uppercase; color:var(--carbon) !important; background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brillo) 40%, var(--dorado) 70%, #d4b66a 100%); background-size:300% 300%; border:none; border-radius:2px; animation: goldShimmer 4s infinite linear, sparkle 2s infinite ease-in-out; transition:all .3s; overflow:hidden; }
-    .catalogo-btn:hover { transform:translateY(-2px); filter:brightness(1.1); }
+    .catalogo-btn { position:relative; display:inline-block; padding:16px 40px; font-weight:800; font-size:clamp(0.85rem,1.6vw,1.1rem); letter-spacing:6px; text-transform:uppercase; color:var(--carbon) !important; background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brillo) 40%, var(--dorado) 70%, #d4b66a 100%); background-size:300% 300%; border:none; border-radius:4px; animation: goldShimmer 4s infinite linear, sparkle 2s infinite ease-in-out, ripplePulse 2.5s infinite ease-in-out; transition:all .3s; overflow:hidden; box-shadow: 0 4px 20px rgba(203,170,99,0.5); text-decoration:none !important; }
+    .catalogo-btn:hover { transform:translateY(-3px) scale(1.05); filter:brightness(1.15); box-shadow: 0 8px 30px rgba(203,170,99,0.7); }
     .catalogo-btn::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 60%); animation:sparkleMove 3s infinite linear; pointer-events:none; }
+    @media(max-width:768px){ .catalogo-btn { padding:14px 32px; font-size:clamp(0.75rem,3vw,0.95rem); letter-spacing:5px; } }
+    @media(max-width:480px){ .catalogo-btn { padding:12px 26px; font-size:0.75rem; letter-spacing:4px; } }
     @keyframes sparkleMove { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
     /* ── NAVBAR ── */

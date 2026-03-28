@@ -238,7 +238,7 @@
       </div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Nombre</th><th>DNI</th><th>Email</th><th>Tel</th><th>Puesto</th><th>Ubicaci&oacute;n</th><th>Carta</th><th>Estado</th><th>Notas Admin</th><th>Fecha</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>DNI</th><th>Email</th><th>Tel</th><th>Puesto</th><th>Ubicaci&oacute;n</th><th>Carta</th><th>Estado</th><th>Notas Admin</th><th>Fecha</th><th>Acciones</th></tr></thead>
       <tbody id="postulacionesBody"></tbody>
     </table></div>
     <div class="empty-state" id="postulacionesEmpty" style="display:none;">No hay postulaciones</div>
@@ -1009,6 +1009,7 @@ async function loadPostulaciones() {
     html += '</select></td>';
     html += '<td><textarea style="min-width:150px;" onblur="savePostulacionNotes(' + p.id + ', this.value)" placeholder="Notas...">' + esc(p.notas_admin || '') + '</textarea></td>';
     html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+    html += '<td><button class="btn btn-danger btn-sm" onclick="eliminarPostulacion(\'' + p.id + '\')"><span>Eliminar</span></button></td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
@@ -1027,6 +1028,24 @@ async function savePostulacionNotes(id, notes) {
   var result = await supaPatch('web_postulaciones', id, { notas_admin: notes });
   if (result) {
     showToast('Notas guardadas');
+  }
+}
+
+async function eliminarPostulacion(id) {
+  if (!confirm('¿Eliminar esta postulación permanentemente? Esta acción no se puede deshacer.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/web_postulaciones?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if (res.ok) {
+      showToast('Postulación eliminada');
+      loadPostulaciones();
+    } else {
+      showToast('Error al eliminar postulación', true);
+    }
+  } catch(e) {
+    showToast('Error de conexión', true);
   }
 }
 

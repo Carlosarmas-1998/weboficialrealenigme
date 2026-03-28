@@ -1051,7 +1051,7 @@
   window.ENIGME.generateOrderId = generateOrderId;
   window.ENIGME.generateOrderPDF = generateOrderPDF;
   window.ENIGME.showPDFModal = showPDFModal;
-  window.ENIGME.initAbril = initAbril;
+  // initAbril removed - using abril-bot.js standalone instead
   window.ENIGME.initFadeObserver = initFadeObserver;
   window.ENIGME.syncFavoritesToServer = syncFavoritesToServer;
   window.ENIGME.syncCartToServer = syncCartToServer;
@@ -1096,7 +1096,7 @@
   }
 
   onReady(function () {
-    initAbril();
+    // initAbril() removed - abril-bot.js handles the bot
     initFadeObserver();
     initDropdownToggle();
     initDeepLinks();

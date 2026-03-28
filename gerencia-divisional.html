@@ -450,7 +450,7 @@ async function doLogin() {
     var data = await api('/rest/v1/gerencias_divisionales?codigo=eq.' + encodeURIComponent(codigo) + '&select=*');
     if (!data || !data.length) { errEl.textContent = 'C\u00f3digo no encontrado.'; return; }
     var gd = data[0];
-    if (!gd.activo) { errEl.textContent = 'Esta gerencia divisional est\u00e1 inactiva.'; return; }
+    if (!gd.activo) { errEl.textContent = 'USUARIO DE BAJA. Su cuenta ha sido desactivada por la Gerencia General. Contacte a info@enigmeofficial.com'; errEl.style.fontWeight = '700'; return; }
     if (gd.password_temporal !== password) { errEl.textContent = 'Contrase\u00f1a incorrecta.'; return; }
     session = gd;
     sessionStorage.setItem('enigme_gd_session', JSON.stringify(gd));
