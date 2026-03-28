@@ -885,6 +885,12 @@
         </button>
       </div>
 
+      <div class="mis-registros-toggle" onclick="toggleMisRegistros()" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--carbon);cursor:pointer;margin-top:20px;border:1px solid rgba(203,170,99,0.3);user-select:none;">
+        <span style="font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;color:var(--dorado);font-weight:500;">Mis Registros</span>
+        <svg id="mis-registros-arrow" viewBox="0 0 24 24" style="width:18px;height:18px;fill:var(--dorado);transition:transform 0.4s;"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>
+      <div id="mis-registros-body" style="max-height:0;overflow:hidden;transition:max-height 0.6s cubic-bezier(0.25,0.46,0.45,0.94);">
+
       <div class="order-tracking" id="order-tracking-section">
         <h3 style="font-family:'Cinzel',serif;font-size:clamp(0.85rem,2vw,1rem);letter-spacing:3px;text-transform:uppercase;color:var(--carbon);margin-bottom:20px;text-align:center;">Seguimiento de Pedido</h3>
         <p style="text-align:center;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--dorado);margin-bottom:5px;" id="tracking-order-id"></p>
@@ -927,6 +933,8 @@
         <p style="text-align:center;font-size:0.5rem;letter-spacing:1px;color:var(--dorado);margin-bottom:15px;" id="review-count-display"></p>
         <div id="review-items-container"></div>
       </div>
+
+      </div><!-- close mis-registros-body -->
 
     </div>
   </main>
@@ -1313,7 +1321,7 @@
           const moneda = po.moneda || 'HNL';
           const symbol = moneda === 'EUR' ? '\u20AC' : 'L';
           const isHonduras = moneda !== 'EUR';
-          const tiempoEnvio = isHonduras ? '25-31 d\u00edas h\u00e1biles' : '15-18 d\u00edas h\u00e1biles';
+          const tiempoEnvio = isHonduras ? '25-31 d\u00edas' : '15-18 d\u00edas';
           const itemsHtml = (po.items || []).map(it => {
             const hnlTotal = it.price * it.qty;
             const displayPrice = moneda === 'EUR'
@@ -1611,7 +1619,7 @@
         container.innerHTML += `
           <div class="delivery-estimate fade-in">
             <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-            <span><strong>Env\u00edo estimado:</strong> Honduras 25 d\u00edas h\u00e1biles \u00b7 Espa\u00f1a 18 d\u00edas h\u00e1biles</span>
+            <span><strong>Env\u00edo estimado:</strong> Honduras 25 d\u00edas \u00b7 Espa\u00f1a 18 d\u00edas</span>
           </div>
           <div class="free-shipping-badge fade-in">
             <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
@@ -1632,21 +1640,28 @@
         const discountBanner = document.getElementById('subscriber-discount-banner');
         const discountSummary = document.getElementById('subscriber-discount-summary');
         if (subscriberDiscountActive && total > 0) {
-          const discountAmount = Math.round(total * 0.10);
-          const discountedTotal = total - discountAmount;
-          currentTotalGlobal = discountedTotal;
+          const discountHNL = Math.round(total * 0.10);
+          const discountedHNL = total - discountHNL;
+          currentTotalGlobal = discountedHNL;
 
-          // Only show the promotional banner if user hasn't seen it before
-          if (!localStorage.getItem('enigme_discount_shown_before')) {
-            discountBanner.style.display = 'flex';
-            localStorage.setItem('enigme_discount_shown_before', '1');
+          // Calculate discount in display currency (no psychological pricing for discount)
+          let discountDisplay, discountedDisplay;
+          if (monedaCart === 'EUR') {
+            const totalEUR = parseFloat((total / TASA_CAMBIO_CHECKOUT).toFixed(2));
+            const discEUR = parseFloat((totalEUR * 0.10).toFixed(2));
+            const finalEUR = parseFloat((totalEUR - discEUR).toFixed(2));
+            discountDisplay = '- \u20AC ' + discEUR.toFixed(2);
+            discountedDisplay = '\u20AC ' + finalEUR.toFixed(2);
           } else {
-            discountBanner.style.display = 'none';
+            discountDisplay = '- L ' + discountHNL.toLocaleString('es-HN');
+            discountedDisplay = 'L ' + discountedHNL.toLocaleString('es-HN');
           }
+
+          discountBanner.style.display = 'flex';
           discountSummary.style.display = 'block';
-          document.getElementById('discount-amount').innerText = '- ' + getCartPriceDisplay(discountAmount);
+          document.getElementById('discount-amount').innerText = discountDisplay;
           document.getElementById('original-price-display').innerText = totalDisplay;
-          document.getElementById('discounted-total-display').innerText = getCartPriceDisplay(discountedTotal);
+          document.getElementById('discounted-total-display').innerText = discountedDisplay;
 
           // Stripe notice shows actual Stripe charge amount
           updateStripeNotice(discountedTotal);
@@ -2084,6 +2099,18 @@
       arrow.classList.toggle('open');
     }
 
+    function toggleMisRegistros() {
+      const body = document.getElementById('mis-registros-body');
+      const arrow = document.getElementById('mis-registros-arrow');
+      if (body.style.maxHeight && body.style.maxHeight !== '0px') {
+        body.style.maxHeight = '0';
+        arrow.style.transform = 'rotate(0deg)';
+      } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        arrow.style.transform = 'rotate(180deg)';
+      }
+    }
+
     // ═══════════════════════════════════════════════════════
     // SHIPPING INFO — dynamic based on department selection
     // ═══════════════════════════════════════════════════════
@@ -2094,11 +2121,11 @@
       const infoDiv = document.getElementById('shipping-info');
       const labelDir = document.getElementById('label-direccion');
       if (hondurasDepts.includes(val)) {
-        infoDiv.textContent = '📦 Envío a punto de encuentro · 25 días naturales';
+        infoDiv.textContent = '📦 Envío a punto de encuentro · 25 días';
         labelDir.textContent = 'Punto de Encuentro';
         document.getElementById('cliente-direccion').placeholder = 'Ej: Mall Multiplaza, centro de San Pedro Sula...';
       } else if (val) {
-        infoDiv.textContent = '📦 Envío a domicilio · 18 días naturales';
+        infoDiv.textContent = '📦 Envío a domicilio · 18 días';
         labelDir.textContent = 'Dirección de Envío';
         document.getElementById('cliente-direccion').placeholder = 'Calle, número, piso, código postal...';
       } else {

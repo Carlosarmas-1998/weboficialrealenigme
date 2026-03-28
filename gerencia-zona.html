@@ -1247,8 +1247,6 @@ async function guardarNombramiento() {
       ano: new Date().getFullYear(),
       fecha_ingreso: fechaIngreso
     };
-    if (deptoId) nomPayload.departamento_id = deptoId;
-    if (muniIds.length) nomPayload.municipio_ids = muniIds;
     var nomData = await apiPost('/rest/v1/nombramientos', nomPayload);
 
     var files = document.getElementById('nomArchivos').files;
