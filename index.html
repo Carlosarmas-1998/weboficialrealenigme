@@ -433,8 +433,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.85));
-      padding: 40px 20px 30px;
+      background: linear-gradient(transparent 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.92) 100%);
+      padding: 50px 20px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -442,56 +442,92 @@
     .hero-overlay h2 {
       font-family: 'Cormorant Garamond', serif;
       color: #CBAA63;
-      font-size: 1.1rem;
-      letter-spacing: 0.3em;
-      margin-bottom: 16px;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      letter-spacing: 0.25em;
+      margin-bottom: 8px;
       text-transform: uppercase;
+      text-align: center;
+    }
+    .hero-overlay .hero-subtitle {
+      font-family: 'Jost', sans-serif;
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+      text-align: center;
     }
     .hero-subscribe-form {
       display: flex;
       gap: 0;
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
     }
     .hero-subscribe-form input {
       flex: 1;
-      padding: 14px 20px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(201,169,110,0.3);
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(201,169,110,0.4);
       border-right: none;
       color: #fff;
       font-family: 'Jost', sans-serif;
-      font-size: 0.85rem;
+      font-size: 1rem;
       outline: none;
+      transition: border-color 0.3s;
+    }
+    .hero-subscribe-form input:focus {
+      border-color: #CBAA63;
+      background: rgba(255,255,255,0.18);
     }
     .hero-subscribe-form input::placeholder {
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.05em;
     }
     .hero-subscribe-form button {
-      padding: 14px 28px;
-      background: #CBAA63;
+      padding: 18px 36px;
+      background: linear-gradient(135deg, #CBAA63, #E8D090);
       border: 1px solid #CBAA63;
       color: #0a0a0a;
       font-family: 'Jost', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.3s;
     }
     .hero-subscribe-form button:hover {
-      background: #d4b76a;
+      background: linear-gradient(135deg, #d4b76a, #f0dda0);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(203,170,99,0.3);
     }
     .hero-subscribe-form button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .hero-discount-badge {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 8px 24px;
+      border: 1px solid rgba(203,170,99,0.4);
+      background: rgba(203,170,99,0.08);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: #CBAA63;
+      letter-spacing: 0.15em;
+      text-align: center;
     }
     .hero-subscribe-text {
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.6);
-      margin-top: 10px;
-      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 14px;
+      letter-spacing: 0.04em;
+      text-align: center;
+      max-width: 500px;
+      line-height: 1.6;
     }
     .hero-subscribe-text strong {
       color: #CBAA63;
@@ -653,13 +689,15 @@
       <h1>Colecci&oacute;n Cero &mdash; Lanzamiento</h1>
     </div>
     <div class="hero-overlay">
-      <h2>Colecci&oacute;n Cero &mdash; Lanzamiento</h2>
+      <h2>Obt&eacute;n 10% en tu Primera Compra</h2>
+      <p class="hero-subtitle">Ingresa tu correo y &uacute;nete al Club Exclusivo de La Casa &Egrave;NIGME</p>
       <form class="hero-subscribe-form" onsubmit="handleHeroSubscribe(event)">
-        <input type="email" id="heroEmail" placeholder="Tu correo electr&oacute;nico" required>
-        <button type="submit" id="heroSubBtn">UNIRSE</button>
+        <input type="email" id="heroEmail" placeholder="Escribe tu correo electr&oacute;nico aqu&iacute;" required>
+        <button type="submit" id="heroSubBtn">UNIRSE AL CLUB</button>
       </form>
-      <p class="hero-subscribe-text">Al suscribirte aceptas recibir un <strong>10% de descuento</strong> en tu primera compra y notificaciones exclusivas de La Casa ENIGME</p>
-      <p id="heroSubMsg" style="display:none;font-size:0.75rem;margin-top:8px;color:#CBAA63;"></p>
+      <div class="hero-discount-badge">&#10022; 10% DE DESCUENTO EXCLUSIVO &#10022;</div>
+      <p class="hero-subscribe-text">Al suscribirte aceptas recibir un <strong>10% de descuento</strong> en tu primera compra y <strong>notificaciones exclusivas</strong> de nuevas colecciones y promociones de La Casa &Egrave;NIGME</p>
+      <p id="heroSubMsg" style="display:none;font-size:0.85rem;margin-top:12px;color:#CBAA63;letter-spacing:0.05em;"></p>
     </div>
   </main>
 
@@ -899,7 +937,7 @@
 
   <!-- ══ COOKIE, SUBSCRIPTION & CHATBOT LOGIC ══ -->
   <script>
-    var RESEND_KEY = 're_3Ae3tcB8_PGAMi3mDFexY49XnW3zN7E8y';
+    // Email sending via Supabase Edge Function (no API keys exposed)
 
     // ── Cookie Popup ──
     function showCookiePopup() {
@@ -1019,16 +1057,15 @@
         // Store subscriber email in localStorage for cart discount
         localStorage.setItem('enigme_subscriber_email', email);
 
-        // 2) Send welcome email via Resend
+        // 2) Send welcome email via Supabase Edge Function (proxy to Resend)
         try {
-          await fetch('https://api.resend.com/emails', {
+          await fetch(SB_URL + '/functions/v1/send-email', {
             method: 'POST',
             headers: {
-              'Authorization': 'Bearer ' + RESEND_KEY,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + SB_KEY
             },
             body: JSON.stringify({
-              from: 'ENIGME <info@enigmeofficial.com>',
               to: [email],
               subject: 'Bienvenido al Club de La Casa ENIGME \u2728',
               html: '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0D0D0D;font-family:Georgia,serif;">' +

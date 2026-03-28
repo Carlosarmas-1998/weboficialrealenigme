@@ -563,14 +563,13 @@
               '</td></tr>' +
               '</table></td></tr></table></body></html>';
 
-            fetch('https://api.resend.com/emails', {
+            fetch(SUPABASE_URL + '/functions/v1/send-email', {
               method: 'POST',
               headers: {
-                'Authorization': 'Bearer re_3Ae3tcB8_PGAMi3mDFexY49XnW3zN7E8y',
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                from: 'ENIGME <info@enigmeofficial.com>',
                 to: [applicantEmail],
                 subject: 'Hemos recibido tu postulación — ENIGME',
                 html: emailHtml
