@@ -767,8 +767,12 @@ async function guardarCoordinador() {
       if (codeResp.ok) {
         codigo = await codeResp.json();
       } else {
-        var maxCode = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-        codigo = maxCode.length ? (parseInt(maxCode[0].codigo) + 1) : 301222;
+        var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+        var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+        var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
+        var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
+        var maxNum = Math.max(numVend, numCoord, 301200);
+        codigo = maxNum + 1;
       }
 
       payload.codigo = String(codigo);
@@ -1176,8 +1180,12 @@ async function guardarNombramiento() {
     if (codeResp.ok) {
       codigo = await codeResp.json();
     } else {
-      var maxCode = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-      codigo = maxCode.length ? (parseInt(maxCode[0].codigo) + 1) : 301222;
+      var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
+      var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
+      var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
+      var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
+      var maxNum = Math.max(numVend, numCoord, 301200);
+      codigo = maxNum + 1;
     }
 
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
@@ -1200,7 +1208,27 @@ async function guardarNombramiento() {
     };
     if (deptoId) vendPayload.departamento_id = deptoId;
     if (muniIds.length) vendPayload.municipio_ids = muniIds;
-    var vendedora = await apiPost('/rest/v1/vendedoras', vendPayload);
+    var vendedora;
+    try {
+      vendedora = await apiPost('/rest/v1/vendedoras', vendPayload);
+    } catch(vendErr) {
+      console.warn('vendedoras insert failed:', vendErr);
+      // If duplicate (409 Conflict or 23505 unique violation), find existing by DNI
+      var errCode = vendErr && (vendErr.code || vendErr.status);
+      var errMsg = vendErr && (vendErr.message || vendErr.details || '');
+      if (errCode == '23505' || errCode == 409 || (typeof errMsg === 'string' && errMsg.indexOf('duplicate') >= 0) || (typeof errMsg === 'string' && errMsg.indexOf('unique') >= 0)) {
+        var existByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+        if (existByDni.length) {
+          vendedora = existByDni;
+        }
+      }
+      // If still no vendedora found and we had existing ones from earlier check, use those
+      if (!vendedora && existentes.length) {
+        vendedora = existentes;
+      }
+      // If truly no vendedora at all, let flow continue with null id
+      if (!vendedora) vendedora = [];
+    }
 
     var vendedoraId = vendedora[0] ? vendedora[0].id : null;
     if (!vendedoraId && existentes.length) vendedoraId = existentes[0].id;

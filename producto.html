@@ -23,8 +23,8 @@
       --transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
     }
     *{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased;}
+    html{scroll-behavior:smooth;overflow-x:hidden;}
+    body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;overflow-x:hidden;min-height:100vh;width:100%;max-width:100vw;-webkit-font-smoothing:antialiased;}
     a{text-decoration:none;color:inherit;transition:var(--transition);}
     button{background:none;border:none;font-family:inherit;cursor:pointer;outline:none;}
 
@@ -119,6 +119,9 @@
       .hero-image{min-height:50vh;}
       .manifesto-side{padding:50px 24px;}
       .manifesto-title{font-size:2.5rem;}
+      .manifesto-text{max-width:100%;font-size:1.05rem;line-height:2;}
+      .manifesto-actions{flex-direction:column;width:100%;}
+      .btn-add-cart,.btn-back,.btn-share{width:100%;text-align:center;justify-content:center;}
     }
     @media(max-width:768px){
       .navbar{display:flex;flex-wrap:wrap;padding:15px 4vw;justify-content:space-between;align-items:center;}
@@ -131,10 +134,33 @@
       .dropbtn{font-size:0.7rem;letter-spacing:1px;padding:5px 0;}
       .dropbtn svg{display:none;}
       .navbar .dropdown{position:static;}
-      .dropdown-content{top:calc(100% + 1px);left:0;right:0;width:100vw;min-width:100%;text-align:center;border-left:none;border-right:none;margin-left:-4vw;}
+      .dropdown-content{top:calc(100% + 1px);left:0;right:0;width:100%;min-width:100%;text-align:center;border-left:none;border-right:none;}
       .dropdown-content a{font-size:0.7rem;padding:15px 20px;}
+      .hero-image{min-height:40vh;}
+      .manifesto-side{padding:40px 20px;}
+      .manifesto-title{font-size:2rem;}
+      .manifesto-text{font-size:1rem;line-height:1.9;}
+      .philosophy-band{padding:50px 20px;}
+      .philosophy-quote{font-size:1.1rem;line-height:1.8;}
       .whatsapp-float{bottom:20px;right:20px;width:45px;height:45px;}
       .whatsapp-float svg{width:22px;height:22px;}
+    }
+    @media(max-width:480px){
+      .navbar{padding:12px 15px;}
+      .brand{font-size:1.4rem;letter-spacing:0.15em;margin-bottom:10px;}
+      .hero-image{min-height:35vh;}
+      .manifesto-side{padding:30px 16px;}
+      .manifesto-title{font-size:1.6rem;letter-spacing:0.05em;}
+      .manifesto-kicker{font-size:0.75rem;}
+      .manifesto-text{font-size:0.9rem;line-height:1.8;}
+      .destila-tag{padding:6px 12px;font-size:0.5rem;}
+      .btn-add-cart{padding:14px 20px;font-size:0.6rem;}
+      .btn-back,.btn-share{padding:14px 20px;font-size:0.55rem;}
+      .philosophy-band{padding:40px 16px;}
+      .philosophy-quote{font-size:0.95rem;}
+      .share-toast{font-size:0.6rem;padding:12px 20px;}
+      .whatsapp-float{bottom:16px;right:16px;width:40px;height:40px;}
+      .whatsapp-float svg{width:20px;height:20px;}
     }
   </style>
 </head>
@@ -322,12 +348,11 @@
 
     function addProductToCart() {
       var cart = JSON.parse(localStorage.getItem('enigme_cart')) || [];
-      var rawPrice = decodeURIComponent(params.get('price') || 'L 0');
       var existing = cart.findIndex(function(i){ return i.ref === productRef; });
       if (existing !== -1) {
         cart[existing].qty = (cart[existing].qty || 1) + 1;
       } else {
-        cart.push({ ref: productRef, name: productName, price: rawPrice, img: productImg, qty: 1 });
+        cart.push({ ref: productRef, name: productName, price: 'L 0', img: productImg, qty: 1 });
       }
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       updateCounts();

@@ -389,7 +389,7 @@
     <div class="page-header">
       <div class="page-title"><h1>Gerencia <em>Divisional</em></h1><p>Crear y gestionar gerentes divisionales</p></div>
       <div class="header-actions">
-        <button class="btn btn-gold" onclick="document.getElementById('gdFormWrap').style.display=document.getElementById('gdFormWrap').style.display==='none'?'block':'none';"><span>+ Nuevo</span></button>
+        <button class="btn btn-gold" onclick="var fw=document.getElementById('gdFormWrap');fw.style.display=fw.style.display==='none'?'block':'none';if(fw.style.display==='block')autoGenerateGDPassword();"><span>+ Nuevo</span></button>
         <button class="btn" onclick="loadGerenciasDivisionales()"><span>Refrescar</span></button>
       </div>
     </div>
@@ -2112,6 +2112,27 @@ function renderGerencias() {
     });
     rentDiv.innerHTML = msgs || '<p style="font-size:.75rem;color:var(--text-muted);">No hay gerencias activas para evaluar.</p>';
   }
+}
+
+async function autoGenerateGDPassword() {
+  try {
+    var allGD = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?select=password_temporal&order=password_temporal', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    var gdList = await allGD.json();
+    var maxNum = 997; // starting: eni998
+    gdList.forEach(function(g) {
+      if (g.password_temporal && typeof g.password_temporal === 'string' && g.password_temporal.indexOf('eni') === 0) {
+        var num = parseInt(g.password_temporal.replace('eni', ''));
+        if (!isNaN(num) && num > maxNum) maxNum = num;
+      }
+    });
+    var nextPassword = 'eni' + (maxNum + 1);
+    var pwField = document.getElementById('gdPassword');
+    if (pwField && !pwField.value.trim()) {
+      pwField.value = nextPassword;
+    }
+  } catch(e) { console.warn('Auto-generate GD password error:', e); }
 }
 
 async function crearGerenciaDivisional() {

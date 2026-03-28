@@ -1000,7 +1000,6 @@
     var cat = catMap[pageName] || "joyeria";
     var manifestUrl = window.location.origin + "/producto.html?ref=" + encodeURIComponent(ref || "") +
       "&name=" + encodeURIComponent(name || "") +
-      "&price=" + encodeURIComponent(price || "") +
       "&img=" + encodeURIComponent(imgSrc || "") +
       "&lema=" + encodeURIComponent(lema || "") +
       "&cat=" + encodeURIComponent(cat);
