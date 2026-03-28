@@ -583,6 +583,84 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner-btn { display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite; }
     .spinner-receipt { animation: spin 1s linear infinite; }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* SHEIN-STYLE ORDER TRACKING                                    */
+    /* ══════════════════════════════════════════════════════════════ */
+    .order-tracker { padding: 30px 20px; margin: 20px 0; background: var(--marfil); border: 1px solid var(--gris-linea, rgba(216,195,188,0.4)); }
+    .order-tracker-title { font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: 0.12em; text-align: center; margin-bottom: 24px; color: var(--carbon); text-transform: uppercase; }
+    .tracker-steps { display: flex; justify-content: space-between; position: relative; padding: 0 10px; }
+    .tracker-steps::before { content: ''; position: absolute; top: 20px; left: 30px; right: 30px; height: 2px; background: var(--linea-fina); z-index: 0; }
+    .tracker-step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; flex: 1; }
+    .tracker-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--linea-fina); background: var(--marfil); transition: all 0.4s ease; margin-bottom: 8px; }
+    .tracker-icon svg { width: 18px; height: 18px; fill: var(--gris-suave); transition: fill 0.4s; }
+    .tracker-step.active .tracker-icon { border-color: var(--dorado); background: var(--dorado); box-shadow: 0 0 12px rgba(203,170,99,0.4); }
+    .tracker-step.active .tracker-icon svg { fill: #fff; }
+    .tracker-step.completed .tracker-icon { border-color: var(--dorado); background: var(--carbon); }
+    .tracker-step.completed .tracker-icon svg { fill: var(--dorado); }
+    .tracker-label { font-size: 0.55rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gris-suave); font-weight: 600; text-align: center; transition: color 0.4s; }
+    .tracker-step.active .tracker-label, .tracker-step.completed .tracker-label { color: var(--dorado); }
+    .tracker-progress { position: absolute; top: 20px; left: 30px; height: 2px; background: var(--dorado); z-index: 0; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* ENHANCED CART ITEMS                                           */
+    /* ══════════════════════════════════════════════════════════════ */
+    .cart-item-enhanced { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--linea-fina); position: relative; transition: all 0.4s ease; }
+    .cart-item-enhanced:hover { background: rgba(203,170,99,0.02); }
+    .cart-item-enhanced .item-img { width: 120px; height: 120px; object-fit: cover; border: 1px solid var(--linea-fina); flex-shrink: 0; cursor: zoom-in; }
+    .cart-item-enhanced .item-details { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .cart-item-enhanced .item-ref { font-size: 0.6rem; letter-spacing: 2px; color: var(--gris-suave); text-transform: uppercase; margin-bottom: 4px; }
+    .cart-item-enhanced .item-name { font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: 0.08em; color: var(--carbon); margin-bottom: 8px; }
+    .cart-item-enhanced .item-price { font-size: 0.95rem; color: var(--dorado); font-weight: 600; letter-spacing: 0.5px; }
+    .cart-item-enhanced .item-subtotal { font-size: 0.75rem; color: var(--gris-suave); margin-top: 2px; }
+    .cart-item-enhanced .item-actions { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* QUANTITY CONTROLS - SHEIN STYLE                               */
+    /* ══════════════════════════════════════════════════════════════ */
+    .qty-control-enhanced { display: flex; align-items: center; border: 1px solid var(--linea-fina); height: 36px; }
+    .qty-control-enhanced button { width: 36px; height: 100%; border: none; background: transparent; color: var(--carbon); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+    .qty-control-enhanced button:hover { background: var(--dorado); color: #fff; }
+    .qty-control-enhanced .qty-val { width: 44px; text-align: center; font-size: 0.85rem; font-weight: 600; border-left: 1px solid var(--linea-fina); border-right: 1px solid var(--linea-fina); line-height: 36px; }
+    .remove-item-btn { font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gris-suave); cursor: pointer; transition: color 0.3s; background: none; border: none; font-family: 'Montserrat', sans-serif; font-weight: 600; padding: 4px 0; }
+    .remove-item-btn:hover { color: #c0392b; }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* DELIVERY ESTIMATE                                             */
+    /* ══════════════════════════════════════════════════════════════ */
+    .delivery-estimate { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(203,170,99,0.06); border-left: 3px solid var(--dorado); margin: 16px 0; font-size: 0.7rem; letter-spacing: 0.5px; color: var(--carbon); }
+    .delivery-estimate svg { width: 16px; height: 16px; fill: var(--dorado); flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* CART REMOVING ANIMATION                                       */
+    /* ══════════════════════════════════════════════════════════════ */
+    .cart-item-removing { opacity: 0; transform: translateX(-30px); max-height: 0; padding: 0; overflow: hidden; transition: all 0.4s ease; }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* SUBSCRIBER BANNER ENHANCED                                    */
+    /* ══════════════════════════════════════════════════════════════ */
+    .subscriber-banner-pro { background: linear-gradient(135deg, #1C1C1C, #2a2520); padding: 14px 20px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(203,170,99,0.3); margin-bottom: 16px; }
+    .subscriber-banner-pro svg { width: 24px; height: 24px; fill: var(--dorado); flex-shrink: 0; }
+    .subscriber-banner-pro .sbp-text { font-size: 0.72rem; color: #e8e0d4; letter-spacing: 0.5px; line-height: 1.6; }
+    .subscriber-banner-pro .sbp-text strong { color: var(--dorado); }
+
+    /* ══════════════════════════════════════════════════════════════ */
+    /* FREE SHIPPING BADGE                                           */
+    /* ══════════════════════════════════════════════════════════════ */
+    .free-shipping-badge { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: linear-gradient(135deg, rgba(203,170,99,0.08), rgba(203,170,99,0.02)); border: 1px solid rgba(203,170,99,0.25); margin: 12px 0; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dorado); font-weight: 600; }
+    .free-shipping-badge svg { width: 18px; height: 18px; fill: var(--dorado); flex-shrink: 0; }
+
+    @media (max-width: 768px) {
+      .cart-item-enhanced .item-img { width: 90px; height: 90px; }
+      .cart-item-enhanced { gap: 14px; padding: 18px 0; }
+      .tracker-steps { padding: 0; }
+      .tracker-icon { width: 32px; height: 32px; }
+      .tracker-icon svg { width: 14px; height: 14px; }
+      .tracker-label { font-size: 0.45rem; letter-spacing: 1px; }
+      .qty-control-enhanced { height: 32px; }
+      .qty-control-enhanced button { width: 32px; }
+      .qty-control-enhanced .qty-val { width: 38px; line-height: 32px; font-size: 0.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -640,13 +718,42 @@
 
   <main class="cart-container" id="main-cart-container">
     <div class="cart-items">
-      <div id="subscriber-discount-banner" class="subscriber-discount-banner" style="display:none;">
+      <div id="subscriber-discount-banner" class="subscriber-banner-pro" style="display:none;">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        <div class="sdb-text">
-          Club ENIGME: 10% de descuento aplicado en su primera compra
-          <span>Beneficio exclusivo para suscriptores</span>
+        <div class="sbp-text">
+          <strong>Club ENIGME:</strong> 10% de descuento aplicado en su primera compra
+          <br><span style="font-size:0.6rem;color:#999;letter-spacing:0.5px;">Beneficio exclusivo para suscriptores del Club</span>
         </div>
       </div>
+      <!-- SHEIN-STYLE ORDER TRACKER (shows last order status) -->
+      <div class="order-tracker" id="shein-order-tracker" style="display:none;">
+        <div class="order-tracker-title">Estado de su Último Pedido</div>
+        <div id="shein-tracker-order-id" style="text-align:center;font-size:0.7rem;letter-spacing:3px;color:var(--dorado);margin-bottom:18px;font-weight:700;font-family:'Cinzel',serif;"></div>
+        <div class="tracker-steps" id="shein-tracker-steps">
+          <div class="tracker-progress" id="shein-tracker-progress" style="width:0%;"></div>
+          <div class="tracker-step" data-step="Recibido">
+            <div class="tracker-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2V7h-4v2h2z"/></svg></div>
+            <span class="tracker-label">Recibido</span>
+          </div>
+          <div class="tracker-step" data-step="Confirmado">
+            <div class="tracker-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <span class="tracker-label">Confirmado</span>
+          </div>
+          <div class="tracker-step" data-step="En Preparación">
+            <div class="tracker-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+            <span class="tracker-label">Preparación</span>
+          </div>
+          <div class="tracker-step" data-step="Enviado">
+            <div class="tracker-icon"><svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></div>
+            <span class="tracker-label">Enviado</span>
+          </div>
+          <div class="tracker-step" data-step="Entregado">
+            <div class="tracker-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+            <span class="tracker-label">Entregado</span>
+          </div>
+        </div>
+      </div>
+
       <div id="promo-banner" class="promo-banner"></div>
       <div id="cart-items-container"></div>
     </div>
@@ -1376,27 +1483,39 @@
           });
 
           container.innerHTML += `
-            <div class="cart-item fade-in">
-              <div class="item-img-wrapper" onclick="openLightbox(this)" title="Ver galería íntegra">
-                <img src="${item.img}" alt="${item.name}" class="item-img" onerror="this.src='https://via.placeholder.com/200x250?text=ÈNIGME'">
-                <div class="carousel-track" style="display:none;" data-index="0">${trackHtml}</div>
-              </div>
+            <div class="cart-item-enhanced fade-in" id="cart-item-${index}">
+              <img class="item-img" src="${item.img}" alt="${item.name}" onerror="this.src='portada.png'" onclick="openLightbox(this.parentElement)" />
+              <div class="carousel-track" style="display:none;" data-index="0">${trackHtml}</div>
               <div class="item-details">
-                <span class="item-ref">${item.ref}</span>
-                <h3 class="item-name">${item.name}</h3>
-                <span class="item-price">${getCartPriceDisplay(priceNum)}</span>
-                ${promoTag}
-              </div>
-              <div class="item-actions">
-                <div class="qty-control">
-                  <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
-                  <span class="qty-display">${item.qty}</span>
-                  <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                <div>
+                  <div class="item-ref">${item.ref || ''}</div>
+                  <div class="item-name">${item.name}</div>
+                  <div class="item-price">${getCartPriceDisplay(priceNum)}</div>
+                  ${item.qty > 1 ? '<div class="item-subtotal">Subtotal: ' + getCartPriceDisplay(priceNum * item.qty) + '</div>' : ''}
+                  ${promoTag}
                 </div>
-                <button class="btn-remove" onclick="removeItem(${index})">Eliminar</button>
+                <div class="item-actions">
+                  <div class="qty-control-enhanced">
+                    <button onclick="updateQty(${index}, -1)">\u2212</button>
+                    <span class="qty-val">${item.qty}</span>
+                    <button onclick="updateQty(${index}, 1)">+</button>
+                  </div>
+                  <button class="remove-item-btn" onclick="removeItemAnimated(${index})">ELIMINAR</button>
+                </div>
               </div>
             </div>`;
         });
+
+        // Add delivery estimate after cart items
+        container.innerHTML += `
+          <div class="delivery-estimate fade-in">
+            <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            <span><strong>Env\u00edo estimado:</strong> Honduras 25 d\u00edas h\u00e1biles \u00b7 Espa\u00f1a 18 d\u00edas h\u00e1biles</span>
+          </div>
+          <div class="free-shipping-badge fade-in">
+            <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+            <span>Env\u00edo gratuito en todos los pedidos</span>
+          </div>`;
 
         // Observe newly added fade-in cart items
         container.querySelectorAll('.fade-in').forEach(el => {
@@ -1450,6 +1569,16 @@
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       renderCart(); updateCounts();
       syncCartAnalytics();
+    }
+
+    function removeItemAnimated(index) {
+      var el = document.getElementById('cart-item-' + index);
+      if (el) {
+        el.classList.add('cart-item-removing');
+        setTimeout(function() { removeItem(index); }, 400);
+      } else {
+        removeItem(index);
+      }
     }
 
     function validateForm() {
@@ -2128,12 +2257,54 @@
       const orders = getActiveOrders();
       if (orders.length > 0) {
         // Show the most recent order
-        showOrderTracking(orders[orders.length - 1].orderId);
+        const lastOrder = orders[orders.length - 1];
+        showOrderTracking(lastOrder.orderId);
+        updateSheinTracker(lastOrder);
       }
       // Check delivery reminders
       checkDeliveryReminders();
       // Set interval for reminders (check every hour)
       setInterval(checkDeliveryReminders, 60 * 60 * 1000);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SHEIN-STYLE ORDER TRACKER — visual progress bar
+    // ═══════════════════════════════════════════════════════
+    function updateSheinTracker(order) {
+      var tracker = document.getElementById('shein-order-tracker');
+      if (!tracker || !order) return;
+
+      tracker.style.display = 'block';
+      var orderIdEl = document.getElementById('shein-tracker-order-id');
+      if (orderIdEl) orderIdEl.textContent = 'Pedido #' + order.orderId;
+
+      var statusSteps = ['Recibido','Confirmado','En Preparación','Enviado','Entregado'];
+      // Map existing order status to SHEIN steps
+      var statusMap = {
+        'Enviado': 'Recibido', 'Pendiente': 'Recibido', 'Recibido': 'Recibido',
+        'Pagado': 'Confirmado', 'Confirmado': 'Confirmado',
+        'Preparando': 'En Preparación', 'En Preparación': 'En Preparación',
+        'En reparto': 'Enviado', 'En Reparto': 'Enviado',
+        'Entregado': 'Entregado'
+      };
+      var currentStatus = statusMap[order.status] || 'Recibido';
+      var currentIndex = statusSteps.indexOf(currentStatus);
+      if (currentIndex < 0) currentIndex = 0;
+
+      // Update progress bar width
+      var progressBar = document.getElementById('shein-tracker-progress');
+      if (progressBar) {
+        var pct = currentIndex === 0 ? 0 : (currentIndex / (statusSteps.length - 1)) * 100;
+        progressBar.style.width = pct + '%';
+      }
+
+      // Update step classes
+      var steps = document.querySelectorAll('#shein-tracker-steps .tracker-step');
+      steps.forEach(function(step, i) {
+        step.classList.remove('active', 'completed');
+        if (i < currentIndex) step.classList.add('completed');
+        else if (i === currentIndex) step.classList.add('active');
+      });
     }
 
     // ═══════════════════════════════════════════════════════
@@ -2488,7 +2659,10 @@
         saveActiveOrders(orders);
         renderMisPedidos();
         const lastOrder = orders[orders.length - 1];
-        if (lastOrder) showOrderTracking(lastOrder.orderId);
+        if (lastOrder) {
+          showOrderTracking(lastOrder.orderId);
+          updateSheinTracker(lastOrder);
+        }
       }
     }
 
@@ -2503,6 +2677,64 @@
       renderNotifications();
       // Run initial sync
       syncOrderStatuses();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SEND ORDER STATUS EMAIL — ENIGME BRANDED
+    // ═══════════════════════════════════════════════════════
+    async function sendOrderStatusEmail(email, nombre, orderId, status) {
+      if (!email) return;
+      var statusConfig = {
+        'Recibido': { color: '#5a8fa0', msg: 'Hemos recibido tu pedido y está siendo procesado.', icon: '📋' },
+        'Confirmado': { color: '#CBAA63', msg: 'Tu pedido ha sido confirmado y pronto comenzará su preparación.', icon: '✓' },
+        'En Preparación': { color: '#b08fd0', msg: 'Tu pedido está siendo preparado con el cuidado que merece.', icon: '✨' },
+        'Enviado': { color: '#6b9e78', msg: 'Tu pedido ha sido enviado. Pronto lo tendrás en tus manos.', icon: '📦' },
+        'Entregado': { color: '#CBAA63', msg: '¡Tu pedido ha sido entregado! Esperamos que disfrutes tu compra.', icon: '🎉' }
+      };
+      var cfg = statusConfig[status] || { color: '#CBAA63', msg: 'El estado de tu pedido ha sido actualizado.', icon: '📋' };
+
+      var trackerHtml = ['Recibido','Confirmado','En Preparación','Enviado','Entregado'].map(function(s) {
+        var isActive = s === status;
+        var isPast = ['Recibido','Confirmado','En Preparación','Enviado','Entregado'].indexOf(s) <= ['Recibido','Confirmado','En Preparación','Enviado','Entregado'].indexOf(status);
+        var border = isPast ? '#CBAA63' : '#444';
+        var textColor = isPast ? '#CBAA63' : '#666';
+        return '<td style="text-align:center;padding:8px;"><div style="width:30px;height:30px;border-radius:50%;background:' + (isPast ? 'rgba(203,170,99,0.15)' : 'transparent') + ';border:2px solid ' + border + ';margin:0 auto 6px;display:flex;align-items:center;justify-content:center;">' +
+          '<span style="font-size:12px;color:' + (isPast ? '#CBAA63' : '#666') + ';">' + (isPast ? '✓' : '○') + '</span></div>' +
+          '<span style="font-size:9px;letter-spacing:1px;color:' + textColor + ';text-transform:uppercase;">' + s + '</span></td>';
+      }).join('');
+
+      var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">' +
+        '<table width="100%" style="background:#0a0a0a;padding:40px 0;"><tr><td align="center">' +
+        '<table width="600" style="max-width:600px;width:100%;">' +
+        '<tr><td style="text-align:center;padding:40px 40px 20px;">' +
+        '<h1 style="font-family:Georgia,serif;font-size:28px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
+        '<p style="font-size:9px;letter-spacing:6px;color:#6b6259;margin:8px 0 0;text-transform:uppercase;">La Casa</p></td></tr>' +
+        '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div></td></tr>' +
+        '<tr><td style="padding:30px 40px;text-align:center;">' +
+        '<h2 style="font-family:Georgia,serif;font-size:20px;font-weight:300;color:#CBAA63;letter-spacing:2px;margin:0 0 8px;">Actualización de Pedido</h2>' +
+        '<p style="font-size:12px;color:#6b6259;letter-spacing:2px;margin:0;">PEDIDO #' + orderId + '</p></td></tr>' +
+        '<tr><td style="padding:10px 20px;">' +
+        '<table width="100%" cellpadding="0" cellspacing="0"><tr>' + trackerHtml + '</tr></table></td></tr>' +
+        '<tr><td style="padding:20px 40px;text-align:center;">' +
+        '<div style="display:inline-block;padding:14px 30px;border:1px solid ' + cfg.color + ';color:' + cfg.color + ';font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">' + status + '</div></td></tr>' +
+        '<tr><td style="padding:20px 40px;text-align:center;">' +
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;">Estimado/a <strong style="color:#CBAA63;">' + (nombre || 'Cliente') + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;">' + cfg.msg + '</p></td></tr>' +
+        '<tr><td style="padding:20px 40px;text-align:center;">' +
+        '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:14px 36px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;">Explorar Catálogo</a></td></tr>' +
+        '<tr><td style="padding:20px 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+        '<tr><td style="padding:20px 40px;text-align:center;">' +
+        '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;">© 2026 ENIGME · TODOS LOS DERECHOS RESERVADOS</p></td></tr>' +
+        '</table></td></tr></table></body></html>';
+
+      try {
+        await fetch(SUPABASE_URL + '/functions/v1/send-email', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: [email], subject: 'Pedido #' + orderId + ' — ' + status + ' | ENIGME', html: emailHtml })
+        });
+        console.log('Status email sent to', email, 'for order', orderId, '- status:', status);
+      } catch(e) { console.warn('Status email error:', e); }
     }
 
     window.onload = () => { checkStripeReturn(); loadCart(); renderHistorial(); loadActiveTracking(); initMisPedidosAndNotifs(); };

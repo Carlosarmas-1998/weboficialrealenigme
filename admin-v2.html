@@ -2123,6 +2123,43 @@ async function reactivarCoordinador(id) {
   } catch(e) { showToast('Error: ' + e.message, true); }
 }
 
+// ---- ELIMINAR PERMANENTEMENTE REGISTROS DE BAJA (solo datos personales, no afecta ventas) ----
+async function eliminarBajaGD(id) {
+  if (!confirm('¿Eliminar permanentemente este registro de baja? Solo se eliminan los datos personales restantes.')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if (res.ok) { showToast('Registro eliminado permanentemente'); loadBajas(); }
+    else showToast('Error al eliminar', true);
+  } catch(e) { showToast('Error: ' + e.message, true); }
+}
+
+async function eliminarBajaGZ(id) {
+  if (!confirm('¿Eliminar permanentemente este registro de baja de Gerente de Zona?')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if (res.ok) { showToast('Registro eliminado'); loadBajas(); }
+    else showToast('Error al eliminar', true);
+  } catch(e) { showToast('Error: ' + e.message, true); }
+}
+
+async function eliminarBajaCoord(id) {
+  if (!confirm('¿Eliminar permanentemente este registro de baja de Coordinador?')) return;
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/coordinadores?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    if (res.ok) { showToast('Registro eliminado'); loadBajas(); }
+    else showToast('Error al eliminar', true);
+  } catch(e) { showToast('Error: ' + e.message, true); }
+}
+
 async function eliminarGerenteZona(id) {
   if (!confirm('¿Dar de BAJA este gerente de zona?\n\nSe conservarán: nombre, código y datos de ventas.\nSe eliminarán: teléfono, email, dirección, DNI y contraseña.')) return;
   try {
@@ -2245,7 +2282,8 @@ async function loadBajas() {
           '<td style="font-size:.75rem;">' + tiempo + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerencia(\'' + gd.id + '\')"><span>Reactivar</span></button></td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerencia(\'' + gd.id + '\')"><span>Reactivar</span></button>' +
+          '<button class="btn btn-danger btn-sm" style="margin-left:4px;padding:4px 10px;font-size:.6rem;" onclick="eliminarBajaGD(\'' + gd.id + '\')"><span>Eliminar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasGdStats').innerHTML =
@@ -2291,7 +2329,8 @@ async function loadBajas() {
           '<td>' + nombCount + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerenteZona(\'' + gz.id + '\')"><span>Reactivar</span></button></td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarGerenteZona(\'' + gz.id + '\')"><span>Reactivar</span></button>' +
+          '<button class="btn btn-danger btn-sm" style="margin-left:4px;padding:4px 10px;font-size:.6rem;" onclick="eliminarBajaGZ(\'' + gz.id + '\')"><span>Eliminar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasGzStats').innerHTML =
@@ -2335,7 +2374,8 @@ async function loadBajas() {
           '<td>' + pedCount + '</td>' +
           '<td>L' + bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
           '<td>L' + neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarCoordinador(\'' + c.id + '\')"><span>Reactivar</span></button></td>' +
+          '<td><button class="btn btn-gold btn-sm" style="padding:4px 10px;font-size:.6rem;" onclick="reactivarCoordinador(\'' + c.id + '\')"><span>Reactivar</span></button>' +
+          '<button class="btn btn-danger btn-sm" style="margin-left:4px;padding:4px 10px;font-size:.6rem;" onclick="eliminarBajaCoord(\'' + c.id + '\')"><span>Eliminar</span></button></td>' +
           '</tr>';
       }).join('');
       document.getElementById('bajasCoordStats').innerHTML =

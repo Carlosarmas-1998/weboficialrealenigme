@@ -1040,9 +1040,13 @@
         });
 
         if (sbRes.status === 409 || sbRes.status === 23505) {
-          msgEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
-          msgEl.style.color = '#E53935';
+          // Email already exists - that's fine, just redirect
+          localStorage.setItem('enigme_subscriber_email', email);
+          msgEl.textContent = '\u00a1Ya eres parte del Club \u00c8NIGME!';
+          msgEl.style.color = '#CBAA63';
           msgEl.style.display = 'block';
+          createSparkles();
+          setTimeout(function(){ window.location.href = 'catalogo.html'; }, 2000);
           btn.disabled = false;
           btn.textContent = 'UNIRSE';
           return;
@@ -1051,9 +1055,13 @@
         if (!sbRes.ok) {
           var errData = await sbRes.json().catch(function() { return {}; });
           if (errData.code === '23505') {
-            msgEl.textContent = 'Este correo ya est\u00e1 suscrito al Club \u00c8NIGME.';
-            msgEl.style.color = '#E53935';
+            // Email already exists - that's fine, just redirect
+            localStorage.setItem('enigme_subscriber_email', email);
+            msgEl.textContent = '\u00a1Ya eres parte del Club \u00c8NIGME!';
+            msgEl.style.color = '#CBAA63';
             msgEl.style.display = 'block';
+            createSparkles();
+            setTimeout(function(){ window.location.href = 'catalogo.html'; }, 2000);
             btn.disabled = false;
             btn.textContent = 'UNIRSE';
             return;
