@@ -830,8 +830,8 @@ async function guardarCoordinador() {
       }).catch(function(e){ console.warn('registro_alta coord:', e); });
 
       // Send welcome email
-      var coordEmail = document.getElementById('coordEmail').value.trim();
-      var coordNombre = document.getElementById('coordNombre').value.trim();
+      var coordEmail = (document.getElementById('mcEmail') || {}).value || '';
+      var coordNombre = (document.getElementById('mcNombre') || {}).value || '';
       if (coordEmail) {
         fetch(SB + '/functions/v1/send-welcome-email', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
