@@ -302,6 +302,7 @@
           <label>Campa&ntilde;a de Ingreso *</label>
           <select id="nomCampana"><option value="">Seleccione...</option></select>
         </div>
+        <div class="form-group"><label>Fecha de Nacimiento *</label><input id="nomFechaNac" type="date"/></div>
         <div class="form-group"><label>Fecha de Ingreso *</label><input id="nomFechaIngreso" type="date"/></div>
       </div>
 
@@ -1181,6 +1182,7 @@ async function guardarNombramiento() {
 
     var fechaIngreso = document.getElementById('nomFechaIngreso').value || null;
 
+    // Solo columnas que existen en la tabla vendedoras
     var vendPayload = {
       codigo: String(codigo),
       nombre: nombre,
@@ -1191,35 +1193,18 @@ async function guardarNombramiento() {
       sector_id: sectorId,
       gerente_id: session.id,
       activo: true,
-      campana_ingreso_id: parseInt(campanaId),
       fecha_ingreso: fechaIngreso
     };
     var vendedora;
     try {
       vendedora = await apiPost('/rest/v1/vendedoras', vendPayload);
     } catch(vendErr) {
-      console.warn('vendedoras insert failed (attempt 1):', vendErr);
+      console.warn('vendedoras insert failed:', vendErr);
       // Try to find existing by DNI
       try {
         var existByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
         if (existByDni.length) { vendedora = existByDni; }
       } catch(e2) {}
-      // If not found, retry insert without optional columns
-      if (!vendedora || !vendedora.length) {
-        try {
-          var minPayload = { codigo: String(codigo), nombre: nombre, dni: dni, direccion: direccion, telefono: telefono, email: email || null, sector_id: sectorId, gerente_id: session.id, activo: true };
-          if (campanaId) minPayload.campana_ingreso_id = parseInt(campanaId);
-          if (fechaIngreso) minPayload.fecha_ingreso = fechaIngreso;
-          vendedora = await apiPost('/rest/v1/vendedoras', minPayload);
-        } catch(vendErr2) {
-          console.warn('vendedoras insert failed (attempt 2):', vendErr2);
-          // Last resort: find by DNI again
-          try {
-            var existByDni2 = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
-            if (existByDni2.length) vendedora = existByDni2;
-          } catch(e3) {}
-        }
-      }
       if (!vendedora) vendedora = existentes.length ? existentes : [];
     }
 
@@ -1238,6 +1223,9 @@ async function guardarNombramiento() {
       telefono: telefono,
       direccion: direccion,
       email: email || null,
+      fecha_nacimiento: document.getElementById('nomFechaNac').value || '2000-01-01',
+      pdf_subido: false,
+      es_efectivo_pagable: false,
       ano: new Date().getFullYear(),
       fecha_ingreso: fechaIngreso
     };
@@ -1269,7 +1257,7 @@ async function guardarNombramiento() {
     }
 
     suc.textContent = 'Nombramiento registrado. Codigo asignado: ' + codigo;
-    ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail','nomFechaNac'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('nomDepto').value = '';
     document.getElementById('nomSector').value = '';
     document.getElementById('nomCampana').value = '';
