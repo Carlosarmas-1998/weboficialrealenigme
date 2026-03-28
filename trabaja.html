@@ -310,9 +310,7 @@
       
       <h3 class="form-title">Dossier de Candidatura V.I.P</h3>
       
-      <form action="https://api.web3forms.com/submit" method="POST">
-        <input type="hidden" name="access_key" value="b74be360-5d4a-4506-b071-f1ec4ff4d64b">
-        <input type="hidden" name="subject" value="Nuevo Candidato/Socio - ÈNIGME">
+      <form id="postulacionForm" onsubmit="return handlePostulacion(event)">
 
         <div class="form-grid">
           
@@ -391,6 +389,22 @@
         <p>¿Desea adjuntar un portafolio o currículum vitae (PDF)? <br>Escríbanos a <a href="mailto:info@enigmeofficial.com" style="color:var(--carbon); font-weight:600;">info@enigmeofficial.com</a> indicando su DNI en el asunto.</p>
       </div>
 
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="success-overlay">
+    <div class="modal-content" style="text-align:center;max-width:620px;border-color:var(--dorado);background:linear-gradient(180deg, var(--marfil) 0%, #f5f0e8 100%);">
+      <div style="width:60px;height:1px;background:var(--dorado);margin:0 auto 24px;"></div>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.6rem;letter-spacing:0.12em;color:var(--dorado);margin-bottom:20px;text-transform:uppercase;">Postulación Recibida</h2>
+      <p style="font-size:1rem;line-height:2;color:var(--carbon);margin-bottom:16px;">
+        Hemos guardado tu postulación, pronto nos pondremos en contacto contigo.
+      </p>
+      <p style="font-size:0.95rem;line-height:2;color:var(--gris-suave);margin-bottom:30px;">
+        Mientras puedes echarle un vistazo a <strong style="color:var(--carbon);">ENIGME</strong> y quiénes somos.
+      </p>
+      <a href="enigme.html" style="display:inline-block;padding:16px 40px;background:var(--carbon);color:var(--dorado);font-family:'Montserrat',sans-serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;border:none;text-decoration:none;transition:all 0.3s;">Conoce ENIGME</a>
+      <p style="margin-top:30px;font-family:'Cinzel',serif;font-size:0.85rem;color:var(--dorado);letter-spacing:0.1em;font-style:italic;">Gracias por confiar en ENIGME</p>
+      <div style="width:40px;height:1px;background:var(--dorado);margin:16px auto 0;"></div>
     </div>
   </div>
 
@@ -488,31 +502,49 @@
     });
 
     /* =========================================
-       SUPABASE SAVE (PARALLEL TO WEB3FORMS)
+       SUPABASE SAVE - DIRECT TO DATABASE
        ========================================= */
     const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 
-    const appForm = document.querySelector('#application-modal form');
-    if (appForm) {
-      appForm.addEventListener('submit', function(e) {
-        // Save to Supabase in parallel (don't block web3forms submission)
-        const applicantName = document.getElementById('nombre').value;
-        const applicantEmail = document.getElementById('correo').value;
-        const data = {
-          puesto: document.getElementById('puesto').value,
-          nombre_completo: applicantName,
-          dni: document.getElementById('dni').value,
-          fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
-          telefono: document.getElementById('telefono').value,
-          email: applicantEmail,
-          departamento: document.getElementById('departamento').value,
-          municipio: document.getElementById('municipio').value,
-          carta_motivacion: document.getElementById('mensaje').value,
-          estado: 'Pendiente'
-        };
+    async function handlePostulacion(e) {
+      e.preventDefault();
 
-        fetch(SUPABASE_URL + '/rest/v1/web_postulaciones', {
+      var nombre = document.getElementById('nombre').value.trim();
+      var correo = document.getElementById('correo').value.trim();
+      var dni = document.getElementById('dni').value.trim();
+      var fechaNac = document.getElementById('fecha_nacimiento').value;
+      var telefono = document.getElementById('telefono').value.trim();
+      var depto = document.getElementById('departamento').value;
+      var muni = document.getElementById('municipio').value;
+      var mensaje = document.getElementById('mensaje').value.trim();
+      var acepto = document.getElementById('acepto_terminos').checked;
+      var puesto = document.getElementById('puesto').value;
+
+      if (!nombre || !correo || !dni || !fechaNac || !telefono || !depto || !muni || !mensaje || !acepto) {
+        alert('Por favor, completa todos los campos del formulario.');
+        return false;
+      }
+
+      var submitBtn = document.querySelector('.btn-submit');
+      submitBtn.textContent = 'ENVIANDO...';
+      submitBtn.disabled = true;
+
+      var data = {
+        puesto: puesto,
+        nombre_completo: nombre,
+        dni: dni,
+        fecha_nacimiento: fechaNac,
+        telefono: telefono,
+        email: correo,
+        departamento: depto,
+        municipio: muni,
+        carta_motivacion: mensaje,
+        estado: 'Pendiente'
+      };
+
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/web_postulaciones', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -521,72 +553,76 @@
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(data)
-        }).then(function(res) {
-          if (res.ok && applicantEmail) {
-            // Send elegant auto-response email via Resend
-            var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">' +
-              '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 0;">' +
-              '<tr><td align="center">' +
-              '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
-              // Header
-              '<tr><td style="text-align:center;padding:50px 40px 30px;">' +
-              '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>' +
-              '<h1 style="font-family:Georgia,serif;font-size:32px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
-              '<p style="font-size:10px;letter-spacing:8px;color:#6b6259;margin:10px 0 0;text-transform:uppercase;">La Casa</p>' +
-              '</td></tr>' +
-              // Gold divider
-              '<tr><td style="padding:0 40px;">' +
-              '<div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div>' +
-              '</td></tr>' +
-              // Main content
-              '<tr><td style="padding:50px 40px 30px;text-align:center;">' +
-              '<h2 style="font-family:Georgia,serif;font-size:24px;font-weight:300;color:#CBAA63;margin:0 0 25px;letter-spacing:3px;">Hemos Recibido tu Postulación</h2>' +
-              '<p style="font-size:15px;color:#e8e0d4;line-height:1.8;margin:0 0 20px;">' +
-              'Estimado/a <strong style="color:#CBAA63;">' + applicantName + '</strong>,</p>' +
-              '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0 0 20px;">' +
-              'Gracias por tu interés en formar parte de <strong style="color:#CBAA63;">La Casa ENIGME</strong>. Nuestro equipo revisará tu solicitud y pronto nos pondremos en contacto contigo.</p>' +
-              '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0;">' +
-              'Mientras tanto, te invitamos a explorar nuestro catálogo.</p>' +
-              '</td></tr>' +
-              // CTA Button
-              '<tr><td style="padding:10px 40px 50px;text-align:center;">' +
-              '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:16px 44px;background:transparent;border:1px solid #CBAA63;color:#CBAA63;font-size:11px;letter-spacing:4px;text-transform:uppercase;text-decoration:none;font-weight:600;transition:all 0.3s;">Explorar Catálogo</a>' +
-              '</td></tr>' +
-              // Divider
-              '<tr><td style="padding:0 40px;">' +
-              '<div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div>' +
-              '</td></tr>' +
-              // Footer
-              '<tr><td style="padding:30px 40px;text-align:center;">' +
-              '<p style="font-size:11px;color:#6b6259;letter-spacing:1px;margin:0 0 8px;">¿Preguntas? Escríbenos a <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
-              '<p style="font-size:9px;color:#4a4540;letter-spacing:3px;margin:0;text-transform:uppercase;">© 2026 ENIGME · Todos los derechos reservados</p>' +
-              '</td></tr>' +
-              '</table></td></tr></table></body></html>';
-
-            fetch(SUPABASE_URL + '/functions/v1/send-email', {
-              method: 'POST',
-              headers: {
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                to: [applicantEmail],
-                subject: 'Hemos recibido tu postulación — ENIGME',
-                html: emailHtml
-              })
-            }).then(function(r) {
-              if (r.ok) console.log('Confirmation email sent to', applicantEmail);
-              else console.warn('Confirmation email failed:', r.status);
-            }).catch(function(e) {
-              console.warn('Confirmation email error:', e);
-            });
-          }
-        }).catch(function(err) {
-          console.warn('Supabase save error:', err);
         });
-        // Let the form continue submitting to web3forms normally
-      });
+
+        if (!res.ok) throw new Error('Error al guardar');
+
+        // Send elegant auto-response email
+        if (correo) {
+          var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background-color:#0a0a0a;font-family:Arial,Helvetica,sans-serif;">' +
+            '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 0;">' +
+            '<tr><td align="center">' +
+            '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
+            '<tr><td style="text-align:center;padding:50px 40px 30px;">' +
+            '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>' +
+            '<h1 style="font-family:Georgia,serif;font-size:32px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
+            '<p style="font-size:10px;letter-spacing:8px;color:#6b6259;margin:10px 0 0;text-transform:uppercase;">La Casa</p>' +
+            '</td></tr>' +
+            '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div></td></tr>' +
+            '<tr><td style="padding:50px 40px 30px;text-align:center;">' +
+            '<h2 style="font-family:Georgia,serif;font-size:24px;font-weight:300;color:#CBAA63;margin:0 0 25px;letter-spacing:3px;">Hemos Recibido tu Postulaci\u00f3n</h2>' +
+            '<p style="font-size:15px;color:#e8e0d4;line-height:1.8;margin:0 0 20px;">Estimado/a <strong style="color:#CBAA63;">' + nombre + '</strong>,</p>' +
+            '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0 0 20px;">Gracias por tu inter\u00e9s en formar parte de <strong style="color:#CBAA63;">La Casa ENIGME</strong>. Nuestro equipo revisar\u00e1 tu solicitud y pronto nos pondremos en contacto contigo.</p>' +
+            '<p style="font-size:15px;color:#b0a898;line-height:1.9;margin:0;">Mientras tanto, te invitamos a explorar nuestro cat\u00e1logo.</p>' +
+            '</td></tr>' +
+            '<tr><td style="padding:10px 40px 50px;text-align:center;">' +
+            '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:16px 44px;background:transparent;border:1px solid #CBAA63;color:#CBAA63;font-size:11px;letter-spacing:4px;text-transform:uppercase;text-decoration:none;font-weight:600;">Explorar Cat\u00e1logo</a>' +
+            '</td></tr>' +
+            '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+            '<tr><td style="padding:30px 40px;text-align:center;">' +
+            '<p style="font-size:11px;color:#6b6259;letter-spacing:1px;margin:0 0 8px;">\u00bfPreguntas? Escr\u00edbenos a <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+            '<p style="font-size:9px;color:#4a4540;letter-spacing:3px;margin:0;text-transform:uppercase;">\u00a9 2026 ENIGME \u00b7 Todos los derechos reservados</p>' +
+            '</td></tr></table></td></tr></table></body></html>';
+
+          fetch(SUPABASE_URL + '/functions/v1/send-email', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + SUPABASE_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              to: [correo],
+              subject: 'Hemos recibido tu postulaci\u00f3n \u2014 ENIGME',
+              html: emailHtml
+            })
+          }).catch(function(e) { console.warn('Email error:', e); });
+        }
+
+        // Close modal and show success
+        closeModal();
+        document.getElementById('postulacionForm').reset();
+        var successOverlay = document.getElementById('success-overlay');
+        successOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+      } catch(err) {
+        console.error('Postulacion error:', err);
+        alert('Hubo un error al enviar tu postulaci\u00f3n. Por favor int\u00e9ntalo de nuevo.');
+      } finally {
+        submitBtn.textContent = 'ENVIAR CANDIDATURA A GERENCIA';
+        submitBtn.disabled = false;
+      }
+
+      return false;
     }
+
+    // Close success overlay
+    document.getElementById('success-overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    });
 
     window.onload = updateCounts;
   </script>

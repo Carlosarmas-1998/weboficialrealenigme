@@ -315,7 +315,7 @@
     <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>P&aacute;gina</th><th>Ciudad</th><th>Pa&iacute;s</th><th>Cookies</th></tr></thead><tbody id="analyticsRecentBody"></tbody></table></div>
 
     <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);margin:30px 0 16px;letter-spacing:.1em;">Suscriptores del Club</h3>
-    <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Email</th><th>Fecha Suscripci&oacute;n</th><th>Descuento Usado</th><th>Creado</th></tr></thead><tbody id="analyticsSuscBody"></tbody></table></div>
   </div>
 
   <!-- TAB: NOTIFICACIONES -->
@@ -372,6 +372,7 @@
       <tbody id="gerenciaBody"></tbody>
     </table></div>
     <div class="empty-state" id="gerenciaEmpty" style="display:none;">No hay gerencias divisionales creadas</div>
+    <div id="rentabilidadMsgs" style="margin-top:20px;"></div>
   </div>
 
   <!-- TAB: VENTAS CORPORATIVAS -->
@@ -474,6 +475,25 @@
         <div class="table-wrap" style="margin-top:12px;"><table>
           <thead><tr><th>Concepto</th><th>Porcentaje</th><th>Monto (L)</th></tr></thead>
           <tbody id="inversionBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- CALCULADORA DE ASESORAS -->
+    <div style="background:var(--surface);border:1px solid var(--border);padding:24px;margin-bottom:24px;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Calculadora de <em style="color:var(--gold);font-style:italic;">Asesoras Necesarias</em></h3>
+      <p style="font-size:.72rem;color:var(--text-muted);margin-bottom:16px;letter-spacing:.06em;">Ingresa tu inversi&oacute;n y te decimos cu&aacute;ntas asesoras necesitas para alcanzarla.</p>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;">
+        <div>
+          <label style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Meta de Inversi&oacute;n (Lempiras)</label>
+          <input type="text" id="metaInversionInput" placeholder="Ej: 50000" style="width:220px;padding:10px 14px;font-size:1rem;" oninput="calcularAsesoras()"/>
+        </div>
+      </div>
+      <div id="asesorasResult" style="display:none;">
+        <div class="stats-row" id="asesorasStats"></div>
+        <div class="table-wrap" style="margin-top:12px;"><table>
+          <thead><tr><th>Tipo de Asesora</th><th>Venta Promedio</th><th>Asesoras Necesarias</th><th>Venta Total Generada</th></tr></thead>
+          <tbody id="asesorasBody"></tbody>
         </table></div>
       </div>
     </div>
@@ -1389,8 +1409,9 @@ async function loadAnalytics() {
     var descuento = s.descuento_usado ? '<span style="color:var(--success);">S&iacute;</span>' : '<span style="color:var(--text-muted);">No</span>';
     suscHtml += '<tr>';
     suscHtml += '<td>' + esc(s.email || '-') + '</td>';
-    suscHtml += '<td style="white-space:nowrap;">' + formatDate(s.created_at) + '</td>';
+    suscHtml += '<td style="white-space:nowrap;">' + formatDate(s.fecha_suscripcion || s.created_at) + '</td>';
     suscHtml += '<td>' + descuento + '</td>';
+    suscHtml += '<td style="white-space:nowrap;">' + formatDate(s.created_at) + '</td>';
     suscHtml += '</tr>';
   });
   document.getElementById('analyticsSuscBody').innerHTML = suscHtml;
@@ -1836,6 +1857,35 @@ function renderGerencias() {
       '</td>' +
       '</tr>';
   }).join('');
+
+  // Rentabilidad messages
+  var rentDiv = document.getElementById('rentabilidadMsgs');
+  if (rentDiv) {
+    var msgs = '';
+    activas.forEach(function(g) {
+      var ventasBruta = 0;
+      // Sum ventas if available
+      if (g.ventas_total) ventasBruta = g.ventas_total;
+      var ventasNeta = ventasBruta * 0.85;
+      var costoGD = ventasNeta * 0.05;
+      var emoji = '';
+      var color = '';
+      var mensaje = '';
+      if (ventasBruta === 0) {
+        emoji = '\u26a0\ufe0f'; color = 'var(--warn)'; mensaje = 'Sin ventas registradas \u2014 Pendiente de activaci\u00f3n';
+      } else if (ventasNeta < 50000) {
+        emoji = '\ud83d\udd34'; color = 'var(--danger)'; mensaje = 'Baja rentabilidad \u2014 Requiere plan de acci\u00f3n inmediato';
+      } else if (ventasNeta < 150000) {
+        emoji = '\ud83d\udfe1'; color = 'var(--warn)'; mensaje = 'Rentabilidad moderada \u2014 En crecimiento';
+      } else {
+        emoji = '\ud83d\udfe2'; color = 'var(--success)'; mensaje = 'Alta rentabilidad \u2014 Excelente rendimiento';
+      }
+      msgs += '<div style="padding:10px 14px;border-left:3px solid ' + color + ';background:var(--surface);margin-bottom:8px;font-size:.78rem;display:flex;align-items:center;gap:8px;">' +
+        '<span style="font-size:1.2rem;">' + emoji + '</span>' +
+        '<span><strong style="color:var(--gold);">' + esc(g.codigo || g.nombre) + '</strong> \u2014 ' + mensaje + ' <span style="color:var(--text-muted);">(Bruta: L' + ventasBruta.toLocaleString('es-HN') + ' | Neta: L' + ventasNeta.toLocaleString('es-HN') + ')</span></span></div>';
+    });
+    rentDiv.innerHTML = msgs || '<p style="font-size:.75rem;color:var(--text-muted);">No hay gerencias activas para evaluar.</p>';
+  }
 }
 
 async function crearGerenciaDivisional() {
@@ -1965,6 +2015,7 @@ function editarGerencia(id) {
     '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">N&uacute;mero de Cuenta</label><input id="editGdCuenta" value="' + esc(g.numero_cuenta || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
     '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Nombre del Banco</label><input id="editGdBanco" value="' + esc(g.nombre_banco || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
     '<div><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px;">Fecha Ingreso</label><input id="editGdFechaIngreso" type="date" value="' + esc(g.fecha_ingreso || '') + '" style="width:100%;padding:8px 10px;font-size:.82rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:Jost,sans-serif;"/></div>' +
+    '<div style="grid-column:1/-1;margin-top:8px;"><label style="font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px;">Departamentos Asignados</label><div id="editGdDeptosContainer" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>' +
     '</div>' +
     '<p id="editGdError" style="color:var(--danger);font-size:.7rem;margin-top:10px;"></p>' +
     '<div style="margin-top:18px;display:flex;gap:10px;">' +
@@ -1972,6 +2023,16 @@ function editarGerencia(id) {
     '<button class="btn" onclick="document.getElementById(\'editGdOverlay\').remove()"><span>Cancelar</span></button>' +
     '</div></div></div>';
   document.body.insertAdjacentHTML('beforeend', html);
+
+  // Populate departamentos checkboxes
+  var editDeptosC = document.getElementById('editGdDeptosContainer');
+  if (editDeptosC && Object.keys(deptosMap).length) {
+    var currentDeptos = g.departamentos_ids || (g.departamento_id ? [g.departamento_id] : []);
+    Object.keys(deptosMap).forEach(function(dId) {
+      var checked = currentDeptos.indexOf(parseInt(dId)) !== -1 ? ' checked' : '';
+      editDeptosC.innerHTML += '<label style="font-size:.75rem;color:var(--text);display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" value="' + dId + '"' + checked + ' style="accent-color:var(--gold);"/> ' + deptosMap[dId] + '</label>';
+    });
+  }
 }
 
 async function guardarEdicionGerencia(id) {
@@ -1988,6 +2049,13 @@ async function guardarEdicionGerencia(id) {
     nombre_banco: document.getElementById('editGdBanco').value.trim() || null,
     fecha_ingreso: document.getElementById('editGdFechaIngreso').value || null
   };
+  var editDeptosC = document.getElementById('editGdDeptosContainer');
+  var deptosIds = [];
+  if (editDeptosC) {
+    editDeptosC.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb) { deptosIds.push(parseInt(cb.value)); });
+  }
+  data.departamentos_ids = deptosIds;
+  data.departamento_id = deptosIds[0] || null;
   if (!data.nombre || !data.codigo) { errEl.textContent = 'Nombre y codigo son obligatorios.'; return; }
   try {
     var res = await fetch(SUPA_URL + '/rest/v1/gerencias_divisionales?id=eq.' + id, {
@@ -3003,6 +3071,48 @@ function calcularInversion() {
   });
   html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);"></td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   document.getElementById('inversionBody').innerHTML = html;
+}
+
+// ========== CALCULADORA DE ASESORAS NECESARIAS ==========
+function calcularAsesoras() {
+  var input = document.getElementById('metaInversionInput');
+  var rawVal = (input.value || '').replace(/[^0-9.]/g, '');
+  var metaInversion = parseFloat(rawVal);
+  var resultWrap = document.getElementById('asesorasResult');
+
+  if (!metaInversion || metaInversion <= 0) {
+    resultWrap.style.display = 'none';
+    return;
+  }
+
+  resultWrap.style.display = 'block';
+
+  // Investment = 22% of Neta, so ventaNeta = metaInversion / 0.22
+  var ventaNetaNecesaria = metaInversion / 0.22;
+  var ventaBrutaNecesaria = ventaNetaNecesaria / 0.85;
+
+  // Two types of asesoras
+  var ventaAlta = 2499;
+  var ventaBaja = 1999;
+
+  // Calculate number of asesoras needed for each type
+  var asesorasAlta = Math.ceil(ventaBrutaNecesaria / ventaAlta);
+  var asesorasBaja = Math.ceil(ventaBrutaNecesaria / ventaBaja);
+
+  // Mixed scenario: 60% sell at 2499, 40% sell at 1999
+  var ventaPromedioMix = (ventaAlta * 0.6) + (ventaBaja * 0.4);
+  var asesorasMix = Math.ceil(ventaBrutaNecesaria / ventaPromedioMix);
+
+  document.getElementById('asesorasStats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Meta Inversi\u00f3n</div><div class="stat-value">L' + metaInversion.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Bruta Necesaria</div><div class="stat-value">L' + ventaBrutaNecesaria.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Neta Necesaria</div><div class="stat-value">L' + ventaNetaNecesaria.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Asesoras Mixtas (Recomendado)</div><div class="stat-value" style="color:var(--success);">' + asesorasMix + '</div></div>';
+
+  document.getElementById('asesorasBody').innerHTML =
+    '<tr><td style="color:var(--gold);font-weight:500;">Asesoras Premium</td><td>L ' + ventaAlta.toLocaleString('es-HN') + '</td><td style="font-size:1.2rem;font-weight:500;color:var(--gold);">' + asesorasAlta + '</td><td>L ' + (asesorasAlta * ventaAlta).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>' +
+    '<tr><td style="color:var(--info);font-weight:500;">Asesoras Est\u00e1ndar</td><td>L ' + ventaBaja.toLocaleString('es-HN') + '</td><td style="font-size:1.2rem;font-weight:500;color:var(--info);">' + asesorasBaja + '</td><td>L ' + (asesorasBaja * ventaBaja).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>' +
+    '<tr style="border-top:2px solid var(--gold);"><td style="color:var(--success);font-weight:500;">Escenario Mixto (60/40)</td><td>L ' + ventaPromedioMix.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' promedio</td><td style="font-size:1.2rem;font-weight:500;color:var(--success);">' + asesorasMix + '</td><td>L ' + (asesorasMix * ventaPromedioMix).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
 }
 
 async function sendAdminMsg() {
