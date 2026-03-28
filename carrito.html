@@ -1433,8 +1433,8 @@
       if (!noticeEl) return;
 
       if (moneda === 'EUR') {
-        // EUR supported by Stripe — show exact same EUR amount as displayed total
-        const eurAmount = (hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2);
+        // EUR supported by Stripe — show exact same EUR amount as displayed in catalog
+        const eurAmount = psychologicalPrice(hnlTotal / TASA_CAMBIO_CHECKOUT).toFixed(2);
         noticeEl.innerText = '\u20AC ' + eurAmount;
         if (conversionNote) { conversionNote.style.display = 'none'; }
       } else {
