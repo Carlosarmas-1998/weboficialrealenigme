@@ -233,12 +233,13 @@
         <div class="card-title">Detalle del Pedido</div>
         <div style="max-height:400px;overflow-y:auto;">
           <table class="pedido-items-table">
-            <thead><tr><th style="width:80px;">Cantidad</th><th>Referencia</th><th style="width:120px;">Precio</th><th style="width:120px;">Total</th><th style="width:40px;"></th></tr></thead>
+            <thead><tr><th style="width:80px;">Cant.</th><th style="width:120px;">C&oacute;digo</th><th>Nombre</th><th style="width:100px;">Precio</th><th style="width:110px;">Total</th><th style="width:40px;"></th></tr></thead>
             <tbody id="pedItems">
               <tr>
                 <td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
-                <td><input class="pi-ref" placeholder="Ref. producto" onkeydown="handleEnterPed(event,this)"/></td>
-                <td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td><input class="pi-ref" placeholder="Ej: J0015" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td>
+                <td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td>
+                <td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td>
                 <td class="pi-total" style="font-weight:600;">0.00</td>
                 <td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>
               </tr>
@@ -853,6 +854,41 @@ async function bajaCoordinador(coordId, sectorId) {
 /* ══════════════════════════════════════════
    TAB 2: SUBIR PEDIDOS
    ══════════════════════════════════════════ */
+// ── CATÁLOGO DE PRODUCTOS (auto-complete) ──
+var catalogoProductos = [];
+async function loadCatalogo() {
+  try {
+    catalogoProductos = await api('/rest/v1/catalogo_productos?activo=eq.true&select=codigo,nombre,precio');
+    if (!catalogoProductos || catalogoProductos.error) catalogoProductos = [];
+  } catch(e) { catalogoProductos = []; }
+}
+loadCatalogo();
+
+function buscarProducto(input) {
+  var codigo = input.value.trim().toUpperCase();
+  var tr = input.closest('tr');
+  var nombreTd = tr.querySelector('.pi-nombre');
+  var precioTd = tr.querySelector('.pi-precio');
+  if (!codigo) { nombreTd.textContent = '—'; precioTd.textContent = '—'; calcRow(input); return; }
+
+  var found = catalogoProductos.find(function(p) { return p.codigo.toUpperCase() === codigo; });
+  if (found) {
+    nombreTd.textContent = found.nombre;
+    nombreTd.style.color = 'var(--text)';
+    precioTd.textContent = 'L ' + parseFloat(found.precio).toFixed(2);
+    precioTd.style.color = 'var(--dorado)';
+    input.style.borderColor = 'var(--success)';
+    calcRow(input);
+  } else {
+    nombreTd.textContent = '⚠ No encontrado';
+    nombreTd.style.color = 'var(--danger)';
+    precioTd.textContent = '—';
+    input.style.borderColor = 'var(--danger)';
+    tr.querySelector('.pi-total').textContent = '0.00';
+    calcTotals();
+  }
+}
+
 async function buscarProfesional() {
   var codigo = document.getElementById('pedCodigo').value.trim();
   var card = document.getElementById('profCard');
@@ -882,9 +918,9 @@ async function buscarProfesional() {
 function addRow() {
   var tbody = document.getElementById('pedItems');
   var tr = document.createElement('tr');
-  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
+  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Código" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
   tbody.appendChild(tr);
-  tr.querySelector('.pi-cant').focus();
+  tr.querySelector('.pi-ref').focus();
 }
 
 function removeRow(btn) {
@@ -897,7 +933,8 @@ function removeRow(btn) {
 function calcRow(input) {
   var tr = input.closest('tr');
   var cant = parseFloat(tr.querySelector('.pi-cant').value) || 0;
-  var precio = parseFloat(tr.querySelector('.pi-precio').value) || 0;
+  var precioText = tr.querySelector('.pi-precio').textContent.replace(/[^0-9.]/g, '');
+  var precio = parseFloat(precioText) || 0;
   tr.querySelector('.pi-total').textContent = (cant * precio).toFixed(2);
   calcTotals();
 }
@@ -915,12 +952,14 @@ function handleEnterPed(e, input) {
   if (e.key === 'Enter') {
     e.preventDefault();
     var tr = input.closest('tr');
-    var inputs = tr.querySelectorAll('input');
-    var idx = Array.from(inputs).indexOf(input);
-    if (idx < inputs.length - 1) {
-      inputs[idx + 1].focus();
-    } else {
+    if (input.classList.contains('pi-ref')) {
+      // Buscar producto y luego agregar nueva fila
+      buscarProducto(input);
       addRow();
+    } else if (input.classList.contains('pi-cant')) {
+      // De cantidad saltar al código
+      var refInput = tr.querySelector('.pi-ref');
+      if (refInput) refInput.focus();
     }
   }
 }
@@ -943,13 +982,15 @@ async function guardarPedido() {
   for (var i = 0; i < rows.length; i++) {
     var cant = parseInt(rows[i].querySelector('.pi-cant').value) || 0;
     var ref = rows[i].querySelector('.pi-ref').value.trim();
-    var precio = parseFloat(rows[i].querySelector('.pi-precio').value) || 0;
-    if (!ref || cant <= 0 || precio <= 0) continue;
+    var nombreProd = rows[i].querySelector('.pi-nombre').textContent.trim();
+    var precioText = rows[i].querySelector('.pi-precio').textContent.replace(/[^0-9.]/g, '');
+    var precio = parseFloat(precioText) || 0;
+    if (!ref || cant <= 0 || precio <= 0 || nombreProd === '—' || nombreProd.indexOf('No encontrado') !== -1) continue;
     var subtotal = cant * precio;
     items.push({
       cantidad: cant,
       codigo_producto: ref,
-      nombre_producto: ref,
+      nombre_producto: nombreProd,
       precio_catalogo_unitario: precio,
       iva_unitario: 0,
       venta_neta_unitaria: precio * 0.85,
@@ -1018,7 +1059,7 @@ function resetPedidoForm() {
   document.getElementById('pedCodigo').value = '';
   document.getElementById('profCard').classList.remove('visible');
   profData = null;
-  document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Ref." onkeydown="handleEnterPed(event,this)"/></td><td><input type="number" step="0.01" class="pi-precio" placeholder="0.00" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
+  document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Código" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
   document.getElementById('pedTotalBruto').textContent = 'L 0.00';
   document.getElementById('pedTotalNeto').textContent = 'L 0.00';
   document.getElementById('pedArchivos').value = '';
