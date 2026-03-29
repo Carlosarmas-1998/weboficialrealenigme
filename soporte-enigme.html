@@ -411,9 +411,19 @@
     .dropdown-content a.mi-espacio-link, .dropdown-content a { color: #e8e0d4 !important; font-family: 'Montserrat', sans-serif; font-weight: 500; padding: 12px 24px; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.04); transition: all 0.3s ease; text-decoration: none; display: block; }
     .dropdown-content a:last-child { border-bottom: none; }
     .dropdown-content a:hover { background: rgba(201, 169, 110, 0.08); color: #CBAA63 !important; padding-left: 28px; }
-    .btn-menu-brand { display: flex; align-items: center; gap: 8px; color: var(--text-primary, #1a1a1a) !important; padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 16px); border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.5rem, 1.2vw, 0.6rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px); text-transform: uppercase; transition: all 0.3s ease; border-radius: 2px; background: transparent; text-decoration: none; }
+    .btn-menu-brand { display: flex; align-items: center; gap: 8px; color: var(--text-primary, #1a1a1a) !important; padding: clamp(8px, 2vw, 12px) clamp(14px, 3vw, 24px); border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.6rem, 1.5vw, 0.75rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px); text-transform: uppercase; transition: all 0.3s ease; border-radius: 2px; background: transparent; text-decoration: none; }
     .btn-menu-brand:hover { background-color: #c9a96e; border-color: #c9a96e; color: #fff !important; }
-    .btn-menu-brand svg { width: clamp(10px, 1.5vw, 13px); height: clamp(10px, 1.5vw, 13px); fill: currentColor; }
+    .btn-menu-brand svg { width: clamp(14px, 2vw, 18px); height: clamp(14px, 2vw, 18px); fill: currentColor; }
+
+    @keyframes bagWigglePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      5% { transform: scale(1.1) rotate(-8deg); }
+      10% { transform: scale(1.1) rotate(8deg); }
+      15% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .btn-cart-nav { background-color: var(--marfil, #FAF9F6); animation: bagWigglePulse 6s ease-in-out infinite; }
+    .btn-cart-nav:hover { animation-play-state: paused; }
     .counter-badge { font-weight: 700; }
     .catalogo-btn { text-decoration: none; }
     .txt-hide-mobile { }
@@ -444,8 +454,10 @@
             <a href="index.html#mi-espacio" class="mi-espacio-link">MI ESPACIO</a>
             <a href="index.html">Inicio</a>
             <a href="joyeria.html">Alta Joyer&iacute;a</a>
-            <a href="boutique.html">Bolsos Boutique</a>
-            <a href="plata.html">Colecci&oacute;n Plata</a>
+            <a href="boutique.html">Boutique</a>
+            <a href="vestidos.html">Vestidos</a>
+            <a href="plata.html">Boda &amp; Plata</a>
+            <a href="sets.html">SETS Exclusivos</a>
             <a href="liquidacion.html">Liquidaci&oacute;n</a>
             <a href="trabaja.html">Trabaja con Nosotros</a>
             <a href="soporte.html">Soporte</a>

@@ -65,10 +65,12 @@
 
     /* ── BADGES ── */
     .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.6rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
-    .badge-pendiente{background:rgba(241,196,15,0.15);color:#d4a017;border:1px solid rgba(241,196,15,0.3);}
-    .badge-en_caja{background:rgba(41,128,185,0.12);color:var(--info);border:1px solid rgba(41,128,185,0.25);}
-    .badge-en_ruta{background:rgba(230,126,34,0.12);color:var(--warning);border:1px solid rgba(230,126,34,0.25);}
+    .badge-enviado_logistica{background:rgba(241,196,15,0.15);color:#d4a017;border:1px solid rgba(241,196,15,0.3);}
+    .badge-empacado{background:rgba(41,128,185,0.12);color:var(--info);border:1px solid rgba(41,128,185,0.25);}
+    .badge-en_reparto{background:rgba(230,126,34,0.12);color:var(--warning);border:1px solid rgba(230,126,34,0.25);}
     .badge-entregado{background:rgba(39,174,96,0.12);color:var(--success);border:1px solid rgba(39,174,96,0.25);}
+    .photo-required-msg{color:var(--danger);font-size:0.7rem;margin-top:4px;display:none;}
+    .photo-required-msg.show{display:block;}
 
     /* ── SEARCH ── */
     .search-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
@@ -199,7 +201,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="pedidos">Pedidos Asignados</button>
   <button class="tab-btn" data-tab="directorio">Directorio</button>
-  <button class="tab-btn" data-tab="comision">Mi Comisión</button>
+  <button class="tab-btn" data-tab="salario">Mi Salario</button>
   <button class="tab-btn" data-tab="cajas">Resumen por Caja</button>
 </div>
 
@@ -213,9 +215,9 @@
       <input type="text" id="pedidoSearch" placeholder="Buscar por código, profesional, dirección..."/>
       <select id="pedidoFilter">
         <option value="">Todos los estados</option>
-        <option value="pendiente_caja">Pendiente Caja</option>
-        <option value="en_caja">En Caja</option>
-        <option value="en_ruta">En Ruta</option>
+        <option value="enviado_logistica">Recibido</option>
+        <option value="empacado">Empacado</option>
+        <option value="en_reparto">En Reparto</option>
         <option value="entregado">Entregado</option>
       </select>
     </div>
@@ -239,10 +241,10 @@
     </div>
   </div>
 
-  <!-- ── TAB 3: MI COMISIÓN ── -->
-  <div class="tab-panel" id="panel-comision">
-    <div id="comisionContent">
-      <div class="loading">Calculando comisiones...</div>
+  <!-- ── TAB 3: MI SALARIO ── -->
+  <div class="tab-panel" id="panel-salario">
+    <div id="salarioContent">
+      <div class="loading">Cargando información salarial...</div>
     </div>
   </div>
 
@@ -258,21 +260,44 @@
 
 </div>
 
+<!-- ═══════════════════ MODAL: EMPACADO ═══════════════════ -->
+<div class="modal-overlay" id="modalEmpacado">
+  <div class="modal-box">
+    <div class="modal-title">📦 Confirmar Empacado</div>
+    <p style="font-size:0.8rem;color:var(--gris);margin-bottom:16px;">Suba una foto del paquete empacado para el pedido <strong id="modalEmpacadoCode"></strong>.</p>
+    <p style="font-size:0.75rem;color:var(--danger);margin-bottom:12px;font-weight:600;">⚠️ La foto es OBLIGATORIA para confirmar el empacado.</p>
+    <div class="photo-upload-area" id="empacadoUploadArea" onclick="document.getElementById('empacadoPhotoInput').click()">
+      <div class="upload-icon">📷</div>
+      <div class="upload-text">Toque para tomar o seleccionar foto del paquete</div>
+    </div>
+    <input type="file" id="empacadoPhotoInput" accept="image/*" capture="environment" style="display:none"/>
+    <img class="photo-preview" id="empacadoPhotoPreview"/>
+    <p class="photo-required-msg" id="empacadoPhotoRequired">⚠️ Debe subir una foto del paquete empacado</p>
+    <textarea id="notasEmpacado" placeholder="Notas de empacado (opcional)..." style="width:100%;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:vertical;min-height:60px;outline:none;margin-top:12px;border-radius:4px;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="closeModalEmpacado()">Cancelar</button>
+      <button class="btn btn-info btn-sm" id="btnConfirmEmpacado" onclick="confirmEmpacado()">📦 Confirmar Empacado</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════ MODAL: ENTREGA ═══════════════════ -->
 <div class="modal-overlay" id="modalEntrega">
   <div class="modal-box">
-    <div class="modal-title">Confirmar Entrega</div>
+    <div class="modal-title">✅ Confirmar Entrega</div>
     <p style="font-size:0.8rem;color:var(--gris);margin-bottom:16px;">Suba una foto como prueba de entrega para el pedido <strong id="modalPedidoCode"></strong>.</p>
+    <p style="font-size:0.75rem;color:var(--danger);margin-bottom:12px;font-weight:600;">⚠️ La foto es OBLIGATORIA para confirmar la entrega.</p>
     <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
-      <div class="upload-icon">&#128247;</div>
-      <div class="upload-text">Toque para tomar o seleccionar foto</div>
+      <div class="upload-icon">📷</div>
+      <div class="upload-text">Toque para tomar o seleccionar foto de entrega</div>
     </div>
     <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none"/>
     <img class="photo-preview" id="photoPreview"/>
+    <p class="photo-required-msg" id="entregaPhotoRequired">⚠️ Debe subir una foto de la entrega</p>
     <textarea id="notasEntrega" placeholder="Notas de entrega (opcional)..." style="width:100%;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:vertical;min-height:60px;outline:none;margin-top:12px;border-radius:4px;"></textarea>
     <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
       <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-success btn-sm" id="btnConfirmEntrega" onclick="confirmEntrega()">Confirmar Entrega</button>
+      <button class="btn btn-success btn-sm" id="btnConfirmEntrega" onclick="confirmEntrega()">✅ Confirmar Entrega</button>
     </div>
   </div>
 </div>
@@ -290,8 +315,7 @@ const STORAGE = SUPABASE_URL + '/storage/v1';
 const headers = {
   'apikey': SUPABASE_KEY,
   'Authorization': 'Bearer ' + SUPABASE_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'return=representation'
+  'Content-Type': 'application/json'
 };
 
 const headersGet = {
@@ -327,15 +351,15 @@ function fmt(n) { return 'L ' + (Number(n) || 0).toLocaleString('es-HN', {minimu
 function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return dt.toLocaleDateString('es-HN', {day:'2-digit',month:'short',year:'numeric'}); }
 function statusLabel(s) {
   const map = {
-    pendiente_caja: 'Pendiente Caja',
-    en_caja: 'En Caja',
-    en_ruta: 'En Ruta',
+    enviado_logistica: 'Recibido',
+    empacado: 'Empacado',
+    en_reparto: 'En Reparto',
     entregado: 'Entregado'
   };
   return map[s] || s;
 }
 function statusOrder(s) {
-  const o = {pendiente_caja:0, en_caja:1, en_ruta:2, entregado:3};
+  const o = {enviado_logistica:0, empacado:1, en_reparto:2, entregado:3};
   return o[s] !== undefined ? o[s] : 9;
 }
 
@@ -348,11 +372,11 @@ async function api(table, query='') {
 async function apiPatch(table, query, body) {
   const res = await fetch(REST + '/' + table + '?' + query, {
     method: 'PATCH',
-    headers: headers,
+    headers: {...headers, 'Prefer': 'return=minimal'},
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error('Error PATCH: ' + res.status);
-  return res.json();
+  return true;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -377,7 +401,7 @@ async function loadAllData() {
 
     if (asigs.length === 0) {
       renderPedidos();
-      renderComision();
+      renderSalario();
       renderCajas();
       loadDirectorio();
       return;
@@ -419,7 +443,7 @@ async function loadAllData() {
     gerentes.forEach(g => gerentesMap[g.id] = g);
 
     renderPedidos();
-    renderComision();
+    renderSalario();
     renderCajas();
     renderDirectorio();
   } catch (err) {
@@ -436,12 +460,12 @@ function renderPedidos() {
   const filterState = document.getElementById('pedidoFilter').value;
 
   // Stats
-  const counts = {pendiente_caja:0, en_caja:0, en_ruta:0, entregado:0};
+  const counts = {enviado_logistica:0, empacado:0, en_reparto:0, entregado:0};
   asignaciones.forEach(a => { if (counts[a.estado] !== undefined) counts[a.estado]++; });
   document.getElementById('pedidosStats').innerHTML = `
     <div class="stat-card"><div class="stat-value">${asignaciones.length}</div><div class="stat-label">Total Asignados</div></div>
-    <div class="stat-card"><div class="stat-value">${counts.pendiente_caja}</div><div class="stat-label">Pendiente Caja</div></div>
-    <div class="stat-card"><div class="stat-value">${counts.en_caja + counts.en_ruta}</div><div class="stat-label">En Proceso</div></div>
+    <div class="stat-card"><div class="stat-value">${counts.enviado_logistica}</div><div class="stat-label">Recibidos</div></div>
+    <div class="stat-card"><div class="stat-value">${counts.empacado + counts.en_reparto}</div><div class="stat-label">En Proceso</div></div>
     <div class="stat-card"><div class="stat-value">${counts.entregado}</div><div class="stat-label">Entregados</div></div>
   `;
 
@@ -484,7 +508,7 @@ function renderPedidos() {
     const camp = campanasMap[p.campana_id];
     const sector = p.sector_id ? sectoresMap[p.sector_id] : null;
 
-    const subtotal = items.reduce((s, i) => s + (i.cantidad * i.precio), 0);
+    const subtotal = items.reduce((s, i) => s + (i.cantidad * (i.precio_catalogo_unitario || i.precio || 0)), 0);
 
     html += `
     <div class="pedido-card">
@@ -497,7 +521,7 @@ function renderPedidos() {
             ${sector ? '<span>Sector ' + sector.numero_sector + '</span>' : ''}
           </div>
         </div>
-        <span class="badge badge-${a.estado === 'pendiente_caja' ? 'pendiente' : a.estado}">${statusLabel(a.estado)}</span>
+        <span class="badge badge-${a.estado}">${statusLabel(a.estado)}</span>
       </div>
       <div class="pedido-body">
         <div class="pedido-info-grid">
@@ -517,9 +541,9 @@ function renderPedidos() {
 
         ${items.length > 0 ? `
         <table class="pedido-items">
-          <thead><tr><th>Cant.</th><th>Referencia</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+          <thead><tr><th>Cant.</th><th>Código</th><th>Producto</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
           <tbody>
-            ${items.map(i => `<tr><td>${i.cantidad}</td><td>${i.referencia}</td><td>${fmt(i.precio)}</td><td>${fmt(i.cantidad * i.precio)}</td></tr>`).join('')}
+            ${items.map(i => `<tr><td>${i.cantidad}</td><td style="font-family:monospace;color:#CBAA63;font-weight:600;">${i.codigo_producto || i.referencia || '—'}</td><td>${i.nombre_producto || i.producto || '—'}</td><td>${fmt(i.precio_catalogo_unitario || i.precio || 0)}</td><td>${fmt(i.cantidad * (i.precio_catalogo_unitario || i.precio || 0))}</td></tr>`).join('')}
           </tbody>
         </table>` : '<p style="font-size:0.8rem;color:var(--gris);margin:8px 0;">Sin detalle de productos</p>'}
 
@@ -534,22 +558,23 @@ function renderPedidos() {
           </div>
         </div>
 
-        ${a.notas_caja ? '<div class="pedido-notes"><strong>Notas caja:</strong> ' + a.notas_caja + '</div>' : ''}
+        ${a.notas_empacado ? '<div class="pedido-notes"><strong>Notas empacado:</strong> ' + a.notas_empacado + '</div>' : ''}
         ${a.notas_entrega ? '<div class="pedido-notes"><strong>Notas entrega:</strong> ' + a.notas_entrega + '</div>' : ''}
-        ${a.foto_entrega ? '<div style="margin-top:8px;"><img src="' + a.foto_entrega + '" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid var(--borde);cursor:pointer;" onclick="window.open(this.src,\'_blank\')"/></div>' : ''}
+        ${a.foto_empacado ? '<div style="margin-top:8px;"><span style="font-size:0.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:0.1em;">Foto Empacado:</span><br/><img src="' + a.foto_empacado + '" style="max-width:160px;max-height:120px;border-radius:6px;border:1px solid var(--borde);cursor:pointer;margin-top:4px;" onclick="window.open(this.src,\'_blank\')"/></div>' : ''}
+        ${a.foto_entrega ? '<div style="margin-top:8px;"><span style="font-size:0.6rem;color:var(--gris);text-transform:uppercase;letter-spacing:0.1em;">Foto Entrega:</span><br/><img src="' + a.foto_entrega + '" style="max-width:160px;max-height:120px;border-radius:6px;border:1px solid var(--borde);cursor:pointer;margin-top:4px;" onclick="window.open(this.src,\'_blank\')"/></div>' : ''}
 
         <div class="pedido-actions">
-          ${a.estado === 'pendiente_caja' ? `
-            <button class="btn btn-info btn-sm" onclick="cambiarEstado(${a.id}, 'en_caja')">&#128230; Armar Caja</button>
+          ${a.estado === 'enviado_logistica' ? `
+            <button class="btn btn-info btn-sm" onclick="openEmpacadoModal(${a.id}, '${(p.codigo_pedido || '').replace(/'/g, "\\'")}')">📦 Empacar</button>
           ` : ''}
-          ${a.estado === 'en_caja' ? `
-            <button class="btn btn-warning btn-sm" onclick="cambiarEstado(${a.id}, 'en_ruta')">&#128666; En Ruta</button>
+          ${a.estado === 'empacado' ? `
+            <button class="btn btn-warning btn-sm" onclick="marcarEnReparto(${a.id}, ${p.id})">🚚 En Reparto</button>
           ` : ''}
-          ${a.estado === 'en_ruta' ? `
-            <button class="btn btn-success btn-sm" onclick="openEntregaModal(${a.id}, '${(p.codigo_pedido || '').replace(/'/g, "\\'")}')">&#9989; Entregado</button>
+          ${a.estado === 'en_reparto' ? `
+            <button class="btn btn-success btn-sm" onclick="openEntregaModal(${a.id}, '${(p.codigo_pedido || '').replace(/'/g, "\\'")}')">✅ Entregado</button>
           ` : ''}
           ${a.estado === 'entregado' ? `
-            <span style="font-size:0.7rem;color:var(--success);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">&#10004; Entregado ${a.fecha_entregado ? '— ' + fmtDate(a.fecha_entregado) : ''}</span>
+            <span style="font-size:0.7rem;color:var(--success);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">✔ Entregado ${a.fecha_entregado ? '— ' + fmtDate(a.fecha_entregado) : ''}</span>
           ` : ''}
         </div>
       </div>
@@ -559,43 +584,154 @@ function renderPedidos() {
   document.getElementById('pedidosList').innerHTML = html;
 }
 
-async function cambiarEstado(asigId, nuevoEstado) {
-  const dateField = {
-    en_caja: 'fecha_en_caja',
-    en_ruta: 'fecha_en_ruta',
-    entregado: 'fecha_entregado'
-  };
-
-  const body = { estado: nuevoEstado };
-  if (dateField[nuevoEstado]) body[dateField[nuevoEstado]] = new Date().toISOString();
-
-  if (nuevoEstado === 'en_caja') {
-    const notas = prompt('Notas de armado de caja (opcional):');
-    if (notas) body.notas_caja = notas;
-  }
-
+/* ═══════════════════════════════════════════════════
+   UPLOAD PHOTO HELPER
+   ═══════════════════════════════════════════════════ */
+async function uploadPhoto(fileInput, folder) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+  const fileName = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + (file.name.split('.').pop() || 'jpg');
   try {
-    await apiPatch('logistica_asignaciones', 'id=eq.' + asigId, body);
-    const idx = asignaciones.findIndex(a => a.id === asigId);
+    const uploadRes = await fetch(STORAGE + '/object/archivos-corporativos/' + fileName, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type },
+      body: file
+    });
+    if (uploadRes.ok) return STORAGE + '/object/public/archivos-corporativos/' + fileName;
+  } catch(e) {}
+  // Fallback: base64
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = ev => resolve(ev.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   MODAL: EMPACADO (foto obligatoria)
+   ═══════════════════════════════════════════════════ */
+let currentEmpacadoId = null;
+let empacadoPhotoReady = false;
+
+function openEmpacadoModal(asigId, codigoPedido) {
+  currentEmpacadoId = asigId;
+  empacadoPhotoReady = false;
+  document.getElementById('modalEmpacadoCode').textContent = codigoPedido;
+  document.getElementById('empacadoPhotoPreview').style.display = 'none';
+  document.getElementById('notasEmpacado').value = '';
+  document.getElementById('empacadoPhotoInput').value = '';
+  document.getElementById('empacadoPhotoRequired').classList.remove('show');
+  document.getElementById('modalEmpacado').classList.add('active');
+}
+
+function closeModalEmpacado() {
+  document.getElementById('modalEmpacado').classList.remove('active');
+  currentEmpacadoId = null;
+}
+
+document.getElementById('empacadoPhotoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  empacadoPhotoReady = true;
+  document.getElementById('empacadoPhotoRequired').classList.remove('show');
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const preview = document.getElementById('empacadoPhotoPreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    document.querySelector('#empacadoUploadArea .upload-text').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function confirmEmpacado() {
+  if (!currentEmpacadoId) return;
+  if (!empacadoPhotoReady) {
+    document.getElementById('empacadoPhotoRequired').classList.add('show');
+    return;
+  }
+  const btn = document.getElementById('btnConfirmEmpacado');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  try {
+    const fotoUrl = await uploadPhoto(document.getElementById('empacadoPhotoInput'), 'empacados');
+    const body = {
+      estado: 'empacado',
+      fecha_empacado: new Date().toISOString(),
+      foto_empacado: fotoUrl,
+      notas_empacado: document.getElementById('notasEmpacado').value || null
+    };
+    await apiPatch('logistica_asignaciones', 'id=eq.' + currentEmpacadoId, body);
+    const idx = asignaciones.findIndex(a => a.id === currentEmpacadoId);
     if (idx >= 0) Object.assign(asignaciones[idx], body);
+    closeModalEmpacado();
     renderPedidos();
     renderCajas();
   } catch (err) {
-    alert('Error al cambiar estado: ' + err.message);
+    alert('Error al confirmar empacado: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📦 Confirmar Empacado';
   }
 }
 
-/* ── Entrega Modal ── */
+/* ═══════════════════════════════════════════════════
+   EN REPARTO — marca todos los empacados y envía correo
+   ═══════════════════════════════════════════════════ */
+async function marcarEnReparto(asigId, pedidoId) {
+  if (!confirm('¿Confirmar que este pedido va EN REPARTO? Se notificará a la vendedora/profesional por correo.')) return;
+  try {
+    const body = { estado: 'en_reparto', fecha_en_reparto: new Date().toISOString() };
+    await apiPatch('logistica_asignaciones', 'id=eq.' + asigId, body);
+    const idx = asignaciones.findIndex(a => a.id === asigId);
+    if (idx >= 0) Object.assign(asignaciones[idx], body);
+
+    // Send email to vendedora
+    const p = pedidosMap[pedidoId];
+    if (p) {
+      const v = vendedorasMap[p.vendedora_id];
+      if (v && v.correo) {
+        try {
+          await fetch(SUPABASE_URL + '/functions/v1/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+            body: JSON.stringify({
+              to: v.correo,
+              subject: '🚚 Tu pedido ENIGME está en camino — ' + (p.codigo_pedido || '#' + p.id),
+              html: '<div style="font-family:Montserrat,sans-serif;max-width:500px;margin:0 auto;padding:24px;background:#FAF9F6;">' +
+                '<h2 style="font-family:Cinzel,serif;color:#1C1C1C;text-align:center;letter-spacing:0.15em;">ENIGME</h2>' +
+                '<p style="color:#1C1C1C;">Hola <strong>' + (v.nombre || '') + '</strong>,</p>' +
+                '<p style="color:#1C1C1C;">Tu pedido <strong style="color:#CBAA63;">' + (p.codigo_pedido || '#' + p.id) + '</strong> ha sido despachado y está <strong>en reparto</strong>.</p>' +
+                '<p style="color:#888;font-size:0.85rem;">Pronto recibirás tu entrega. Cualquier duda, comunícate con tu coordinador.</p>' +
+                '<hr style="border:none;border-top:1px solid #CBAA63;margin:20px 0;"/>' +
+                '<p style="text-align:center;font-size:0.7rem;color:#888;">ENIGME — Alta Joyería</p></div>'
+            })
+          });
+        } catch(emailErr) { console.warn('No se pudo enviar correo a vendedora:', emailErr); }
+      }
+    }
+
+    renderPedidos();
+    renderCajas();
+  } catch (err) {
+    alert('Error al marcar en reparto: ' + err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MODAL: ENTREGA (foto obligatoria)
+   ═══════════════════════════════════════════════════ */
 let currentEntregaId = null;
-let entregaPhotoBase64 = null;
+let entregaPhotoReady = false;
 
 function openEntregaModal(asigId, codigoPedido) {
   currentEntregaId = asigId;
-  entregaPhotoBase64 = null;
+  entregaPhotoReady = false;
   document.getElementById('modalPedidoCode').textContent = codigoPedido;
   document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('notasEntrega').value = '';
   document.getElementById('photoInput').value = '';
+  document.getElementById('entregaPhotoRequired').classList.remove('show');
   document.getElementById('modalEntrega').classList.add('active');
 }
 
@@ -607,11 +743,12 @@ function closeModal() {
 document.getElementById('photoInput').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
+  entregaPhotoReady = true;
+  document.getElementById('entregaPhotoRequired').classList.remove('show');
   const reader = new FileReader();
   reader.onload = function(ev) {
-    entregaPhotoBase64 = ev.target.result;
     const preview = document.getElementById('photoPreview');
-    preview.src = entregaPhotoBase64;
+    preview.src = ev.target.result;
     preview.style.display = 'block';
     document.querySelector('#photoUploadArea .upload-text').textContent = file.name;
   };
@@ -620,59 +757,33 @@ document.getElementById('photoInput').addEventListener('change', function(e) {
 
 async function confirmEntrega() {
   if (!currentEntregaId) return;
+  if (!entregaPhotoReady) {
+    document.getElementById('entregaPhotoRequired').classList.add('show');
+    return;
+  }
   const btn = document.getElementById('btnConfirmEntrega');
   btn.disabled = true;
   btn.textContent = 'Procesando...';
-
   try {
-    let fotoUrl = null;
-
-    // Try to upload photo to Supabase storage
-    if (entregaPhotoBase64) {
-      try {
-        const file = document.getElementById('photoInput').files[0];
-        const fileName = 'entregas/' + currentEntregaId + '_' + Date.now() + '.' + (file.name.split('.').pop() || 'jpg');
-        const uploadRes = await fetch(STORAGE + '/object/entregas/' + fileName, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': file.type
-          },
-          body: file
-        });
-        if (uploadRes.ok) {
-          fotoUrl = STORAGE + '/object/public/entregas/' + fileName;
-        } else {
-          // If storage fails, store as base64 in the field
-          fotoUrl = entregaPhotoBase64;
-        }
-      } catch (storageErr) {
-        fotoUrl = entregaPhotoBase64;
-      }
-    }
-
+    const fotoUrl = await uploadPhoto(document.getElementById('photoInput'), 'entregas');
     const body = {
       estado: 'entregado',
       fecha_entregado: new Date().toISOString(),
+      foto_entrega: fotoUrl,
       notas_entrega: document.getElementById('notasEntrega').value || null
     };
-    if (fotoUrl) body.foto_entrega = fotoUrl;
-
     await apiPatch('logistica_asignaciones', 'id=eq.' + currentEntregaId, body);
-
     const idx = asignaciones.findIndex(a => a.id === currentEntregaId);
     if (idx >= 0) Object.assign(asignaciones[idx], body);
-
     closeModal();
     renderPedidos();
-    renderComision();
+    renderSalario();
     renderCajas();
   } catch (err) {
     alert('Error al confirmar entrega: ' + err.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Confirmar Entrega';
+    btn.textContent = '✅ Confirmar Entrega';
   }
 }
 
@@ -770,66 +881,40 @@ function renderDirectorio() {
 }
 
 /* ═══════════════════════════════════════════════════
-   TAB 3: MI COMISIÓN
+   TAB 3: MI SALARIO
    ═══════════════════════════════════════════════════ */
-function renderComision() {
-  const pct = session.porcentaje_comision || 0;
+function renderSalario() {
+  const salarioFijo = 11000;
   const entregados = asignaciones.filter(a => a.estado === 'entregado');
-
-  // Group by campaign
-  const byCampana = {};
-  entregados.forEach(a => {
-    const p = pedidosMap[a.pedido_id];
-    if (!p) return;
-    const campId = p.campana_id || 0;
-    const campNombre = campanasMap[campId] ? 'Campaña ' + campanasMap[campId].numero : 'Sin Campaña';
-    if (!byCampana[campNombre]) byCampana[campNombre] = { total: 0, count: 0 };
-    byCampana[campNombre].total += (p.total_venta_neta || 0);
-    byCampana[campNombre].count++;
-  });
-
-  const grandTotal = Object.values(byCampana).reduce((s, c) => s + c.total, 0);
-  const comisionTotal = grandTotal * pct / 100;
+  const empacados = asignaciones.filter(a => a.estado === 'empacado' || a.estado === 'en_reparto' || a.estado === 'entregado');
 
   let html = `
   <div class="comision-card">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="stat-label">Tu Porcentaje de Comisión</div>
-      <div class="stat-value">${pct}%</div>
+    <div style="text-align:center;margin-bottom:24px;">
+      <div class="stat-label">Salario Fijo Mensual</div>
+      <div class="comision-total" style="margin:0;border:none;padding:0;">${fmt(salarioFijo)}</div>
     </div>
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="stat-label">Total Pedidos Entregados</div>
-      <div style="font-family:'Cinzel',serif;font-size:1.3rem;color:var(--dorado);">${entregados.length}</div>
-    </div>`;
 
-  if (Object.keys(byCampana).length > 0) {
-    Object.entries(byCampana).sort((a,b) => b[1].total - a[1].total).forEach(([camp, data]) => {
-      html += `
-      <div class="comision-row">
-        <span class="cr-label">${camp} (${data.count} pedidos)</span>
-        <span class="cr-value">${fmt(data.total)}</span>
-      </div>`;
-    });
+    <div class="comision-row">
+      <span class="cr-label">📦 Pedidos Empacados</span>
+      <span class="cr-value">${empacados.length}</span>
+    </div>
+    <div class="comision-row">
+      <span class="cr-label">✅ Pedidos Entregados</span>
+      <span class="cr-value">${entregados.length}</span>
+    </div>
+    <div class="comision-row">
+      <span class="cr-label">📋 Total Asignados</span>
+      <span class="cr-value">${asignaciones.length}</span>
+    </div>
 
-    html += `
-    <div class="comision-row" style="border-top:1px solid rgba(203,170,99,0.3);margin-top:8px;padding-top:12px;">
-      <span class="cr-label" style="color:var(--marfil);">Total Venta Neta</span>
-      <span class="cr-value">${fmt(grandTotal)}</span>
-    </div>`;
-  }
-
-  html += `
-    <div class="comision-total">${fmt(comisionTotal)}</div>
-    <div style="text-align:center;margin-top:4px;">
-      <span class="stat-label">Comisión Total (${pct}%)</span>
+    <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(203,170,99,0.3);">
+      <div class="stat-label">Tu salario es fijo independiente de entregas</div>
+      <div style="font-size:0.75rem;color:rgba(250,249,246,0.5);margin-top:8px;">Recuerda: la foto de empacado y entrega son obligatorias</div>
     </div>
   </div>`;
 
-  if (entregados.length === 0) {
-    html += '<div class="empty-state"><div class="empty-icon">&#128176;</div><div class="empty-text">Sin entregas completadas aún</div><div class="empty-sub">Tu comisión se calcula sobre los pedidos entregados</div></div>';
-  }
-
-  document.getElementById('comisionContent').innerHTML = html;
+  document.getElementById('salarioContent').innerHTML = html;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -857,9 +942,9 @@ function renderCajas() {
 
     const items = detallesMap[p.id] || [];
     items.forEach(i => {
-      const key = i.referencia;
+      const key = i.codigo_producto || i.referencia || ('item_' + i.id);
       if (!bySector[sectorName].products[key]) {
-        bySector[sectorName].products[key] = { referencia: i.referencia, precio: i.precio, cantidad: 0 };
+        bySector[sectorName].products[key] = { codigo: i.codigo_producto || i.referencia || '—', nombre: i.nombre_producto || i.producto || '', precio: i.precio_catalogo_unitario || i.precio || 0, cantidad: 0 };
       }
       bySector[sectorName].products[key].cantidad += i.cantidad;
     });
@@ -874,7 +959,7 @@ function renderCajas() {
   const sortedSectors = Object.entries(bySector).sort((a,b) => a[0].localeCompare(b[0]));
 
   sortedSectors.forEach(([sectorName, data]) => {
-    const productList = Object.values(data.products).sort((a,b) => a.referencia.localeCompare(b.referencia));
+    const productList = Object.values(data.products).sort((a,b) => (a.codigo || '').localeCompare(b.codigo || ''));
     const totalItems = productList.reduce((s, p) => s + p.cantidad, 0);
 
     html += `
@@ -888,7 +973,8 @@ function renderCajas() {
         ${productList.map(p => `
         <div class="caja-product-row">
           <div>
-            <span class="caja-product-ref">${p.referencia}</span>
+            <span class="caja-product-ref" style="font-family:monospace;color:#CBAA63;">${p.codigo}</span>
+            ${p.nombre ? '<span style="color:var(--gris);font-size:0.7rem;margin-left:6px;">' + p.nombre + '</span>' : ''}
             <span style="color:var(--gris);font-size:0.75rem;margin-left:8px;">${fmt(p.precio)} c/u</span>
           </div>
           <div class="caja-product-qty">${p.cantidad}</div>
@@ -925,9 +1011,12 @@ document.getElementById('dirSearch').addEventListener('input', debounce(renderDi
 document.getElementById('dirFilter').addEventListener('change', renderDirectorio);
 document.getElementById('cajaSearch').addEventListener('input', debounce(renderCajas, 300));
 
-/* ── Close modal on overlay click ── */
+/* ── Close modals on overlay click ── */
 document.getElementById('modalEntrega').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
+});
+document.getElementById('modalEmpacado').addEventListener('click', function(e) {
+  if (e.target === this) closeModalEmpacado();
 });
 
 /* ═══════════════════════════════════════════════════

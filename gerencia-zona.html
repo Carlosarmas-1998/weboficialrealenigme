@@ -716,7 +716,7 @@ function renderSectorGrid() {
   var grid = document.getElementById('sectorGrid');
   var html = '';
 
-  for (var i = 1; i <= 14; i++) {
+  for (var i = 1; i <= 20; i++) {
     var sector = null;
     sectores.forEach(function(s){ if (s.numero_sector === i) sector = s; });
     var coord = sector ? coordMap[sector.id] : null;
@@ -1345,14 +1345,42 @@ async function buscarExistente() {
       return;
     }
 
-    // If found as vendedora, autofill (existing behavior for re-nombramientos)
+    // If found as vendedora, autofill and show detailed info
     if (vends && vends.length) {
       var v = vends[0];
       document.getElementById('nomNombre').value = v.nombre || '';
       document.getElementById('nomDireccion').value = v.direccion || '';
       document.getElementById('nomTelefono').value = v.telefono || '';
       document.getElementById('nomEmail').value = v.email || '';
-      alertEl.innerHTML = '<p style="font-size:0.8rem;color:var(--danger);font-weight:600;">Esta persona ya esta registrada como Vendedora (Codigo: ' + (v.codigo || 'N/A') + ', Estado: ' + (v.activo ? 'ACTIVO' : 'BAJA') + '). Se notificara a Gerencia Divisional.</p>';
+
+      // Query pedidos count and deuda info
+      var pedidosCount = 0;
+      var tieneDeuda = v.tiene_deuda || false;
+      try {
+        var vendFull = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=id,tiene_deuda');
+        if (vendFull && vendFull.length) {
+          tieneDeuda = vendFull[0].tiene_deuda || false;
+          var pedidos = await api('/rest/v1/pedidos?vendedora_id=eq.' + vendFull[0].id + '&select=id');
+          pedidosCount = pedidos ? pedidos.length : 0;
+        }
+      } catch(pe) { console.warn('Error consultando pedidos/deuda:', pe); }
+
+      var alertHtml = '<p style="font-size:0.85rem;font-weight:600;color:var(--dorado);margin-bottom:8px;">Esta persona ya existe en la base de datos</p>';
+      alertHtml += '<div style="font-size:0.8rem;line-height:1.6;">';
+      alertHtml += '<strong>Nombre:</strong> ' + esc(v.nombre || 'N/A') + '<br>';
+      alertHtml += '<strong>C\u00f3digo existente:</strong> <span style="color:var(--dorado);font-weight:600;">' + esc(v.codigo || 'N/A') + '</span><br>';
+      alertHtml += '<strong>Estado:</strong> ' + (v.activo ? '<span style="color:var(--success);">ACTIVO</span>' : '<span style="color:var(--danger);">BAJA</span>') + '<br>';
+      alertHtml += '<strong>Pedidos realizados:</strong> ' + pedidosCount + '<br>';
+      if (tieneDeuda) {
+        alertHtml += '<p style="margin-top:8px;padding:8px 12px;background:rgba(192,57,43,0.12);border:1px solid var(--danger);border-radius:4px;color:var(--danger);font-weight:700;font-size:0.85rem;">ESTA PERSONA TIENE DEUDA PENDIENTE</p>';
+      } else {
+        alertHtml += '<p style="margin-top:8px;padding:8px 12px;background:rgba(39,174,96,0.1);border:1px solid var(--success);border-radius:4px;color:var(--success);font-weight:600;font-size:0.8rem;">Sin deuda pendiente &mdash; se permite re-nombramiento.</p>';
+      }
+      alertHtml += '</div>';
+
+      alertEl.style.background = tieneDeuda ? 'rgba(192,57,43,0.08)' : 'rgba(203,170,99,0.1)';
+      alertEl.style.borderColor = tieneDeuda ? 'var(--danger)' : 'var(--dorado)';
+      alertEl.innerHTML = alertHtml;
       alertEl.style.display = 'block';
     }
   } catch(e) { console.error(e); }
@@ -1397,6 +1425,16 @@ async function guardarNombramiento() {
       return;
     }
   } catch(dniErrNom) { console.warn('Error validando DNI en nombramiento:', dniErrNom); }
+
+  // Check if vendedora exists and has deuda — block if tiene_deuda = true
+  try {
+    var dniEncDeuda = encodeURIComponent(dni);
+    var vendDeuda = await api('/rest/v1/vendedoras?dni=eq.' + dniEncDeuda + '&select=id,tiene_deuda,nombre,codigo');
+    if (vendDeuda && vendDeuda.length && vendDeuda[0].tiene_deuda) {
+      err.textContent = 'No se puede registrar: ' + (vendDeuda[0].nombre || 'Esta persona') + ' (Codigo: ' + (vendDeuda[0].codigo || 'N/A') + ') tiene deuda pendiente. Debe saldar su deuda antes de ser re-nombrada.';
+      return;
+    }
+  } catch(deudaErr) { console.warn('Error validando deuda:', deudaErr); }
 
   try {
     // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes

@@ -100,8 +100,8 @@
     html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     body {
-      background-color: #0A0A0A;
-      color: #FFFFFF;
+      background-color: #FAF9F6;
+      color: #1C1C1C;
       font-family: 'Montserrat', sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
@@ -277,16 +277,16 @@
       .nav-group { width: 100%; justify-content: center; flex-direction: row; flex-wrap: wrap; gap: 12px; }
       .nav-group.right { width: 100%; justify-content: center; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 12px; }
       
-      .dropdown { position: relative; width: auto; display: inline-block; }
+      .navbar .dropdown { position: static; width: auto; display: inline-block; }
       .dropbtn { font-size: 0.55rem; letter-spacing: 1.5px; padding: 10px 5px; }
-      
+
       .dropdown-content {
-        top: 100%; left: 50%; transform: translateX(-50%) translateY(10px);
-        width: auto; min-width: 200px; max-width: calc(100vw - 30px); text-align: center;
+        top: calc(100% + 1px); left: 0; right: 0; width: 100vw; min-width: 100%; max-width: 100vw; text-align: center;
         background: rgba(28, 28, 28, 0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(201, 169, 110, 0.15);
+        border: 1px solid rgba(201, 169, 110, 0.15); border-left: none; border-right: none;
+        transform: translateY(10px);
       }
-      .dropdown.active .dropdown-content { transform: translateX(-50%) translateY(0) !important; }
+      .dropdown.active .dropdown-content { transform: translateY(0) !important; }
 
       .dropdown-content a { font-size: 0.55rem; padding: 15px;  color: #e8e0d4 !important; }
       .dropdown-content a:hover { padding-left: 15px; }
@@ -599,11 +599,14 @@
 
     /* ── GLOBAL RESPONSIVE SAFETY ── */
     img, video, iframe { max-width: 100%; }
-    section, main, footer, nav { max-width: 100%; overflow-x: hidden; }
+    section, main, footer { max-width: 100%; overflow-x: hidden; }
 
-    /* ── DARK THEME ADDITIONAL REFINEMENTS ── */
-    .image-hero { background: #0A0A0A; }
+    /* ── SECTION BACKGROUNDS ── */
+    .image-hero { background: #0A0A0A; color: #FFFFFF; }
+    .navbar { background: #0A0A0A; }
     .btn-editorial:hover { background: #CBAA63; border: 1px solid #CBAA63; color: #0A0A0A; }
+    .catalogo-btn:hover { background: #1C1C1C !important; color: #CBAA63 !important; box-shadow: 0 6px 30px rgba(203,170,99,0.5) !important; transform: scale(1.05); }
+    @keyframes goldShimmer { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
   </style>
 </head>
@@ -636,8 +639,10 @@
           <a href="#" class="mi-espacio-link" onclick="event.preventDefault();document.getElementById('miEspacioModal').style.display='flex';">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
           <a href="joyeria.html">Alta Joyer&iacute;a</a>
-          <a href="boutique.html">Bolsos Boutique</a>
-          <a href="plata.html">Colecci&oacute;n Plata</a>
+          <a href="boutique.html">Boutique</a>
+          <a href="vestidos.html">Vestidos</a>
+          <a href="plata.html">Boda &amp; Plata</a>
+          <a href="sets.html">SETS Exclusivos</a>
           <a href="liquidacion.html">Liquidaci&oacute;n</a>
           <a href="trabaja.html">Trabaja con Nosotros</a>
           <a href="soporte.html">Soporte</a>
@@ -648,10 +653,10 @@
       </div>
     </div>
 
-    <div class="brand-nav">&Egrave; N I G M E</div>
+    <div class="brand-nav" style="font-size:clamp(1.4rem,4vw,2.2rem);letter-spacing:0.4em;color:#CBAA63;font-weight:400;">&Egrave; N I G M E</div>
 
     <div class="nav-group right">
-      <a href="catalogo.html" class="nav-link" style="font-size:clamp(0.55rem,1.5vw,0.65rem);letter-spacing:3px;text-transform:uppercase;color:#CBAA63;font-weight:700;text-decoration:none;">CAT&Aacute;LOGO</a>
+      <a href="catalogo.html" class="nav-link catalogo-btn" style="font-size:clamp(0.85rem,2.5vw,1.1rem);letter-spacing:6px;text-transform:uppercase;color:#0A0A0A;font-weight:700;text-decoration:none;background:linear-gradient(135deg,#CBAA63 0%,#E8D090 50%,#CBAA63 100%);background-size:200% 200%;animation:goldShimmer 3s ease infinite;padding:14px 38px;border:1px solid #CBAA63;box-shadow:0 4px 20px rgba(203,170,99,0.3);display:inline-block;font-family:'Cinzel',serif;">CAT&Aacute;LOGO</a>
     </div>
   </nav>
 
@@ -664,9 +669,7 @@
   <!-- ══ IMAGE HERO + SUBSCRIPTION ══ -->
   <main class="image-hero" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')window.location.href='catalogo.html'">
     <img src="portada.png" alt="ÈNIGME — Colección Cero" class="hero-img" />
-    <div class="hero-title-overlay">
-      <h1>Colecci&oacute;n Cero &mdash; Lanzamiento</h1>
-    </div>
+    <!-- hero title removed -->
     <div class="hero-overlay" id="heroSubscribeOverlay">
       <h2>Obt&eacute;n 10% en tu Primera Compra</h2>
       <p class="hero-subtitle">Ingresa tu correo y &uacute;nete al Club Exclusivo de La Casa &Egrave;NIGME</p>

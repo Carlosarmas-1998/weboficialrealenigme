@@ -119,20 +119,19 @@
     .dropdown-content a:hover { background: rgba(201, 169, 110, 0.08); color: #CBAA63 !important; padding-left: 28px; }
     .dropdown.right .dropdown-content { left: auto; right: 0; }
 
-    .btn-menu-brand { display: flex; align-items: center; gap: 8px; color: var(--carbon) !important; padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 16px); border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.5rem, 1.2vw, 0.6rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px); text-transform: uppercase; transition: var(--transition); border-radius: 2px; background: transparent; }
+    .btn-menu-brand { display: flex; align-items: center; gap: 8px; color: var(--carbon) !important; padding: clamp(8px, 2vw, 12px) clamp(14px, 3vw, 24px); border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.6rem, 1.5vw, 0.75rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px); text-transform: uppercase; transition: var(--transition); border-radius: 2px; background: transparent; }
     .btn-menu-brand:hover { background-color: var(--dorado); border-color: var(--dorado); color: var(--blanco-dior) !important; }
-    .btn-menu-brand svg { width: clamp(10px, 1.5vw, 13px); height: clamp(10px, 1.5vw, 13px); fill: currentColor; }
+    .btn-menu-brand svg { width: clamp(14px, 2vw, 18px); height: clamp(14px, 2vw, 18px); fill: currentColor; }
 
     @keyframes bagWigglePulse {
       0%, 100% { transform: scale(1) rotate(0deg); }
       5% { transform: scale(1.1) rotate(-8deg); }
       10% { transform: scale(1.1) rotate(8deg); }
-      15% { transform: scale(1.1) rotate(-8deg); }
-      20% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.05); }
+      15% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
-    .btn-cart-nav { animation: bagWigglePulse 6s ease-in-out infinite; background-color: var(--marfil); }
-    .btn-cart-nav:hover { animation: none; }
+    .btn-cart-nav { background-color: var(--marfil, #FAF9F6); animation: bagWigglePulse 6s ease-in-out infinite; }
+    .btn-cart-nav:hover { animation-play-state: paused; }
     .counter-badge { font-weight: 700; }
     
     .txt-hide-mobile { display: inline; }
@@ -368,8 +367,10 @@
           <a href="index.html#mi-espacio" class="mi-espacio-link">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
           <a href="joyeria.html">Alta Joyer&iacute;a</a>
-          <a href="boutique.html">Bolsos Boutique</a>
-          <a href="plata.html">Colecci&oacute;n Plata</a>
+          <a href="boutique.html">Boutique</a>
+          <a href="vestidos.html">Vestidos</a>
+          <a href="plata.html">Boda &amp; Plata</a>
+          <a href="sets.html">SETS Exclusivos</a>
           <a href="liquidacion.html">Liquidaci&oacute;n</a>
           <a href="trabaja.html">Trabaja con Nosotros</a>
           <a href="soporte.html">Soporte</a>
@@ -418,13 +419,17 @@
   </div>
 
   <div class="finish-selector">
-    <a href="plata.html" class="finish-btn plata">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
-      Plata de Ley 925
-    </a>
     <a href="joyeria.html" class="finish-btn oro">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
       Alta Joyer&iacute;a Acabada en Oro Real
+    </a>
+    <a href="plata.html" class="finish-btn plata">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
+      Ver Boda &amp; Plata
+    </a>
+    <a href="sets.html" class="finish-btn plata" style="border-color:#CBAA63;color:#CBAA63;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
+      Ver SETS Exclusivos
     </a>
   </div>
 
@@ -432,8 +437,7 @@
     <p style="font-family:'Cinzel',serif;font-size:clamp(0.7rem,1.2vw,0.85rem);letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:15px;font-weight:500;">Seleccione su colección</p>
     <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;">
       <button class="filter-cat-btn active" data-cat="all" style="padding:12px 28px;border:1px solid #CBAA63;background:#1C1C1C;color:#CBAA63;font-family:'Montserrat',sans-serif;font-size:clamp(0.5rem,1vw,0.6rem);letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.3s;border-radius:2px;">Todas las Piezas</button>
-      <button class="filter-cat-btn" data-cat="plata925" style="padding:12px 28px;border:1px solid rgba(203,170,99,0.4);background:transparent;color:#1C1C1C;font-family:'Montserrat',sans-serif;font-size:clamp(0.5rem,1vw,0.6rem);letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.3s;border-radius:2px;">Plata de Ley 925</button>
-      <button class="filter-cat-btn" data-cat="inoxidable" style="padding:12px 28px;border:1px solid rgba(203,170,99,0.4);background:transparent;color:#1C1C1C;font-family:'Montserrat',sans-serif;font-size:clamp(0.5rem,1vw,0.6rem);letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.3s;border-radius:2px;">Joyería Inoxidable Acabada en Oro</button>
+      <button class="filter-cat-btn" data-cat="inoxidable" style="padding:12px 28px;border:1px solid rgba(203,170,99,0.4);background:transparent;color:#1C1C1C;font-family:'Montserrat',sans-serif;font-size:clamp(0.5rem,1vw,0.6rem);letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.3s;border-radius:2px;">Joyer&iacute;a Inoxidable Acabada en Oro</button>
     </div>
   </div>
 
@@ -1051,196 +1055,10 @@
       </div>
     </article>
 
-    <article class="product-card">
-      <button class="btn-fav" data-ref="PL001" onclick="toggleFav('PL001', 'Anillo Aura Céleste', 'L 1499', 'pl1.jpg', this); event.stopPropagation();">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      </button>
-      <div class="carousel-wrapper" onclick="openLightbox(this)">
-        <div class="carousel-track" data-index="0">
-          <img src="pl1.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+1'">
-          <img src="pl2.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+2'">
-          <img src="pl1.jpg" alt="Joyería ÈNIGME" loading="lazy" class="product-media">
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-meta">
-          <span class="product-code">REF: PL001</span>
-          <h2 class="product-name">Aura Céleste</h2>
-          <p class="product-lema">"Un fragmento de cielo capturado en plata."</p>
-          <div class="specs-block">
-            <select id="size-PL001" class="size-select">
-              <option value="7">Talla 7</option>
-              <option value="8">Talla 8</option>
-            </select>
-            <span class="spec-material"><strong>Plata de Ley 925</strong></span>
-          </div>
-        </div>
-        <div class="pricing-action-wrapper">
-          <div class="product-price">L 1499</div>
-          <div class="purchase-action">
-            <div class="qty-selector">
-              <button onclick="changeCardQty('qty-PL001', -1)">-</button>
-              <span id="qty-PL001">1</span>
-              <button onclick="changeCardQty('qty-PL001', 1)">+</button>
-            </div>
-            <button class="btn-cart" onclick="addToCartBase('PL001', 'Anillo Aura Céleste', '1499', 'pl1.jpg', this, 'qty-PL001', 'size-PL001')">Añadir a la Bolsa</button>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="product-card">
-      <button class="btn-fav" data-ref="PL002" onclick="toggleFav('PL002', 'Anillo Éclat de Lune', 'L 1899', 'pl3.jpg', this); event.stopPropagation();">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      </button>
-      <div class="carousel-wrapper" onclick="openLightbox(this)">
-        <div class="carousel-track" data-index="0">
-          <img src="pl3.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+3'">
-          <img src="pl4.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+4'">
-          <img src="pl3.jpg" alt="Joyería ÈNIGME" loading="lazy" class="product-media">
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-meta">
-          <span class="product-code">REF: PL002</span>
-          <h2 class="product-name">Éclat de Lune</h2>
-          <p class="product-lema">"Luz forjada en la penumbra. Hipnotizante."</p>
-          <div class="specs-block">
-            <select id="size-PL002" class="size-select">
-              <option value="7">Talla 7</option>
-              <option value="8">Talla 8</option>
-            </select>
-            <span class="spec-material"><strong>Plata de Ley 925</strong></span>
-          </div>
-        </div>
-        <div class="pricing-action-wrapper">
-          <div class="product-price">L 1899</div>
-          <div class="purchase-action">
-            <div class="qty-selector">
-              <button onclick="changeCardQty('qty-PL002', -1)">-</button>
-              <span id="qty-PL002">1</span>
-              <button onclick="changeCardQty('qty-PL002', 1)">+</button>
-            </div>
-            <button class="btn-cart" onclick="addToCartBase('PL002', 'Anillo Éclat de Lune', '1899', 'pl3.jpg', this, 'qty-PL002', 'size-PL002')">Añadir a la Bolsa</button>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="product-card">
-      <button class="btn-fav" data-ref="PL003" onclick="toggleFav('PL003', 'Anillo Sortilège', 'L 1399', 'pl5.jpg', this); event.stopPropagation();">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      </button>
-      <div class="carousel-wrapper" onclick="openLightbox(this)">
-        <div class="carousel-track" data-index="0">
-          <img src="pl5.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+5'">
-          <img src="pl6.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+6'">
-          <img src="pl5.jpg" alt="Joyería ÈNIGME" loading="lazy" class="product-media">
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-meta">
-          <span class="product-code">REF: PL003</span>
-          <h2 class="product-name">Sortilège</h2>
-          <p class="product-lema">"La elegancia de un hechizo silencioso."</p>
-          <div class="specs-block">
-            <select id="size-PL003" class="size-select">
-              <option value="7">Talla 7</option>
-              <option value="8">Talla 8</option>
-            </select>
-            <span class="spec-material"><strong>Plata de Ley 925</strong></span>
-          </div>
-        </div>
-        <div class="pricing-action-wrapper">
-          <div class="product-price">L 1399</div>
-          <div class="purchase-action">
-            <div class="qty-selector">
-              <button onclick="changeCardQty('qty-PL003', -1)">-</button>
-              <span id="qty-PL003">1</span>
-              <button onclick="changeCardQty('qty-PL003', 1)">+</button>
-            </div>
-            <button class="btn-cart" onclick="addToCartBase('PL003', 'Anillo Sortilège', '1399', 'pl5.jpg', this, 'qty-PL003', 'size-PL003')">Añadir a la Bolsa</button>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="product-card">
-      <button class="btn-fav" data-ref="PL004" onclick="toggleFav('PL004', 'Anillo Majesté', 'L 1599', 'pl7.jpg', this); event.stopPropagation();">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      </button>
-      <div class="carousel-wrapper" onclick="openLightbox(this)">
-        <div class="carousel-track" data-index="0">
-          <img src="pl7.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+7'">
-          <img src="pl8.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+8'">
-          <img src="pl7.jpg" alt="Joyería ÈNIGME" loading="lazy" class="product-media">
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-meta">
-          <span class="product-code">REF: PL004</span>
-          <h2 class="product-name">Majesté</h2>
-          <p class="product-lema">"Una corona diseñada para dominar el espacio."</p>
-          <div class="specs-block">
-            <select id="size-PL004" class="size-select">
-              <option value="7">Talla 7</option>
-              <option value="8">Talla 8</option>
-            </select>
-            <span class="spec-material"><strong>Plata de Ley 925</strong></span>
-          </div>
-        </div>
-        <div class="pricing-action-wrapper">
-          <div class="product-price">L 1599</div>
-          <div class="purchase-action">
-            <div class="qty-selector">
-              <button onclick="changeCardQty('qty-PL004', -1)">-</button>
-              <span id="qty-PL004">1</span>
-              <button onclick="changeCardQty('qty-PL004', 1)">+</button>
-            </div>
-            <button class="btn-cart" onclick="addToCartBase('PL004', 'Anillo Majesté', '1599', 'pl7.jpg', this, 'qty-PL004', 'size-PL004')">Añadir a la Bolsa</button>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <article class="product-card">
-      <button class="btn-fav" data-ref="PL005" onclick="toggleFav('PL005', 'Pulsera Éternité Bleu', 'L 1299', 'pl9.jpg', this); event.stopPropagation();">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-      </button>
-      <div class="carousel-wrapper" onclick="openLightbox(this)">
-        <div class="carousel-track" data-index="0">
-          <img src="pl9.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+9'">
-          <img src="pl10.jpg" loading="lazy" class="product-media" onerror="this.src='https://via.placeholder.com/600x800?text=PLATA+10'">
-          <img src="pl9.jpg" alt="Joyería ÈNIGME" loading="lazy" class="product-media">
-        </div>
-      </div>
-      <div class="product-info">
-        <div class="product-meta">
-          <span class="product-code">REF: PL005</span>
-          <h2 class="product-name">Éternité Bleu</h2>
-          <p class="product-lema">"El ciclo interminable de un aura cautivadora."</p>
-          <div class="specs-block">
-            <select id="size-PL005" class="size-select">
-              <option value="UNICA">Ajuste Unisex</option>
-            </select>
-            <span class="spec-material"><strong>Plata de Ley 925</strong></span>
-          </div>
-        </div>
-        <div class="pricing-action-wrapper">
-          <div class="product-price">L 1299</div>
-          <div class="purchase-action">
-            <div class="qty-selector">
-              <button onclick="changeCardQty('qty-PL005', -1)">-</button>
-              <span id="qty-PL005">1</span>
-              <button onclick="changeCardQty('qty-PL005', 1)">+</button>
-            </div>
-            <button class="btn-cart" onclick="addToCartBase('PL005', 'Pulsera Éternité Bleu', '1299', 'pl9.jpg', this, 'qty-PL005', 'size-PL005')">Añadir a la Bolsa</button>
-          </div>
-        </div>
-      </div>
-    </article>
+    <!-- Plata products removed - now in plata.html (Boda & Plata) -->
 
   </main>
+  
 
   <footer class="legal-banner">
     <div class="trust-badges-container">

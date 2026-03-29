@@ -193,6 +193,7 @@
   <button class="tab-btn" onclick="switchTab('pedidosDiv',this)">Pedidos Divisi&oacute;n</button>
   <button class="tab-btn" onclick="switchTab('logistica',this)">Log&iacute;stica</button>
   <button class="tab-btn" onclick="switchTab('bajasConsultas',this)">Bajas / Consultas</button>
+  <button class="tab-btn" onclick="switchTab('trackingLog',this)">Tracking Log&iacute;stica</button>
 </div>
 
 <div class="container">
@@ -511,6 +512,46 @@
     </div>
   </div>
 
+  <!-- ══════════ TAB 9: TRACKING LOGISTICA ══════════ -->
+  <div class="tab-panel" id="panel-trackingLog">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Tracking Log&iacute;stica</h2>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input id="trackSearch" placeholder="Buscar c&oacute;digo o vendedora..." style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;min-width:200px;" oninput="filterTracking()"/>
+        <select id="trackEstadoFilter" onchange="filterTracking()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+          <option value="">Todos los estados</option>
+          <option value="enviado_logistica">Enviado a Log&iacute;stica</option>
+          <option value="empacado">Empacado</option>
+          <option value="en_reparto">En Reparto</option>
+          <option value="entregado">Entregado</option>
+        </select>
+        <button class="btn btn-sm" onclick="loadTrackingLogistica()">Refrescar</button>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="trackStats"></div>
+
+    <div class="card" style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>C&oacute;digo Pedido</th>
+            <th>Vendedora</th>
+            <th>Estado</th>
+            <th>Foto Empacado</th>
+            <th>Foto Entrega</th>
+            <th>F. Empacado</th>
+            <th>F. En Reparto</th>
+            <th>F. Entregado</th>
+          </tr>
+        </thead>
+        <tbody id="trackTableBody">
+          <tr><td colspan="8" style="text-align:center;color:var(--gris);padding:40px;">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div><!-- /container -->
 </div><!-- /app-wrap -->
 
@@ -676,6 +717,7 @@ function switchTab(tab, btn) {
   if (tab === 'pedidosDiv') { initPedDivSelectors(); loadPedidosDiv(); }
   if (tab === 'logistica') loadOperadoresLog();
   if (tab === 'bajasConsultas') { document.getElementById('bcResultado').style.display = 'none'; document.getElementById('bcBuscar').value = ''; document.getElementById('bcError').textContent = ''; document.getElementById('bcSuccess').textContent = ''; }
+  if (tab === 'trackingLog') loadTrackingLogistica();
 }
 
 function stopAllPolling() {
@@ -2336,6 +2378,159 @@ async function doChangePasswordGD() {
     console.error(e);
   }
 }
+
+/* ══════════════════════════════════════════════════════
+   TAB 9: TRACKING LOGISTICA
+   ══════════════════════════════════════════════════════ */
+var trackingData = [];
+var trackingVendedoraMap = {};
+
+async function loadTrackingLogistica() {
+  var tbody = document.getElementById('trackTableBody');
+  var statsEl = document.getElementById('trackStats');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gris);padding:40px;">Cargando tracking...</td></tr>';
+  statsEl.innerHTML = '';
+
+  try {
+    // Get all logistica operators for this division
+    var ops = await api('/rest/v1/logistica_operadores?gerencia_divisional_id=eq.' + session.id + '&select=id');
+    if (!ops || ops.error || !ops.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gris);padding:40px;">No hay operadores log\u00edsticos registrados.</td></tr>';
+      return;
+    }
+    var opIds = ops.map(function(o){ return o.id; });
+
+    // Get all asignaciones for these operators with relevant estados
+    var estadosFilter = 'in.(enviado_logistica,empacado,en_reparto,entregado)';
+    var asigs = [];
+    for (var ab = 0; ab < opIds.length; ab += 50) {
+      var opBatch = opIds.slice(ab, ab + 50);
+      var batchAsigs = await api('/rest/v1/logistica_asignaciones?logistica_id=in.(' + opBatch.join(',') + ')&estado=' + estadosFilter + '&order=created_at.desc&select=id,pedido_id,logistica_id,estado,foto_empacado,foto_entrega,fecha_empacado,fecha_en_reparto,fecha_entregado');
+      if (batchAsigs && !batchAsigs.error) asigs = asigs.concat(batchAsigs);
+    }
+
+    if (!asigs.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gris);padding:40px;">No hay pedidos en log\u00edstica actualmente.</td></tr>';
+      statsEl.innerHTML = '<div class="stat-card"><div class="stat-value">0</div><div class="stat-label">En Log\u00edstica</div></div>';
+      trackingData = [];
+      return;
+    }
+
+    // Get pedidos for these asignaciones
+    var pedidoIds = [];
+    asigs.forEach(function(a){ if (a.pedido_id && pedidoIds.indexOf(a.pedido_id) === -1) pedidoIds.push(a.pedido_id); });
+    var pedidoMap = {};
+    for (var pb = 0; pb < pedidoIds.length; pb += 50) {
+      var pBatch = pedidoIds.slice(pb, pb + 50);
+      var pRes = await api('/rest/v1/pedidos?id=in.(' + pBatch.join(',') + ')&select=id,codigo_pedido,vendedora_id');
+      if (pRes && !pRes.error) pRes.forEach(function(p){ pedidoMap[p.id] = p; });
+    }
+
+    // Get vendedoras
+    var vendedoraIds = [];
+    Object.values(pedidoMap).forEach(function(p){ if (p.vendedora_id && vendedoraIds.indexOf(p.vendedora_id) === -1) vendedoraIds.push(p.vendedora_id); });
+    trackingVendedoraMap = {};
+    for (var vb = 0; vb < vendedoraIds.length; vb += 50) {
+      var vBatch = vendedoraIds.slice(vb, vb + 50);
+      var vRes = await api('/rest/v1/vendedoras?id=in.(' + vBatch.join(',') + ')&select=id,nombre');
+      if (vRes && !vRes.error) vRes.forEach(function(v){ trackingVendedoraMap[v.id] = v; });
+    }
+
+    // Build enriched tracking data
+    trackingData = asigs.map(function(a) {
+      var ped = pedidoMap[a.pedido_id] || {};
+      var vend = trackingVendedoraMap[ped.vendedora_id] || {};
+      return {
+        codigo_pedido: ped.codigo_pedido || ('#' + (a.pedido_id || '-')),
+        vendedora_nombre: vend.nombre || '-',
+        estado: a.estado,
+        foto_empacado: a.foto_empacado || null,
+        foto_entrega: a.foto_entrega || null,
+        fecha_empacado: a.fecha_empacado || null,
+        fecha_en_reparto: a.fecha_en_reparto || null,
+        fecha_entregado: a.fecha_entregado || null
+      };
+    });
+
+    // Stats
+    var cEnviado = 0, cEmpacado = 0, cReparto = 0, cEntregado = 0;
+    trackingData.forEach(function(t) {
+      if (t.estado === 'enviado_logistica') cEnviado++;
+      else if (t.estado === 'empacado') cEmpacado++;
+      else if (t.estado === 'en_reparto') cReparto++;
+      else if (t.estado === 'entregado') cEntregado++;
+    });
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-value">' + trackingData.length + '</div><div class="stat-label">Total en Log\u00edstica</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + cEnviado + '</div><div class="stat-label">Enviado a Log.</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + cEmpacado + '</div><div class="stat-label">Empacado</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + cReparto + '</div><div class="stat-label">En Reparto</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + cEntregado + '</div><div class="stat-label">Entregado</div></div>';
+
+    filterTracking();
+  } catch (err) {
+    console.error('Error loading tracking logistica:', err);
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--danger);padding:40px;">Error al cargar tracking: ' + esc(err.message || '') + '</td></tr>';
+  }
+}
+
+function filterTracking() {
+  var search = (document.getElementById('trackSearch').value || '').toLowerCase().trim();
+  var estadoFilter = document.getElementById('trackEstadoFilter').value;
+  var tbody = document.getElementById('trackTableBody');
+
+  var filtered = trackingData.filter(function(t) {
+    if (estadoFilter && t.estado !== estadoFilter) return false;
+    if (search) {
+      var matchCode = (t.codigo_pedido || '').toLowerCase().indexOf(search) >= 0;
+      var matchVend = (t.vendedora_nombre || '').toLowerCase().indexOf(search) >= 0;
+      if (!matchCode && !matchVend) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gris);padding:40px;">No se encontraron resultados.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(t) {
+    var badgeClass = '';
+    var badgeLabel = '';
+    switch (t.estado) {
+      case 'enviado_logistica': badgeClass = 'background:rgba(52,152,219,0.12);color:#2980b9;'; badgeLabel = 'Enviado a Log.'; break;
+      case 'empacado': badgeClass = 'background:rgba(243,156,18,0.12);color:#e67e22;'; badgeLabel = 'Empacado'; break;
+      case 'en_reparto': badgeClass = 'background:rgba(155,89,182,0.12);color:#8e44ad;'; badgeLabel = 'En Reparto'; break;
+      case 'entregado': badgeClass = 'background:rgba(39,174,96,0.12);color:#27ae60;'; badgeLabel = 'Entregado'; break;
+      default: badgeClass = 'background:rgba(136,136,136,0.12);color:#888;'; badgeLabel = t.estado || '-';
+    }
+
+    var fotoEmpHtml = '-';
+    if (t.foto_empacado) {
+      fotoEmpHtml = '<a href="' + esc(t.foto_empacado) + '" target="_blank"><img src="' + esc(t.foto_empacado) + '" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--borde);cursor:pointer;" title="Ver foto empacado"/></a>';
+    }
+    var fotoEntHtml = '-';
+    if (t.foto_entrega) {
+      fotoEntHtml = '<a href="' + esc(t.foto_entrega) + '" target="_blank"><img src="' + esc(t.foto_entrega) + '" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--borde);cursor:pointer;" title="Ver foto entrega"/></a>';
+    }
+
+    function fmtFecha(f) { if (!f) return '-'; try { return new Date(f).toLocaleDateString('es-HN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){ return f; } }
+
+    html += '<tr>' +
+      '<td style="font-weight:600;font-family:monospace;color:var(--dorado);">' + esc(t.codigo_pedido) + '</td>' +
+      '<td>' + esc(t.vendedora_nombre) + '</td>' +
+      '<td><span class="badge" style="' + badgeClass + '">' + badgeLabel + '</span></td>' +
+      '<td>' + fotoEmpHtml + '</td>' +
+      '<td>' + fotoEntHtml + '</td>' +
+      '<td style="font-size:0.75rem;">' + fmtFecha(t.fecha_empacado) + '</td>' +
+      '<td style="font-size:0.75rem;">' + fmtFecha(t.fecha_en_reparto) + '</td>' +
+      '<td style="font-size:0.75rem;">' + fmtFecha(t.fecha_entregado) + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
 </script>
 </body>
 </html>

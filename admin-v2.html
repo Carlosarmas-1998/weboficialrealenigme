@@ -655,7 +655,7 @@
     <div>
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:16px;">Desglose por <em style="color:var(--gold);font-style:italic;">Gerencia Divisional</em></h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Gerencia Divisional</th><th>Venta Bruta</th><th>Venta Neta</th><th>Com. GD (5%)</th><th>Com. GZ (3%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L16,000)</th><th>Com. Asesoras (15%)</th><th>Com. Ger. Gral. (5%)</th></tr></thead>
+        <thead><tr><th>Gerencia Divisional</th><th>Venta Bruta</th><th>Venta Neta</th><th>Com. GD (5%)</th><th>Com. GZ (4%)</th><th>Pago Nombramientos GZ</th><th>Base Salary GZ (L16,000)</th><th>Com. Asesoras (15%)</th><th>Com. Ger. Gral. (7%)</th></tr></thead>
         <tbody id="comisionesDesglose"></tbody>
       </table></div>
     </div>
@@ -941,7 +941,7 @@ var estadosPedidoConfig = ['Recibido','Confirmado','En Preparación','Enviado','
 var cfgUmbralNombAlto = 21;
 var cfgPagoNombAlto = 320;
 var cfgPagoNombBajo = 220;
-var cfgComisionLogistica = 8;
+var cfgComisionLogistica = 5;
 var cfgSalarioLogistica = 12000;
 
 // ================================================================
@@ -1242,7 +1242,7 @@ async function loadConfigValues() {
       if (c.clave === 'pago_nombramiento_alto') cfgPagoNombAlto = parseFloat(c.valor) || 320;
       if (c.clave === 'pago_nombramiento_bajo') cfgPagoNombBajo = parseFloat(c.valor) || 220;
       if (c.clave === 'salario_logistica') { cfgSalarioLogistica = parseFloat(c.valor) || 12000; foundSalarioLogistica = true; }
-      if (c.clave === 'comision_logistica') cfgComisionLogistica = parseFloat(c.valor) || 8;
+      if (c.clave === 'comision_logistica') cfgComisionLogistica = parseFloat(c.valor) || 5;
     });
   }
   // Seed salario_logistica if missing
@@ -2344,10 +2344,11 @@ function exportSimulacion() {
     { 'Concepto': '= VENTA NETA', '%': '85%', 'Monto (L)': ventaNeta },
     { 'Concepto': 'Precio de Insercion (Producto)', '%': '22% de Neta', 'Monto (L)': ventaNeta * 0.22 },
     { 'Concepto': 'Comision Asesoras', '%': '15% de Neta', 'Monto (L)': ventaNeta * 0.15 },
-    { 'Concepto': 'Logistica', '%': cfgComisionLogistica + '% de Neta', 'Monto (L)': ventaNeta * (cfgComisionLogistica / 100) },
+    { 'Concepto': 'Logistica (gastos envio Espana->Honduras)', '%': cfgComisionLogistica + '% de Neta', 'Monto (L)': ventaNeta * (cfgComisionLogistica / 100) },
+    { 'Concepto': 'Personal Logistica', '%': 'Fijo', 'Monto (L)': 11000 },
     { 'Concepto': 'Comision Gerencia Divisional', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
-    { 'Concepto': 'Comision Gerencia de Zona', '%': '3% de Neta', 'Monto (L)': ventaNeta * 0.03 },
-    { 'Concepto': 'Gerencia General', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
+    { 'Concepto': 'Comision Gerencia de Zona', '%': '4% de Neta', 'Monto (L)': ventaNeta * 0.04 },
+    { 'Concepto': 'Gerencia General', '%': '7% de Neta', 'Monto (L)': ventaNeta * 0.07 },
     { 'Concepto': 'Marketing y Web', '%': '4% de Neta', 'Monto (L)': ventaNeta * 0.04 },
     { 'Concepto': 'Gastos de Pagos (Salarios+Nomb+Op)', '%': '28% de Neta', 'Monto (L)': dGastos },
     { 'Concepto': 'Empresa - Ganancia Neta (INTOCABLE)', '%': '10% de Neta', 'Monto (L)': ventaNeta * 0.10 },
@@ -2363,8 +2364,8 @@ function exportSimulacion() {
     { 'Concepto': 'Ganancia Empresa (10% de Neta)', '%': '10% de Neta', 'Monto (L)': ventaNeta * 0.10 },
     { 'Concepto': 'Sobrante Fondo 28%', '%': '', 'Monto (L)': sobrante },
     { 'Concepto': 'Comision GD recibe', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
-    { 'Concepto': 'Comision GZ recibe', '%': '3% de Neta', 'Monto (L)': ventaNeta * 0.03 },
-    { 'Concepto': 'GZ cobra total (salario+comision)', '%': '', 'Monto (L)': costoSalGZ + (ventaNeta * 0.03) },
+    { 'Concepto': 'Comision GZ recibe', '%': '4% de Neta', 'Monto (L)': ventaNeta * 0.04 },
+    { 'Concepto': 'GZ cobra total (salario+comision)', '%': '', 'Monto (L)': costoSalGZ + (ventaNeta * 0.04) },
     { 'Concepto': 'Cada asesora recibe (15% de Neta)', '%': '', 'Monto (L)': (ventaNeta * 0.15) / numAsesoras }
   ];
 
@@ -3570,10 +3571,11 @@ var COMISION_ESTRUCTURA = [
   { concepto: 'Impuestos (15% de Venta Bruta)', pct: 15, color: '#b08fd0', deBruta: true },
   { concepto: 'Precio de Inserci\u00f3n (Producto/Coste)', pct: 22, color: '#5a8fa0' },
   { concepto: 'Comisi\u00f3n Asesoras', pct: 15, color: '#6ba896' },
-  { concepto: 'Log\u00edstica', pct: 8, color: '#9e6b6b' },
+  { concepto: 'Log\u00edstica (gastos env\u00edo Espa\u00f1a\u2192Honduras)', pct: 5, color: '#9e6b6b' },
+  { concepto: 'Personal Log\u00edstica', pct: 0, color: '#a07070', fijo: 11000, nota: 'L11,000 salario fijo' },
   { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5, color: '#c9a96e' },
-  { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
-  { concepto: 'Gerencia General', pct: 5, color: '#8b7355' },
+  { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 4, color: '#6b9e78', nota: '+ L16,000 brutos fijos por GZ' },
+  { concepto: 'Gerencia General', pct: 7, color: '#8b7355' },
   { concepto: 'Marketing y Web', pct: 4, color: '#a08840' },
   { concepto: 'Gastos de Pagos (Salarios GZ + Nombramientos + Operativo)', pct: 28, color: '#d08050' },
   { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10, color: '#d0a84f' }
@@ -3613,31 +3615,33 @@ async function loadComisiones() {
   var baseGZ = totalGerentesZona * 16000;
   var impuestos = totalBruta * 0.15;
   var comAsesoras = totalNeta * 0.15;
+  var LE = function(n) { return 'L' + n.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' <span style="font-size:.65rem;color:#e74c3c;font-weight:600;">(\u20ac' + (n/31.50).toLocaleString('es-HN',{minimumFractionDigits:2}) + ')</span>'; };
   document.getElementById('comisionesStats').innerHTML =
-    '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.4rem;">L' + totalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">(-) Impuestos (15% Bruta)</div><div class="stat-value" style="color:#b08fd0;">-L' + impuestos.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Venta Neta Total</div><div class="stat-value" style="color:var(--success);font-size:1.4rem;">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22% Neta)</div><div class="stat-value">L' + (totalNeta*0.22).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10% Neta)</div><div class="stat-value" style="color:var(--success);">L' + (totalNeta*0.10).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Neta)</div><div class="stat-value">L' + (totalNeta*0.28).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. GD (5% Neta)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (5% Neta)</div><div class="stat-value">L' + (totalNeta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Venta Bruta Total</div><div class="stat-value" style="font-size:1.4rem;">' + LE(totalBruta) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">(-) Impuestos (15% Bruta)</div><div class="stat-value" style="color:#b08fd0;">-' + LE(impuestos) + '</div></div>' +
+    '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Venta Neta Total</div><div class="stat-value" style="color:var(--success);font-size:1.4rem;">' + LE(totalNeta) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Inserci\u00f3n (22% Neta)</div><div class="stat-value">' + LE(totalNeta*0.22) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Empresa Ganancia (10% Neta)</div><div class="stat-value" style="color:var(--success);">' + LE(totalNeta*0.10) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Gastos de Pagos (28% Neta)</div><div class="stat-value">' + LE(totalNeta*0.28) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. GD (5% Neta)</div><div class="stat-value">' + LE(totalNeta*0.05) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Com. Ger. Gral. (7% Neta)</div><div class="stat-value">' + LE(totalNeta*0.07) + '</div></div>';
 
   // Estructura table - Impuestos (15%) se descuentan de Bruta, el resto sale de Neta
   var estHtml = '';
-  estHtml += '<tr style="background:rgba(176,143,208,0.08);"><td>Impuestos (15% de Venta Bruta)</td><td style="color:#b08fd0;font-weight:400;">15%</td><td style="color:#b08fd0;">L' + impuestos.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
-  estHtml += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA (Bruta - 15%)</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">L' + totalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="background:rgba(176,143,208,0.08);"><td>Impuestos (15% de Venta Bruta)</td><td style="color:#b08fd0;font-weight:400;">15%</td><td style="color:#b08fd0;">' + LE(impuestos) + '</td></tr>';
+  estHtml += '<tr style="border-top:2px solid var(--success);border-bottom:2px solid var(--success);background:rgba(107,158,120,0.06);"><td style="font-weight:600;color:var(--success);">= VENTA NETA (Bruta - 15%)</td><td style="font-weight:600;color:var(--success);">85%</td><td style="font-weight:600;color:var(--success);">' + LE(totalNeta) + '</td></tr>';
   var totalPct = 0;
   var totalMonto = impuestos;
   COMISION_ESTRUCTURA.forEach(function(c) {
-    if (c.deBruta) return; // skip Impuestos row (already shown above)
-    var monto = totalNeta * (c.pct / 100);
+    if (c.deBruta) return;
+    var monto = c.fijo ? c.fijo : totalNeta * (c.pct / 100);
     totalPct += c.pct;
     totalMonto += monto;
     var notaHtml = c.nota ? ' <span style="font-size:.7rem;color:var(--text-muted);">' + esc(c.nota) + '</span>' : '';
-    estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + c.pct + '% de Neta</td><td>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+    var pctLabel = c.fijo ? 'Fijo' : (c.pct + '% de Neta');
+    estHtml += '<tr><td>' + esc(c.concepto) + notaHtml + '</td><td style="color:var(--gold);font-weight:400;">' + pctLabel + '</td><td>' + LE(monto) + '</td></tr>';
   });
-  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL (Impuestos + Distribuci\u00f3n de Neta)</td><td style="font-weight:500;color:var(--gold);">' + (totalPct) + '% de Neta + 15% imp.</td><td style="font-weight:500;color:var(--gold);">L' + totalMonto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+  estHtml += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL (Impuestos + Distribuci\u00f3n de Neta)</td><td style="font-weight:500;color:var(--gold);">' + (totalPct) + '% de Neta + 15% imp.</td><td style="font-weight:500;color:var(--gold);">' + LE(totalMonto) + '</td></tr>';
   document.getElementById('comisionesEstructuraBody').innerHTML = estHtml;
 
   // Load nombramientos for pago calculation
@@ -3686,14 +3690,14 @@ async function loadComisiones() {
 
     desHtml += '<tr>' +
       '<td style="color:var(--gold);">' + esc(s.nombre) + ' <span style="color:var(--text-muted);font-size:.7rem;">(' + esc(s.codigo) + ')</span></td>' +
-      '<td>L' + s.bruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + s.neta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.03).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>' + LE(s.bruta) + '</td>' +
+      '<td>' + LE(s.neta) + '</td>' +
+      '<td>' + LE(s.neta*0.05) + '</td>' +
+      '<td>' + LE(s.neta*0.04) + '</td>' +
       '<td>' + pagoNomHtml + '</td>' +
-      '<td>L' + baseGZGd.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' <span style="font-size:.6rem;color:var(--text-muted);">(' + gdGerentes.length + ' GZ)</span></td>' +
-      '<td>L' + (s.neta*0.15).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
-      '<td>L' + (s.neta*0.05).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>' +
+      '<td>' + LE(baseGZGd) + ' <span style="font-size:.6rem;color:var(--text-muted);">(' + gdGerentes.length + ' GZ)</span></td>' +
+      '<td>' + LE(s.neta*0.15) + '</td>' +
+      '<td>' + LE(s.neta*0.07) + '</td>' +
       '</tr>';
   });
   if (!desHtml) desHtml = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:30px;">No hay gerencias divisionales</td></tr>';
@@ -3708,9 +3712,10 @@ async function loadComisiones() {
     insercion: 0.22,
     asesoras: 0.15,
     logistica: cfgComisionLogistica / 100,
+    personalLogistica: 11000,
     divisional: 0.05,
-    zona: 0.03,
-    gerenciaGral: 0.05,
+    zona: 0.04,
+    gerenciaGral: 0.07,
     marketing: 0.04,
     gastosPagos: 0.28,
     empresa: 0.10
@@ -3718,7 +3723,14 @@ async function loadComisiones() {
   window.SUELDO_GZ = 16000;
   window.PEDIDO_MIN = 2499;
 
-  window.L = function(n) { return 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+  window.TASA_EUR = 31.50;
+  window.L = function(n) {
+    var hnl = 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+    var eur = '\u20ac' + (n / TASA_EUR).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return hnl + ' <span style="font-size:0.7em;color:#e74c3c;font-weight:600;">(' + eur + ')</span>';
+  };
+  window.Lplain = function(n) { return 'L' + n.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+  window.Eplain = function(n) { return '\u20ac' + (n / TASA_EUR).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); };
 
   window.simular = function() {
     var numAsesoras = parseInt(document.getElementById('simAsesoras').value) || 0;
@@ -3736,6 +3748,7 @@ async function loadComisiones() {
     var dAsesoras = ventaNeta * MODELO.asesoras;
     var dInsercion = ventaNeta * MODELO.insercion;
     var dLogistica = ventaNeta * MODELO.logistica;
+    var dPersonalLogistica = MODELO.personalLogistica;
     var dDivisional = ventaNeta * MODELO.divisional;
     var dZona = ventaNeta * MODELO.zona;
     var dGerenciaGral = ventaNeta * MODELO.gerenciaGral;
@@ -3773,10 +3786,11 @@ async function loadComisiones() {
     var distribucion = [
       ['Precio de Inserci\u00f3n (Producto)', '22%', dInsercion, 'var(--info)'],
       ['Comisi\u00f3n Asesoras', '15%', dAsesoras, '#6ba896'],
-      ['Log\u00edstica', '8%', dLogistica, '#9e6b6b'],
+      ['Log\u00edstica (gastos env\u00edo Espa\u00f1a\u2192Honduras)', cfgComisionLogistica + '%', dLogistica, '#9e6b6b'],
+      ['Personal Log\u00edstica', 'Fijo', dPersonalLogistica, '#a07070'],
       ['Comisi\u00f3n Gerencia Divisional', '5%', dDivisional, 'var(--gold)'],
-      ['Comisi\u00f3n Gerencia de Zona', '3%', dZona, 'var(--success)'],
-      ['Gerencia General', '5%', dGerenciaGral, '#8b7355'],
+      ['Comisi\u00f3n Gerencia de Zona', '4%', dZona, 'var(--success)'],
+      ['Gerencia General', '7%', dGerenciaGral, '#8b7355'],
       ['Marketing y Web', '4%', dMarketing, 'var(--warn)'],
       ['Gastos de Pagos (Salarios + Nomb. + Op.)', '28%', dGastosPagos, '#d08050'],
       ['Empresa \u2014 Ganancia Neta (INTOCABLE)', '10%', dEmpresa, 'var(--success)']
@@ -3805,13 +3819,30 @@ async function loadComisiones() {
     html += '<div style="margin-bottom:16px;">';
     html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;color:var(--success);margin-bottom:12px;letter-spacing:.1em;">\u2728 QUEDA &mdash; Resumen Final</h3>';
     html += '<div class="stats-row">';
+    var totalEmpresaReal = dEmpresa + sobranteFondo28;
+    var totalEmpresaPositivo = totalEmpresaReal >= 0;
+
     html += '<div class="stat-card" style="border-color:var(--success);"><div class="stat-label">Ganancia Empresa (10%)</div><div class="stat-value" style="color:var(--success);">' + L(dEmpresa) + '</div></div>';
     html += '<div class="stat-card" style="border-color:#d08050;"><div class="stat-label">Sobrante Fondo 28%</div><div class="stat-value" style="color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</div></div>';
+    html += '<div class="stat-card" style="border-color:' + (totalEmpresaPositivo ? 'var(--gold)' : 'var(--danger)') + ';background:' + (totalEmpresaPositivo ? 'rgba(203,170,99,0.08)' : 'rgba(158,107,107,0.08)') + ';"><div class="stat-label" style="font-weight:700;color:' + (totalEmpresaPositivo ? 'var(--gold)' : 'var(--danger)') + ';">\u2b50 TOTAL DE EMPRESA</div><div class="stat-value" style="font-size:1.5rem;color:' + (totalEmpresaPositivo ? 'var(--gold)' : 'var(--danger)') + ';">' + L(totalEmpresaReal) + '</div><div style="font-size:.6rem;color:var(--text-muted);margin-top:4px;">10% ganancia ' + (esRentable ? '+ sobrante 28%' : '- d\u00e9ficit 28%') + '</div></div>';
     html += '<div class="stat-card" style="border-color:var(--gold);"><div class="stat-label">Comisi\u00f3n GD recibe</div><div class="stat-value">' + L(dDivisional) + '</div></div>';
     html += '<div class="stat-card"><div class="stat-label">Comisi\u00f3n GZ recibe</div><div class="stat-value">' + L(dZona) + '</div></div>';
     html += '<div class="stat-card"><div class="stat-label">GZ cobra total (salario+comisi\u00f3n)</div><div class="stat-value" style="color:var(--gold);">' + L(costoSalariosGZ + dZona) + '</div></div>';
     html += '<div class="stat-card"><div class="stat-label">Cada asesora recibe (15%)</div><div class="stat-value">' + L(dAsesoras / numAsesoras) + '</div></div>';
     html += '</div></div>';
+
+    // Si el 28% no alcanza, mostrar alerta de cuánto se resta de la empresa
+    if (!esRentable) {
+      html += '<div style="background:rgba(203,170,99,0.06);border:1px solid var(--gold);padding:16px;margin-bottom:16px;">';
+      html += '<strong style="color:var(--gold);">\u26a0\ufe0f IMPACTO EN GANANCIA EMPRESA:</strong><br>';
+      html += '<span style="font-size:.8rem;">El d\u00e9ficit del 28% (<strong style="color:var(--danger);">' + L(Math.abs(sobranteFondo28)) + '</strong>) se resta de la ganancia del 10% (<strong>' + L(dEmpresa) + '</strong>).<br>';
+      if (totalEmpresaPositivo) {
+        html += 'A\u00fan queda ganancia: <strong style="color:var(--success);">' + L(totalEmpresaReal) + '</strong></span>';
+      } else {
+        html += '<strong style="color:var(--danger);">La empresa pierde ' + L(Math.abs(totalEmpresaReal)) + ' \u2014 ZONA NO VIABLE</strong></span>';
+      }
+      html += '</div>';
+    }
 
     // ALERTA si no es rentable
     if (!esRentable) {
@@ -3917,10 +3948,11 @@ function calcularInversion() {
     { concepto: 'Impuestos (15% de Bruta)', pct: 15, deBruta: true },
     { concepto: 'Precio de Inserción (inversi\u00f3n)', pct: 22 },
     { concepto: 'Comisi\u00f3n Asesoras', pct: 15 },
-    { concepto: 'Log\u00edstica', pct: 8 },
+    { concepto: 'Log\u00edstica (gastos env\u00edo Espa\u00f1a\u2192Honduras)', pct: 5 },
+    { concepto: 'Personal Log\u00edstica', pct: 0, fijo: 11000 },
     { concepto: 'Comisi\u00f3n Gerencia Divisional', pct: 5 },
-    { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 3 },
-    { concepto: 'Gerencia General', pct: 5 },
+    { concepto: 'Comisi\u00f3n Gerencia de Zona', pct: 4 },
+    { concepto: 'Gerencia General', pct: 7 },
     { concepto: 'Marketing y Web', pct: 4 },
     { concepto: 'Gastos de Pagos (Salarios GZ + Nombramientos + Operativo)', pct: 28 },
     { concepto: 'Empresa - Ganancia Neta (INTOCABLE)', pct: 10 }
@@ -3938,10 +3970,10 @@ function calcularInversion() {
   var html = '';
   var totalCalc = 0;
   breakdown.forEach(function(b) {
-    var monto = b.deBruta ? (ventaBruta * (b.pct / 100)) : (ventaNeta * (b.pct / 100));
+    var monto = b.fijo ? b.fijo : (b.deBruta ? (ventaBruta * (b.pct / 100)) : (ventaNeta * (b.pct / 100)));
     totalCalc += monto;
-    var highlight = b.pct === 10 && !b.deBruta ? ' style="color:var(--success);font-weight:500;"' : '';
-    var pctLabel = b.deBruta ? (b.pct + '% de Bruta') : (b.pct + '% de Neta');
+    var highlight = b.pct === 10 && !b.deBruta && !b.fijo ? ' style="color:var(--success);font-weight:500;"' : '';
+    var pctLabel = b.fijo ? 'Fijo' : (b.deBruta ? (b.pct + '% de Bruta') : (b.pct + '% de Neta'));
     html += '<tr><td>' + b.concepto + '</td><td style="color:var(--gold);">' + pctLabel + '</td><td' + highlight + '>L' + monto.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
   });
   html += '<tr style="border-top:2px solid var(--gold);"><td style="font-weight:500;color:var(--gold);">TOTAL</td><td style="font-weight:500;color:var(--gold);"></td><td style="font-weight:500;color:var(--gold);">L' + totalCalc.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';

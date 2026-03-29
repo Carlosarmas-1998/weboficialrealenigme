@@ -163,6 +163,20 @@
       .whatsapp-float svg{width:20px;height:20px;}
     }
   
+    /* MANIFEST OVERLAY */
+    .manifest-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(28,28,28,0.85);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all 0.4s ease;}
+    .manifest-overlay.active{opacity:1;visibility:visible;}
+    .manifest-card{background:var(--marfil);max-width:420px;width:90%;border:1px solid rgba(203,170,99,0.3);padding:30px;position:relative;transform:translateY(20px);transition:transform 0.4s ease;}
+    .manifest-overlay.active .manifest-card{transform:translateY(0);}
+    .manifest-card-close{position:absolute;top:12px;right:16px;font-size:1.4rem;color:var(--gris-suave);cursor:pointer;background:none;border:none;font-family:inherit;transition:color 0.3s;}
+    .manifest-card-close:hover{color:var(--dorado);}
+    .manifest-card-img{width:100%;max-height:200px;object-fit:cover;border:1px solid var(--gris-linea);margin-bottom:20px;}
+    .manifest-card-ref{font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--dorado);margin-bottom:8px;font-weight:600;}
+    .manifest-card-name{font-family:'Cinzel',serif;font-size:1.3rem;letter-spacing:0.08em;color:var(--carbon);margin-bottom:8px;text-transform:uppercase;}
+    .manifest-card-price{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--dorado);letter-spacing:0.08em;margin-bottom:12px;}
+    .manifest-card-cat{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--gris-suave);margin-bottom:10px;}
+    .manifest-card-desc{font-family:'Cormorant Garamond',serif;font-size:0.95rem;line-height:1.8;color:var(--carbon);font-style:italic;font-weight:300;}
+
     /* Mobile dropdown active state */
     @media (max-width: 768px) {
       .dropdown.active .dropdown-content {
@@ -212,8 +226,8 @@
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         <span id="fav-count" class="counter-badge">0</span>
       </a>
-      <a href="carrito.html" class="btn-menu-brand btn-cart-nav">
-        <svg viewBox="0 0 24 24"><path d="M16 6V4a4 4 0 0 0-8 0v2H3v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6h-5zm-6-2a2 2 0 0 1 4 0v2h-4V4zm8 16H6V8h2v2a1 1 0 0 0 2 0V8h4v2a1 1 0 0 0 2 0V8h2v12z"/></svg>
+      <a href="carrito.html" class="btn-menu-brand btn-cart-nav" style="padding:10px 20px;font-size:0.75rem;font-weight:700;border:2px solid var(--dorado);background:var(--carbon);color:var(--dorado);letter-spacing:2px;">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:var(--dorado);"><path d="M16 6V4a4 4 0 0 0-8 0v2H3v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6h-5zm-6-2a2 2 0 0 1 4 0v2h-4V4zm8 16H6V8h2v2a1 1 0 0 0 2 0V8h4v2a1 1 0 0 0 2 0V8h2v12z"/></svg>
         <span class="txt-hide-mobile">BOLSA</span> (<span id="cart-count" class="counter-badge">0</span>)
       </a>
     </div>
@@ -225,6 +239,19 @@
 
   <div class="toast-manifesto" id="toastMsg">Añadido a la bolsa</div>
   <div class="share-toast" id="shareToast">Enlace copiado</div>
+
+  <!-- MANIFEST OVERLAY -->
+  <div class="manifest-overlay" id="manifestOverlay" onclick="if(event.target===this)closeManifest()">
+    <div class="manifest-card">
+      <button class="manifest-card-close" onclick="closeManifest()">&times;</button>
+      <img class="manifest-card-img" id="manifestImg" src="" alt="Producto" />
+      <div class="manifest-card-ref" id="manifestRef"></div>
+      <div class="manifest-card-name" id="manifestName"></div>
+      <div class="manifest-card-price" id="manifestPrice"></div>
+      <div class="manifest-card-cat" id="manifestCat"></div>
+      <div class="manifest-card-desc" id="manifestDesc"></div>
+    </div>
+  </div>
 
   <section class="product-hero">
     <div class="hero-image-wrap">
@@ -244,10 +271,6 @@
         </div>
         <div class="manifesto-actions fade-up fade-up-delay4">
           <button class="btn-add-cart" id="btnAddCart" onclick="addProductToCart()">Añadir a la Bolsa</button>
-          <button class="btn-share" onclick="shareProduct()">
-            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-            Compartir
-          </button>
           <button class="btn-back" onclick="history.back()">Volver</button>
         </div>
       </div>
@@ -391,7 +414,7 @@
       if (existing !== -1) {
         cart[existing].qty = (cart[existing].qty || 1) + 1;
       } else {
-        cart.push({ ref: productRef, name: productName, price: 'L ' + productPrice, img: productImg, qty: 1 });
+        cart.push({ ref: productRef, name: productName, price: 'L ' + productPrice, img: productImg, qty: 1, cat: productCategory, lema: productLema });
       }
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       updateCounts();
@@ -400,34 +423,37 @@
       setTimeout(function(){ toast.classList.remove('show'); }, 2500);
     }
 
-    function shareProduct() {
-      var shareUrl = window.location.href;
-      var shareData = {
-        title: productName + ' | ÈNIGME',
-        text: 'Mira esta pieza de La Casa ÈNIGME: ' + productName,
-        url: shareUrl
-      };
-      if (navigator.share) {
-        navigator.share(shareData).catch(function(){});
-      } else {
-        // Fallback: copy to clipboard
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(shareUrl).then(function(){
-            var t = document.getElementById('shareToast');
-            t.classList.add('show');
-            setTimeout(function(){ t.classList.remove('show'); }, 2500);
-          });
-        } else {
-          var tmp = document.createElement('textarea');
-          tmp.value = shareUrl; document.body.appendChild(tmp);
-          tmp.select(); document.execCommand('copy');
-          document.body.removeChild(tmp);
-          var t = document.getElementById('shareToast');
-          t.classList.add('show');
-          setTimeout(function(){ t.classList.remove('show'); }, 2500);
-        }
-      }
+    // ======= MANIFEST OVERLAY =======
+    function openManifest() {
+      document.getElementById('manifestImg').src = productImg;
+      document.getElementById('manifestRef').textContent = 'REF: ' + productRef;
+      document.getElementById('manifestName').textContent = productName;
+      var priceEl = document.getElementById('productPriceDisplay');
+      document.getElementById('manifestPrice').textContent = priceEl ? priceEl.textContent : '';
+      var catLabels = { joyeria: 'Alta Joyería', boutique: 'Bolsos Boutique', plata: 'Colección Plata', liquidacion: 'Liquidación' };
+      document.getElementById('manifestCat').textContent = catLabels[productCategory] || 'La Casa ÈNIGME';
+      document.getElementById('manifestDesc').textContent = document.getElementById('manifestoText').textContent;
+      document.getElementById('manifestOverlay').classList.add('active');
     }
+    function closeManifest() {
+      document.getElementById('manifestOverlay').classList.remove('active');
+    }
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeManifest(); });
+
+    // Click handlers on title and description to open manifest
+    document.getElementById('productTitle').style.cursor = 'pointer';
+    document.getElementById('productTitle').addEventListener('click', openManifest);
+    document.getElementById('manifestoText').style.cursor = 'pointer';
+    document.getElementById('manifestoText').addEventListener('click', openManifest);
+
+    // ======= UPDATE BUTTON TEXT WITH REAL PRICE =======
+    (function() {
+      var btn = document.getElementById('btnAddCart');
+      var priceEl = document.getElementById('productPriceDisplay');
+      if (priceEl && priceEl.textContent.trim()) {
+        btn.textContent = 'Añadir a la Bolsa — ' + priceEl.textContent.trim();
+      }
+    })();
 
     window.onload = updateCounts;
   </script>

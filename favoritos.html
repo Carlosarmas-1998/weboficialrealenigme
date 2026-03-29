@@ -82,12 +82,22 @@
     .dropdown.right .dropdown-content { left: auto; right: 0; }
 
     .btn-menu-brand {
-      display: flex; align-items: center; gap: 8px; color: var(--carbon) !important; padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 16px);
-      border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.5rem, 1.2vw, 0.6rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px);
+      display: flex; align-items: center; gap: 8px; color: var(--carbon) !important; padding: clamp(8px, 2vw, 12px) clamp(14px, 3vw, 24px);
+      border: 1px solid rgba(203, 170, 99, 0.4); font-size: clamp(0.6rem, 1.5vw, 0.75rem); font-weight: 600; letter-spacing: clamp(1px, 0.5vw, 2px);
       text-transform: uppercase; transition: var(--transition); border-radius: 2px; background: transparent;
     }
     .btn-menu-brand:hover { background-color: var(--dorado); border-color: var(--dorado); color: var(--blanco-puro) !important; }
-    .btn-menu-brand svg { width: clamp(10px, 1.5vw, 13px); height: clamp(10px, 1.5vw, 13px); fill: currentColor; }
+    .btn-menu-brand svg { width: clamp(14px, 2vw, 18px); height: clamp(14px, 2vw, 18px); fill: currentColor; }
+
+    @keyframes bagWigglePulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      5% { transform: scale(1.1) rotate(-8deg); }
+      10% { transform: scale(1.1) rotate(8deg); }
+      15% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .btn-cart-nav { background-color: var(--marfil, #FAF9F6); animation: bagWigglePulse 6s ease-in-out infinite; }
+    .btn-cart-nav:hover { animation-play-state: paused; }
     .counter-badge { font-weight: 700; }
 
     /* =========================================
@@ -274,8 +284,10 @@
           <a href="index.html#mi-espacio" class="mi-espacio-link">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
           <a href="joyeria.html">Alta Joyer&iacute;a</a>
-          <a href="boutique.html">Bolsos Boutique</a>
-          <a href="plata.html">Colecci&oacute;n Plata</a>
+          <a href="boutique.html">Boutique</a>
+          <a href="vestidos.html">Vestidos</a>
+          <a href="plata.html">Boda &amp; Plata</a>
+          <a href="sets.html">SETS Exclusivos</a>
           <a href="liquidacion.html">Liquidaci&oacute;n</a>
           <a href="trabaja.html">Trabaja con Nosotros</a>
           <a href="soporte.html">Soporte</a>

@@ -1605,14 +1605,18 @@
           });
           let hideCarousel = validMedia.length <= 1 && !hasVideos;
 
+          let itemPriceRaw = item.price ? item.price.replace(/\D/g, '') : '0';
+          let itemProductUrl = 'producto.html?ref=' + encodeURIComponent(item.ref || '') + '&name=' + encodeURIComponent(item.name || '') + '&img=' + encodeURIComponent(item.img || '') + '&price=' + itemPriceRaw + '&cat=' + encodeURIComponent(item.cat || 'joyeria') + '&lema=' + encodeURIComponent(item.lema || '');
           container.innerHTML += `
             <div class="cart-item-enhanced fade-in" id="cart-item-${index}">
-              <img class="item-img" src="${item.img}" alt="${item.name}" onerror="this.src='portada.png'" onclick="openLightbox(this.parentElement)" />
+              <a href="${itemProductUrl}" style="flex-shrink:0;">
+                <img class="item-img" src="${item.img}" alt="${item.name}" onerror="this.src='portada.png'" style="cursor:pointer;" />
+              </a>
               <div class="carousel-track" style="display:none;" data-index="0">${hideCarousel ? '' : trackHtml}</div>
               <div class="item-details">
                 <div>
                   <div class="item-ref">${item.ref || ''}</div>
-                  <div class="item-name">${item.name}</div>
+                  <a href="${itemProductUrl}" class="item-name" style="cursor:pointer;text-decoration:none;color:inherit;">${item.name}</a>
                   <div class="item-price">${getCartPriceDisplay(priceNum)}</div>
                   ${item.qty > 1 ? '<div class="item-subtotal">Subtotal: ' + getCartPriceDisplay(priceNum * item.qty) + '</div>' : ''}
                   ${promoTag}
