@@ -217,6 +217,11 @@
   <div class="nav-item" data-tab="logistica_ventas" onclick="switchTab('logistica_ventas');loadLogisticaVentas();">Log&iacute;stica y Ventas</div>
   <div class="nav-item" data-tab="pedidos_web" onclick="switchTab('pedidos_web');loadPedidosWeb();">&#9830; Pedidos Web (Stripe)</div>
   <div class="nav-item" data-tab="deuda" onclick="switchTab('deuda');loadPanelDeuda();">&#9830; Panel de Deuda</div>
+  <div class="nav-item" data-tab="pedidos_corp" onclick="switchTab('pedidos_corp');loadPedidosCorp();">Pedidos Corp.</div>
+  <div class="nav-item" data-tab="buscador_pedidos" onclick="switchTab('buscador_pedidos');">Buscador Pedidos</div>
+  <div class="nav-item" data-tab="estructura_red" onclick="switchTab('estructura_red');loadEstructuraRed();">Estructura Red</div>
+  <div class="nav-item" data-tab="papelera" onclick="switchTab('papelera');loadPapelera();">Papelera</div>
+  <div class="nav-item" data-tab="configuracion" onclick="switchTab('configuracion');loadConfiguracion();">Configuraci&oacute;n</div>
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -742,6 +747,82 @@
     </div>
     <div class="stats-row" id="deudaStats"></div>
     <div id="deudaContent"><div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando&hellip;</div></div>
+  </div>
+
+  <!-- TAB: PEDIDOS CORP. -->
+  <div class="tab-content" id="tab-pedidos_corp">
+    <div class="page-header">
+      <div class="page-title"><h1>Pedidos <em>Corp.</em></h1><p>Pedidos corporativos con resumen de cantidades por producto</p></div>
+      <div class="header-actions">
+        <button class="btn btn-gold" onclick="exportPedidosCorpExcel()"><span>Exportar Excel</span></button>
+        <button class="btn" onclick="loadPedidosCorp()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="stats-row" id="pcorpStats"></div>
+    <div id="pcorpResumen" style="display:none;background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);margin-bottom:14px;">&#9830; Resumen Total por Producto</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>C&oacute;digo</th><th>Producto</th><th>Unidades Totales</th></tr></thead>
+        <tbody id="pcorpResumenBody"></tbody>
+      </table></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>C&oacute;digo Pedido</th><th>Vendedora</th><th>C&oacute;d. Vendedora</th><th>Gerente Zona</th><th>Campa&ntilde;a</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Productos</th></tr></thead>
+      <tbody id="pcorpBody"></tbody>
+    </table></div>
+    <div class="empty-state" id="pcorpEmpty" style="display:none;">No hay pedidos corporativos</div>
+  </div>
+
+  <!-- TAB: BUSCADOR PEDIDOS -->
+  <div class="tab-content" id="tab-buscador_pedidos">
+    <div class="page-header">
+      <div class="page-title"><h1>Buscador de <em>Pedidos</em></h1><p>Buscar por c&oacute;digo de pedido, vendedora, nombre o DNI</p></div>
+    </div>
+    <div class="filter-row" style="margin-bottom:24px;">
+      <input type="text" id="buscPedInput" placeholder="C&oacute;digo pedido, c&oacute;digo vendedora, nombre o DNI..." style="max-width:400px;" onkeydown="if(event.key==='Enter')buscarPedidosGlobal()"/>
+      <button class="btn btn-gold" onclick="buscarPedidosGlobal()"><span>Buscar</span></button>
+    </div>
+    <div id="buscPedResultados"><div class="empty-state">Ingrese un t&eacute;rmino de b&uacute;squeda</div></div>
+  </div>
+
+  <!-- TAB: ESTRUCTURA RED -->
+  <div class="tab-content" id="tab-estructura_red">
+    <div class="page-header">
+      <div class="page-title"><h1>Estructura de la <em>Red</em></h1><p>Divisi&oacute;n &rarr; Zonas &rarr; Sectores &rarr; Coordinadores &rarr; Vendedoras</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="loadEstructuraRed()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="stats-row" id="eredStats"></div>
+    <div id="eredContent"><div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando estructura&hellip;</div></div>
+  </div>
+
+  <!-- TAB: PAPELERA -->
+  <div class="tab-content" id="tab-papelera">
+    <div class="page-header">
+      <div class="page-title"><h1>Pape<em>lera</em></h1><p>Registros archivados &mdash; restaurar o revisar</p></div>
+      <div class="header-actions">
+        <input type="text" id="papeleraSearch" placeholder="Buscar en papelera..." style="max-width:260px;" onkeydown="if(event.key==='Enter')loadPapelera()"/>
+        <button class="btn" onclick="loadPapelera()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="stats-row" id="papeleraStats"></div>
+    <div id="papeleraContent"><div class="empty-state">Cargando papelera&hellip;</div></div>
+  </div>
+
+  <!-- TAB: CONFIGURACIÓN -->
+  <div class="tab-content" id="tab-configuracion">
+    <div class="page-header">
+      <div class="page-title"><h1>Configura<em>ci&oacute;n</em></h1><p>Valores del sistema multinivel</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="loadConfiguracion()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Clave</th><th>Valor</th><th>Descripci&oacute;n</th><th>Acciones</th></tr></thead>
+      <tbody id="configBody"></tbody>
+    </table></div>
+    <div class="empty-state" id="configEmpty" style="display:none;">No hay configuraciones</div>
   </div>
 
 </div>
@@ -4419,6 +4500,482 @@ async function ajustarDeuda(id, tipo, signo) {
     loadPanelDeuda();
   } catch(e) {
     showToast('Error: ' + (e.message || e), 'error');
+  }
+}
+
+// ================================================================
+// PEDIDOS CORP.
+// ================================================================
+var cachedPedidosCorp = [];
+
+async function loadPedidosCorp() {
+  var statsEl = document.getElementById('pcorpStats');
+  var tbody = document.getElementById('pcorpBody');
+  var emptyEl = document.getElementById('pcorpEmpty');
+  var resumenWrap = document.getElementById('pcorpResumen');
+  var resumenBody = document.getElementById('pcorpResumenBody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">Cargando...</td></tr>';
+
+  try {
+    var pedidos = await supaGet('pedidos', '&order=created_at.desc');
+    var detalles = await supaGet('pedidos_detalle', '');
+    var vendedoras = await supaGet('vendedoras', '&select=id,codigo,nombre');
+    var gerentes = await supaGet('gerentes_zona', '&select=id,codigo,nombre');
+
+    cachedPedidosCorp = pedidos;
+
+    // Map vendedoras and gerentes by id
+    var vendMap = {};
+    vendedoras.forEach(function(v) { vendMap[v.id] = v; });
+    var gzMap = {};
+    gerentes.forEach(function(g) { gzMap[g.id] = g; });
+
+    // Group detalles by pedido_id
+    var detMap = {};
+    detalles.forEach(function(d) {
+      if (!detMap[d.pedido_id]) detMap[d.pedido_id] = [];
+      detMap[d.pedido_id].push(d);
+    });
+
+    // Summary: total quantities per product code
+    var prodSummary = {};
+    detalles.forEach(function(d) {
+      var code = d.codigo_producto || d.producto || 'SIN_CODIGO';
+      var nombre = d.nombre_producto || d.producto || code;
+      var qty = parseInt(d.cantidad) || 1;
+      if (!prodSummary[code]) prodSummary[code] = { codigo: code, nombre: nombre, total: 0 };
+      prodSummary[code].total += qty;
+    });
+
+    var summaryArr = [];
+    for (var k in prodSummary) { summaryArr.push(prodSummary[k]); }
+    summaryArr.sort(function(a, b) { return b.total - a.total; });
+
+    if (summaryArr.length) {
+      resumenWrap.style.display = '';
+      var rhtml = '';
+      summaryArr.forEach(function(s, i) {
+        rhtml += '<tr><td>' + (i + 1) + '</td><td style="color:var(--gold);font-weight:500;">' + esc(s.codigo) + '</td><td>' + esc(s.nombre) + '</td><td style="font-weight:600;">' + s.total + '</td></tr>';
+      });
+      resumenBody.innerHTML = rhtml;
+    } else {
+      resumenWrap.style.display = 'none';
+    }
+
+    // Stats
+    var totalPedidos = pedidos.length;
+    var totalItems = detalles.length;
+    var totalBruto = 0;
+    pedidos.forEach(function(p) { totalBruto += parseFloat(p.total || 0); });
+
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-label">Total Pedidos</div><div class="stat-value">' + totalPedidos + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Total Items</div><div class="stat-value">' + totalItems + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Productos Distintos</div><div class="stat-value">' + summaryArr.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L ' + totalBruto.toFixed(2) + '</div></div>';
+
+    if (!pedidos.length) {
+      tbody.innerHTML = '';
+      emptyEl.style.display = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    var html = '';
+    pedidos.forEach(function(p) {
+      var vend = vendMap[p.vendedora_id] || {};
+      var gz = gzMap[p.gerente_zona_id] || {};
+      var dets = detMap[p.id] || [];
+      var prodsHtml = dets.map(function(d) {
+        return esc(d.codigo_producto || '?') + ' x' + (d.cantidad || 1);
+      }).join(', ') || '-';
+      html += '<tr>';
+      html += '<td style="color:var(--gold);white-space:nowrap;">' + esc(p.codigo || 'PED-' + p.id) + '</td>';
+      html += '<td>' + esc(vend.nombre || p.vendedora_nombre || '-') + '</td>';
+      html += '<td>' + esc(vend.codigo || p.vendedora_codigo || '-') + '</td>';
+      html += '<td>' + esc(gz.nombre || '-') + '</td>';
+      html += '<td>' + esc(p.campana || '-') + '</td>';
+      html += '<td>L ' + (parseFloat(p.total || 0)).toFixed(2) + '</td>';
+      html += '<td><span class="status-badge ' + statusClass(p.estado) + '">' + esc(p.estado || 'pendiente') + '</span></td>';
+      html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+      html += '<td style="max-width:240px;font-size:.78rem;">' + prodsHtml + '</td>';
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--danger);">Error: ' + esc(e.message || e) + '</td></tr>';
+  }
+}
+
+function exportPedidosCorpExcel() {
+  if (!cachedPedidosCorp.length) { showToast('No hay datos para exportar', 'error'); return; }
+  var rows = [['Codigo', 'Vendedora', 'Campana', 'Total', 'Estado', 'Fecha']];
+  cachedPedidosCorp.forEach(function(p) {
+    rows.push([p.codigo || '', p.vendedora_nombre || '', p.campana || '', p.total || 0, p.estado || '', p.created_at || '']);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'PedidosCorp');
+  XLSX.writeFile(wb, 'pedidos_corp.xlsx');
+}
+
+// ================================================================
+// BUSCADOR PEDIDOS
+// ================================================================
+async function buscarPedidosGlobal() {
+  var term = (document.getElementById('buscPedInput').value || '').trim();
+  var container = document.getElementById('buscPedResultados');
+  if (!term) { container.innerHTML = '<div class="empty-state">Ingrese un t\u00e9rmino de b\u00fasqueda</div>'; return; }
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Buscando...</div>';
+
+  try {
+    var termEnc = encodeURIComponent(term);
+    var termLike = encodeURIComponent('%' + term + '%');
+
+    // Search corp pedidos
+    var corpPedidos = await supaGet('pedidos', '&or=(codigo.ilike.' + termLike + ',vendedora_nombre.ilike.' + termLike + ',vendedora_codigo.ilike.' + termLike + ')');
+    // Search vendedoras by name/dni to get their IDs
+    var vendedorasMatch = await supaGet('vendedoras', '&or=(nombre.ilike.' + termLike + ',dni.ilike.' + termLike + ',codigo.ilike.' + termLike + ')');
+    var vendIds = vendedorasMatch.map(function(v) { return v.id; });
+
+    // Get pedidos for matched vendedoras
+    var corpByVend = [];
+    if (vendIds.length) {
+      corpByVend = await supaGet('pedidos', '&vendedora_id=in.(' + vendIds.join(',') + ')');
+    }
+
+    // Merge corp results
+    var corpMap = {};
+    corpPedidos.forEach(function(p) { corpMap[p.id] = p; });
+    corpByVend.forEach(function(p) { corpMap[p.id] = p; });
+    var allCorp = [];
+    for (var cid in corpMap) { allCorp.push(corpMap[cid]); }
+
+    // Get detalles for corp results
+    var corpIds = allCorp.map(function(p) { return p.id; });
+    var corpDetalles = [];
+    if (corpIds.length) {
+      corpDetalles = await supaGet('pedidos_detalle', '&pedido_id=in.(' + corpIds.join(',') + ')');
+    }
+    var detMap = {};
+    corpDetalles.forEach(function(d) {
+      if (!detMap[d.pedido_id]) detMap[d.pedido_id] = [];
+      detMap[d.pedido_id].push(d);
+    });
+
+    // Search web pedidos
+    var webPedidos = await supaGet('web_pedidos', '&or=(codigo.ilike.' + termLike + ',nombre_cliente.ilike.' + termLike + ',email_cliente.ilike.' + termLike + ')');
+
+    // Get web items for web results
+    var webIds = webPedidos.map(function(p) { return p.id; });
+    var webItems = [];
+    if (webIds.length) {
+      webItems = await supaGet('web_pedido_items', '&pedido_id=in.(' + webIds.join(',') + ')');
+    }
+    var webItemMap = {};
+    webItems.forEach(function(it) {
+      if (!webItemMap[it.pedido_id]) webItemMap[it.pedido_id] = [];
+      webItemMap[it.pedido_id].push(it);
+    });
+
+    if (!allCorp.length && !webPedidos.length) {
+      container.innerHTML = '<div class="empty-state">No se encontraron resultados para "' + esc(term) + '"</div>';
+      return;
+    }
+
+    var html = '';
+
+    // Corp results
+    if (allCorp.length) {
+      html += '<div style="margin-bottom:24px;">';
+      html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.3rem;font-weight:300;margin-bottom:12px;color:var(--gold);">Pedidos Corporativos (' + allCorp.length + ')</h3>';
+      html += '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Vendedora</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Productos</th></tr></thead><tbody>';
+      allCorp.forEach(function(p) {
+        var dets = detMap[p.id] || [];
+        var prodsStr = dets.map(function(d) { return esc(d.codigo_producto || '?') + ' ' + esc(d.nombre_producto || '') + ' x' + (d.cantidad || 1); }).join('<br>') || '-';
+        html += '<tr>';
+        html += '<td style="color:var(--gold);font-weight:500;">' + esc(p.codigo || 'PED-' + p.id) + '</td>';
+        html += '<td>' + esc(p.vendedora_nombre || '-') + ' <span style="color:var(--text-muted);font-size:.75rem;">' + esc(p.vendedora_codigo || '') + '</span></td>';
+        html += '<td>L ' + (parseFloat(p.total || 0)).toFixed(2) + '</td>';
+        html += '<td><span class="status-badge ' + statusClass(p.estado) + '">' + esc(p.estado || '-') + '</span></td>';
+        html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+        html += '<td style="font-size:.78rem;">' + prodsStr + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    // Web results
+    if (webPedidos.length) {
+      html += '<div style="margin-bottom:24px;">';
+      html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.3rem;font-weight:300;margin-bottom:12px;color:var(--gold);">Pedidos Web (' + webPedidos.length + ')</h3>';
+      html += '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Cliente</th><th>Email</th><th>Total</th><th>Estado</th><th>Pagado</th><th>Fecha</th><th>Productos</th></tr></thead><tbody>';
+      webPedidos.forEach(function(p) {
+        var items = webItemMap[p.id] || [];
+        var itemsStr = items.map(function(it) { return esc(it.nombre || it.producto || '?') + ' x' + (it.cantidad || 1); }).join('<br>');
+        if (!itemsStr) itemsStr = parseItems(p.items);
+        html += '<tr>';
+        html += '<td style="color:var(--gold);font-weight:500;">' + esc(p.codigo || 'WEB-' + p.id) + '</td>';
+        html += '<td>' + esc(p.nombre_cliente || '-') + '</td>';
+        html += '<td>' + esc(p.email_cliente || '-') + '</td>';
+        html += '<td>' + currencySymbol(p.moneda) + (parseFloat(p.total || 0)).toFixed(2) + '</td>';
+        html += '<td><span class="status-badge ' + statusClass(p.estado) + '">' + esc(p.estado || '-') + '</span></td>';
+        html += '<td>' + (p.pagado ? '<span style="color:var(--success);">S\u00ed</span>' : '<span style="color:var(--danger);">No</span>') + '</td>';
+        html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+        html += '<td style="font-size:.78rem;">' + itemsStr + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state" style="color:var(--danger);">Error: ' + esc(e.message || e) + '</div>';
+  }
+}
+
+// ================================================================
+// ESTRUCTURA RED
+// ================================================================
+async function loadEstructuraRed() {
+  var statsEl = document.getElementById('eredStats');
+  var container = document.getElementById('eredContent');
+  container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">Cargando estructura...</div>';
+
+  try {
+    var divisiones = await supaGet('gerencias_divisionales', '&activo=eq.true&order=nombre');
+    var gerentes = await supaGet('gerentes_zona', '&activo=eq.true&order=nombre');
+    var zonas = await supaGet('zonas', '&order=nombre');
+    var sectores = await supaGet('sectores', '&order=nombre');
+    var coordinadores = await supaGet('coordinadores', '&activo=eq.true&order=nombre');
+    var vendedoras = await supaGet('vendedoras', '&activo=eq.true&select=id,nombre,codigo,sector_id,coordinador_id,gerente_id');
+
+    // Stats
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-label">Divisiones</div><div class="stat-value">' + divisiones.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Gerentes Zona</div><div class="stat-value">' + gerentes.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Coordinadores</div><div class="stat-value">' + coordinadores.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Vendedoras Activas</div><div class="stat-value">' + vendedoras.length + '</div></div>';
+
+    // Build maps
+    var gzByDiv = {};
+    gerentes.forEach(function(g) {
+      var divId = g.gerencia_divisional_id || g.division_id || 'sin_division';
+      if (!gzByDiv[divId]) gzByDiv[divId] = [];
+      gzByDiv[divId].push(g);
+    });
+
+    var zonasByGz = {};
+    zonas.forEach(function(z) {
+      var gzId = z.gerente_zona_id || z.gerente_id || 'sin_gz';
+      if (!zonasByGz[gzId]) zonasByGz[gzId] = [];
+      zonasByGz[gzId].push(z);
+    });
+
+    var sectByZona = {};
+    sectores.forEach(function(s) {
+      var zId = s.zona_id || 'sin_zona';
+      if (!sectByZona[zId]) sectByZona[zId] = [];
+      sectByZona[zId].push(s);
+    });
+
+    var coordBySect = {};
+    coordinadores.forEach(function(c) {
+      var sId = c.sector_id || 'sin_sector';
+      if (!coordBySect[sId]) coordBySect[sId] = [];
+      coordBySect[sId].push(c);
+    });
+
+    var vendByCoord = {};
+    var vendByGz = {};
+    vendedoras.forEach(function(v) {
+      if (v.coordinador_id) {
+        if (!vendByCoord[v.coordinador_id]) vendByCoord[v.coordinador_id] = [];
+        vendByCoord[v.coordinador_id].push(v);
+      } else if (v.gerente_id) {
+        if (!vendByGz[v.gerente_id]) vendByGz[v.gerente_id] = [];
+        vendByGz[v.gerente_id].push(v);
+      }
+    });
+
+    var html = '';
+
+    if (!divisiones.length) {
+      container.innerHTML = '<div class="empty-state">No hay divisiones activas</div>';
+      return;
+    }
+
+    divisiones.forEach(function(div) {
+      html += '<div style="background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:16px;">';
+      html += '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.4rem;font-weight:300;color:var(--gold);margin-bottom:12px;">&#9830; ' + esc(div.nombre || div.codigo) + '</div>';
+
+      var divGerentes = gzByDiv[div.id] || [];
+      if (!divGerentes.length) {
+        html += '<div style="padding:10px;color:var(--text-muted);font-size:.8rem;">Sin gerentes de zona asignados</div>';
+      }
+
+      divGerentes.forEach(function(gz) {
+        var gzVendCount = (vendByGz[gz.id] || []).length;
+        html += '<div style="margin-left:20px;padding:10px 0;border-bottom:1px solid var(--border);">';
+        html += '<div style="font-size:.85rem;color:var(--text);font-weight:500;">&#9656; GZ: ' + esc(gz.nombre) + ' <span style="color:var(--text-muted);font-size:.72rem;">(' + esc(gz.codigo || '') + ')</span></div>';
+
+        var gzZonas = zonasByGz[gz.id] || [];
+        gzZonas.forEach(function(zona) {
+          html += '<div style="margin-left:20px;padding:6px 0;">';
+          html += '<div style="font-size:.8rem;color:var(--info);">Zona: ' + esc(zona.nombre || zona.codigo || 'Sin nombre') + '</div>';
+
+          var zonaSectores = sectByZona[zona.id] || [];
+          zonaSectores.forEach(function(sect) {
+            html += '<div style="margin-left:20px;padding:4px 0;">';
+            html += '<div style="font-size:.78rem;color:var(--warn);">Sector: ' + esc(sect.nombre || sect.codigo || 'Sin nombre') + '</div>';
+
+            var sectCoords = coordBySect[sect.id] || [];
+            sectCoords.forEach(function(coord) {
+              var coordVends = vendByCoord[coord.id] || [];
+              html += '<div style="margin-left:20px;padding:3px 0;font-size:.75rem;color:var(--text-muted);">&#8226; Coord: ' + esc(coord.nombre) + ' <span style="color:var(--gold);">(' + coordVends.length + ' vendedoras)</span></div>';
+            });
+
+            html += '</div>';
+          });
+          html += '</div>';
+        });
+
+        if (gzVendCount) {
+          html += '<div style="margin-left:20px;font-size:.72rem;color:var(--text-muted);padding:4px 0;">+ ' + gzVendCount + ' vendedoras directas</div>';
+        }
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state" style="color:var(--danger);">Error: ' + esc(e.message || e) + '</div>';
+  }
+}
+
+// ================================================================
+// PAPELERA
+// ================================================================
+async function loadPapelera() {
+  var statsEl = document.getElementById('papeleraStats');
+  var container = document.getElementById('papeleraContent');
+  container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Cargando papelera...</div>';
+
+  try {
+    var searchVal = (document.getElementById('papeleraSearch').value || '').trim();
+    var query = '&order=created_at.desc';
+    if (searchVal) {
+      var like = encodeURIComponent('%' + searchVal + '%');
+      query += '&or=(nombre_display.ilike.' + like + ',codigo_display.ilike.' + like + ',tipo_registro.ilike.' + like + ')';
+    }
+
+    var items = await supaGet('papelera_corporativa', query);
+
+    // Group by tipo_registro
+    var groups = {};
+    items.forEach(function(it) {
+      var tipo = it.tipo_registro || 'otros';
+      if (!groups[tipo]) groups[tipo] = [];
+      groups[tipo].push(it);
+    });
+
+    var tipoCount = Object.keys(groups).length;
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-label">Total Archivados</div><div class="stat-value">' + items.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Tipos de Registro</div><div class="stat-value">' + tipoCount + '</div></div>';
+
+    if (!items.length) {
+      container.innerHTML = '<div class="empty-state">La papelera est\u00e1 vac\u00eda</div>';
+      return;
+    }
+
+    var html = '';
+    for (var tipo in groups) {
+      html += '<div style="margin-bottom:24px;">';
+      html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem;font-weight:300;margin-bottom:12px;color:var(--gold);">' + esc(tipo) + ' (' + groups[tipo].length + ')</h3>';
+      html += '<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>C\u00f3digo</th><th>Fecha Archivado</th><th>Acciones</th></tr></thead><tbody>';
+      groups[tipo].forEach(function(it) {
+        html += '<tr>';
+        html += '<td>' + esc(it.nombre_display || '-') + '</td>';
+        html += '<td style="color:var(--gold);">' + esc(it.codigo_display || '-') + '</td>';
+        html += '<td style="white-space:nowrap;">' + formatDate(it.created_at) + '</td>';
+        html += '<td><button class="btn btn-gold btn-sm" onclick="restaurarPapelera(\'' + it.id + '\',\'' + esc(it.tabla_origen || '') + '\',\'' + esc(it.registro_id || '') + '\')"><span>Restaurar</span></button></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state" style="color:var(--danger);">Error: ' + esc(e.message || e) + '</div>';
+  }
+}
+
+async function restaurarPapelera(papeleraId, tablaOrigen, registroId) {
+  if (!confirm('\u00bfRestaurar este registro?')) return;
+  try {
+    // Set archivado=false on original table
+    if (tablaOrigen && registroId) {
+      await fetch(SUPA_URL + '/rest/v1/' + tablaOrigen + '?id=eq.' + registroId, {
+        method: 'PATCH',
+        headers: supaHeaders(),
+        body: JSON.stringify({ archivado: false })
+      });
+    }
+    // Delete from papelera
+    await supaDelete('papelera_corporativa', papeleraId);
+    showToast('Registro restaurado correctamente');
+    loadPapelera();
+  } catch(e) {
+    showToast('Error al restaurar: ' + (e.message || e), 'error');
+  }
+}
+
+// ================================================================
+// CONFIGURACIÓN
+// ================================================================
+async function loadConfiguracion() {
+  var tbody = document.getElementById('configBody');
+  var emptyEl = document.getElementById('configEmpty');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted);">Cargando...</td></tr>';
+
+  try {
+    var configs = await supaGet('config_multinivel', '&order=clave');
+
+    if (!configs.length) {
+      tbody.innerHTML = '';
+      emptyEl.style.display = '';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    var html = '';
+    configs.forEach(function(c) {
+      html += '<tr>';
+      html += '<td style="color:var(--gold);font-weight:500;white-space:nowrap;">' + esc(c.clave) + '</td>';
+      html += '<td><input type="text" id="cfgVal_' + c.id + '" value="' + esc(c.valor || '') + '" style="max-width:300px;"/></td>';
+      html += '<td style="font-size:.78rem;color:var(--text-muted);">' + esc(c.descripcion || '') + '</td>';
+      html += '<td><button class="btn btn-gold btn-sm" onclick="guardarConfig(\'' + c.id + '\')"><span>Guardar</span></button></td>';
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--danger);">Error: ' + esc(e.message || e) + '</td></tr>';
+  }
+}
+
+async function guardarConfig(id) {
+  var inputEl = document.getElementById('cfgVal_' + id);
+  if (!inputEl) return;
+  var newVal = inputEl.value;
+
+  try {
+    await supaPatch('config_multinivel', id, { valor: newVal });
+    showToast('Configuraci\u00f3n guardada');
+  } catch(e) {
+    showToast('Error al guardar: ' + (e.message || e), 'error');
   }
 }
 </script>

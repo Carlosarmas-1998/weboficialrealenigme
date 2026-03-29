@@ -173,6 +173,7 @@
   <button class="tab-btn" onclick="switchTab('comisiones',this)">Comisiones y Pagos</button>
   <button class="tab-btn" onclick="switchTab('pedidosDiv',this)">Pedidos Divisi&oacute;n</button>
   <button class="tab-btn" onclick="switchTab('logistica',this)">Log&iacute;stica</button>
+  <button class="tab-btn" onclick="switchTab('bajasConsultas',this)">Bajas / Consultas</button>
 </div>
 
 <div class="container">
@@ -454,6 +455,43 @@
     <div id="listaLog"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando operadores...</p></div>
   </div>
 
+  <!-- ══════════ TAB 8: BAJAS / CONSULTAS ══════════ -->
+  <div class="tab-panel" id="panel-bajasConsultas">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Bajas / Consultas</h2>
+
+    <div class="card">
+      <div class="card-title">Buscar Profesional</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="flex:1;min-width:220px;">
+          <label>DNI o C&oacute;digo</label>
+          <input id="bcBuscar" placeholder="Ingrese DNI o c&oacute;digo..." onkeydown="if(event.key==='Enter')buscarProfesional();"/>
+        </div>
+        <button class="btn" onclick="buscarProfesional()" style="margin-bottom:0;">Buscar</button>
+      </div>
+      <p id="bcError" class="error-msg"></p>
+      <p id="bcSuccess" class="success-msg"></p>
+    </div>
+
+    <div id="bcResultado" style="display:none;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div class="card-title" style="margin-bottom:0;" id="bcTitulo">Datos del Profesional</div>
+          <div id="bcEstadoBadge"></div>
+        </div>
+        <div class="form-grid" id="bcDatos"></div>
+      </div>
+
+      <div class="card" id="bcDocsCard" style="display:none;">
+        <div class="card-title">Documentos de Alta</div>
+        <div id="bcDocs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
+      </div>
+
+      <div id="bcBajaSection" style="margin-top:10px;">
+        <button class="btn btn-danger" id="bcBtnBaja" onclick="darBajaProfesional()">Dar de Baja</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /container -->
 </div><!-- /app-wrap -->
 
@@ -605,6 +643,7 @@ function switchTab(tab, btn) {
   if (tab === 'comisiones') loadComisiones();
   if (tab === 'pedidosDiv') { initPedDivSelectors(); loadPedidosDiv(); }
   if (tab === 'logistica') loadOperadoresLog();
+  if (tab === 'bajasConsultas') { document.getElementById('bcResultado').style.display = 'none'; document.getElementById('bcBuscar').value = ''; document.getElementById('bcError').textContent = ''; document.getElementById('bcSuccess').textContent = ''; }
 }
 
 function stopAllPolling() {
@@ -1883,6 +1922,179 @@ async function altaOperadorLog(id) {
 document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
 });
+
+/* ══════════════════════════════════════════
+   TAB 8: BAJAS / CONSULTAS
+   ══════════════════════════════════════════ */
+var bcFoundRecord = null;
+var bcFoundTable = null;
+var bcFoundTipo = null;
+
+async function buscarProfesional() {
+  var q = document.getElementById('bcBuscar').value.trim();
+  var errEl = document.getElementById('bcError');
+  var sucEl = document.getElementById('bcSuccess');
+  errEl.textContent = ''; sucEl.textContent = '';
+  document.getElementById('bcResultado').style.display = 'none';
+  bcFoundRecord = null; bcFoundTable = null; bcFoundTipo = null;
+
+  if (!q) { errEl.textContent = 'Ingrese un DNI o c\u00f3digo para buscar.'; return; }
+
+  var tables = [
+    { table: 'vendedoras', tipo: 'Vendedora', label: 'Vendedora' },
+    { table: 'coordinadores', tipo: 'Coordinador', label: 'Coordinador(a)' },
+    { table: 'gerentes_zona', tipo: 'Gerente de Zona', label: 'Gerente de Zona' },
+    { table: 'logistica_operadores', tipo: 'Operador Log\u00edstico', label: 'Operador Log\u00edstico' }
+  ];
+
+  var found = null;
+  var foundTable = null;
+  var foundTipo = null;
+
+  for (var i = 0; i < tables.length; i++) {
+    var t = tables[i];
+    // Search by codigo
+    var resCod = await api('/rest/v1/' + t.table + '?codigo=eq.' + encodeURIComponent(q) + '&select=*');
+    if (resCod && resCod.length && !resCod.error) { found = resCod[0]; foundTable = t.table; foundTipo = t.label; break; }
+    // Search by DNI
+    var resDni = await api('/rest/v1/' + t.table + '?dni=eq.' + encodeURIComponent(q) + '&select=*');
+    if (resDni && resDni.length && !resDni.error) { found = resDni[0]; foundTable = t.table; foundTipo = t.label; break; }
+  }
+
+  if (!found) { errEl.textContent = 'No se encontr\u00f3 ning\u00fan profesional con DNI o c\u00f3digo: ' + q; return; }
+
+  bcFoundRecord = found;
+  bcFoundTable = foundTable;
+  bcFoundTipo = foundTipo;
+  renderBcResultado();
+}
+
+function renderBcResultado() {
+  var r = bcFoundRecord;
+  if (!r) return;
+
+  document.getElementById('bcResultado').style.display = 'block';
+  document.getElementById('bcTitulo').textContent = bcFoundTipo + ' \u2014 ' + (r.nombre || 'Sin nombre');
+
+  var esActivo = r.activo !== false;
+  document.getElementById('bcEstadoBadge').innerHTML = esActivo ?
+    '<span class="badge badge-active" style="font-size:.75rem;padding:4px 14px;">ACTIVO</span>' :
+    '<span class="badge badge-inactive" style="font-size:.75rem;padding:4px 14px;">INACTIVO / BAJA</span>';
+
+  var campos = [
+    { label: 'Tipo', value: bcFoundTipo },
+    { label: 'C\u00f3digo', value: r.codigo },
+    { label: 'Nombre', value: r.nombre },
+    { label: 'DNI', value: r.dni },
+    { label: 'Tel\u00e9fono', value: r.telefono },
+    { label: 'Email', value: r.email },
+    { label: 'Direcci\u00f3n', value: r.direccion },
+    { label: 'RTN', value: r.rtn },
+    { label: 'N\u00famero de Cuenta', value: r.numero_cuenta },
+    { label: 'Nombre del Banco', value: r.nombre_banco },
+    { label: 'Fecha de Nacimiento', value: r.fecha_nacimiento },
+    { label: 'Fecha de Ingreso', value: r.fecha_ingreso },
+    { label: 'Fecha de Baja', value: r.fecha_baja },
+    { label: 'Motivo de Baja', value: r.motivo_baja },
+    { label: 'Deuda Actual', value: r.deuda_actual != null ? fmtL(r.deuda_actual) : null },
+    { label: 'Estado', value: esActivo ? 'Activo' : 'Inactivo' }
+  ];
+
+  var html = '';
+  campos.forEach(function(c) {
+    var val = c.value || '\u2014';
+    html += '<div class="form-group"><label>' + c.label + '</label><div style="padding:10px 12px;background:var(--marfil);border:1px solid var(--borde);font-size:.85rem;min-height:40px;">' + esc(String(val)) + '</div></div>';
+  });
+  document.getElementById('bcDatos').innerHTML = html;
+
+  // Show/hide baja button
+  var bajaSection = document.getElementById('bcBajaSection');
+  if (esActivo) {
+    bajaSection.style.display = 'block';
+    document.getElementById('bcBtnBaja').disabled = false;
+  } else {
+    bajaSection.style.display = 'none';
+  }
+
+  // Load documents
+  loadBcDocumentos();
+}
+
+async function loadBcDocumentos() {
+  var r = bcFoundRecord;
+  var docsCard = document.getElementById('bcDocsCard');
+  var docsEl = document.getElementById('bcDocs');
+  docsCard.style.display = 'none';
+
+  if (!r || !r.codigo) return;
+
+  try {
+    var registros = await api('/rest/v1/registros_alta?codigo=eq.' + encodeURIComponent(r.codigo) + '&select=archivo_dni,archivo_cuenta,archivo_extra&order=created_at.desc&limit=1');
+    if (!registros || !registros.length || registros.error) return;
+
+    var reg = registros[0];
+    if (!reg.archivo_dni && !reg.archivo_cuenta && !reg.archivo_extra) return;
+
+    docsCard.style.display = 'block';
+    var html = '';
+
+    if (reg.archivo_dni) {
+      var isPdf = reg.archivo_dni.toLowerCase().endsWith('.pdf');
+      html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">DNI</div>' +
+        (isPdf ? '<a href="' + reg.archivo_dni + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+        '<img src="' + reg.archivo_dni + '" style="max-width:180px;max-height:140px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+        '</div>';
+    }
+    if (reg.archivo_cuenta) {
+      var isPdf2 = reg.archivo_cuenta.toLowerCase().endsWith('.pdf');
+      html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">Cuenta Bancaria</div>' +
+        (isPdf2 ? '<a href="' + reg.archivo_cuenta + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+        '<img src="' + reg.archivo_cuenta + '" style="max-width:180px;max-height:140px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+        '</div>';
+    }
+    if (reg.archivo_extra) {
+      var isPdf3 = reg.archivo_extra.toLowerCase().endsWith('.pdf');
+      html += '<div style="text-align:center;"><div style="font-size:.7rem;color:var(--dorado);margin-bottom:6px;font-weight:600;text-transform:uppercase;">Doc. Adicional</div>' +
+        (isPdf3 ? '<a href="' + reg.archivo_extra + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Ver PDF</a>' :
+        '<img src="' + reg.archivo_extra + '" style="max-width:180px;max-height:140px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)"/>') +
+        '</div>';
+    }
+    docsEl.innerHTML = html;
+  } catch(e) {
+    console.warn('Error loading bc docs:', e);
+  }
+}
+
+async function darBajaProfesional() {
+  if (!bcFoundRecord || !bcFoundTable) return;
+  var motivo = prompt('Ingrese el motivo de baja:');
+  if (!motivo || !motivo.trim()) { alert('Debe ingresar un motivo de baja.'); return; }
+  motivo = motivo.trim();
+
+  if (!confirm('\u00bfEst\u00e1 seguro de dar de baja a ' + (bcFoundRecord.nombre || 'este profesional') + '?\n\nMotivo: ' + motivo)) return;
+
+  var hoy = new Date().toISOString().split('T')[0];
+
+  try {
+    await apiPatch('/rest/v1/' + bcFoundTable + '?id=eq.' + bcFoundRecord.id, {
+      activo: false,
+      fecha_baja: hoy,
+      motivo_baja: motivo
+    });
+    document.getElementById('bcSuccess').textContent = 'Baja procesada exitosamente para ' + (bcFoundRecord.nombre || '') + ' el ' + hoy + '.';
+    // Refresh record
+    var updated = await api('/rest/v1/' + bcFoundTable + '?id=eq.' + bcFoundRecord.id + '&select=*');
+    if (updated && updated.length && !updated.error) {
+      bcFoundRecord = updated[0];
+      renderBcResultado();
+    }
+    // Refresh gerentes list if it was a gerente_zona
+    if (bcFoundTable === 'gerentes_zona') loadGerentesZona();
+  } catch(e) {
+    document.getElementById('bcError').textContent = 'Error al procesar la baja: ' + (e.message || e.details || 'Error desconocido');
+    console.error(e);
+  }
+}
 </script>
 </body>
 </html>
