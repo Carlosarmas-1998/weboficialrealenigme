@@ -869,7 +869,7 @@ async function guardarCoordinador() {
   if (!coordIdVal) {
     try {
       var dniEnc = encodeURIComponent(dni);
-      var dniV = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo');
+      var dniV = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo');
       var dniC = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
       var dniG = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
       var dup = null;
@@ -926,7 +926,7 @@ async function guardarCoordinador() {
       suc.textContent = 'Coordinador actualizado.';
     } else {
       // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
-      var allVend = await api('/rest/v1/vendedoras?select=codigo');
+      var allVend = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&select=codigo');
       var allCoord = await api('/rest/v1/coordinadores?select=codigo');
       var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
       var allLogOp = await api('/rest/v1/logistica_operadores?select=codigo');
@@ -1088,7 +1088,7 @@ async function buscarProfesional() {
     if (coords.length) {
       profData = coords[0];
     } else {
-      var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
+      var vends = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true');
       if (vends.length) profData = vends[0];
     }
 
@@ -1198,7 +1198,7 @@ async function guardarPedido() {
 
     var vendedoraId = profData.id;
     if (!profData.sector_id && !profData.zona_id) {
-      var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(profData.codigo));
+      var vends = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&codigo=eq.' + encodeURIComponent(profData.codigo));
       if (vends.length) vendedoraId = vends[0].id;
     }
 
@@ -1327,7 +1327,7 @@ async function buscarExistente() {
 
   try {
     var dniEnc = encodeURIComponent(dni);
-    var vends = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo,direccion,telefono,email');
+    var vends = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo,direccion,telefono,email');
     var coords = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
     var gers = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
 
@@ -1357,10 +1357,10 @@ async function buscarExistente() {
       var pedidosCount = 0;
       var tieneDeuda = v.tiene_deuda || false;
       try {
-        var vendFull = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=id,tiene_deuda');
+        var vendFull = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + dniEnc + '&select=id,tiene_deuda');
         if (vendFull && vendFull.length) {
           tieneDeuda = vendFull[0].tiene_deuda || false;
-          var pedidos = await api('/rest/v1/pedidos?vendedora_id=eq.' + vendFull[0].id + '&select=id');
+          var pedidos = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&vendedora_id=eq.' + vendFull[0].id + '&select=id');
           pedidosCount = pedidos ? pedidos.length : 0;
         }
       } catch(pe) { console.warn('Error consultando pedidos/deuda:', pe); }
@@ -1429,7 +1429,7 @@ async function guardarNombramiento() {
   // Check if vendedora exists and has deuda — block if tiene_deuda = true
   try {
     var dniEncDeuda = encodeURIComponent(dni);
-    var vendDeuda = await api('/rest/v1/vendedoras?dni=eq.' + dniEncDeuda + '&select=id,tiene_deuda,nombre,codigo');
+    var vendDeuda = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + dniEncDeuda + '&select=id,tiene_deuda,nombre,codigo');
     if (vendDeuda && vendDeuda.length && vendDeuda[0].tiene_deuda) {
       err.textContent = 'No se puede registrar: ' + (vendDeuda[0].nombre || 'Esta persona') + ' (Codigo: ' + (vendDeuda[0].codigo || 'N/A') + ') tiene deuda pendiente. Debe saldar su deuda antes de ser re-nombrada.';
       return;
@@ -1438,7 +1438,7 @@ async function guardarNombramiento() {
 
   try {
     // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
-    var allVendN = await api('/rest/v1/vendedoras?select=codigo');
+    var allVendN = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&select=codigo');
     var allCoordN = await api('/rest/v1/coordinadores?select=codigo');
     var allGerN = await api('/rest/v1/gerentes_zona?select=codigo');
     var allLogN = await api('/rest/v1/logistica_operadores?select=codigo');
@@ -1453,7 +1453,7 @@ async function guardarNombramiento() {
     }
     var codigo = Math.max(getMaxNumericNom(allVendN), getMaxNumericNom(allCoordN), getMaxNumericNom(allGerN), getMaxNumericNom(allLogN), 301200) + 1;
 
-    var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+    var existentes = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
 
     var fechaIngreso = document.getElementById('nomFechaIngreso').value || null;
@@ -1478,7 +1478,7 @@ async function guardarNombramiento() {
       console.warn('vendedoras insert failed:', vendErr);
       // Try to find existing by DNI
       try {
-        var existByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
+        var existByDni = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + encodeURIComponent(dni));
         if (existByDni.length) { vendedora = existByDni; }
       } catch(e2) {}
       if (!vendedora) vendedora = existentes.length ? existentes : [];
@@ -1556,7 +1556,7 @@ async function loadNombramientos() {
   if (sel && sel.value) campFilter = '&campana_ingreso_id=eq.' + sel.value;
 
   try {
-    var noms = await api('/rest/v1/nombramientos?gerente_id=eq.' + session.id + campFilter + '&order=created_at.desc&limit=50');
+    var noms = await api('/rest/v1/nombramientos?or=(archivado.eq.false,archivado.is.null)&gerente_id=eq.' + session.id + campFilter + '&order=created_at.desc&limit=50');
     var c = document.getElementById('listaNom');
     if (!noms.length) { c.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin nombramientos registrados.</p>'; return; }
     c.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Sector</th><th>Campana</th><th>Fecha</th></tr></thead><tbody>' +
@@ -1649,7 +1649,7 @@ async function renderResCharts(sectorLabels, sectorVentas, ano, campanaId) {
   for (var i = 0; i < compareCamps.length; i++) {
     compLabels.push('C' + compareCamps[i].numero);
     try {
-      var p = await api('/rest/v1/pedidos?gerente_id=eq.' + session.id + '&campana_id=eq.' + compareCamps[i].id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
+      var p = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=eq.' + session.id + '&campana_id=eq.' + compareCamps[i].id + '&ano=eq.' + ano + '&select=subtotal_catalogo');
       var t = 0; p.forEach(function(r){ t += parseFloat(r.subtotal_catalogo || 0); });
       compVentas.push(t);
     } catch(e) { compVentas.push(0); }
@@ -1947,7 +1947,7 @@ async function loadRegistros() {
         var vendNombre = '-';
         try {
           if (p.vendedora_id) {
-            var v = await api('/rest/v1/vendedoras?id=eq.' + p.vendedora_id + '&select=nombre,codigo');
+            var v = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&id=eq.' + p.vendedora_id + '&select=nombre,codigo');
             if (v.length) vendNombre = v[0].nombre + ' (' + v[0].codigo + ')';
           }
         } catch(ve) {}
@@ -2044,7 +2044,7 @@ async function loadBajasCoords() {
 async function loadBajasVends() {
   var container = document.getElementById('bajaVendsContent');
   try {
-    var vends = await api('/rest/v1/vendedoras?gerente_id=eq.' + session.id + '&activo=eq.true&order=nombre');
+    var vends = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&gerente_id=eq.' + session.id + '&activo=eq.true&order=nombre');
     if (!vends.length) {
       container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin vendedoras activas.</p>';
       return;
@@ -2086,7 +2086,7 @@ async function bajaVendedora(vendId) {
   var motivo = prompt('Motivo de la baja:');
   if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
   try {
-    await apiPatch('/rest/v1/vendedoras?id=eq.' + vendId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim(), archivado: true });
+    await apiPatch('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&id=eq.' + vendId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim(), archivado: true });
     await loadBajasTab();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }
@@ -2114,8 +2114,8 @@ async function buscarProfesionalBaja() {
     });
 
     // Search vendedoras by codigo or DNI
-    var vendsByCodigo = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(query) + '&select=*');
-    var vendsByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(query) + '&select=*');
+    var vendsByCodigo = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&codigo=eq.' + encodeURIComponent(query) + '&select=*');
+    var vendsByDni = await api('/rest/v1/vendedoras?or=(archivado.eq.false,archivado.is.null)&dni=eq.' + encodeURIComponent(query) + '&select=*');
 
     var vendIds = {};
     vendsByCodigo.concat(vendsByDni).forEach(function(v) {

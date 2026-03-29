@@ -854,7 +854,7 @@ function clearGZForm() {
 
 async function loadGerentesZona() {
   try {
-    gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
+    gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&or=(archivado.eq.false,archivado.is.null)&order=created_at.desc');
     if (!gerentes || gerentes.error) gerentes = [];
     // Load zona names
     for (var i = 0; i < gerentes.length; i++) {
@@ -1124,7 +1124,7 @@ async function eliminarGerente(id) {
 async function eliminarPedidoCorp(pedidoId) {
   if (!confirm('¿Eliminar este pedido? Se enviará a la PAPELERA del admin.')) return;
   try {
-    await apiPatch('/rest/v1/pedidos?id=eq.' + pedidoId, { archivado: true });
+    await apiPatch('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&id=eq.' + pedidoId, { archivado: true });
     alert('Pedido eliminado y enviado a papelera.');
     if (typeof loadDashboard === 'function') loadDashboard();
   } catch(e) { alert('Error: ' + e.message); }
@@ -1133,7 +1133,7 @@ async function eliminarPedidoCorp(pedidoId) {
 async function eliminarNombramiento(nomId) {
   if (!confirm('¿Eliminar este nombramiento? Se enviará a la PAPELERA del admin.')) return;
   try {
-    await apiPatch('/rest/v1/nombramientos?id=eq.' + nomId, { archivado: true });
+    await apiPatch('/rest/v1/nombramientos?or=(archivado.eq.false,archivado.is.null)&id=eq.' + nomId, { archivado: true });
     alert('Nombramiento eliminado y enviado a papelera.');
     if (typeof loadDashboard === 'function') loadDashboard();
   } catch(e) { alert('Error: ' + e.message); }
@@ -1343,9 +1343,9 @@ async function loadDashboard() {
   }
 
   var idFilter = 'in.(' + gerenteIds.join(',') + ')';
-  var pedidos = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta');
+  var pedidos = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&campana_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta');
   if (!pedidos || pedidos.error) pedidos = [];
-  var nombramientos = await api('/rest/v1/nombramientos?gerente_id=' + idFilter + '&campana_ingreso_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id');
+  var nombramientos = await api('/rest/v1/nombramientos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&campana_ingreso_id=eq.' + campanaId + '&ano=eq.' + ano + '&select=id,gerente_id');
   if (!nombramientos || nombramientos.error) nombramientos = [];
 
   var totalPedidos = 0, totalNombramientos = 0, totalBruta = 0, totalNeta = 0;
@@ -1416,7 +1416,7 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
   for (var i = 0; i < compareCamps.length; i++) {
     var c = compareCamps[i];
     compLabels.push('C' + c.numero);
-    var p = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + c.id + '&ano=eq.' + ano + '&select=total_venta_neta');
+    var p = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&campana_id=eq.' + c.id + '&ano=eq.' + ano + '&select=total_venta_neta');
     var tot = 0; if (p && !p.error) p.forEach(function(r){ tot += parseFloat(r.total_venta_neta || 0); });
     compVentas.push(tot);
   }
@@ -1442,7 +1442,7 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
   for (var j = 0; j < campanas.length; j++) {
     var camp = campanas[j];
     tLabels.push('C' + camp.numero);
-    var pd = await api('/rest/v1/pedidos?gerente_id=' + idFilter + '&campana_id=eq.' + camp.id + '&ano=eq.' + ano + '&select=total_venta_neta');
+    var pd = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&campana_id=eq.' + camp.id + '&ano=eq.' + ano + '&select=total_venta_neta');
     var t = 0; if (pd && !pd.error) pd.forEach(function(r){ t += parseFloat(r.total_venta_neta || 0); });
     tVentas.push(t);
   }
@@ -1691,8 +1691,8 @@ async function loadComisiones() {
   }
 
   var idFilter = 'in.(' + gerenteIds.join(',') + ')';
-  var pedidosQuery = '/rest/v1/pedidos?gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta';
-  var nombrQuery = '/rest/v1/nombramientos?gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id';
+  var pedidosQuery = '/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id,subtotal_catalogo,total_venta_neta';
+  var nombrQuery = '/rest/v1/nombramientos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,gerente_id';
   if (campanaId) {
     pedidosQuery += '&campana_id=eq.' + campanaId;
     nombrQuery += '&campana_ingreso_id=eq.' + campanaId;
@@ -1809,7 +1809,7 @@ async function loadPedidosDiv() {
 
   try {
     var idFilter = 'in.(' + gerenteIds.join(',') + ')';
-    var pedidosQuery = '/rest/v1/pedidos?gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,codigo_pedido,gerente_id,campana_id,sector_id,vendedora_id,subtotal_catalogo,total_venta_neta,created_at,observaciones&order=created_at.desc';
+    var pedidosQuery = '/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&gerente_id=' + idFilter + '&ano=eq.' + ano + '&select=id,codigo_pedido,gerente_id,campana_id,sector_id,vendedora_id,subtotal_catalogo,total_venta_neta,created_at,observaciones&order=created_at.desc';
     if (campanaId) pedidosQuery += '&campana_id=eq.' + campanaId;
 
     var pedidos = await api(pedidosQuery);
@@ -2453,7 +2453,7 @@ async function loadTrackingLogistica() {
     var pedidoMap = {};
     for (var pb = 0; pb < pedidoIds.length; pb += 50) {
       var pBatch = pedidoIds.slice(pb, pb + 50);
-      var pRes = await api('/rest/v1/pedidos?id=in.(' + pBatch.join(',') + ')&select=id,codigo_pedido,vendedora_id');
+      var pRes = await api('/rest/v1/pedidos?or=(archivado.eq.false,archivado.is.null)&id=in.(' + pBatch.join(',') + ')&select=id,codigo_pedido,vendedora_id');
       if (pRes && !pRes.error) pRes.forEach(function(p){ pedidoMap[p.id] = p; });
     }
 
