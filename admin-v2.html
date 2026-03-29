@@ -5440,15 +5440,17 @@ async function loadPapelera() {
     var coordinadores = await supaGet('coordinadores', '&archivado=eq.true&order=created_at.desc') || [];
     var gerentesZ = await supaGet('gerentes_zona', '&archivado=eq.true&order=created_at.desc') || [];
     var postulaciones = await supaGet('web_postulaciones', '&archivado=eq.true&order=created_at.desc') || [];
+    var nombramientosArch = await supaGet('nombramientos', '&archivado=eq.true&order=created_at.desc') || [];
 
-    var totalArchivados = webPedidos.length + pedidosCorp.length + vendedoras.length + coordinadores.length + gerentesZ.length + postulaciones.length;
+    var totalArchivados = webPedidos.length + pedidosCorp.length + vendedoras.length + coordinadores.length + gerentesZ.length + postulaciones.length + nombramientosArch.length;
 
     statsEl.innerHTML =
       '<div class="stat-card"><div class="stat-label">Total Archivados</div><div class="stat-value">' + totalArchivados + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Pedidos Web</div><div class="stat-value">' + webPedidos.length + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Pedidos Corp.</div><div class="stat-value">' + pedidosCorp.length + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Personal</div><div class="stat-value">' + (vendedoras.length + coordinadores.length + gerentesZ.length) + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Postulaciones</div><div class="stat-value">' + postulaciones.length + '</div></div>';
+      '<div class="stat-card"><div class="stat-label">Postulaciones</div><div class="stat-value">' + postulaciones.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Nombramientos</div><div class="stat-value">' + nombramientosArch.length + '</div></div>';
 
     if (!totalArchivados) {
       container.innerHTML = '<div class="empty-state">La papelera est\u00e1 vac\u00eda</div>';
@@ -5568,6 +5570,22 @@ async function loadPapelera() {
     });
     postHtml += '</tbody></table></div>';
     html += papeleraSection('Postulaciones', postulaciones.length, postHtml);
+
+    // --- Nombramientos archivados ---
+    var nomHtml = '<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>DNI</th><th>C\u00f3digo</th><th>Sector</th><th>Campa\u00f1a</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    nombramientosArch.forEach(function(n) {
+      nomHtml += '<tr>';
+      nomHtml += '<td>' + esc(n.nombre || '-') + '</td>';
+      nomHtml += '<td>' + esc(n.dni || '-') + '</td>';
+      nomHtml += '<td style="color:var(--gold);">' + esc(n.codigo || '-') + '</td>';
+      nomHtml += '<td>' + esc(n.sector_id || '-') + '</td>';
+      nomHtml += '<td>' + esc(n.campana_ingreso || '-') + '</td>';
+      nomHtml += '<td style="white-space:nowrap;">' + formatDate(n.created_at) + '</td>';
+      nomHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'nombramientos\',\'' + n.id + '\')"><span>Restaurar</span></button></td>';
+      nomHtml += '</tr>';
+    });
+    nomHtml += '</tbody></table></div>';
+    html += papeleraSection('Nombramientos', nombramientosArch.length, nomHtml);
 
     container.innerHTML = html;
   } catch(e) {

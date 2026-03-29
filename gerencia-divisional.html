@@ -884,9 +884,11 @@ function renderGerentesZona() {
     var acciones = '';
     if (g.activo) {
       acciones = '<button class="btn btn-sm" onclick="openEditGZ(\'' + g.id + '\')" style="margin-right:4px;">Editar</button>' +
-        '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')">Baja</button>';
+        '<button class="btn btn-danger btn-sm" onclick="bajaGerente(\'' + g.id + '\')" style="margin-right:4px;">Baja</button>' +
+        '<button class="btn btn-sm" onclick="eliminarGerente(\'' + g.id + '\')" style="background:#c0392b;color:#fff;border-color:#c0392b;">\uD83D\uDDD1 Eliminar</button>';
     } else {
-      acciones = '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')">Alta</button>';
+      acciones = '<button class="btn btn-sm" onclick="altaGerente(\'' + g.id + '\')" style="margin-right:4px;">Alta</button>' +
+        '<button class="btn btn-sm" onclick="eliminarGerente(\'' + g.id + '\')" style="background:#c0392b;color:#fff;border-color:#c0392b;">\uD83D\uDDD1 Eliminar</button>';
     }
     var pwVal = esc(g.password_temporal || '');
     var pwField = '<div style="display:flex;gap:4px;align-items:center;">' +
@@ -1106,6 +1108,35 @@ async function altaGerente(id) {
   if (activeCount >= 7) { alert('M\u00e1ximo 7 gerentes de zona activos.'); return; }
   await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true });
   loadGerentesZona();
+}
+
+async function eliminarGerente(id) {
+  var g = gerentes.find(function(x){ return x.id === id; });
+  var nombre = g ? g.nombre : '';
+  if (!confirm('¿Eliminar al gerente ' + nombre + '?\n\nSe enviará a la PAPELERA del admin. Los datos de ventas se conservan.')) return;
+  try {
+    await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, archivado: true, fecha_baja: new Date().toISOString() });
+    alert('Gerente eliminado y enviado a papelera del admin.');
+    loadGerentesZona();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function eliminarPedidoCorp(pedidoId) {
+  if (!confirm('¿Eliminar este pedido? Se enviará a la PAPELERA del admin.')) return;
+  try {
+    await apiPatch('/rest/v1/pedidos?id=eq.' + pedidoId, { archivado: true });
+    alert('Pedido eliminado y enviado a papelera.');
+    if (typeof loadDashboard === 'function') loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function eliminarNombramiento(nomId) {
+  if (!confirm('¿Eliminar este nombramiento? Se enviará a la PAPELERA del admin.')) return;
+  try {
+    await apiPatch('/rest/v1/nombramientos?id=eq.' + nomId, { archivado: true });
+    alert('Nombramiento eliminado y enviado a papelera.');
+    if (typeof loadDashboard === 'function') loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 /* ── EDIT MODAL ── */
@@ -1932,9 +1963,9 @@ async function loadPedidosDiv() {
             html += '<p style="font-size:.72rem;color:var(--gris);font-style:italic;">Sin detalle de productos</p>';
           }
 
-          html += '<div style="display:flex;gap:16px;font-size:.72rem;padding-top:6px;border-top:1px solid var(--borde);">';
-          html += '<span>Bruto: <strong style="color:var(--dorado);">' + fmtL(pedBruta) + '</strong></span>';
-          html += '<span>Neto (-15%): <strong style="color:var(--dorado);">' + fmtL(pedNeta) + '</strong></span>';
+          html += '<div style="display:flex;gap:16px;font-size:.72rem;padding-top:6px;border-top:1px solid var(--borde);align-items:center;justify-content:space-between;flex-wrap:wrap;">';
+          html += '<div><span>Bruto: <strong style="color:var(--dorado);">' + fmtL(pedBruta) + '</strong></span> <span style="margin-left:12px;">Neto (-15%): <strong style="color:var(--dorado);">' + fmtL(pedNeta) + '</strong></span></div>';
+          html += '<button onclick="eliminarPedidoCorp(\'' + p.id + '\')" style="background:#c0392b;color:#fff;border:1px solid #c0392b;padding:4px 10px;font-size:.65rem;cursor:pointer;font-family:Montserrat,sans-serif;letter-spacing:.08em;text-transform:uppercase;">\uD83D\uDDD1 Eliminar</button>';
           html += '</div>';
           html += '</div>';
         });
