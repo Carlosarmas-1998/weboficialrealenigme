@@ -4455,16 +4455,22 @@ async function enviarRecordatorioPago(pedidoId, email, nombre, codigo, total) {
   '</div>';
 
   try {
-    await supaPost('email_queue', {
-      to_email: email,
-      to_name: nombre || '',
-      subject: 'ENIGME \u2014 Recordatorio de Pago Pendiente | Pedido #' + codigo,
-      html_body: htmlContent,
-      status: 'pending',
-      tipo: 'recordatorio_pago',
-      referencia_id: pedidoId
+    var res = await fetch(SUPA_URL + '/functions/v1/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        destinatario: email,
+        asunto: 'ÈNIGME — Recordatorio de Pago Pendiente | Pedido #' + codigo,
+        tipo: 'recordatorio_pago',
+        contenido_html: htmlContent
+      })
     });
-    showToast('Recordatorio de pago enviado a ' + email);
+    var result = await res.json();
+    if (result.sent > 0) {
+      showToast('Recordatorio de pago enviado a ' + email);
+    } else {
+      showToast('Email en cola — se enviará en breve', 'info');
+    }
   } catch(e) {
     showToast('Error al enviar recordatorio: ' + (e.message || e), true);
   }

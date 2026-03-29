@@ -484,19 +484,13 @@
             + '</td></tr>'
             + '</table></td></tr></table></div>';
 
-          fetch('https://hajmyntnvurlcuwshjdd.supabase.co/rest/v1/email_queue', {
+          fetch('https://hajmyntnvurlcuwshjdd.supabase.co/functions/v1/send-email', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
-              'Prefer': 'return=minimal'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               destinatario: email,
-              asunto: 'Bienvenida al Club Exclusivo | La Casa \u00C8NIGME',
+              asunto: 'Bienvenida al Club Exclusivo | La Casa ÈNIGME',
               tipo: 'bienvenida_ella',
-              estado: 'pendiente',
               contenido_html: contenidoHtml
             })
           }).catch(function() {});
