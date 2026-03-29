@@ -145,6 +145,15 @@
       .chat-bubble{max-width:90%;}
       .login-box{padding:32px 24px;}
     }
+    /* ── SEARCH RESULT CARD ── */
+    .search-result-card{background:var(--surface);border:1px solid var(--dorado);border-radius:6px;padding:20px;margin-top:16px;box-shadow:0 4px 20px rgba(203,170,99,0.12);}
+    .search-result-card .src-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--borde);}
+    .search-result-card .src-type{font-family:'Cinzel',serif;font-size:0.9rem;color:var(--dorado);letter-spacing:0.1em;}
+    .search-result-card .src-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+    .search-result-card .src-field{font-size:0.8rem;}
+    .search-result-card .src-field .src-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);display:block;margin-bottom:2px;}
+    .search-result-card .src-field .src-value{font-weight:500;}
+
     .upload-field{margin-top:8px;}
     .upload-field label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;font-weight:600;}
     .upload-field input[type=file]{width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.8rem;cursor:pointer;}
@@ -187,6 +196,7 @@
   <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona Resumen</button>
   <button class="tab-btn" onclick="switchTab('mensajeria',this)">Mensajer&iacute;a</button>
   <button class="tab-btn" onclick="switchTab('registros',this)">Registros</button>
+  <button class="tab-btn" onclick="switchTab('bajas',this)">Bajas / Consultas</button>
 </div>
 
 <div class="container">
@@ -427,6 +437,41 @@
     <div id="regContent"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p></div>
   </div>
 
+  <!-- ══════════════════════════════════════════
+       TAB 7: BAJAS / CONSULTAS
+       ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-bajas">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Bajas / Consultas de Profesionales</h2>
+
+    <!-- SEARCH -->
+    <div class="card">
+      <div class="card-title">Buscar Profesional</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="flex:1;min-width:220px;">
+          <label>DNI o C&oacute;digo</label>
+          <input id="bajaBuscar" placeholder="Ingrese DNI o c&oacute;digo num&eacute;rico" onkeydown="if(event.key==='Enter')buscarProfesionalBaja()"/>
+        </div>
+        <button class="btn" onclick="buscarProfesionalBaja()" style="margin-bottom:0;">Buscar</button>
+      </div>
+      <p id="bajaSearchError" class="error-msg"></p>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="bajaResultados"></div>
+
+    <!-- BAJA COORDINADORES -->
+    <div class="card" style="margin-top:24px;">
+      <div class="card-title">Coordinadores Activos en mi Zona</div>
+      <div id="bajaCoordsContent"><p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p></div>
+    </div>
+
+    <!-- BAJA VENDEDORAS -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Vendedoras/Asesoras Activas en mi Zona</div>
+      <div id="bajaVendsContent"><p style="color:var(--gris);text-align:center;padding:20px;">Cargando...</p></div>
+    </div>
+  </div>
+
 </div><!-- /container -->
 </div><!-- /app-wrapper -->
 
@@ -558,6 +603,7 @@ function switchTab(tab, el) {
   if (tab === 'resumen') loadResumen();
   if (tab === 'mensajeria') loadMensajesGZ();
   if (tab === 'registros') loadRegistros();
+  if (tab === 'bajas') loadBajasTab();
 }
 
 /* ── API HELPERS ── */
@@ -1730,6 +1776,202 @@ function setupFileInfoListeners() {
     var info = document.getElementById('nomFilesInfo');
     info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
   });
+}
+
+/* ══════════════════════════════════════════
+   TAB 7: BAJAS / CONSULTAS
+   ══════════════════════════════════════════ */
+async function loadBajasTab() {
+  await loadBajasCoords();
+  await loadBajasVends();
+}
+
+async function loadBajasCoords() {
+  var container = document.getElementById('bajaCoordsContent');
+  try {
+    var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&activo=eq.true&order=nombre');
+    if (!coords.length) {
+      container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin coordinadores activos.</p>';
+      return;
+    }
+    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>DNI</th><th>Tel&eacute;fono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
+    coords.forEach(function(c) {
+      var sNum = '';
+      sectores.forEach(function(s){ if (s.id === c.sector_id) sNum = 'S' + s.numero_sector; });
+      html += '<tr>' +
+        '<td style="color:var(--dorado);font-weight:600;">' + esc(c.codigo) + '</td>' +
+        '<td>' + esc(c.nombre) + '</td>' +
+        '<td>' + esc(c.dni || '-') + '</td>' +
+        '<td>' + esc(c.telefono || '-') + '</td>' +
+        '<td>' + esc(c.email || '-') + '</td>' +
+        '<td>' + sNum + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" onclick="bajaCoordinadorFromTab(\'' + c.id + '\',\'' + (c.sector_id || '') + '\')">Dar de Baja</button></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--danger);text-align:center;padding:20px;">Error al cargar coordinadores.</p>';
+    console.error(e);
+  }
+}
+
+async function loadBajasVends() {
+  var container = document.getElementById('bajaVendsContent');
+  try {
+    var vends = await api('/rest/v1/vendedoras?gerente_id=eq.' + session.id + '&activo=eq.true&order=nombre');
+    if (!vends.length) {
+      container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin vendedoras activas.</p>';
+      return;
+    }
+    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>DNI</th><th>Tel&eacute;fono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
+    vends.forEach(function(v) {
+      var sNum = '';
+      sectores.forEach(function(s){ if (s.id === v.sector_id) sNum = 'S' + s.numero_sector; });
+      html += '<tr>' +
+        '<td style="color:var(--dorado);font-weight:600;">' + esc(v.codigo) + '</td>' +
+        '<td>' + esc(v.nombre) + '</td>' +
+        '<td>' + esc(v.dni || '-') + '</td>' +
+        '<td>' + esc(v.telefono || '-') + '</td>' +
+        '<td>' + esc(v.email || '-') + '</td>' +
+        '<td>' + sNum + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" onclick="bajaVendedora(\'' + v.id + '\')">Dar de Baja</button></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--danger);text-align:center;padding:20px;">Error al cargar vendedoras.</p>';
+    console.error(e);
+  }
+}
+
+async function bajaCoordinadorFromTab(coordId, sectorId) {
+  if (!confirm('Dar de baja al coordinador? Sus datos se conservan.')) return;
+  var motivo = prompt('Motivo de la baja:');
+  if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
+  try {
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
+    await loadBajasTab();
+    await loadSectores();
+  } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
+}
+
+async function bajaVendedora(vendId) {
+  if (!confirm('Dar de baja a esta vendedora/asesora? Sus datos se conservan.')) return;
+  var motivo = prompt('Motivo de la baja:');
+  if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
+  try {
+    await apiPatch('/rest/v1/vendedoras?id=eq.' + vendId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
+    await loadBajasTab();
+  } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
+}
+
+async function buscarProfesionalBaja() {
+  var errEl = document.getElementById('bajaSearchError');
+  var resultsEl = document.getElementById('bajaResultados');
+  errEl.textContent = '';
+  resultsEl.innerHTML = '';
+
+  var query = document.getElementById('bajaBuscar').value.trim();
+  if (!query) { errEl.textContent = 'Ingrese un DNI o c\u00f3digo para buscar.'; return; }
+
+  var results = [];
+
+  try {
+    // Search coordinadores by codigo or DNI
+    var coordsByCodigo = await api('/rest/v1/coordinadores?codigo=eq.' + encodeURIComponent(query) + '&select=*');
+    var coordsByDni = await api('/rest/v1/coordinadores?dni=eq.' + encodeURIComponent(query) + '&select=*');
+
+    // Merge without duplicates
+    var coordIds = {};
+    coordsByCodigo.concat(coordsByDni).forEach(function(c) {
+      if (!coordIds[c.id]) { coordIds[c.id] = true; c._tipo_profesional = 'Coordinador/a'; results.push(c); }
+    });
+
+    // Search vendedoras by codigo or DNI
+    var vendsByCodigo = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(query) + '&select=*');
+    var vendsByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(query) + '&select=*');
+
+    var vendIds = {};
+    vendsByCodigo.concat(vendsByDni).forEach(function(v) {
+      if (!vendIds[v.id]) { vendIds[v.id] = true; v._tipo_profesional = 'Vendedora/Asesora'; results.push(v); }
+    });
+
+    if (!results.length) {
+      resultsEl.innerHTML = '<div class="card" style="margin-top:16px;text-align:center;"><p style="color:var(--gris);padding:20px;">No se encontraron resultados para "<strong>' + esc(query) + '</strong>".</p></div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < results.length; i++) {
+      var r = results[i];
+      var isActive = r.activo !== false;
+      var sectorName = '';
+      if (r.sector_id) {
+        sectores.forEach(function(s){ if (s.id === r.sector_id) sectorName = 'S' + s.numero_sector; });
+      }
+
+      // Try to find coordinator info for vendedoras
+      var coordInfo = '';
+      if (r._tipo_profesional === 'Vendedora/Asesora' && r.sector_id) {
+        var coord = coordMap[r.sector_id];
+        if (coord) coordInfo = coord.nombre + ' (' + coord.codigo + ')';
+      }
+
+      html += '<div class="search-result-card">';
+      html += '<div class="src-header">';
+      html += '<span class="src-type">' + esc(r._tipo_profesional) + '</span>';
+      html += '<span class="badge ' + (isActive ? 'badge-active' : 'badge-inactive') + '" style="font-size:0.7rem;padding:4px 12px;">' + (isActive ? 'ACTIVO' : 'INACTIVO / BAJA') + '</span>';
+      html += '</div>';
+      html += '<div class="src-grid">';
+      html += '<div class="src-field"><span class="src-label">Nombre</span><span class="src-value">' + esc(r.nombre || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">DNI</span><span class="src-value">' + esc(r.dni || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">C\u00f3digo</span><span class="src-value" style="color:var(--dorado);font-weight:600;">' + esc(r.codigo || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Tel\u00e9fono</span><span class="src-value">' + esc(r.telefono || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Email</span><span class="src-value">' + esc(r.email || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Direcci\u00f3n</span><span class="src-value">' + esc(r.direccion || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Sector</span><span class="src-value">' + (sectorName || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Fecha de Alta / Ingreso</span><span class="src-value">' + (r.fecha_ingreso ? new Date(r.fecha_ingreso).toLocaleDateString('es-HN') : (r.created_at ? new Date(r.created_at).toLocaleDateString('es-HN') : '-')) + '</span></div>';
+
+      if (r.fecha_baja) {
+        html += '<div class="src-field"><span class="src-label">Fecha de Baja</span><span class="src-value" style="color:var(--danger);">' + new Date(r.fecha_baja).toLocaleDateString('es-HN') + '</span></div>';
+      }
+      if (r.motivo_baja) {
+        html += '<div class="src-field"><span class="src-label">Motivo de Baja</span><span class="src-value" style="color:var(--danger);">' + esc(r.motivo_baja) + '</span></div>';
+      }
+
+      // Coordinator-specific: sector info
+      if (r._tipo_profesional === 'Coordinador/a') {
+        if (r.rtn) html += '<div class="src-field"><span class="src-label">RTN</span><span class="src-value">' + esc(r.rtn) + '</span></div>';
+        if (r.numero_cuenta) html += '<div class="src-field"><span class="src-label">N\u00famero de Cuenta</span><span class="src-value">' + esc(r.numero_cuenta) + '</span></div>';
+        if (r.nombre_banco) html += '<div class="src-field"><span class="src-label">Banco</span><span class="src-value">' + esc(r.nombre_banco) + '</span></div>';
+      }
+
+      // Vendedora-specific: coordinator info
+      if (r._tipo_profesional === 'Vendedora/Asesora' && coordInfo) {
+        html += '<div class="src-field"><span class="src-label">Coordinador/a</span><span class="src-value">' + esc(coordInfo) + '</span></div>';
+      }
+
+      html += '</div>'; // close src-grid
+
+      // Action buttons - only Baja for active professionals, no Eliminar
+      if (isActive) {
+        html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--borde);">';
+        if (r._tipo_profesional === 'Coordinador/a') {
+          html += '<button class="btn btn-sm btn-danger" onclick="bajaCoordinadorFromTab(\'' + r.id + '\',\'' + (r.sector_id || '') + '\')">Dar de Baja</button>';
+        } else {
+          html += '<button class="btn btn-sm btn-danger" onclick="bajaVendedora(\'' + r.id + '\')">Dar de Baja</button>';
+        }
+        html += '</div>';
+      }
+
+      html += '</div>'; // close search-result-card
+    }
+
+    resultsEl.innerHTML = html;
+  } catch(e) {
+    errEl.textContent = 'Error al buscar: ' + (e.message || 'Intente de nuevo.');
+    console.error(e);
+  }
 }
 </script>
 </body>

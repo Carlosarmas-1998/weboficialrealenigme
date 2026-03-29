@@ -215,6 +215,8 @@
   <div class="nav-item" data-tab="bajas" onclick="switchTab('bajas');loadBajas();">Bajas</div>
   <div class="nav-item" data-tab="registros_zonas" onclick="switchTab('registros_zonas');loadRegistrosAlta();">Registros Zonas</div>
   <div class="nav-item" data-tab="logistica_ventas" onclick="switchTab('logistica_ventas');loadLogisticaVentas();">Log&iacute;stica y Ventas</div>
+  <div class="nav-item" data-tab="pedidos_web" onclick="switchTab('pedidos_web');loadPedidosWeb();">&#9830; Pedidos Web (Stripe)</div>
+  <div class="nav-item" data-tab="deuda" onclick="switchTab('deuda');loadPanelDeuda();">&#9830; Panel de Deuda</div>
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -679,13 +681,67 @@
   <!-- TAB: LOGISTICA Y VENTAS -->
   <div class="tab-content" id="tab-logistica_ventas">
     <div class="page-header">
-      <div class="page-title"><h1>Log&iacute;stica y <em>Ventas</em></h1><p>Resumen de productos por Gerencia Divisional</p></div>
+      <div class="page-title"><h1>Log&iacute;stica y <em>Ventas</em></h1><p>Pedidos con detalle de productos &middot; Divisi&oacute;n &rarr; Gerente de Zona</p></div>
       <div class="header-actions">
+        <select id="lvAno" onchange="loadLogisticaVentas()" style="min-width:100px;"></select>
+        <select id="lvCampana" onchange="loadLogisticaVentas()" style="min-width:160px;">
+          <option value="">Todas las campa&ntilde;as</option>
+        </select>
         <button class="btn" onclick="loadLogisticaVentas()"><span>Refrescar</span></button>
       </div>
     </div>
     <div id="logVentasStats" class="stats-row"></div>
+
+    <!-- Global aggregated product summary -->
+    <div id="lvGlobalResumen" style="display:none;background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--gold);margin-bottom:14px;">&#9830; Resumen Global de Productos</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>C&oacute;digo</th><th>Producto</th><th>Unidades</th><th>Valor Cat&aacute;logo</th></tr></thead>
+        <tbody id="lvGlobalResumenBody"></tbody>
+      </table></div>
+    </div>
+
     <div id="logVentasContent"><div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando datos&hellip;</div></div>
+  </div>
+
+  <!-- TAB: PEDIDOS WEB (STRIPE) -->
+  <div class="tab-content" id="tab-pedidos_web">
+    <div class="page-header">
+      <div class="page-title"><h1>Pedidos <em>Web (Stripe)</em></h1><p>Pagos reales recibidos por la pasarela de pago</p></div>
+      <div class="header-actions">
+        <select id="pwEstado" onchange="loadPedidosWeb()" style="min-width:140px;">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="pagado">Pagado</option>
+          <option value="enviado">Enviado</option>
+          <option value="entregado">Entregado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <button class="btn" onclick="syncStripePayments()"><span>&#8635; Sincronizar Stripe</span></button>
+        <button class="btn" onclick="loadPedidosWeb()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="stats-row" id="pwStats"></div>
+    <div id="pwContent"><div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando&hellip;</div></div>
+  </div>
+
+  <!-- TAB: PANEL DE DEUDA -->
+  <div class="tab-content" id="tab-deuda">
+    <div class="page-header">
+      <div class="page-title"><h1>Panel de <em>Deuda</em></h1><p>Control de deuda por profesional &middot; Vendedoras, Coordinadores y Gerentes de Zona</p></div>
+      <div class="header-actions">
+        <input id="deudaBuscar" placeholder="Buscar por nombre, c&oacute;digo o DNI..." style="min-width:220px;padding:8px 12px;border:1px solid var(--border);font-size:.8rem;font-family:inherit;" onkeydown="if(event.key==='Enter')loadPanelDeuda()"/>
+        <select id="deudaTipo" onchange="loadPanelDeuda()" style="min-width:140px;">
+          <option value="">Todos</option>
+          <option value="vendedora">Vendedoras</option>
+          <option value="coordinador">Coordinadores</option>
+          <option value="gerente_zona">Gerentes Zona</option>
+        </select>
+        <button class="btn" onclick="loadPanelDeuda()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div class="stats-row" id="deudaStats"></div>
+    <div id="deudaContent"><div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando&hellip;</div></div>
   </div>
 
 </div>
@@ -2256,17 +2312,39 @@ async function loadPedidosPorGZ() {
   container.innerHTML = '<p style="color:var(--text-muted);font-size:.75rem;">Cargando pedidos...</p>';
 
   try {
-    // Load all gerentes de zona with their gerencia divisional
-    var gzRes = await fetch(SUPA_URL + '/rest/v1/gerentes_zona?select=id,codigo,nombre,gerencia_divisional_id,activo&order=codigo', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-    });
-    var allGZ = await gzRes.json();
+    var allGZ = await supaGet('gerentes_zona', '&select=id,codigo,nombre,gerencia_divisional_id,activo&order=codigo');
+    var allPedidos = await supaGet('pedidos', '&select=id,codigo_pedido,subtotal_catalogo,total_venta_neta,total_con_iva,gerente_id,campana_id,vendedora_id,created_at,observaciones&order=created_at.desc');
 
-    // Load all pedidos with gerente info
-    var pedRes = await fetch(SUPA_URL + '/rest/v1/pedidos?select=id,codigo_pedido,subtotal_catalogo,total_venta_neta,total_con_iva,gerente_id,created_at,observaciones,items&order=created_at.desc', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    // Fetch pedidos_detalle
+    var pedidoIds = allPedidos.map(function(p){ return p.id; });
+    var allDetalles = [];
+    for (var batch = 0; batch < pedidoIds.length; batch += 50) {
+      var batchIds = pedidoIds.slice(batch, batch + 50);
+      if (!batchIds.length) break;
+      var batchRes = await supaGet('pedidos_detalle', '&pedido_id=in.(' + batchIds.join(',') + ')');
+      if (batchRes && !batchRes.error) allDetalles = allDetalles.concat(batchRes);
+    }
+    var detalleMap = {};
+    allDetalles.forEach(function(d) {
+      if (!detalleMap[d.pedido_id]) detalleMap[d.pedido_id] = [];
+      detalleMap[d.pedido_id].push(d);
     });
-    var allPedidos = await pedRes.json();
+
+    // Fetch vendedoras
+    var vendedoraIds = [];
+    allPedidos.forEach(function(p){ if (p.vendedora_id && vendedoraIds.indexOf(p.vendedora_id) === -1) vendedoraIds.push(p.vendedora_id); });
+    var vendedoraMap = {};
+    for (var vb = 0; vb < vendedoraIds.length; vb += 50) {
+      var vBatch = vendedoraIds.slice(vb, vb + 50);
+      if (!vBatch.length) break;
+      var vRes = await supaGet('vendedoras', '&id=in.(' + vBatch.join(',') + ')&select=id,nombre,codigo');
+      if (vRes && !vRes.error) vRes.forEach(function(v){ vendedoraMap[v.id] = v; });
+    }
+
+    // Fetch campanas
+    var campanas = await supaGet('campanas', '&order=numero');
+    var campanaMap = {};
+    campanas.forEach(function(c){ campanaMap[c.id] = c; });
 
     // Group pedidos by gerente_id
     var pedidosByGZ = {};
@@ -2286,66 +2364,59 @@ async function loadPedidosPorGZ() {
 
     var html = '';
 
-    // Iterate over each gerencia divisional
     cachedGerencias.forEach(function(gd) {
       var gzList = gzByGD[gd.id] || [];
-      var gdTotalBruta = 0;
-      var gdTotalPedidos = 0;
+      var gdTotalBruta = 0, gdTotalNeta = 0, gdTotalPedidos = 0;
+      var gdProductAgg = {};
 
       var gzHtml = '';
-      var gdProductAgg = {}; // Aggregated products across all GZs for this GD
       gzList.forEach(function(gz) {
         var pedidos = pedidosByGZ[gz.id] || [];
-        var gzBruta = 0;
-        var gzNeta = 0;
-        var gzTotalUnidades = 0;
+        var gzBruta = 0, gzNeta = 0, gzTotalUnidades = 0;
         var gzProductosSet = {};
+
         pedidos.forEach(function(p) {
           gzBruta += parseFloat(p.subtotal_catalogo || p.total_con_iva || 0);
           gzNeta += parseFloat(p.total_venta_neta || 0);
-          // Parse items
-          var items = [];
-          if (p.items) {
-            try { items = typeof p.items === 'string' ? JSON.parse(p.items) : p.items; } catch(e) { items = []; }
-          }
-          if (Array.isArray(items)) {
-            items.forEach(function(it) {
-              var qty = parseInt(it.cantidad || it.qty || 0);
-              var cod = it.codigo || it.codigo_producto || '-';
-              var nom = it.nombre || '-';
-              gzTotalUnidades += qty;
-              gzProductosSet[cod] = true;
-              // Aggregate for GD summary
-              var key = cod + '||' + nom;
-              if (!gdProductAgg[key]) gdProductAgg[key] = { codigo: cod, nombre: nom, cantidad: 0 };
-              gdProductAgg[key].cantidad += qty;
-            });
-          }
+          var items = detalleMap[p.id] || [];
+          items.forEach(function(it) {
+            var qty = parseInt(it.cantidad || 0);
+            var cod = it.codigo_producto || '-';
+            var nom = it.nombre_producto || '-';
+            gzTotalUnidades += qty;
+            gzProductosSet[cod] = true;
+            var key = cod;
+            if (!gdProductAgg[key]) gdProductAgg[key] = { codigo: cod, nombre: nom, cantidad: 0, valor: 0 };
+            gdProductAgg[key].cantidad += qty;
+            gdProductAgg[key].valor += parseFloat(it.subtotal_catalogo || 0);
+          });
         });
         gdTotalBruta += gzBruta;
+        gdTotalNeta += gzNeta;
         gdTotalPedidos += pedidos.length;
 
         var statusBadge = gz.activo !== false
-          ? '<span style="color:var(--success);font-size:.65rem;">● Activo</span>'
-          : '<span style="color:var(--danger);font-size:.65rem;">● Baja</span>';
+          ? '<span style="color:var(--success);font-size:.65rem;">\u25CF Activo</span>'
+          : '<span style="color:var(--danger);font-size:.65rem;">\u25CF Baja</span>';
 
         gzHtml += '<div style="background:var(--surface2);border:1px solid var(--border);padding:16px;margin-bottom:8px;">';
-        gzHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+        gzHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">';
         gzHtml += '<div><span style="color:var(--gold);font-weight:500;font-size:.85rem;">' + esc(gz.codigo || '-') + '</span> &mdash; ' + esc(gz.nombre || '-') + ' ' + statusBadge + '</div>';
-        gzHtml += '<div style="font-size:.75rem;color:var(--text-muted);">' + pedidos.length + ' pedido' + (pedidos.length !== 1 ? 's' : '') + ' &middot; Bruta: <strong style="color:var(--gold);">L' + gzBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong></div>';
+        gzHtml += '<div style="font-size:.75rem;color:var(--text-muted);">' + pedidos.length + ' pedido' + (pedidos.length !== 1 ? 's' : '') + ' &middot; ' + gzTotalUnidades + ' uds &middot; Bruta: <strong style="color:var(--gold);">L' + gzBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong> &middot; Neta: <strong style="color:var(--warn);">L' + gzNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong></div>';
         gzHtml += '</div>';
 
         if (pedidos.length > 0) {
           pedidos.forEach(function(p) {
-            var items = [];
-            if (p.items) {
-              try { items = typeof p.items === 'string' ? JSON.parse(p.items) : p.items; } catch(e) { items = []; }
-            }
-            if (!Array.isArray(items)) items = [];
+            var items = detalleMap[p.id] || [];
+            var vendedora = vendedoraMap[p.vendedora_id];
+            var camp = campanaMap[p.campana_id];
 
             gzHtml += '<div style="background:var(--bg);border:1px solid var(--border);padding:10px;margin-bottom:6px;">';
-            gzHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
-            gzHtml += '<span style="font-size:.75rem;font-weight:600;color:var(--text);">' + esc(p.codigo_pedido || '-') + '</span>';
+            gzHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px;">';
+            gzHtml += '<div><span style="font-size:.75rem;font-weight:600;color:var(--text);">' + esc(p.codigo_pedido || '-') + '</span>';
+            if (vendedora) gzHtml += ' &mdash; <span style="font-size:.72rem;">' + esc(vendedora.codigo) + ' ' + esc(vendedora.nombre) + '</span>';
+            if (camp) gzHtml += ' <span style="font-size:.65rem;color:var(--info);margin-left:4px;">C' + camp.numero + '</span>';
+            gzHtml += '</div>';
             gzHtml += '<span style="font-size:.68rem;color:var(--text-muted);">' + (p.created_at ? p.created_at.split('T')[0] : '-') + ' &middot; Bruta: L' + parseFloat(p.subtotal_catalogo || 0).toLocaleString('es-HN',{minimumFractionDigits:2}) + ' &middot; Neta: <span style="color:var(--gold);">L' + parseFloat(p.total_venta_neta || 0).toLocaleString('es-HN',{minimumFractionDigits:2}) + '</span></span>';
             gzHtml += '</div>';
             if (p.observaciones) {
@@ -2353,29 +2424,22 @@ async function loadPedidosPorGZ() {
             }
             if (items.length > 0) {
               gzHtml += '<table style="width:100%;font-size:.72rem;"><thead><tr>';
-              gzHtml += '<th style="padding:4px 6px;font-size:.6rem;">Código</th><th style="padding:4px 6px;font-size:.6rem;">Producto</th><th style="padding:4px 6px;font-size:.6rem;text-align:center;">Cant.</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Precio</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Subtotal</th>';
+              gzHtml += '<th style="padding:4px 6px;font-size:.6rem;">Cant.</th><th style="padding:4px 6px;font-size:.6rem;">C\u00f3digo</th><th style="padding:4px 6px;font-size:.6rem;">Producto</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Precio</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Subtotal</th>';
               gzHtml += '</tr></thead><tbody>';
               items.forEach(function(it) {
-                var cod = it.codigo || it.codigo_producto || '-';
-                var nom = it.nombre || '-';
-                var qty = parseInt(it.cantidad || it.qty || 0);
-                var precio = parseFloat(it.precio || it.precio_unitario || 0);
-                var sub = parseFloat(it.subtotal || (precio * qty) || 0);
-                gzHtml += '<tr>';
-                gzHtml += '<td style="padding:3px 6px;font-size:.7rem;">' + esc(cod) + '</td>';
-                gzHtml += '<td style="padding:3px 6px;font-size:.7rem;">' + esc(nom) + '</td>';
-                gzHtml += '<td style="padding:3px 6px;font-size:.7rem;text-align:center;">' + qty + '</td>';
-                gzHtml += '<td style="padding:3px 6px;font-size:.7rem;text-align:right;">L' + precio.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
-                gzHtml += '<td style="padding:3px 6px;font-size:.7rem;text-align:right;">L' + sub.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
-                gzHtml += '</tr>';
+                var qty = parseInt(it.cantidad || 0);
+                var cod = esc(it.codigo_producto || '-');
+                var nom = esc(it.nombre_producto || '-');
+                var precio = parseFloat(it.precio_catalogo_unitario || 0);
+                var sub = parseFloat(it.subtotal_catalogo || (precio * qty));
+                gzHtml += '<tr><td style="padding:3px 6px;">' + qty + '</td><td style="padding:3px 6px;font-family:monospace;color:var(--gold);">' + cod + '</td><td style="padding:3px 6px;">' + nom + '</td><td style="padding:3px 6px;text-align:right;">L' + precio.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td><td style="padding:3px 6px;text-align:right;">L' + sub.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
               });
               gzHtml += '</tbody></table>';
             } else {
-              gzHtml += '<p style="font-size:.68rem;color:var(--text-muted);font-style:italic;margin:0;">Sin detalle de items</p>';
+              gzHtml += '<p style="font-size:.68rem;color:var(--text-muted);font-style:italic;margin:0;">Sin detalle de productos</p>';
             }
             gzHtml += '</div>';
           });
-          // GZ summary
           var numProductosDif = Object.keys(gzProductosSet).length;
           gzHtml += '<div style="margin-top:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);font-size:.75rem;color:var(--text-muted);">';
           gzHtml += '<strong>Total:</strong> ' + gzTotalUnidades + ' unidades de ' + numProductosDif + ' producto' + (numProductosDif !== 1 ? 's' : '') + ' diferente' + (numProductosDif !== 1 ? 's' : '');
@@ -2392,26 +2456,24 @@ async function loadPedidosPorGZ() {
       html += '<div><span style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem;font-weight:300;color:var(--gold);">' + esc(gd.codigo || '-') + '</span> <span style="font-size:.9rem;color:var(--text);">' + esc(gd.nombre || '-') + '</span></div>';
       html += '<div style="text-align:right;font-size:.75rem;">';
       html += '<div style="color:var(--text-muted);">' + gzList.length + ' Gerente' + (gzList.length !== 1 ? 's' : '') + ' de Zona &middot; ' + gdTotalPedidos + ' pedidos</div>';
-      html += '<div style="color:var(--gold);font-weight:500;margin-top:2px;">Venta Bruta Total: L' + gdTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div>';
+      html += '<div style="color:var(--gold);font-weight:500;margin-top:2px;">Bruta: L' + gdTotalBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' &middot; Neta: L' + gdTotalNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</div>';
       html += '</div></div>';
 
       if (gzList.length > 0) {
         html += gzHtml;
-        // GD aggregated product summary
         var gdProdList = Object.values(gdProductAgg);
         if (gdProdList.length > 0) {
           gdProdList.sort(function(a, b) { return b.cantidad - a.cantidad; });
           html += '<div style="margin-top:12px;padding:14px;background:linear-gradient(135deg,var(--surface2),var(--bg));border:2px solid var(--gold);border-radius:0;">';
-          html += '<div style="font-size:.8rem;font-weight:600;color:var(--gold);margin-bottom:10px;">Resumen de productos a preparar — ' + esc(gd.codigo || '-') + '</div>';
-          gdProdList.forEach(function(prod) {
-            html += '<div style="font-size:.73rem;padding:3px 0;color:var(--text);border-bottom:1px solid var(--border);">';
-            html += '<strong>' + prod.cantidad + ' unidades</strong> &mdash; Código: ' + esc(prod.codigo) + ' &mdash; ' + esc(prod.nombre);
-            html += '</div>';
+          html += '<div style="font-size:.8rem;font-weight:600;color:var(--gold);margin-bottom:10px;">Resumen de productos a preparar \u2014 ' + esc(gd.codigo || '-') + '</div>';
+          html += '<table style="width:100%;font-size:.72rem;"><thead><tr><th style="padding:4px 6px;font-size:.6rem;">#</th><th style="padding:4px 6px;font-size:.6rem;">C\u00f3digo</th><th style="padding:4px 6px;font-size:.6rem;">Producto</th><th style="padding:4px 6px;font-size:.6rem;text-align:center;">Unidades</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Valor</th></tr></thead><tbody>';
+          gdProdList.forEach(function(prod, idx) {
+            html += '<tr><td style="padding:3px 6px;color:var(--text-muted);">' + (idx+1) + '</td><td style="padding:3px 6px;font-family:monospace;color:var(--gold);">' + esc(prod.codigo) + '</td><td style="padding:3px 6px;">' + esc(prod.nombre) + '</td><td style="padding:3px 6px;text-align:center;font-weight:500;color:var(--info);">' + prod.cantidad + '</td><td style="padding:3px 6px;text-align:right;color:var(--gold);">L' + prod.valor.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
           });
           var gdTotalUnits = gdProdList.reduce(function(s,p){return s+p.cantidad;},0);
-          html += '<div style="font-size:.75rem;margin-top:8px;color:var(--gold);font-weight:500;">';
-          html += 'Total GD: ' + gdTotalUnits + ' unidades de ' + gdProdList.length + ' producto' + (gdProdList.length !== 1 ? 's' : '') + ' diferente' + (gdProdList.length !== 1 ? 's' : '');
-          html += '</div></div>';
+          var gdTotalValue = gdProdList.reduce(function(s,p){return s+p.valor;},0);
+          html += '<tr style="border-top:2px solid var(--gold-dim);"><td colspan="3" style="padding:4px 6px;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:500;">TOTAL GD</td><td style="padding:4px 6px;text-align:center;font-weight:500;color:var(--info);">' + gdTotalUnits + '</td><td style="padding:4px 6px;text-align:right;font-weight:500;color:var(--gold);">L' + gdTotalValue.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td></tr>';
+          html += '</tbody></table></div>';
         }
       } else {
         html += '<p style="font-size:.75rem;color:var(--text-muted);font-style:italic;">No tiene Gerentes de Zona asignados</p>';
@@ -3797,82 +3859,175 @@ function renderRegistrosAlta() {
 }
 
 // ================================================================
-// LOGISTICA Y VENTAS
+// LOGISTICA Y VENTAS (with pedidos_detalle)
 // ================================================================
 var logVentasLoaded = false;
+var lvSelectorsInit = false;
+
+function initLvSelectors() {
+  if (lvSelectorsInit) return;
+  lvSelectorsInit = true;
+  var curYear = new Date().getFullYear();
+  var selA = document.getElementById('lvAno');
+  selA.innerHTML = '';
+  for (var y = curYear; y >= curYear - 2; y--) {
+    var opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    selA.appendChild(opt);
+  }
+  // Populate campaigns
+  supaGet('campanas', '&order=numero').then(function(camps) {
+    if (!camps || camps.error) return;
+    var sel = document.getElementById('lvCampana');
+    sel.innerHTML = '<option value="">Todas las campa\u00f1as</option>';
+    camps.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = 'Campa\u00f1a ' + c.numero;
+      sel.appendChild(opt);
+    });
+  });
+}
+
 async function loadLogisticaVentas() {
+  initLvSelectors();
   var container = document.getElementById('logVentasContent');
   var statsEl = document.getElementById('logVentasStats');
+  var globalResumen = document.getElementById('lvGlobalResumen');
+  var globalResumenBody = document.getElementById('lvGlobalResumenBody');
   container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">Cargando datos&hellip;</div>';
+  globalResumen.style.display = 'none';
+
+  var ano = document.getElementById('lvAno').value || new Date().getFullYear();
+  var campanaId = document.getElementById('lvCampana').value;
 
   // Fetch data in parallel
-  var gerenciasP = supaGet('gerencias_divisionales', '&activo=eq.true&order=nombre');
-  var gerentesP = supaGet('gerentes_zona', '&select=id,nombre,codigo,gerencia_divisional_id');
-  var pedidosP = supaGet('pedidos', '');
+  var gerencias = await supaGet('gerencias_divisionales', '&activo=eq.true&order=nombre');
+  var allGerentes = await supaGet('gerentes_zona', '&select=id,nombre,codigo,gerencia_divisional_id,activo');
+  var campanas = await supaGet('campanas', '&order=numero');
 
-  var gerencias = await gerenciasP;
-  var gerentes = await gerentesP;
-  var pedidos = await pedidosP;
+  // Build campana map
+  var campanaMap = {};
+  campanas.forEach(function(c){ campanaMap[c.id] = c; });
 
-  // Map gerente_id -> gerencia_divisional_id
+  // Fetch pedidos with filters
+  var pedidosQuery = '&ano=eq.' + ano + '&order=created_at.desc';
+  if (campanaId) pedidosQuery += '&campana_id=eq.' + campanaId;
+  var pedidos = await supaGet('pedidos', pedidosQuery);
+
+  // Fetch all pedidos_detalle for these pedidos
+  var pedidoIds = pedidos.map(function(p){ return p.id; });
+  var detalles = [];
+  for (var batch = 0; batch < pedidoIds.length; batch += 50) {
+    var batchIds = pedidoIds.slice(batch, batch + 50);
+    if (!batchIds.length) break;
+    var batchRes = await supaGet('pedidos_detalle', '&pedido_id=in.(' + batchIds.join(',') + ')');
+    if (batchRes && !batchRes.error) detalles = detalles.concat(batchRes);
+  }
+
+  // Map detalle by pedido_id
+  var detalleMap = {};
+  detalles.forEach(function(d) {
+    if (!detalleMap[d.pedido_id]) detalleMap[d.pedido_id] = [];
+    detalleMap[d.pedido_id].push(d);
+  });
+
+  // Fetch vendedoras
+  var vendedoraIds = [];
+  pedidos.forEach(function(p){ if (p.vendedora_id && vendedoraIds.indexOf(p.vendedora_id) === -1) vendedoraIds.push(p.vendedora_id); });
+  var vendedoraMap = {};
+  for (var vb = 0; vb < vendedoraIds.length; vb += 50) {
+    var vBatch = vendedoraIds.slice(vb, vb + 50);
+    if (!vBatch.length) break;
+    var vRes = await supaGet('vendedoras', '&id=in.(' + vBatch.join(',') + ')&select=id,nombre,codigo');
+    if (vRes && !vRes.error) vRes.forEach(function(v){ vendedoraMap[v.id] = v; });
+  }
+
+  // Map gerentes
   var gerenteToGD = {};
   var gerenteInfo = {};
-  gerentes.forEach(function(g) {
+  allGerentes.forEach(function(g) {
     gerenteToGD[g.id] = g.gerencia_divisional_id;
-    gerenteInfo[g.id] = { nombre: g.nombre, codigo: g.codigo };
+    gerenteInfo[g.id] = { nombre: g.nombre, codigo: g.codigo, activo: g.activo };
   });
 
-  // Group pedidos by GD
+  // Group pedidos by GD -> GZ
   var gdData = {};
   gerencias.forEach(function(gd) {
-    gdData[gd.id] = { nombre: gd.nombre, codigo: gd.codigo || '', pedidos: [], productMap: {} };
+    gdData[gd.id] = { nombre: gd.nombre, codigo: gd.codigo || '', gzMap: {}, productMap: {} };
   });
 
-  var totalGlobalItems = 0;
-  var totalGlobalValue = 0;
-  var totalGlobalPedidos = 0;
+  // Assign gerentes to their GD
+  allGerentes.forEach(function(g) {
+    if (g.gerencia_divisional_id && gdData[g.gerencia_divisional_id]) {
+      gdData[g.gerencia_divisional_id].gzMap[g.id] = { nombre: g.nombre, codigo: g.codigo, activo: g.activo, pedidos: [] };
+    }
+  });
+
+  var totalGlobalPedidos = 0, totalGlobalUnidades = 0, totalGlobalBruta = 0, totalGlobalNeta = 0;
+  var globalProductAgg = {};
 
   pedidos.forEach(function(p) {
     var gdId = gerenteToGD[p.gerente_id];
     if (!gdId || !gdData[gdId]) return;
-
-    gdData[gdId].pedidos.push(p);
-    totalGlobalPedidos++;
-
-    // Parse items
-    var items = p.items;
-    if (!items) return;
-    if (typeof items === 'string') {
-      try { items = JSON.parse(items); } catch(e) { return; }
+    if (!gdData[gdId].gzMap[p.gerente_id]) {
+      gdData[gdId].gzMap[p.gerente_id] = { nombre: (gerenteInfo[p.gerente_id] || {}).nombre || '?', codigo: (gerenteInfo[p.gerente_id] || {}).codigo || '?', activo: true, pedidos: [] };
     }
-    if (!Array.isArray(items)) return;
+    gdData[gdId].gzMap[p.gerente_id].pedidos.push(p);
+    totalGlobalPedidos++;
+    totalGlobalBruta += parseFloat(p.subtotal_catalogo || 0);
+    totalGlobalNeta += parseFloat(p.total_venta_neta || 0);
 
+    var items = detalleMap[p.id] || [];
     items.forEach(function(it) {
-      if (typeof it !== 'object' || it === null) return;
-      var codigo = it.codigo || it.code || it.sku || 'SIN-CODIGO';
-      var nombre = it.nombre || it.name || it.producto || it.title || 'Sin nombre';
-      var qty = parseInt(it.cantidad || it.qty || it.quantity || 1) || 1;
-      var precio = parseFloat(it.precio || it.price || 0) || 0;
-      var key = String(codigo).trim();
-
-      if (!gdData[gdId].productMap[key]) {
-        gdData[gdId].productMap[key] = { codigo: key, nombre: nombre, qty: 0, valor: 0 };
-      }
-      gdData[gdId].productMap[key].qty += qty;
-      gdData[gdId].productMap[key].valor += precio * qty;
-      totalGlobalItems += qty;
-      totalGlobalValue += precio * qty;
+      var qty = parseInt(it.cantidad || 0);
+      var cod = it.codigo_producto || '-';
+      var nom = it.nombre_producto || '-';
+      var precio = parseFloat(it.precio_catalogo_unitario || 0);
+      totalGlobalUnidades += qty;
+      // Global aggregation
+      if (!globalProductAgg[cod]) globalProductAgg[cod] = { codigo: cod, nombre: nom, cantidad: 0, valor: 0 };
+      globalProductAgg[cod].cantidad += qty;
+      globalProductAgg[cod].valor += precio * qty;
+      // GD aggregation
+      if (!gdData[gdId].productMap[cod]) gdData[gdId].productMap[cod] = { codigo: cod, nombre: nom, cantidad: 0, valor: 0 };
+      gdData[gdId].productMap[cod].cantidad += qty;
+      gdData[gdId].productMap[cod].valor += precio * qty;
     });
   });
 
   // Stats
   statsEl.innerHTML =
-    '<div class="stat-card"><div class="stat-label">Gerencias Activas</div><div class="stat-value">' + gerencias.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Divisiones Activas</div><div class="stat-value">' + gerencias.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Total Pedidos</div><div class="stat-value">' + totalGlobalPedidos + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Total Unidades</div><div class="stat-value">' + totalGlobalItems.toLocaleString('es-HN') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Valor Total</div><div class="stat-value">L' + totalGlobalValue.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">Total Unidades</div><div class="stat-value">' + totalGlobalUnidades.toLocaleString('es-HN') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L' + totalGlobalBruta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Venta Neta</div><div class="stat-value">L' + totalGlobalNeta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</div></div>';
 
-  // Render collapsible GD sections
+  // Global product summary
+  var globalProds = Object.values(globalProductAgg);
+  globalProds.sort(function(a, b) { return b.cantidad - a.cantidad; });
+  if (globalProds.length) {
+    globalResumen.style.display = 'block';
+    var gResHtml = '';
+    var gIdx = 0;
+    var gTotalQty = 0, gTotalVal = 0;
+    globalProds.forEach(function(pr) {
+      gIdx++;
+      gTotalQty += pr.cantidad;
+      gTotalVal += pr.valor;
+      gResHtml += '<tr>';
+      gResHtml += '<td style="color:var(--text-muted);font-size:.75rem;">' + gIdx + '</td>';
+      gResHtml += '<td style="font-weight:500;color:var(--gold);font-family:monospace;">' + esc(pr.codigo) + '</td>';
+      gResHtml += '<td>' + esc(pr.nombre) + '</td>';
+      gResHtml += '<td style="font-weight:500;color:var(--info);">' + pr.cantidad.toLocaleString('es-HN') + '</td>';
+      gResHtml += '<td style="color:var(--gold);">L' + pr.valor.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td>';
+      gResHtml += '</tr>';
+    });
+    gResHtml += '<tr style="border-top:2px solid var(--gold-dim);"><td colspan="3" style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:500;">TOTAL GLOBAL</td><td style="font-weight:500;color:var(--info);">' + gTotalQty.toLocaleString('es-HN') + '</td><td style="font-weight:500;color:var(--gold);">L' + gTotalVal.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td></tr>';
+    globalResumenBody.innerHTML = gResHtml;
+  }
+
+  // Render GD sections
   if (!gerencias.length) {
     container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);font-size:.8rem;">No hay gerencias divisionales activas</div>';
     return;
@@ -3883,64 +4038,150 @@ async function loadLogisticaVentas() {
     var data = gdData[gd.id];
     if (!data) return;
 
-    // Sort products by qty descending
-    var products = Object.values(data.productMap);
-    products.sort(function(a, b) { return b.qty - a.qty; });
+    var gdProds = Object.values(data.productMap);
+    gdProds.sort(function(a, b) { return b.cantidad - a.cantidad; });
+    var gdTotalQty = 0, gdTotalVal = 0, gdTotalPedidos = 0, gdTotalBruta = 0, gdTotalNeta = 0;
+    gdProds.forEach(function(pr) { gdTotalQty += pr.cantidad; gdTotalVal += pr.valor; });
 
-    var gdTotalQty = 0;
-    var gdTotalVal = 0;
-    products.forEach(function(pr) { gdTotalQty += pr.qty; gdTotalVal += pr.valor; });
+    var gzEntries = Object.keys(data.gzMap).map(function(gzId) { return data.gzMap[gzId]; });
+    gzEntries.forEach(function(gz) { gdTotalPedidos += gz.pedidos.length; gz.pedidos.forEach(function(p) { gdTotalBruta += parseFloat(p.subtotal_catalogo || 0); gdTotalNeta += parseFloat(p.total_venta_neta || 0); }); });
 
     var sectionId = 'logvGD_' + gd.id;
 
-    html += '<div style="background:var(--surface);border:1px solid var(--border);margin-bottom:12px;">';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);margin-bottom:16px;">';
 
-    // Clickable header
+    // GD Header (clickable)
     html += '<div onclick="toggleLogVentasGD(\'' + sectionId + '\', this)" style="padding:18px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .2s;" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'transparent\'">';
     html += '<div>';
     html += '<span style="font-family:\'Cormorant Garamond\',serif;font-size:1.3rem;font-weight:300;color:var(--gold);">' + esc(data.nombre) + '</span>';
     if (data.codigo) html += ' <span style="font-size:.65rem;letter-spacing:.14em;color:var(--text-muted);margin-left:8px;">' + esc(data.codigo) + '</span>';
     html += '</div>';
-    html += '<div style="display:flex;align-items:center;gap:16px;">';
-    html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--text-muted);">' + data.pedidos.length + ' pedidos</span>';
+    html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">';
+    html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--text-muted);">' + gdTotalPedidos + ' pedidos</span>';
     html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--info);">' + gdTotalQty + ' uds</span>';
-    html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--gold);">L' + gdTotalVal.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</span>';
+    html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--gold);">Bruta: L' + gdTotalBruta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</span>';
+    html += '<span style="font-size:.7rem;letter-spacing:.1em;color:var(--warn);">Neta: L' + gdTotalNeta.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</span>';
     html += '<span class="logv-arrow" style="font-size:.7rem;color:var(--text-muted);transition:transform .2s;">&#9660;</span>';
     html += '</div></div>';
 
-    // Collapsible content (hidden by default)
+    // Collapsible content
     html += '<div id="' + sectionId + '" style="display:none;border-top:1px solid var(--border);padding:20px 24px;">';
 
-    if (!products.length) {
-      html += '<div style="color:var(--text-muted);font-size:.8rem;padding:16px 0;">No hay productos en los pedidos de esta gerencia.</div>';
-    } else {
-      // Product summary table
-      html += '<div style="font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">&#9830; RESUMEN DE PRODUCTOS</div>';
-      html += '<div class="table-wrap"><table>';
-      html += '<thead><tr><th>#</th><th>C&oacute;digo</th><th>Producto</th><th>Unidades</th><th>Valor</th></tr></thead>';
-      html += '<tbody>';
-      products.forEach(function(pr, idx) {
-        html += '<tr>';
-        html += '<td style="color:var(--text-muted);font-size:.75rem;">' + (idx + 1) + '</td>';
-        html += '<td style="font-weight:500;color:var(--gold);font-size:.8rem;font-family:monospace;">' + esc(pr.codigo) + '</td>';
-        html += '<td>' + esc(pr.nombre) + '</td>';
-        html += '<td style="font-weight:500;color:var(--info);">' + pr.qty.toLocaleString('es-HN') + '</td>';
-        html += '<td style="color:var(--gold);">L' + pr.valor.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td>';
-        html += '</tr>';
+    // GD aggregated product summary
+    if (gdProds.length) {
+      html += '<div style="margin-bottom:20px;padding:14px;background:linear-gradient(135deg,var(--surface2),var(--bg));border:2px solid var(--gold);">';
+      html += '<div style="font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:500;">&#9830; RESUMEN PRODUCTOS &mdash; ' + esc(data.nombre) + '</div>';
+      html += '<div class="table-wrap"><table><thead><tr><th>#</th><th>C\u00f3digo</th><th>Producto</th><th>Unidades</th><th>Valor</th></tr></thead><tbody>';
+      gdProds.forEach(function(pr, idx) {
+        html += '<tr><td style="color:var(--text-muted);font-size:.75rem;">' + (idx + 1) + '</td><td style="font-weight:500;color:var(--gold);font-family:monospace;">' + esc(pr.codigo) + '</td><td>' + esc(pr.nombre) + '</td><td style="font-weight:500;color:var(--info);">' + pr.cantidad.toLocaleString('es-HN') + '</td><td style="color:var(--gold);">L' + pr.valor.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td></tr>';
       });
-      html += '</tbody>';
-      html += '<tfoot><tr style="border-top:2px solid var(--gold-dim);">';
-      html += '<td colspan="3" style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:500;">TOTAL</td>';
-      html += '<td style="font-weight:500;color:var(--info);">' + gdTotalQty.toLocaleString('es-HN') + '</td>';
-      html += '<td style="font-weight:500;color:var(--gold);">L' + gdTotalVal.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td>';
-      html += '</tr></tfoot>';
-      html += '</table></div>';
+      html += '<tr style="border-top:2px solid var(--gold-dim);"><td colspan="3" style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:500;">TOTAL</td><td style="font-weight:500;color:var(--info);">' + gdTotalQty.toLocaleString('es-HN') + '</td><td style="font-weight:500;color:var(--gold);">L' + gdTotalVal.toLocaleString('es-HN', {minimumFractionDigits:2}) + '</td></tr>';
+      html += '</tbody></table></div></div>';
+    }
+
+    // Orders by each GZ within this GD
+    gzEntries.forEach(function(gz) {
+      var gzBruta = 0, gzNeta = 0, gzUnidades = 0;
+      gz.pedidos.forEach(function(p) {
+        gzBruta += parseFloat(p.subtotal_catalogo || 0);
+        gzNeta += parseFloat(p.total_venta_neta || 0);
+        (detalleMap[p.id] || []).forEach(function(it){ gzUnidades += parseInt(it.cantidad || 0); });
+      });
+
+      var statusBadge = gz.activo !== false
+        ? '<span style="color:var(--success);font-size:.65rem;">\u25CF Activo</span>'
+        : '<span style="color:var(--danger);font-size:.65rem;">\u25CF Baja</span>';
+
+      html += '<div style="background:var(--surface2);border:1px solid var(--border);padding:16px;margin-bottom:10px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">';
+      html += '<div><span style="color:var(--gold);font-weight:500;font-size:.85rem;">' + esc(gz.codigo || '-') + '</span> &mdash; ' + esc(gz.nombre || '-') + ' ' + statusBadge + '</div>';
+      html += '<div style="font-size:.72rem;color:var(--text-muted);">' + gz.pedidos.length + ' ped. &middot; ' + gzUnidades + ' uds &middot; Bruta: <strong style="color:var(--gold);">L' + gzBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong> &middot; Neta: <strong style="color:var(--warn);">L' + gzNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</strong></div>';
+      html += '</div>';
+
+      if (!gz.pedidos.length) {
+        html += '<p style="font-size:.7rem;color:var(--text-muted);font-style:italic;">Sin pedidos</p>';
+      } else {
+        gz.pedidos.forEach(function(p) {
+          var items = detalleMap[p.id] || [];
+          var vendedora = vendedoraMap[p.vendedora_id];
+          var camp = campanaMap[p.campana_id];
+          var pedBruta = parseFloat(p.subtotal_catalogo || 0);
+          var pedNeta = parseFloat(p.total_venta_neta || 0);
+
+          html += '<div style="background:var(--bg);border:1px solid var(--border);padding:10px;margin-bottom:6px;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px;">';
+          html += '<div>';
+          html += '<span style="font-size:.75rem;font-weight:600;color:var(--text);">' + esc(p.codigo_pedido || '-') + '</span>';
+          if (vendedora) html += ' &mdash; <span style="font-size:.72rem;color:var(--text-muted);">' + esc(vendedora.codigo) + ' ' + esc(vendedora.nombre) + '</span>';
+          if (camp) html += ' <span style="font-size:.65rem;color:var(--info);margin-left:6px;">C' + camp.numero + '</span>';
+          html += '</div>';
+          html += '<span style="font-size:.68rem;color:var(--text-muted);">' + (p.created_at ? p.created_at.split('T')[0] : '-') + ' &middot; Bruta: L' + pedBruta.toLocaleString('es-HN',{minimumFractionDigits:2}) + ' &middot; Neta: <span style="color:var(--gold);">L' + pedNeta.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</span></span>';
+          html += '</div>';
+
+          if (p.observaciones) {
+            html += '<div style="font-size:.68rem;color:var(--text-muted);margin-bottom:6px;font-style:italic;">' + esc(p.observaciones) + '</div>';
+          }
+
+          if (items.length) {
+            html += '<table style="width:100%;font-size:.72rem;"><thead><tr>';
+            html += '<th style="padding:4px 6px;font-size:.6rem;">Cant.</th><th style="padding:4px 6px;font-size:.6rem;">C\u00f3digo</th><th style="padding:4px 6px;font-size:.6rem;">Producto</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Precio</th><th style="padding:4px 6px;font-size:.6rem;text-align:right;">Subtotal</th>';
+            html += '</tr></thead><tbody>';
+            items.forEach(function(it) {
+              var qty = parseInt(it.cantidad || 0);
+              var cod = esc(it.codigo_producto || '-');
+              var nom = esc(it.nombre_producto || '-');
+              var precio = parseFloat(it.precio_catalogo_unitario || 0);
+              var sub = parseFloat(it.subtotal_catalogo || (precio * qty));
+              html += '<tr>';
+              html += '<td style="padding:3px 6px;">' + qty + '</td>';
+              html += '<td style="padding:3px 6px;font-family:monospace;color:var(--gold);">' + cod + '</td>';
+              html += '<td style="padding:3px 6px;">' + nom + '</td>';
+              html += '<td style="padding:3px 6px;text-align:right;">L' + precio.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
+              html += '<td style="padding:3px 6px;text-align:right;">L' + sub.toLocaleString('es-HN',{minimumFractionDigits:2}) + '</td>';
+              html += '</tr>';
+            });
+            html += '</tbody></table>';
+          } else {
+            html += '<p style="font-size:.68rem;color:var(--text-muted);font-style:italic;">Sin detalle de productos</p>';
+          }
+          html += '</div>';
+        });
+
+        // GZ product aggregation
+        var gzAgg = {};
+        gz.pedidos.forEach(function(p) {
+          (detalleMap[p.id] || []).forEach(function(it) {
+            var key = it.codigo_producto || '-';
+            if (!gzAgg[key]) gzAgg[key] = { codigo: key, nombre: it.nombre_producto || '-', cantidad: 0, valor: 0 };
+            gzAgg[key].cantidad += parseInt(it.cantidad || 0);
+            gzAgg[key].valor += parseFloat(it.subtotal_catalogo || 0);
+          });
+        });
+        var gzProds = Object.values(gzAgg);
+        gzProds.sort(function(a, b) { return b.cantidad - a.cantidad; });
+        if (gzProds.length) {
+          var gzTotalU = gzProds.reduce(function(s,p){return s+p.cantidad;},0);
+          html += '<div style="margin-top:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);font-size:.73rem;color:var(--text-muted);">';
+          html += '<strong style="color:var(--gold);">Resumen ' + esc(gz.codigo) + ':</strong> ';
+          gzProds.forEach(function(pr, i) {
+            html += '<span>' + pr.cantidad + 'x ' + esc(pr.codigo) + '</span>';
+            if (i < gzProds.length - 1) html += ' &middot; ';
+          });
+          html += ' &mdash; <strong>' + gzTotalU + ' uds total</strong>';
+          html += '</div>';
+        }
+      }
+      html += '</div>';
+    });
+
+    if (!gzEntries.length || gdTotalPedidos === 0) {
+      html += '<div style="color:var(--text-muted);font-size:.8rem;padding:16px 0;">No hay pedidos para esta gerencia en el periodo seleccionado.</div>';
     }
 
     html += '</div></div>';
   });
 
-  container.innerHTML = html;
+  container.innerHTML = html || '<div style="text-align:center;padding:60px;color:var(--text-muted);">No hay datos para mostrar</div>';
   logVentasLoaded = true;
 }
 
@@ -3954,6 +4195,230 @@ function toggleLogVentasGD(sectionId, headerEl) {
   } else {
     section.style.display = 'none';
     if (arrow) arrow.style.transform = 'rotate(0deg)';
+  }
+}
+
+/* ══════════════════════════════════════════
+   PEDIDOS WEB (STRIPE)
+   ══════════════════════════════════════════ */
+async function loadPedidosWeb() {
+  var container = document.getElementById('pwContent');
+  var statsEl = document.getElementById('pwStats');
+  container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">Cargando pedidos web...</div>';
+
+  var estadoFilter = document.getElementById('pwEstado').value;
+  var url = SB + '/rest/v1/web_pedidos?order=created_at.desc&limit=100';
+  if (estadoFilter) url += '&estado=eq.' + estadoFilter;
+
+  try {
+    var pedidos = await api(url);
+    if (!pedidos || pedidos.error) pedidos = [];
+
+    var totalPedidos = pedidos.length;
+    var totalPagados = pedidos.filter(function(p){ return p.pagado; }).length;
+    var totalEUR = 0, totalHNL = 0;
+    pedidos.forEach(function(p) {
+      if (p.pagado) {
+        totalEUR += parseFloat(p.total_eur || 0);
+        totalHNL += parseFloat(p.total_hnl || p.total || 0);
+      }
+    });
+
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Total Pedidos</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + totalPagados + '</div><div class="stat-label">Pagados</div></div>' +
+      '<div class="stat-card"><div class="stat-value">&euro; ' + totalEUR.toFixed(2) + '</div><div class="stat-label">Total EUR</div></div>' +
+      '<div class="stat-card"><div class="stat-value">L ' + totalHNL.toFixed(2) + '</div><div class="stat-label">Total HNL</div></div>';
+
+    if (!pedidos.length) {
+      container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No hay pedidos web.</div>';
+      return;
+    }
+
+    var html = '<div class="table-wrap"><table><thead><tr><th>C&oacute;digo</th><th>Cliente</th><th>Email</th><th>Moneda</th><th>Total</th><th>EUR</th><th>Estado</th><th>Pagado</th><th>Stripe ID</th><th>Fecha</th><th>Items</th><th>Acciones</th></tr></thead><tbody>';
+    pedidos.forEach(function(p) {
+      var estadoClass = p.pagado ? 'color:#27ae60;font-weight:600;' : (p.estado === 'cancelado' ? 'color:#c0392b;' : 'color:#f39c12;');
+      var items = '';
+      if (p.items && Array.isArray(p.items)) {
+        items = p.items.map(function(it){ return (it.qty || it.cantidad || 1) + 'x ' + (it.nombre || it.ref || '?'); }).join('<br>');
+      }
+      var stripeId = p.stripe_payment_id ? ('<a href="https://dashboard.stripe.com/payments/' + p.stripe_payment_id + '" target="_blank" style="color:var(--gold);font-size:.7rem;">' + p.stripe_payment_id.substring(0,15) + '...</a>') : '-';
+      html += '<tr>' +
+        '<td style="font-weight:600;color:var(--gold);">' + esc(p.codigo || '-') + '</td>' +
+        '<td>' + esc(p.nombre_cliente || '-') + '</td>' +
+        '<td style="font-size:.75rem;">' + esc(p.email_cliente || '-') + '</td>' +
+        '<td>' + esc(p.moneda || '-') + '</td>' +
+        '<td style="font-weight:600;">' + parseFloat(p.total || 0).toFixed(2) + '</td>' +
+        '<td>' + (p.total_eur ? '&euro;' + parseFloat(p.total_eur).toFixed(2) : '-') + '</td>' +
+        '<td><select onchange="updateWebPedidoEstado(\'' + p.id + '\',this.value)" style="padding:4px 8px;border:1px solid var(--border);font-size:.7rem;background:var(--surface);">' +
+          '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
+          '<option value="pagado"' + (p.estado === 'pagado' ? ' selected' : '') + '>Pagado</option>' +
+          '<option value="enviado"' + (p.estado === 'enviado' ? ' selected' : '') + '>Enviado</option>' +
+          '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
+          '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
+        '</select></td>' +
+        '<td style="' + estadoClass + '">' + (p.pagado ? '&#10004; S&iacute;' : '&#10008; No') + '</td>' +
+        '<td>' + stripeId + '</td>' +
+        '<td style="font-size:.75rem;">' + new Date(p.created_at).toLocaleDateString('es-HN') + '</td>' +
+        '<td style="font-size:.7rem;">' + items + '</td>' +
+        '<td><button class="btn btn-sm" onclick="verDetallePedidoWeb(' + p.id + ')">Ver</button></td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger);">Error: ' + (e.message || e) + '</div>';
+  }
+}
+
+async function updateWebPedidoEstado(id, estado) {
+  try {
+    var body = { estado: estado };
+    if (estado === 'pagado') body.pagado = true;
+    await fetch(SB + '/rest/v1/web_pedidos?id=eq.' + id, {
+      method: 'PATCH', headers: HJ, body: JSON.stringify(body)
+    });
+    showToast('Estado actualizado a: ' + estado);
+  } catch(e) { showToast('Error al actualizar', 'error'); }
+}
+
+async function syncStripePayments() {
+  showToast('Sincronizando con Stripe...');
+  try {
+    // Get all web_pedidos that have stripe_payment_id
+    var pedidos = await api(SB + '/rest/v1/web_pedidos?stripe_payment_id=neq.&select=id,stripe_payment_id,pagado,estado');
+    if (!pedidos || !pedidos.length) { showToast('No hay pedidos con Stripe ID para sincronizar.'); return; }
+    // Note: Full Stripe sync would require a server-side function.
+    // For now, mark pedidos with stripe_payment_id as pagado if not already
+    var updated = 0;
+    for (var i = 0; i < pedidos.length; i++) {
+      if (!pedidos[i].pagado && pedidos[i].stripe_payment_id) {
+        await fetch(SB + '/rest/v1/web_pedidos?id=eq.' + pedidos[i].id, {
+          method: 'PATCH', headers: HJ, body: JSON.stringify({ pagado: true, estado: 'pagado' })
+        });
+        updated++;
+      }
+    }
+    showToast('Sincronizado: ' + updated + ' pedidos actualizados.');
+    loadPedidosWeb();
+  } catch(e) { showToast('Error sincronizando: ' + e.message, 'error'); }
+}
+
+function verDetallePedidoWeb(id) {
+  // Simple alert with order details — could be expanded to modal
+  alert('Ver pedido web #' + id + ' — Se puede expandir a un modal detallado.');
+}
+
+/* ══════════════════════════════════════════
+   PANEL DE DEUDA
+   ══════════════════════════════════════════ */
+async function loadPanelDeuda() {
+  var container = document.getElementById('deudaContent');
+  var statsEl = document.getElementById('deudaStats');
+  container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">Cargando deudas...</div>';
+
+  var buscar = (document.getElementById('deudaBuscar').value || '').trim().toLowerCase();
+  var tipo = document.getElementById('deudaTipo').value;
+
+  try {
+    // Load all professionals with deuda info
+    var vendedoras = [], coordinadores = [], gerentesZ = [];
+
+    if (!tipo || tipo === 'vendedora') {
+      vendedoras = await api(SB + '/rest/v1/vendedoras?select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
+    }
+    if (!tipo || tipo === 'coordinador') {
+      coordinadores = await api(SB + '/rest/v1/coordinadores?select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
+    }
+    if (!tipo || tipo === 'gerente_zona') {
+      gerentesZ = await api(SB + '/rest/v1/gerentes_zona?select=id,codigo,nombre,dni,telefono,deuda_actual,activo&order=nombre') || [];
+    }
+
+    // Combine into unified list
+    var all = [];
+    vendedoras.forEach(function(v){ v._tipo = 'Vendedora'; all.push(v); });
+    coordinadores.forEach(function(c){ c._tipo = 'Coordinador'; all.push(c); });
+    gerentesZ.forEach(function(g){ g._tipo = 'Gerente Zona'; all.push(g); });
+
+    // Filter by search
+    if (buscar) {
+      all = all.filter(function(p) {
+        return (p.nombre && p.nombre.toLowerCase().indexOf(buscar) >= 0) ||
+               (p.codigo && p.codigo.toLowerCase().indexOf(buscar) >= 0) ||
+               (p.dni && p.dni.toLowerCase().indexOf(buscar) >= 0);
+      });
+    }
+
+    // Stats
+    var totalDeuda = 0, conDeuda = 0, sinDeuda = 0;
+    all.forEach(function(p) {
+      var d = parseFloat(p.deuda_actual || 0);
+      totalDeuda += d;
+      if (d > 0) conDeuda++; else sinDeuda++;
+    });
+
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-value">' + all.length + '</div><div class="stat-label">Profesionales</div></div>' +
+      '<div class="stat-card"><div class="stat-value" style="color:#c0392b;">L ' + totalDeuda.toFixed(2) + '</div><div class="stat-label">Deuda Total</div></div>' +
+      '<div class="stat-card"><div class="stat-value" style="color:#e67e22;">' + conDeuda + '</div><div class="stat-label">Con Deuda</div></div>' +
+      '<div class="stat-card"><div class="stat-value" style="color:#27ae60;">' + sinDeuda + '</div><div class="stat-label">Sin Deuda</div></div>';
+
+    if (!all.length) {
+      container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No se encontraron profesionales.</div>';
+      return;
+    }
+
+    // Sort: by deuda desc
+    all.sort(function(a,b){ return parseFloat(b.deuda_actual||0) - parseFloat(a.deuda_actual||0); });
+
+    var html = '<div class="table-wrap"><table><thead><tr><th>Tipo</th><th>C&oacute;digo</th><th>Nombre</th><th>DNI</th><th>Tel&eacute;fono</th><th>Estado</th><th>Deuda Actual</th><th>Acciones</th></tr></thead><tbody>';
+    all.forEach(function(p) {
+      var deuda = parseFloat(p.deuda_actual || 0);
+      var deudaStyle = deuda > 0 ? 'color:#c0392b;font-weight:700;' : 'color:#27ae60;';
+      var estadoBadge = p.activo !== false ? '<span style="color:#27ae60;font-size:.75rem;">&#9679; Activo</span>' : '<span style="color:#c0392b;font-size:.75rem;">&#9679; Inactivo</span>';
+      html += '<tr>' +
+        '<td style="font-size:.75rem;">' + esc(p._tipo) + '</td>' +
+        '<td style="color:var(--gold);font-weight:600;">' + esc(p.codigo || '-') + '</td>' +
+        '<td>' + esc(p.nombre || '-') + '</td>' +
+        '<td>' + esc(p.dni || '-') + '</td>' +
+        '<td>' + esc(p.telefono || '-') + '</td>' +
+        '<td>' + estadoBadge + '</td>' +
+        '<td style="' + deudaStyle + '">L ' + deuda.toFixed(2) + '</td>' +
+        '<td style="white-space:nowrap;">' +
+          '<input type="number" id="deudaInput_' + p.id + '_' + p._tipo + '" value="" placeholder="Monto" step="0.01" style="width:80px;padding:4px;border:1px solid var(--border);font-size:.75rem;margin-right:4px;"/>' +
+          '<button class="btn btn-sm" onclick="ajustarDeuda(\'' + p.id + '\',\'' + p._tipo + '\',1)" title="Sumar deuda" style="margin-right:2px;">+</button>' +
+          '<button class="btn btn-sm" onclick="ajustarDeuda(\'' + p.id + '\',\'' + p._tipo + '\',-1)" title="Restar deuda (abono)">-</button>' +
+        '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger);">Error: ' + (e.message || e) + '</div>';
+  }
+}
+
+async function ajustarDeuda(id, tipo, signo) {
+  var inputEl = document.getElementById('deudaInput_' + id + '_' + tipo);
+  var monto = parseFloat(inputEl ? inputEl.value : 0);
+  if (!monto || monto <= 0) { showToast('Ingrese un monto v\u00e1lido.', 'error'); return; }
+
+  var tabla = tipo === 'Vendedora' ? 'vendedoras' : (tipo === 'Coordinador' ? 'coordinadores' : 'gerentes_zona');
+
+  try {
+    // Get current deuda
+    var current = await api(SB + '/rest/v1/' + tabla + '?id=eq.' + id + '&select=deuda_actual');
+    var deudaActual = (current && current.length) ? parseFloat(current[0].deuda_actual || 0) : 0;
+    var nuevaDeuda = deudaActual + (monto * signo);
+    if (nuevaDeuda < 0) nuevaDeuda = 0;
+
+    await fetch(SB + '/rest/v1/' + tabla + '?id=eq.' + id, {
+      method: 'PATCH', headers: HJ, body: JSON.stringify({ deuda_actual: nuevaDeuda })
+    });
+
+    showToast((signo > 0 ? 'Deuda aumentada' : 'Abono aplicado') + ': L ' + monto.toFixed(2));
+    if (inputEl) inputEl.value = '';
+    loadPanelDeuda();
+  } catch(e) {
+    showToast('Error: ' + (e.message || e), 'error');
   }
 }
 </script>

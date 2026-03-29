@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es-HN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logística | ENIGME</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--carbon:#1C1C1C;--dorado:#CBAA63;--marfil:#FAF9F6;--gris:#888;--borde:rgba(0,0,0,0.08);--danger:#c0392b;--success:#27ae60;--warning:#e67e22;--info:#2980b9;--surface:#FFFFFF;--shadow:0 2px 12px rgba(0,0,0,0.06);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--marfil);color:var(--carbon);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;font-size:14px;}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:6px;height:6px;}
+    ::-webkit-scrollbar-track{background:var(--marfil);}
+    ::-webkit-scrollbar-thumb{background:var(--dorado);border-radius:3px;}
+
+    /* ── TOPBAR ── */
+    .topbar{background:var(--carbon);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px;}
+    .topbar-brand{font-family:'Cinzel',serif;color:var(--dorado);font-size:1rem;letter-spacing:0.2em;}
+    .topbar-brand small{display:block;font-family:'Montserrat',sans-serif;font-size:0.55rem;letter-spacing:0.15em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:2px;}
+    .topbar-right{display:flex;align-items:center;gap:16px;}
+    .topbar-info{color:rgba(255,255,255,0.7);font-size:0.7rem;letter-spacing:0.05em;text-align:right;}
+    .topbar-info strong{color:var(--dorado);}
+    .topbar-logout{background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);padding:6px 14px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;transition:all .3s;border-radius:2px;}
+    .topbar-logout:hover{border-color:var(--dorado);color:var(--dorado);}
+
+    /* ── TABS ── */
+    .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--borde);padding:0 24px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .tab-btn{padding:14px 20px;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris);cursor:pointer;border:none;background:none;font-family:'Montserrat',sans-serif;font-weight:500;border-bottom:2px solid transparent;transition:all .3s;white-space:nowrap;}
+    .tab-btn:hover{color:var(--carbon);}
+    .tab-btn.active{color:var(--dorado);border-bottom-color:var(--dorado);}
+
+    /* ── LAYOUT ── */
+    .container{max-width:1200px;margin:0 auto;padding:30px 24px;}
+    .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+    /* ── CARDS ── */
+    .card{background:var(--surface);border:1px solid var(--borde);border-radius:6px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);}
+    .card-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--borde);border-radius:6px;padding:18px;text-align:center;box-shadow:var(--shadow);}
+    .stat-value{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--dorado);margin-bottom:4px;}
+    .stat-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
+
+    /* ── BUTTONS ── */
+    .btn{padding:10px 20px;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;border:1px solid var(--dorado);background:var(--dorado);color:var(--carbon);transition:all .3s;border-radius:2px;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{background:var(--carbon);color:var(--dorado);border-color:var(--carbon);}
+    .btn:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;}
+    .btn-outline{background:transparent;color:var(--carbon);}.btn-outline:hover{background:var(--carbon);color:var(--dorado);}
+    .btn-sm{padding:6px 12px;font-size:0.6rem;}
+    .btn-success{border-color:var(--success);background:var(--success);color:#fff;}.btn-success:hover{background:#219a52;border-color:#219a52;}
+    .btn-info{border-color:var(--info);background:var(--info);color:#fff;}.btn-info:hover{background:#1f6da0;border-color:#1f6da0;}
+    .btn-warning{border-color:var(--warning);background:var(--warning);color:#fff;}.btn-warning:hover{background:#c96d1b;border-color:#c96d1b;}
+    .btn-danger{border-color:var(--danger);background:transparent;color:var(--danger);}.btn-danger:hover{background:var(--danger);color:#fff;}
+
+    /* ── TABLE ── */
+    table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+    thead{background:var(--carbon);}
+    th{color:var(--dorado);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;padding:10px 12px;text-align:left;font-weight:500;}
+    td{padding:10px 12px;border-bottom:1px solid var(--borde);}
+    tr:hover{background:rgba(203,170,99,0.04);}
+
+    /* ── BADGES ── */
+    .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.6rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+    .badge-pendiente{background:rgba(241,196,15,0.15);color:#d4a017;border:1px solid rgba(241,196,15,0.3);}
+    .badge-en_caja{background:rgba(41,128,185,0.12);color:var(--info);border:1px solid rgba(41,128,185,0.25);}
+    .badge-en_ruta{background:rgba(230,126,34,0.12);color:var(--warning);border:1px solid rgba(230,126,34,0.25);}
+    .badge-entregado{background:rgba(39,174,96,0.12);color:var(--success);border:1px solid rgba(39,174,96,0.25);}
+
+    /* ── SEARCH ── */
+    .search-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+    .search-bar input,.search-bar select{padding:10px 14px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--surface);transition:border-color .3s;border-radius:4px;flex:1;min-width:180px;}
+    .search-bar input:focus,.search-bar select:focus{border-color:var(--dorado);}
+
+    /* ── PEDIDO CARD ── */
+    .pedido-card{background:var(--surface);border:1px solid var(--borde);border-radius:6px;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;transition:border-color .3s;}
+    .pedido-card:hover{border-color:rgba(203,170,99,0.4);}
+    .pedido-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(28,28,28,0.02);border-bottom:1px solid var(--borde);flex-wrap:wrap;gap:8px;}
+    .pedido-code{font-family:'Cinzel',serif;font-size:0.95rem;color:var(--carbon);letter-spacing:0.05em;}
+    .pedido-meta{font-size:0.7rem;color:var(--gris);display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+    .pedido-body{padding:16px 20px;}
+    .pedido-info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:14px;}
+    .pedido-info-item{font-size:0.8rem;}
+    .pedido-info-item .label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:2px;}
+    .pedido-items{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.8rem;}
+    .pedido-items th{background:var(--marfil);color:var(--carbon);font-size:0.6rem;padding:8px 10px;border:1px solid var(--borde);letter-spacing:0.1em;text-transform:uppercase;}
+    .pedido-items td{padding:8px 10px;border:1px solid var(--borde);}
+    .pedido-totals{display:flex;justify-content:flex-end;gap:24px;margin-top:8px;font-size:0.8rem;}
+    .pedido-totals .total-item{text-align:right;}
+    .pedido-totals .total-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);}
+    .pedido-totals .total-value{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--dorado);}
+    .pedido-actions{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--borde);flex-wrap:wrap;align-items:center;}
+    .pedido-notes{font-size:0.75rem;color:var(--gris);font-style:italic;margin-top:8px;}
+    .pedido-notes strong{color:var(--carbon);font-style:normal;}
+
+    /* ── COMISION CARD ── */
+    .comision-card{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);padding:28px;border-radius:6px;margin-bottom:20px;}
+    .comision-card .stat-value{color:var(--dorado);font-size:2rem;}
+    .comision-card .stat-label{color:rgba(250,249,246,0.6);}
+    .comision-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:0.85rem;}
+    .comision-row:last-child{border-bottom:none;}
+    .comision-row .cr-label{color:rgba(250,249,246,0.7);}
+    .comision-row .cr-value{color:var(--dorado);font-weight:600;}
+    .comision-total{font-family:'Cinzel',serif;font-size:2rem;color:var(--dorado);text-align:center;padding:16px 0 0;border-top:1px solid rgba(203,170,99,0.3);margin-top:8px;}
+
+    /* ── CAJA GROUP ── */
+    .caja-group{background:var(--surface);border:1px solid var(--borde);border-radius:6px;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;}
+    .caja-group-header{padding:16px 20px;background:var(--carbon);color:var(--dorado);font-family:'Cinzel',serif;font-size:0.95rem;letter-spacing:0.1em;display:flex;justify-content:space-between;align-items:center;}
+    .caja-group-header .caja-count{font-family:'Montserrat',sans-serif;font-size:0.65rem;color:rgba(255,255,255,0.6);letter-spacing:0.1em;}
+    .caja-group-body{padding:16px 20px;}
+    .caja-product-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--borde);font-size:0.8rem;}
+    .caja-product-row:last-child{border-bottom:none;}
+    .caja-product-ref{font-weight:600;color:var(--carbon);}
+    .caja-product-qty{font-family:'Cinzel',serif;font-size:1rem;color:var(--dorado);min-width:40px;text-align:center;}
+    .caja-pedidos-list{margin-top:12px;padding-top:12px;border-top:1px solid var(--borde);}
+    .caja-pedidos-list .mini-tag{display:inline-block;padding:2px 8px;font-size:0.6rem;background:var(--marfil);border:1px solid var(--borde);border-radius:10px;margin:2px 4px 2px 0;}
+
+    /* ── DIRECTORIO ── */
+    .dir-card{background:var(--surface);border:1px solid var(--borde);border-radius:6px;padding:16px;box-shadow:var(--shadow);transition:border-color .3s;}
+    .dir-card:hover{border-color:var(--dorado);}
+    .dir-card .dir-name{font-weight:600;font-size:0.9rem;margin-bottom:4px;}
+    .dir-card .dir-code{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--dorado);letter-spacing:0.1em;}
+    .dir-card .dir-detail{font-size:0.75rem;color:var(--gris);margin:3px 0;}
+    .dir-card .dir-type{display:inline-block;padding:2px 8px;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;border-radius:10px;font-weight:600;}
+    .dir-type-vendedora{background:rgba(203,170,99,0.12);color:var(--dorado);border:1px solid rgba(203,170,99,0.3);}
+    .dir-type-coordinador{background:rgba(41,128,185,0.12);color:var(--info);border:1px solid rgba(41,128,185,0.25);}
+    .dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+
+    /* ── MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.active{display:flex;}
+    .modal-box{background:var(--surface);border-radius:6px;padding:28px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+    .modal-title{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;margin-bottom:16px;color:var(--carbon);}
+    .modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:1.2rem;color:var(--gris);cursor:pointer;}
+
+    /* ── PHOTO UPLOAD ── */
+    .photo-upload-area{border:2px dashed var(--borde);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all .3s;margin:12px 0;}
+    .photo-upload-area:hover{border-color:var(--dorado);background:rgba(203,170,99,0.04);}
+    .photo-upload-area .upload-icon{font-size:2rem;color:var(--gris);margin-bottom:8px;}
+    .photo-upload-area .upload-text{font-size:0.75rem;color:var(--gris);}
+    .photo-preview{max-width:100%;max-height:200px;border-radius:6px;margin-top:12px;display:none;}
+
+    /* ── LOADING ── */
+    .loading{text-align:center;padding:40px;color:var(--gris);font-size:0.8rem;}
+    .loading::before{content:'';display:block;width:32px;height:32px;border:2px solid var(--borde);border-top-color:var(--dorado);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .empty-state{text-align:center;padding:48px 24px;color:var(--gris);}
+    .empty-state .empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:0.4;}
+    .empty-state .empty-text{font-size:0.85rem;margin-bottom:4px;}
+    .empty-state .empty-sub{font-size:0.7rem;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .topbar{padding:10px 16px;}
+      .topbar-brand{font-size:0.85rem;}
+      .topbar-info{font-size:0.6rem;}
+      .tabs{padding:0 8px;}
+      .tab-btn{padding:12px 14px;font-size:0.58rem;}
+      .container{padding:20px 12px;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .pedido-header{padding:12px 14px;}
+      .pedido-body{padding:12px 14px;}
+      .pedido-info-grid{grid-template-columns:1fr;}
+      .pedido-totals{flex-direction:column;align-items:flex-end;gap:8px;}
+      .dir-grid{grid-template-columns:1fr;}
+      .search-bar{flex-direction:column;}
+      .search-bar input,.search-bar select{min-width:100%;}
+      .pedido-items{font-size:0.7rem;}
+      .pedido-items th,.pedido-items td{padding:6px 8px;}
+      .btn{padding:8px 14px;font-size:0.6rem;}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr;}
+      .pedido-meta{flex-direction:column;gap:4px;}
+      .pedido-actions{flex-direction:column;}
+      .pedido-actions .btn{width:100%;justify-content:center;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ TOPBAR ═══════════════════ -->
+<div class="topbar">
+  <div class="topbar-brand">ENIGME<small>Portal Logística</small></div>
+  <div class="topbar-right">
+    <div class="topbar-info">
+      <span id="topbarName"></span><br/>
+      <strong id="topbarCode"></strong>
+    </div>
+    <button class="topbar-logout" onclick="logout()">Salir</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ TABS ═══════════════════ -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="pedidos">Pedidos Asignados</button>
+  <button class="tab-btn" data-tab="directorio">Directorio</button>
+  <button class="tab-btn" data-tab="comision">Mi Comisión</button>
+  <button class="tab-btn" data-tab="cajas">Resumen por Caja</button>
+</div>
+
+<!-- ═══════════════════ CONTENT ═══════════════════ -->
+<div class="container">
+
+  <!-- ── TAB 1: PEDIDOS ASIGNADOS ── -->
+  <div class="tab-panel active" id="panel-pedidos">
+    <div class="stats-grid" id="pedidosStats"></div>
+    <div class="search-bar">
+      <input type="text" id="pedidoSearch" placeholder="Buscar por código, profesional, dirección..."/>
+      <select id="pedidoFilter">
+        <option value="">Todos los estados</option>
+        <option value="pendiente_caja">Pendiente Caja</option>
+        <option value="en_caja">En Caja</option>
+        <option value="en_ruta">En Ruta</option>
+        <option value="entregado">Entregado</option>
+      </select>
+    </div>
+    <div id="pedidosList">
+      <div class="loading">Cargando pedidos...</div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2: DIRECTORIO ── -->
+  <div class="tab-panel" id="panel-directorio">
+    <div class="search-bar">
+      <input type="text" id="dirSearch" placeholder="Buscar por nombre, código, dirección, teléfono..."/>
+      <select id="dirFilter">
+        <option value="">Todos</option>
+        <option value="vendedora">Vendedoras</option>
+        <option value="coordinador">Coordinadores</option>
+      </select>
+    </div>
+    <div id="dirList">
+      <div class="loading">Cargando directorio...</div>
+    </div>
+  </div>
+
+  <!-- ── TAB 3: MI COMISIÓN ── -->
+  <div class="tab-panel" id="panel-comision">
+    <div id="comisionContent">
+      <div class="loading">Calculando comisiones...</div>
+    </div>
+  </div>
+
+  <!-- ── TAB 4: RESUMEN POR CAJA ── -->
+  <div class="tab-panel" id="panel-cajas">
+    <div class="search-bar">
+      <input type="text" id="cajaSearch" placeholder="Buscar por sector..."/>
+    </div>
+    <div id="cajasContent">
+      <div class="loading">Organizando cajas...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════ MODAL: ENTREGA ═══════════════════ -->
+<div class="modal-overlay" id="modalEntrega">
+  <div class="modal-box">
+    <div class="modal-title">Confirmar Entrega</div>
+    <p style="font-size:0.8rem;color:var(--gris);margin-bottom:16px;">Suba una foto como prueba de entrega para el pedido <strong id="modalPedidoCode"></strong>.</p>
+    <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
+      <div class="upload-icon">&#128247;</div>
+      <div class="upload-text">Toque para tomar o seleccionar foto</div>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none"/>
+    <img class="photo-preview" id="photoPreview"/>
+    <textarea id="notasEntrega" placeholder="Notas de entrega (opcional)..." style="width:100%;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:vertical;min-height:60px;outline:none;margin-top:12px;border-radius:4px;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-success btn-sm" id="btnConfirmEntrega" onclick="confirmEntrega()">Confirmar Entrega</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ENIGME — Portal Logística
+   ═══════════════════════════════════════════════════ */
+
+const SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+const REST = SUPABASE_URL + '/rest/v1';
+const STORAGE = SUPABASE_URL + '/storage/v1';
+
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+const headersGet = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY
+};
+
+/* ── Session ── */
+let session = null;
+try { session = JSON.parse(localStorage.getItem('enigme_log_session')); } catch(e) {}
+if (!session || !session.id) { window.location.href = 'index.html'; }
+
+document.getElementById('topbarName').textContent = session.nombre || '';
+document.getElementById('topbarCode').textContent = session.codigo || '';
+
+function logout() {
+  localStorage.removeItem('enigme_log_session');
+  window.location.href = 'index.html';
+}
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ── Helpers ── */
+function fmt(n) { return 'L ' + (Number(n) || 0).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return dt.toLocaleDateString('es-HN', {day:'2-digit',month:'short',year:'numeric'}); }
+function statusLabel(s) {
+  const map = {
+    pendiente_caja: 'Pendiente Caja',
+    en_caja: 'En Caja',
+    en_ruta: 'En Ruta',
+    entregado: 'Entregado'
+  };
+  return map[s] || s;
+}
+function statusOrder(s) {
+  const o = {pendiente_caja:0, en_caja:1, en_ruta:2, entregado:3};
+  return o[s] !== undefined ? o[s] : 9;
+}
+
+async function api(table, query='') {
+  const res = await fetch(REST + '/' + table + '?' + query, {headers: headersGet});
+  if (!res.ok) throw new Error('Error API: ' + res.status);
+  return res.json();
+}
+
+async function apiPatch(table, query, body) {
+  const res = await fetch(REST + '/' + table + '?' + query, {
+    method: 'PATCH',
+    headers: headers,
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('Error PATCH: ' + res.status);
+  return res.json();
+}
+
+/* ═══════════════════════════════════════════════════
+   DATA STORE
+   ═══════════════════════════════════════════════════ */
+let asignaciones = [];
+let pedidosMap = {};
+let detallesMap = {};
+let vendedorasMap = {};
+let coordinadoresMap = {};
+let campanasMap = {};
+let sectoresMap = {};
+let gerentesMap = {};
+let allVendedoras = [];
+let allCoordinadores = [];
+
+async function loadAllData() {
+  try {
+    // Load asignaciones for this operator
+    const asigs = await api('logistica_asignaciones', 'logistica_id=eq.' + session.id + '&order=fecha_asignacion.desc');
+    asignaciones = asigs;
+
+    if (asigs.length === 0) {
+      renderPedidos();
+      renderComision();
+      renderCajas();
+      loadDirectorio();
+      return;
+    }
+
+    const pedidoIds = [...new Set(asigs.map(a => a.pedido_id))];
+
+    // Load pedidos
+    const pedidos = await api('pedidos', 'id=in.(' + pedidoIds.join(',') + ')');
+    pedidos.forEach(p => pedidosMap[p.id] = p);
+
+    // Load detalles
+    const detalles = await api('pedidos_detalle', 'pedido_id=in.(' + pedidoIds.join(',') + ')');
+    detalles.forEach(d => {
+      if (!detallesMap[d.pedido_id]) detallesMap[d.pedido_id] = [];
+      detallesMap[d.pedido_id].push(d);
+    });
+
+    // Load vendedoras from division
+    const vendedoras = await api('vendedoras', 'select=*');
+    vendedoras.forEach(v => vendedorasMap[v.id] = v);
+    allVendedoras = vendedoras;
+
+    // Load coordinadores
+    const coordinadores = await api('coordinadores', 'select=*');
+    coordinadores.forEach(c => coordinadoresMap[c.id] = c);
+    allCoordinadores = coordinadores;
+
+    // Load campanas
+    const campanas = await api('campanas', 'select=*');
+    campanas.forEach(c => campanasMap[c.id] = c);
+
+    // Load sectores
+    const sectores = await api('sectores', 'select=*');
+    sectores.forEach(s => sectoresMap[s.id] = s);
+
+    // Load gerentes
+    const gerentes = await api('gerentes_zona', 'select=*');
+    gerentes.forEach(g => gerentesMap[g.id] = g);
+
+    renderPedidos();
+    renderComision();
+    renderCajas();
+    renderDirectorio();
+  } catch (err) {
+    console.error('Error loading data:', err);
+    document.getElementById('pedidosList').innerHTML = '<div class="empty-state"><div class="empty-icon">!</div><div class="empty-text">Error al cargar datos</div><div class="empty-sub">' + err.message + '</div></div>';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB 1: PEDIDOS ASIGNADOS
+   ═══════════════════════════════════════════════════ */
+function renderPedidos() {
+  const searchTerm = (document.getElementById('pedidoSearch').value || '').toLowerCase();
+  const filterState = document.getElementById('pedidoFilter').value;
+
+  // Stats
+  const counts = {pendiente_caja:0, en_caja:0, en_ruta:0, entregado:0};
+  asignaciones.forEach(a => { if (counts[a.estado] !== undefined) counts[a.estado]++; });
+  document.getElementById('pedidosStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${asignaciones.length}</div><div class="stat-label">Total Asignados</div></div>
+    <div class="stat-card"><div class="stat-value">${counts.pendiente_caja}</div><div class="stat-label">Pendiente Caja</div></div>
+    <div class="stat-card"><div class="stat-value">${counts.en_caja + counts.en_ruta}</div><div class="stat-label">En Proceso</div></div>
+    <div class="stat-card"><div class="stat-value">${counts.entregado}</div><div class="stat-label">Entregados</div></div>
+  `;
+
+  // Filter & sort
+  let filtered = asignaciones.filter(a => {
+    if (filterState && a.estado !== filterState) return false;
+    if (searchTerm) {
+      const p = pedidosMap[a.pedido_id];
+      if (!p) return false;
+      const v = vendedorasMap[p.vendedora_id];
+      const searchable = [
+        p.codigo_pedido,
+        p.direccion_entrega,
+        p.telefono_entrega,
+        v ? v.nombre : '',
+        v ? v.codigo : ''
+      ].join(' ').toLowerCase();
+      if (!searchable.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    const so = statusOrder(a.estado) - statusOrder(b.estado);
+    if (so !== 0) return so;
+    return new Date(b.fecha_asignacion) - new Date(a.fecha_asignacion);
+  });
+
+  if (filtered.length === 0) {
+    document.getElementById('pedidosList').innerHTML = '<div class="empty-state"><div class="empty-icon">&#128230;</div><div class="empty-text">No hay pedidos</div><div class="empty-sub">No se encontraron pedidos con los filtros aplicados</div></div>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(a => {
+    const p = pedidosMap[a.pedido_id];
+    if (!p) return;
+    const items = detallesMap[p.id] || [];
+    const v = vendedorasMap[p.vendedora_id];
+    const camp = campanasMap[p.campana_id];
+    const sector = p.sector_id ? sectoresMap[p.sector_id] : null;
+
+    const subtotal = items.reduce((s, i) => s + (i.cantidad * i.precio), 0);
+
+    html += `
+    <div class="pedido-card">
+      <div class="pedido-header">
+        <div>
+          <div class="pedido-code">${p.codigo_pedido || 'Pedido #' + p.id}</div>
+          <div class="pedido-meta">
+            <span>Campaña: ${camp ? camp.numero : '—'}</span>
+            <span>${fmtDate(p.created_at)}</span>
+            ${sector ? '<span>Sector ' + sector.numero_sector + '</span>' : ''}
+          </div>
+        </div>
+        <span class="badge badge-${a.estado === 'pendiente_caja' ? 'pendiente' : a.estado}">${statusLabel(a.estado)}</span>
+      </div>
+      <div class="pedido-body">
+        <div class="pedido-info-grid">
+          <div class="pedido-info-item">
+            <div class="label">Profesional</div>
+            <div>${v ? v.codigo + ' — ' + v.nombre : '—'}</div>
+          </div>
+          <div class="pedido-info-item">
+            <div class="label">Dirección de Entrega</div>
+            <div>${p.direccion_entrega || '—'}</div>
+          </div>
+          <div class="pedido-info-item">
+            <div class="label">Teléfono</div>
+            <div>${p.telefono_entrega || (v ? v.telefono : '—')}</div>
+          </div>
+        </div>
+
+        ${items.length > 0 ? `
+        <table class="pedido-items">
+          <thead><tr><th>Cant.</th><th>Referencia</th><th>Precio Unit.</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            ${items.map(i => `<tr><td>${i.cantidad}</td><td>${i.referencia}</td><td>${fmt(i.precio)}</td><td>${fmt(i.cantidad * i.precio)}</td></tr>`).join('')}
+          </tbody>
+        </table>` : '<p style="font-size:0.8rem;color:var(--gris);margin:8px 0;">Sin detalle de productos</p>'}
+
+        <div class="pedido-totals">
+          <div class="total-item">
+            <div class="total-label">Total Bruto</div>
+            <div class="total-value">${fmt(subtotal || p.subtotal_catalogo)}</div>
+          </div>
+          <div class="total-item">
+            <div class="total-label">Total Neto</div>
+            <div class="total-value">${fmt(p.total_venta_neta)}</div>
+          </div>
+        </div>
+
+        ${a.notas_caja ? '<div class="pedido-notes"><strong>Notas caja:</strong> ' + a.notas_caja + '</div>' : ''}
+        ${a.notas_entrega ? '<div class="pedido-notes"><strong>Notas entrega:</strong> ' + a.notas_entrega + '</div>' : ''}
+        ${a.foto_entrega ? '<div style="margin-top:8px;"><img src="' + a.foto_entrega + '" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid var(--borde);cursor:pointer;" onclick="window.open(this.src,\'_blank\')"/></div>' : ''}
+
+        <div class="pedido-actions">
+          ${a.estado === 'pendiente_caja' ? `
+            <button class="btn btn-info btn-sm" onclick="cambiarEstado(${a.id}, 'en_caja')">&#128230; Armar Caja</button>
+          ` : ''}
+          ${a.estado === 'en_caja' ? `
+            <button class="btn btn-warning btn-sm" onclick="cambiarEstado(${a.id}, 'en_ruta')">&#128666; En Ruta</button>
+          ` : ''}
+          ${a.estado === 'en_ruta' ? `
+            <button class="btn btn-success btn-sm" onclick="openEntregaModal(${a.id}, '${(p.codigo_pedido || '').replace(/'/g, "\\'")}')">&#9989; Entregado</button>
+          ` : ''}
+          ${a.estado === 'entregado' ? `
+            <span style="font-size:0.7rem;color:var(--success);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">&#10004; Entregado ${a.fecha_entregado ? '— ' + fmtDate(a.fecha_entregado) : ''}</span>
+          ` : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('pedidosList').innerHTML = html;
+}
+
+async function cambiarEstado(asigId, nuevoEstado) {
+  const dateField = {
+    en_caja: 'fecha_en_caja',
+    en_ruta: 'fecha_en_ruta',
+    entregado: 'fecha_entregado'
+  };
+
+  const body = { estado: nuevoEstado };
+  if (dateField[nuevoEstado]) body[dateField[nuevoEstado]] = new Date().toISOString();
+
+  if (nuevoEstado === 'en_caja') {
+    const notas = prompt('Notas de armado de caja (opcional):');
+    if (notas) body.notas_caja = notas;
+  }
+
+  try {
+    await apiPatch('logistica_asignaciones', 'id=eq.' + asigId, body);
+    const idx = asignaciones.findIndex(a => a.id === asigId);
+    if (idx >= 0) Object.assign(asignaciones[idx], body);
+    renderPedidos();
+    renderCajas();
+  } catch (err) {
+    alert('Error al cambiar estado: ' + err.message);
+  }
+}
+
+/* ── Entrega Modal ── */
+let currentEntregaId = null;
+let entregaPhotoBase64 = null;
+
+function openEntregaModal(asigId, codigoPedido) {
+  currentEntregaId = asigId;
+  entregaPhotoBase64 = null;
+  document.getElementById('modalPedidoCode').textContent = codigoPedido;
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('notasEntrega').value = '';
+  document.getElementById('photoInput').value = '';
+  document.getElementById('modalEntrega').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalEntrega').classList.remove('active');
+  currentEntregaId = null;
+}
+
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    entregaPhotoBase64 = ev.target.result;
+    const preview = document.getElementById('photoPreview');
+    preview.src = entregaPhotoBase64;
+    preview.style.display = 'block';
+    document.querySelector('#photoUploadArea .upload-text').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function confirmEntrega() {
+  if (!currentEntregaId) return;
+  const btn = document.getElementById('btnConfirmEntrega');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+
+  try {
+    let fotoUrl = null;
+
+    // Try to upload photo to Supabase storage
+    if (entregaPhotoBase64) {
+      try {
+        const file = document.getElementById('photoInput').files[0];
+        const fileName = 'entregas/' + currentEntregaId + '_' + Date.now() + '.' + (file.name.split('.').pop() || 'jpg');
+        const uploadRes = await fetch(STORAGE + '/object/entregas/' + fileName, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': file.type
+          },
+          body: file
+        });
+        if (uploadRes.ok) {
+          fotoUrl = STORAGE + '/object/public/entregas/' + fileName;
+        } else {
+          // If storage fails, store as base64 in the field
+          fotoUrl = entregaPhotoBase64;
+        }
+      } catch (storageErr) {
+        fotoUrl = entregaPhotoBase64;
+      }
+    }
+
+    const body = {
+      estado: 'entregado',
+      fecha_entregado: new Date().toISOString(),
+      notas_entrega: document.getElementById('notasEntrega').value || null
+    };
+    if (fotoUrl) body.foto_entrega = fotoUrl;
+
+    await apiPatch('logistica_asignaciones', 'id=eq.' + currentEntregaId, body);
+
+    const idx = asignaciones.findIndex(a => a.id === currentEntregaId);
+    if (idx >= 0) Object.assign(asignaciones[idx], body);
+
+    closeModal();
+    renderPedidos();
+    renderComision();
+    renderCajas();
+  } catch (err) {
+    alert('Error al confirmar entrega: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirmar Entrega';
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB 2: DIRECTORIO
+   ═══════════════════════════════════════════════════ */
+async function loadDirectorio() {
+  try {
+    if (allVendedoras.length === 0) {
+      allVendedoras = await api('vendedoras', 'select=*');
+      allVendedoras.forEach(v => vendedorasMap[v.id] = v);
+    }
+    if (allCoordinadores.length === 0) {
+      allCoordinadores = await api('coordinadores', 'select=*');
+      allCoordinadores.forEach(c => coordinadoresMap[c.id] = c);
+    }
+    if (Object.keys(sectoresMap).length === 0) {
+      const sectores = await api('sectores', 'select=*');
+      sectores.forEach(s => sectoresMap[s.id] = s);
+    }
+    renderDirectorio();
+  } catch (err) {
+    document.getElementById('dirList').innerHTML = '<div class="empty-state"><div class="empty-text">Error al cargar directorio</div></div>';
+  }
+}
+
+function renderDirectorio() {
+  const search = (document.getElementById('dirSearch').value || '').toLowerCase();
+  const filter = document.getElementById('dirFilter').value;
+
+  let people = [];
+
+  if (filter !== 'coordinador') {
+    allVendedoras.forEach(v => {
+      const sector = v.sector_id ? sectoresMap[v.sector_id] : null;
+      people.push({
+        type: 'vendedora',
+        codigo: v.codigo,
+        nombre: v.nombre,
+        direccion: v.direccion,
+        telefono: v.telefono,
+        sector: sector ? 'Sector ' + sector.numero_sector : '—',
+        dni: v.dni
+      });
+    });
+  }
+
+  if (filter !== 'vendedora') {
+    allCoordinadores.forEach(c => {
+      const sector = c.sector_id ? sectoresMap[c.sector_id] : null;
+      people.push({
+        type: 'coordinador',
+        codigo: c.codigo,
+        nombre: c.nombre,
+        direccion: c.direccion,
+        telefono: c.telefono,
+        sector: sector ? 'Sector ' + sector.numero_sector : '—',
+        dni: ''
+      });
+    });
+  }
+
+  if (search) {
+    people = people.filter(p => {
+      return [p.codigo, p.nombre, p.direccion, p.telefono, p.sector].join(' ').toLowerCase().includes(search);
+    });
+  }
+
+  people.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+  if (people.length === 0) {
+    document.getElementById('dirList').innerHTML = '<div class="empty-state"><div class="empty-icon">&#128205;</div><div class="empty-text">No se encontraron resultados</div></div>';
+    return;
+  }
+
+  let html = '<div class="dir-grid">';
+  people.forEach(p => {
+    html += `
+    <div class="dir-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+        <div>
+          <div class="dir-name">${p.nombre || '—'}</div>
+          <div class="dir-code">${p.codigo || '—'}</div>
+        </div>
+        <span class="dir-type ${p.type === 'vendedora' ? 'dir-type-vendedora' : 'dir-type-coordinador'}">${p.type === 'vendedora' ? 'Vendedora' : 'Coordinador'}</span>
+      </div>
+      <div class="dir-detail">&#128205; ${p.direccion || 'Sin dirección'}</div>
+      <div class="dir-detail">&#128222; ${p.telefono || 'Sin teléfono'}</div>
+      <div class="dir-detail" style="color:var(--dorado);">${p.sector}</div>
+      ${p.telefono ? '<a href="tel:' + p.telefono + '" class="btn btn-sm btn-outline" style="margin-top:8px;text-decoration:none;">Llamar</a>' : ''}
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('dirList').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB 3: MI COMISIÓN
+   ═══════════════════════════════════════════════════ */
+function renderComision() {
+  const pct = session.porcentaje_comision || 0;
+  const entregados = asignaciones.filter(a => a.estado === 'entregado');
+
+  // Group by campaign
+  const byCampana = {};
+  entregados.forEach(a => {
+    const p = pedidosMap[a.pedido_id];
+    if (!p) return;
+    const campId = p.campana_id || 0;
+    const campNombre = campanasMap[campId] ? 'Campaña ' + campanasMap[campId].numero : 'Sin Campaña';
+    if (!byCampana[campNombre]) byCampana[campNombre] = { total: 0, count: 0 };
+    byCampana[campNombre].total += (p.total_venta_neta || 0);
+    byCampana[campNombre].count++;
+  });
+
+  const grandTotal = Object.values(byCampana).reduce((s, c) => s + c.total, 0);
+  const comisionTotal = grandTotal * pct / 100;
+
+  let html = `
+  <div class="comision-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="stat-label">Tu Porcentaje de Comisión</div>
+      <div class="stat-value">${pct}%</div>
+    </div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="stat-label">Total Pedidos Entregados</div>
+      <div style="font-family:'Cinzel',serif;font-size:1.3rem;color:var(--dorado);">${entregados.length}</div>
+    </div>`;
+
+  if (Object.keys(byCampana).length > 0) {
+    Object.entries(byCampana).sort((a,b) => b[1].total - a[1].total).forEach(([camp, data]) => {
+      html += `
+      <div class="comision-row">
+        <span class="cr-label">${camp} (${data.count} pedidos)</span>
+        <span class="cr-value">${fmt(data.total)}</span>
+      </div>`;
+    });
+
+    html += `
+    <div class="comision-row" style="border-top:1px solid rgba(203,170,99,0.3);margin-top:8px;padding-top:12px;">
+      <span class="cr-label" style="color:var(--marfil);">Total Venta Neta</span>
+      <span class="cr-value">${fmt(grandTotal)}</span>
+    </div>`;
+  }
+
+  html += `
+    <div class="comision-total">${fmt(comisionTotal)}</div>
+    <div style="text-align:center;margin-top:4px;">
+      <span class="stat-label">Comisión Total (${pct}%)</span>
+    </div>
+  </div>`;
+
+  if (entregados.length === 0) {
+    html += '<div class="empty-state"><div class="empty-icon">&#128176;</div><div class="empty-text">Sin entregas completadas aún</div><div class="empty-sub">Tu comisión se calcula sobre los pedidos entregados</div></div>';
+  }
+
+  document.getElementById('comisionContent').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB 4: RESUMEN POR CAJA
+   ═══════════════════════════════════════════════════ */
+function renderCajas() {
+  const search = (document.getElementById('cajaSearch').value || '').toLowerCase();
+
+  // Only non-entregado
+  const pending = asignaciones.filter(a => a.estado !== 'entregado');
+
+  // Group by sector
+  const bySector = {};
+  pending.forEach(a => {
+    const p = pedidosMap[a.pedido_id];
+    if (!p) return;
+    const sectorId = p.sector_id || 0;
+    const sector = sectorId ? sectoresMap[sectorId] : null;
+    const sectorName = sector ? 'Sector ' + sector.numero_sector : 'Sin Sector';
+
+    if (search && !sectorName.toLowerCase().includes(search)) return;
+
+    if (!bySector[sectorName]) bySector[sectorName] = { pedidos: [], products: {} };
+    bySector[sectorName].pedidos.push({ asig: a, pedido: p });
+
+    const items = detallesMap[p.id] || [];
+    items.forEach(i => {
+      const key = i.referencia;
+      if (!bySector[sectorName].products[key]) {
+        bySector[sectorName].products[key] = { referencia: i.referencia, precio: i.precio, cantidad: 0 };
+      }
+      bySector[sectorName].products[key].cantidad += i.cantidad;
+    });
+  });
+
+  if (Object.keys(bySector).length === 0) {
+    document.getElementById('cajasContent').innerHTML = '<div class="empty-state"><div class="empty-icon">&#128230;</div><div class="empty-text">No hay cajas pendientes</div><div class="empty-sub">Todos los pedidos han sido entregados o no hay pedidos asignados</div></div>';
+    return;
+  }
+
+  let html = '';
+  const sortedSectors = Object.entries(bySector).sort((a,b) => a[0].localeCompare(b[0]));
+
+  sortedSectors.forEach(([sectorName, data]) => {
+    const productList = Object.values(data.products).sort((a,b) => a.referencia.localeCompare(b.referencia));
+    const totalItems = productList.reduce((s, p) => s + p.cantidad, 0);
+
+    html += `
+    <div class="caja-group">
+      <div class="caja-group-header">
+        <span>${sectorName}</span>
+        <span class="caja-count">${data.pedidos.length} pedidos &middot; ${totalItems} unidades</span>
+      </div>
+      <div class="caja-group-body">
+        <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:8px;font-weight:500;">Productos Agregados</div>
+        ${productList.map(p => `
+        <div class="caja-product-row">
+          <div>
+            <span class="caja-product-ref">${p.referencia}</span>
+            <span style="color:var(--gris);font-size:0.75rem;margin-left:8px;">${fmt(p.precio)} c/u</span>
+          </div>
+          <div class="caja-product-qty">${p.cantidad}</div>
+        </div>`).join('')}
+
+        <div class="caja-pedidos-list">
+          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gris);margin-bottom:6px;font-weight:500;">Pedidos en esta caja</div>
+          ${data.pedidos.map(d => {
+            const v = vendedorasMap[d.pedido.vendedora_id];
+            return `<span class="mini-tag">${d.pedido.codigo_pedido || '#' + d.pedido.id} ${v ? '(' + v.nombre + ')' : ''}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('cajasContent').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════
+   SEARCH / FILTER LISTENERS
+   ═══════════════════════════════════════════════════ */
+let searchTimeout;
+function debounce(fn, ms) {
+  return function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(fn, ms);
+  };
+}
+
+document.getElementById('pedidoSearch').addEventListener('input', debounce(renderPedidos, 300));
+document.getElementById('pedidoFilter').addEventListener('change', renderPedidos);
+document.getElementById('dirSearch').addEventListener('input', debounce(renderDirectorio, 300));
+document.getElementById('dirFilter').addEventListener('change', renderDirectorio);
+document.getElementById('cajaSearch').addEventListener('input', debounce(renderCajas, 300));
+
+/* ── Close modal on overlay click ── */
+document.getElementById('modalEntrega').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* ═══════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════ */
+loadAllData();
+</script>
+</body>
+</html>

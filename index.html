@@ -432,28 +432,20 @@
     .cookie-social-links a:hover { transform: translateY(-2px); border-color: rgba(203,170,99,0.5); }
     .cookie-social-links a svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-    /* ── VIDEO HERO ── */
-    .video-hero {
+    /* ── IMAGE HERO ── */
+    .image-hero {
       position: relative;
       width: 100%;
-      height: 100vh;
-      height: 100dvh;
       overflow: hidden;
       cursor: pointer;
       background: #000;
     }
-    .video-hero video {
+    .image-hero img.hero-img {
       width: 100%;
-      height: 100%;
+      height: 100vh;
+      height: 100dvh;
       object-fit: cover;
-      -webkit-playsinline: true;
-    }
-    /* Hide iOS play button overlay */
-    .video-hero video::-webkit-media-controls-start-playback-button,
-    .video-hero video::-webkit-media-controls-play-button,
-    .video-hero video::-webkit-media-controls {
-      display: none !important;
-      -webkit-appearance: none;
+      display: block;
     }
     .hero-title-overlay {
       position: absolute;
@@ -650,7 +642,7 @@
       .hero-overlay h2 { font-size: clamp(1.2rem, 5vw, 1.6rem); letter-spacing: 0.12em; }
       .hero-overlay .hero-subtitle { font-size: 0.82rem; }
       .hero-discount-badge { font-size: 0.65rem; padding: 8px 16px; }
-      .video-hero { height: 100dvh; height: -webkit-fill-available; }
+      .image-hero img.hero-img { height: auto; aspect-ratio: 3/4; }
       .abril-tooltip { bottom: 78px; left: 16px; font-size: 0.65rem; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
@@ -762,11 +754,9 @@
     </svg>
   </a>
 
-  <!-- ══ VIDEO HERO + SUBSCRIPTION ══ -->
-  <main class="video-hero" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')window.location.href='catalogo.html'">
-    <video autoplay muted loop playsinline webkit-playsinline preload="auto" poster="portada.png" disableRemotePlayback>
-      <source src="bv6.mp4" type="video/mp4">
-    </video>
+  <!-- ══ IMAGE HERO + SUBSCRIPTION ══ -->
+  <main class="image-hero" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')window.location.href='catalogo.html'">
+    <img src="portada.png" alt="ÈNIGME — Colección Cero" class="hero-img" />
     <div class="hero-title-overlay">
       <h1>Colecci&oacute;n Cero &mdash; Lanzamiento</h1>
     </div>
@@ -866,7 +856,7 @@
   <!-- ══ MODAL MI ESPACIO ══ -->
   <div id="miEspacioModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;">
     <div style="background:var(--blanco-dior,#FAF9F6);max-width:440px;width:100%;border-radius:4px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
-      <button onclick="document.getElementById('miEspacioModal').style.display='none';document.getElementById('meLoginDiv').style.display='none';document.getElementById('meLoginGZ').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGDError').textContent='';document.getElementById('meGZError').textContent='';" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;color:#1C1C1C;cursor:pointer;z-index:2;">&times;</button>
+      <button onclick="document.getElementById('miEspacioModal').style.display='none';document.getElementById('meLoginDiv').style.display='none';document.getElementById('meLoginGZ').style.display='none';document.getElementById('meLoginLog').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGDError').textContent='';document.getElementById('meGZError').textContent='';document.getElementById('meLogError').textContent='';" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;color:#1C1C1C;cursor:pointer;z-index:2;">&times;</button>
 
       <div style="padding:40px 30px 10px;text-align:center;">
         <div style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.25em;color:#1C1C1C;margin-bottom:6px;">MI ESPACIO</div>
@@ -877,6 +867,7 @@
       <div id="meMain" style="padding:0 30px 35px;display:block;">
         <button onclick="document.getElementById('meMain').style.display='none';document.getElementById('meLoginDiv').style.display='block';" style="width:100%;padding:16px;margin-bottom:12px;background:#1C1C1C;color:#CBAA63;border:1px solid #1C1C1C;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;">GERENCIA DIVISIONAL</button>
         <button onclick="document.getElementById('meMain').style.display='none';document.getElementById('meLoginGZ').style.display='block';" style="width:100%;padding:16px;background:transparent;color:#1C1C1C;border:1px solid #CBAA63;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;">GERENCIA DE ZONA</button>
+        <button onclick="document.getElementById('meMain').style.display='none';document.getElementById('meLoginLog').style.display='block';" style="width:100%;padding:16px;margin-top:12px;background:transparent;color:#1C1C1C;border:1px solid #888;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;">LOG&Iacute;STICA</button>
       </div>
 
       <!-- Login Gerencia Divisional -->
@@ -892,11 +883,21 @@
       <!-- Login Gerencia de Zona -->
       <div id="meLoginGZ" style="display:none;padding:0 30px 35px;">
         <p style="font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#888;text-align:center;margin-bottom:18px;">Ingrese sus credenciales de Gerente de Zona</p>
-        <input id="meGZCodigo" type="text" placeholder="C&oacute;digo (ej: ACC123)" maxlength="6" style="width:100%;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;text-transform:uppercase;box-sizing:border-box;" />
+        <input id="meGZCodigo" type="text" placeholder="C&oacute;digo (ej: 301201)" style="width:100%;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
         <input id="meGZPassword" type="password" placeholder="Contrase&ntilde;a" style="width:100%;padding:12px 14px;margin-bottom:6px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
         <p id="meGZError" style="color:#c0392b;font-size:0.7rem;font-family:'Montserrat',sans-serif;min-height:18px;margin:0 0 10px;"></p>
         <button onclick="loginGerenteZona()" style="width:100%;padding:14px;background:#CBAA63;color:#1C1C1C;border:none;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:600;">ACCEDER</button>
         <button onclick="document.getElementById('meLoginGZ').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meGZError').textContent='';" style="width:100%;padding:10px;margin-top:8px;background:none;border:none;color:#888;font-size:0.65rem;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:1px;">&larr; VOLVER</button>
+      </div>
+
+      <!-- Login Logística -->
+      <div id="meLoginLog" style="display:none;padding:0 30px 35px;">
+        <p style="font-family:'Montserrat',sans-serif;font-size:0.75rem;color:#888;text-align:center;margin-bottom:18px;">Ingrese sus credenciales de Log&iacute;stica</p>
+        <input id="meLogCodigo" type="text" placeholder="C&oacute;digo de Log&iacute;stica" style="width:100%;padding:12px 14px;margin-bottom:10px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
+        <input id="meLogPassword" type="password" placeholder="Contrase&ntilde;a" style="width:100%;padding:12px 14px;margin-bottom:6px;border:1px solid #ddd;font-family:'Montserrat',sans-serif;font-size:0.8rem;outline:none;box-sizing:border-box;" />
+        <p id="meLogError" style="color:#c0392b;font-size:0.7rem;font-family:'Montserrat',sans-serif;min-height:18px;margin:0 0 10px;"></p>
+        <button onclick="loginLogistica()" style="width:100%;padding:14px;background:#CBAA63;color:#1C1C1C;border:none;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-weight:600;">ACCEDER</button>
+        <button onclick="document.getElementById('meLoginLog').style.display='none';document.getElementById('meMain').style.display='block';document.getElementById('meLogError').textContent='';" style="width:100%;padding:10px;margin-top:8px;background:none;border:none;color:#888;font-size:0.65rem;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:1px;">&larr; VOLVER</button>
       </div>
     </div>
   </div>
@@ -943,12 +944,32 @@
       } catch(e) { errEl.textContent = 'Error de conexión.'; }
     }
 
+    async function loginLogistica() {
+      var codigo = document.getElementById('meLogCodigo').value.trim();
+      var password = document.getElementById('meLogPassword').value.trim();
+      var errEl = document.getElementById('meLogError');
+      errEl.textContent = '';
+      if (!codigo || !password) { errEl.textContent = 'Complete ambos campos.'; return; }
+      try {
+        var res = await fetch(SB_URL + '/rest/v1/logistica_operadores?codigo=eq.' + encodeURIComponent(codigo) + '&activo=eq.true&select=id,codigo,nombre,gerencia_divisional_id,password_temporal,porcentaje_comision', {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        var data = await res.json();
+        if (!data.length) { errEl.textContent = 'Código no encontrado o inactivo.'; return; }
+        var op = data[0];
+        if (op.password_temporal !== password) { errEl.textContent = 'Contraseña incorrecta.'; return; }
+        localStorage.setItem('enigme_log_session', JSON.stringify({ id: op.id, codigo: op.codigo, nombre: op.nombre, gerencia_divisional_id: op.gerencia_divisional_id, porcentaje_comision: op.porcentaje_comision }));
+        window.location.href = 'logistica.html';
+      } catch(e) { errEl.textContent = 'Error de conexión.'; }
+    }
+
     // Close modal on Escape
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         document.getElementById('miEspacioModal').style.display = 'none';
         document.getElementById('meLoginDiv').style.display = 'none';
         document.getElementById('meLoginGZ').style.display = 'none';
+        document.getElementById('meLoginLog').style.display = 'none';
         document.getElementById('meMain').style.display = 'block';
       }
     });
@@ -1232,7 +1253,7 @@
         function createSparkles() {
           var container = document.createElement('div');
           container.className = 'sparkle-container';
-          document.querySelector('.video-hero').appendChild(container);
+          document.querySelector('.image-hero').appendChild(container);
           for (var i = 0; i < 30; i++) {
             var s = document.createElement('div');
             s.className = 'sparkle';
