@@ -329,6 +329,21 @@
     }
   .product-name { cursor: pointer; transition: color 0.3s ease; }
   .product-name:hover { color: var(--dorado); }
+  
+    /* Mobile dropdown active state */
+    @media (max-width: 768px) {
+      .dropdown.active .dropdown-content {
+        display: flex !important;
+        flex-direction: column;
+        position: relative;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        box-shadow: none;
+        pointer-events: auto !important;
+      }
+      .dropdown.active .dropbtn svg { transform: rotate(180deg); }
+    }
   </style>
 </head>
 <body>
@@ -336,35 +351,30 @@
   <nav class="navbar">
     <div class="nav-group">
       <div class="dropdown">
-        <button class="nav-link dropbtn">
-          CASA ÈNIGME <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+        <button class="dropbtn" onclick="toggleMobileMenu(event, this)">
+          LA CASA &Egrave;NIGME
+          <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
         </button>
         <div class="dropdown-content">
+          <a href="index.html#mi-espacio" class="mi-espacio-link">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
+          <a href="joyeria.html">Alta Joyer&iacute;a</a>
+          <a href="boutique.html">Bolsos Boutique</a>
+          <a href="plata.html">Colecci&oacute;n Plata</a>
+          <a href="liquidacion.html">Liquidaci&oacute;n</a>
           <a href="trabaja.html">Trabaja con Nosotros</a>
-          <a href="enigme.html">Sobre la Marca</a>
           <a href="soporte.html">Soporte</a>
-          <a href="contactos.html">Contactos</a>
+          <a href="contactos.html">Contacto</a>
+          <a href="enigme.html">Sobre &Egrave;NIGME</a>
           <a href="certificado.html">Certificado</a>
-          <a href="ley.html">Políticas</a>
         </div>
       </div>
     </div>
 
-    <a href="index.html" class="brand">È N I G M E</a>
-    
+    <a href="index.html" class="brand-nav">&Egrave; N I G M E</a>
+
     <div class="nav-group right">
-      <div class="dropdown right">
-        <button class="nav-link dropbtn" style="color:var(--dorado)!important;">
-          CATÁLOGO <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
-        </button>
-        <div class="dropdown-content">
-          <a href="catalogo.html">Catálogo Completo</a>
-          <a href="joyeria.html">Alta Joyería</a>
-          <a href="boutique.html">Bolsos Boutique</a>
-          <a href="liquidacion.html" style="color:var(--dorado)!important;">Liquidación</a>
-        </div>
-      </div>
+      <a href="catalogo.html" class="nav-link catalogo-btn" style="font-size:clamp(0.55rem,1.5vw,0.65rem);letter-spacing:3px;text-transform:uppercase;color:#CBAA63;font-weight:700;">CAT&Aacute;LOGO</a>
       <a href="favoritos.html" class="btn-menu-brand" style="border-color: var(--dorado); background-color: var(--fondo-galeria);">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         <span id="fav-count" class="counter-badge">0</span>
@@ -1435,7 +1445,8 @@ document.querySelectorAll('.product-card').forEach(function(card) {
               '&name=' + encodeURIComponent(name) +
               '&img=' + encodeURIComponent(img) +
               '&lema=' + encodeURIComponent(lema) +
-              '&cat=' + encodeURIComponent(cat);
+              '&cat=' + encodeURIComponent(cat) +
+              '&price=' + encodeURIComponent(price.replace(/[^\d]/g, ''));
     window.location.href = url;
   });
 });
@@ -1454,6 +1465,26 @@ document.querySelectorAll('.product-card').forEach(function(card) {
     }
   }).catch(function(){});
 })();
+</script>
+
+<!-- Mobile Menu Toggle -->
+<script>
+function toggleMobileMenu(event, element) {
+  event.preventDefault();
+  event.stopPropagation();
+  var parentDropdown = element.closest('.dropdown');
+  document.querySelectorAll('.dropdown').forEach(function(d) {
+    if (d !== parentDropdown) d.classList.remove('active');
+  });
+  parentDropdown.classList.toggle('active');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown.active').forEach(function(d) {
+      d.classList.remove('active');
+    });
+  }
+});
 </script>
 </body>
 </html>

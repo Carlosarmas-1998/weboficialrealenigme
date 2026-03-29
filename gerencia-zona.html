@@ -1646,14 +1646,22 @@ function renderSalary(totalNeto, totalNoms, campanaId) {
   }
 
   var baseSalary = 16000;
-  var nomPayRate = totalNoms < configNombr.umbral ? configNombr.pagoBajo : configNombr.pagoAlto;
-  var nomPayment = totalNoms * nomPayRate;
+  var pagoNombr;
+  if (totalNoms < configNombr.umbral) {
+    pagoNombr = totalNoms * configNombr.pagoBajo;
+  } else {
+    pagoNombr = (configNombr.umbral - 1) * configNombr.pagoBajo + (totalNoms - configNombr.umbral + 1) * configNombr.pagoAlto;
+  }
+  var nomPayment = pagoNombr;
   var commission = totalNeto * 0.03;
   var totalSalary = baseSalary + nomPayment + commission;
 
+  var nomDesc = totalNoms < configNombr.umbral
+    ? totalNoms + ' x L' + configNombr.pagoBajo + ' [<' + configNombr.umbral + ']'
+    : (configNombr.umbral - 1) + ' x L' + configNombr.pagoBajo + ' + ' + (totalNoms - configNombr.umbral + 1) + ' x L' + configNombr.pagoAlto + ' [>=' + configNombr.umbral + ']';
   el.innerHTML =
     '<div class="salary-row"><span class="sr-label">Salario Base</span><span class="sr-value">' + fmtL(baseSalary) + '</span></div>' +
-    '<div class="salary-row"><span class="sr-label">Nombramientos (' + totalNoms + ' x L' + nomPayRate + (totalNoms < configNombr.umbral ? ' [<' + configNombr.umbral + ']' : ' [>=' + configNombr.umbral + ']') + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
+    '<div class="salary-row"><span class="sr-label">Nombramientos (' + nomDesc + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
     '<div class="salary-row"><span class="sr-label">Comision 3% sobre Venta Neta (' + fmtL(totalNeto) + ')</span><span class="sr-value">' + fmtL(commission) + '</span></div>' +
     '<div class="salary-total">' + fmtL(totalSalary) + '</div>' +
     '<div style="text-align:center;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(250,249,246,0.5);margin-top:4px;">Salario Total Estimado</div>';

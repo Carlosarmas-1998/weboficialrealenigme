@@ -1212,11 +1212,21 @@ async function guardarEstadosPedido() {
 // ================================================================
 async function loadConfigValues() {
   var configs = await supaGet('config_multinivel', '');
+  var foundSalarioLogistica = false;
   if (configs && configs.length) {
     configs.forEach(function(c) {
       if (c.clave === 'umbral_nombramientos_alto') cfgUmbralNombAlto = parseInt(c.valor) || 25;
       if (c.clave === 'pago_nombramiento_alto') cfgPagoNombAlto = parseFloat(c.valor) || 320;
       if (c.clave === 'pago_nombramiento_bajo') cfgPagoNombBajo = parseFloat(c.valor) || 220;
+      if (c.clave === 'salario_logistica') foundSalarioLogistica = true;
+    });
+  }
+  // Seed salario_logistica if missing
+  if (!foundSalarioLogistica) {
+    await supaPost('config_multinivel', {
+      clave: 'salario_logistica',
+      valor: '12000',
+      descripcion: 'Salario mensual del operador de logística'
     });
   }
 }

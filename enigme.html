@@ -410,6 +410,21 @@
       .whatsapp-float { bottom: 20px; right: 20px; width: 45px; height: 45px; }
       .whatsapp-float svg { width: 22px; height: 22px; }
     }
+  
+    /* Mobile dropdown active state */
+    @media (max-width: 768px) {
+      .dropdown.active .dropdown-content {
+        display: flex !important;
+        flex-direction: column;
+        position: relative;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        box-shadow: none;
+        pointer-events: auto !important;
+      }
+      .dropdown.active .dropbtn svg { transform: rotate(180deg); }
+    }
   </style>
   <meta property="og:title" content="Sobre ÈNIGME | La Casa ÈNIGME">
   <meta property="og:description" content="Descubre la esencia de ÈNIGME. Aura, misterio y presencia. Alta joyería y moda de lujo desde Honduras.">
@@ -421,43 +436,35 @@
   <nav class="navbar">
     <div class="nav-group">
       <div class="dropdown">
-        <button class="dropbtn">
-          CASA ÈNIGME <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+        <button class="dropbtn" onclick="toggleMobileMenu(event, this)">
+          LA CASA &Egrave;NIGME
+          <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
         </button>
         <div class="dropdown-content">
+          <a href="index.html#mi-espacio" class="mi-espacio-link">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
+          <a href="joyeria.html">Alta Joyer&iacute;a</a>
+          <a href="boutique.html">Bolsos Boutique</a>
+          <a href="plata.html">Colecci&oacute;n Plata</a>
+          <a href="liquidacion.html">Liquidaci&oacute;n</a>
           <a href="trabaja.html">Trabaja con Nosotros</a>
-          <a href="enigme.html" style="color:var(--dorado)!important;">Sobre la Marca</a>
           <a href="soporte.html">Soporte</a>
-          <a href="contactos.html">Contactos</a>
+          <a href="contactos.html">Contacto</a>
+          <a href="enigme.html">Sobre &Egrave;NIGME</a>
           <a href="certificado.html">Certificado</a>
-          <a href="ley.html">Políticas</a>
         </div>
       </div>
     </div>
-    
-    <a href="index.html" class="brand-nav">È N I G M E</a>
-    
-    <div class="nav-group right">
-      <div class="dropdown right">
-        <button class="dropbtn">
-          CATÁLOGO <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
-        </button>
-        <div class="dropdown-content">
-          <a href="catalogo.html">Catálogo Completo</a>
-          <a href="joyeria.html">Alta Joyería</a>
-          <a href="boutique.html">Bolsos Boutique</a>
-          <a href="liquidacion.html">Liquidación</a>
-            <a href="vestidos.html">Colección Ella</a>
-        </div>
-      </div>
 
-      <a href="favoritos.html" class="btn-action">
+    <a href="index.html" class="brand-nav">&Egrave; N I G M E</a>
+
+    <div class="nav-group right">
+      <a href="catalogo.html" class="nav-link catalogo-btn" style="font-size:clamp(0.55rem,1.5vw,0.65rem);letter-spacing:3px;text-transform:uppercase;color:#CBAA63;font-weight:700;">CAT&Aacute;LOGO</a>
+      <a href="favoritos.html" class="btn-menu-brand" style="border-color: var(--dorado); background-color: var(--fondo-galeria);">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         <span id="fav-count" class="counter-badge">0</span>
       </a>
-
-      <a href="carrito.html" class="btn-action btn-cart-nav">
+      <a href="carrito.html" class="btn-menu-brand btn-cart-nav">
         <svg viewBox="0 0 24 24"><path d="M16 6V4a4 4 0 0 0-8 0v2H3v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6h-5zm-6-2a2 2 0 0 1 4 0v2h-4V4zm8 16H6V8h2v2a1 1 0 0 0 2 0V8h4v2a1 1 0 0 0 2 0V8h2v12z"/></svg>
         <span class="txt-hide-mobile">BOLSA</span> (<span id="cart-count" class="counter-badge">0</span>)
       </a>
@@ -563,6 +570,26 @@
     }
   }).catch(function(){});
 })();
+</script>
+
+<!-- Mobile Menu Toggle -->
+<script>
+function toggleMobileMenu(event, element) {
+  event.preventDefault();
+  event.stopPropagation();
+  var parentDropdown = element.closest('.dropdown');
+  document.querySelectorAll('.dropdown').forEach(function(d) {
+    if (d !== parentDropdown) d.classList.remove('active');
+  });
+  parentDropdown.classList.toggle('active');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown.active').forEach(function(d) {
+      d.classList.remove('active');
+    });
+  }
+});
 </script>
 </body>
 </html>
