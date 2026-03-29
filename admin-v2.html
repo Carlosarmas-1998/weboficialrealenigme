@@ -289,6 +289,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
       <span style="font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:inherit;">Instalar App</span>
     </div>
+    <div onclick="exportarTodoExcel()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold);background:linear-gradient(135deg,rgba(203,170,99,0.15),transparent);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='linear-gradient(135deg,rgba(203,170,99,0.15),transparent)';this.style.color='var(--gold)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      <span style="font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:inherit;font-weight:700;">Exportar Todo Excel</span>
+    </div>
     <button class="logout-btn" onclick="doLogout()">Cerrar Sesi&oacute;n</button>
   </div>
 </div>
@@ -2313,6 +2317,165 @@ function enigmeExcel(data, sheetName, filename) {
   var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName);
   XLSX.writeFile(wb, filename);
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORTAR TODO — UN SOLO EXCEL CON TODAS LAS HOJAS
+// ═══════════════════════════════════════════════
+async function exportarTodoExcel() {
+  showToast('Recopilando todos los datos...');
+  var TASA = 31.50;
+  try {
+    // Fetch ALL data from Supabase
+    var [pedidosWeb, postulaciones, suscripciones, analytics, registrosAlta, pedidosCorp, gerentesZ, vendedoras, coordinadores, config, soporte, nombramientos, papPedidos, papCorp, papVend, papCoord, papGZ, papPost, papNom] = await Promise.all([
+      supaGet('web_pedidos', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('web_postulaciones', '&archivado=eq.false&order=created_at.desc').catch(function(){return [];}),
+      supaGet('suscriptores', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('web_analytics', '&order=created_at.desc&limit=500').catch(function(){return [];}),
+      supaGet('registros_alta', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('pedidos', '&or=(archivado.eq.false,archivado.is.null)&order=created_at.desc').catch(function(){return [];}),
+      supaGet('gerentes_zona', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('vendedoras', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('coordinadores', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('config_multinivel', '&order=clave').catch(function(){return [];}),
+      supaGet('web_soporte_tickets', '&order=created_at.desc').catch(function(){return [];}),
+      supaGet('nombramientos', '&or=(archivado.eq.false,archivado.is.null)&order=created_at.desc').catch(function(){return [];}),
+      supaGet('web_pedidos', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('pedidos', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('vendedoras', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('coordinadores', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('gerentes_zona', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('web_postulaciones', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];}),
+      supaGet('nombramientos', '&archivado=eq.true&order=created_at.desc').catch(function(){return [];})
+    ]);
+
+    var wb = XLSX.utils.book_new();
+
+    function addSheet(name, rawData, mapper) {
+      var mapped = (rawData || []).map(mapper);
+      if (!mapped.length) mapped = [{'Sin datos': 'No hay registros'}];
+      var ws = XLSX.utils.json_to_sheet(mapped);
+      styleEnigmeSheet(ws);
+      XLSX.utils.book_append_sheet(wb, ws, name.substring(0, 31));
+    }
+
+    // 1. Pedidos Web
+    addSheet('Pedidos Web', pedidosWeb, function(p) {
+      var t = parseFloat(p.total || 0);
+      return { 'Codigo': p.codigo||'', 'Cliente': p.nombre_cliente||'', 'Email': p.email_cliente||'', 'Telefono': p.telefono_cliente||'', 'Direccion': p.direccion_envio||'', 'Ciudad': p.ciudad||'', 'Depto': p.departamento||'', 'Pais': p.pais||'', 'Total HNL': t, 'Total EUR': +(t/TASA).toFixed(2), 'Estado': p.estado||'', 'Pagado': p.pagado?'Si':'No', 'Metodo': p.metodo_pago||'', 'Fecha': p.created_at||'' };
+    });
+
+    // 2. Pedidos Corporativos
+    addSheet('Pedidos Corp', pedidosCorp, function(p) {
+      var b = parseFloat(p.subtotal_catalogo||0); var n = parseFloat(p.total_venta_neta||0);
+      return { 'Codigo': p.codigo_pedido||'', 'Gerente ID': p.gerente_id||'', 'Vendedora ID': p.vendedora_id||'', 'Campana': p.campana_id||'', 'Bruto HNL': b, 'Bruto EUR': +(b/TASA).toFixed(2), 'Neto HNL': n, 'Neto EUR': +(n/TASA).toFixed(2), 'Estado': p.estado||'', 'Observaciones': p.observaciones||'', 'Fecha': p.created_at||'' };
+    });
+
+    // 3. Postulaciones
+    addSheet('Postulaciones', postulaciones, function(p) {
+      return { 'Nombre': p.nombre_completo||'', 'DNI': p.dni||'', 'Email': p.email||'', 'Telefono': p.telefono||'', 'Puesto': p.puesto||'', 'Departamento': p.departamento||'', 'Municipio': p.municipio||'', 'Estado': p.estado||'', 'Carta': (p.carta_motivacion||'').substring(0,100), 'Notas Admin': p.notas_admin||'', 'Fecha': p.created_at||'' };
+    });
+
+    // 4. Suscriptores
+    addSheet('Suscriptores', suscripciones, function(s) {
+      return { 'Email': s.email||'', 'Descuento Usado': s.descuento_usado?'Si':'No', 'Fecha': s.fecha_suscripcion||s.created_at||'' };
+    });
+
+    // 5. Gerentes de Zona
+    addSheet('Gerentes Zona', gerentesZ, function(g) {
+      return { 'Codigo': g.codigo||'', 'Nombre': g.nombre||'', 'DNI': g.dni||'', 'Telefono': g.telefono||'', 'Email': g.email||'', 'Direccion': g.direccion||'', 'Activo': g.activo?'Si':'No', 'Archivado': g.archivado?'Si':'No', 'Banco': g.nombre_banco||'', 'Cuenta': g.numero_cuenta||'', 'F.Ingreso': g.fecha_ingreso||'', 'Fecha': g.created_at||'' };
+    });
+
+    // 6. Vendedoras
+    addSheet('Vendedoras', vendedoras, function(v) {
+      return { 'Codigo': v.codigo||'', 'Nombre': v.nombre||'', 'DNI': v.dni||'', 'Telefono': v.telefono||'', 'Email': v.correo||'', 'Direccion': v.direccion||'', 'Sector': v.sector_id||'', 'Activa': v.activo!==false?'Si':'No', 'Deuda': v.tiene_deuda?'Si':'No', 'Monto Deuda': v.monto_deuda||0, 'Fecha': v.created_at||'' };
+    });
+
+    // 7. Coordinadores
+    addSheet('Coordinadores', coordinadores, function(c) {
+      return { 'Codigo': c.codigo||'', 'Nombre': c.nombre||'', 'DNI': c.dni||'', 'Telefono': c.telefono||'', 'Email': c.correo||'', 'Direccion': c.direccion||'', 'Sector': c.sector_id||'', 'Activo': c.activo!==false?'Si':'No', 'Fecha': c.created_at||'' };
+    });
+
+    // 8. Nombramientos
+    addSheet('Nombramientos', nombramientos, function(n) {
+      return { 'Nombre': n.nombre||'', 'DNI': n.dni||'', 'Codigo': n.codigo||'', 'Gerente ID': n.gerente_id||'', 'Campana': n.campana_ingreso_id||'', 'Ano': n.ano||'', 'Fecha': n.created_at||'' };
+    });
+
+    // 9. Registros Alta
+    addSheet('Registros Alta', registrosAlta, function(r) {
+      return { 'Tipo': r.tipo||'', 'Codigo': r.codigo||'', 'Nombre': r.nombre||'', 'DNI': r.dni||'', 'Telefono': r.telefono||'', 'Email': r.email||'', 'Depto': r.departamento||'', 'Zona': r.zona||'', 'Gerencia': r.gerencia_divisional||'', 'Fecha': r.created_at||'' };
+    });
+
+    // 10. Soporte
+    addSheet('Soporte', soporte, function(s) {
+      return { 'Nombre': s.nombre||'', 'Email': s.email||'', 'Asunto': s.asunto||'', 'Mensaje': (s.mensaje||'').substring(0,150), 'Estado': s.estado||'', 'Prioridad': s.prioridad||'', 'Fecha': s.created_at||'' };
+    });
+
+    // 11. Configuracion
+    addSheet('Configuracion', config, function(c) {
+      return { 'Clave': c.clave||'', 'Valor': c.valor||'', 'Valor EUR': isNaN(c.valor) ? '' : +(parseFloat(c.valor)/TASA).toFixed(2) };
+    });
+
+    // 12. Analytics
+    addSheet('Analytics', analytics.slice(0,200), function(a) {
+      return { 'Pagina': a.pagina||'', 'Pais': a.pais||'', 'Ciudad': a.ciudad||'', 'Region': a.region||'', 'IP': a.ip||'', 'User Agent': (a.user_agent||'').substring(0,80), 'Fecha': a.created_at||'' };
+    });
+
+    // 13-17. PAPELERA
+    addSheet('Papelera-PedidosWeb', papPedidos, function(p) {
+      return { 'Codigo': p.codigo||'', 'Cliente': p.nombre_cliente||'', 'Total': p.total||0, 'Estado': p.estado||'', 'Fecha': p.created_at||'' };
+    });
+    addSheet('Papelera-PedidosCorp', papCorp, function(p) {
+      return { 'Codigo': p.codigo_pedido||'', 'Bruto': p.subtotal_catalogo||0, 'Neto': p.total_venta_neta||0, 'Estado': p.estado||'', 'Fecha': p.created_at||'' };
+    });
+    addSheet('Papelera-Personal', [].concat(papVend||[],papCoord||[],papGZ||[]), function(p) {
+      return { 'Tipo': p.zona_id?'Gerente':(p.sector_id?'Vendedora/Coord':'Otro'), 'Codigo': p.codigo||'', 'Nombre': p.nombre||'', 'DNI': p.dni||'', 'Fecha': p.created_at||'' };
+    });
+    addSheet('Papelera-Postulaciones', papPost, function(p) {
+      return { 'Nombre': p.nombre_completo||'', 'DNI': p.dni||'', 'Email': p.email||'', 'Estado': p.estado||'', 'Fecha': p.created_at||'' };
+    });
+    addSheet('Papelera-Nombramientos', papNom, function(n) {
+      return { 'Nombre': n.nombre||'', 'DNI': n.dni||'', 'Codigo': n.codigo||'', 'Fecha': n.created_at||'' };
+    });
+
+    var fecha = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, 'ENIGME_Admin_Completo_' + fecha + '.xlsx');
+    showToast('Exportado: ENIGME_Admin_Completo_' + fecha + '.xlsx');
+  } catch(e) {
+    console.error('Export all error:', e);
+    showToast('Error al exportar: ' + e.message, true);
+  }
+}
+
+function styleEnigmeSheet(ws) {
+  if (!ws['!ref']) return;
+  var range = XLSX.utils.decode_range(ws['!ref']);
+  var colWidths = [];
+  for (var c = 0; c <= range.e.c; c++) {
+    var maxLen = 10;
+    for (var r = 0; r <= Math.min(range.e.r, 50); r++) {
+      var cell = ws[XLSX.utils.encode_cell({r:r, c:c})];
+      if (cell && cell.v != null) { var len = String(cell.v).length; if (len > maxLen) maxLen = Math.min(len, 40); }
+    }
+    colWidths.push({ wch: maxLen + 3 });
+  }
+  ws['!cols'] = colWidths;
+
+  var hStyle = { font:{name:'Calibri',sz:11,bold:true,color:{rgb:'CBAA63'}}, fill:{fgColor:{rgb:'1C1C1C'}}, alignment:{horizontal:'center',vertical:'center'}, border:{bottom:{style:'thin',color:{rgb:'CBAA63'}}} };
+  var eStyle = { font:{name:'Calibri',sz:10,color:{rgb:'1C1C1C'}}, fill:{fgColor:{rgb:'FAF9F6'}}, alignment:{vertical:'center'}, border:{bottom:{style:'hair',color:{rgb:'E8E4DD'}}} };
+  var oStyle = { font:{name:'Calibri',sz:10,color:{rgb:'1C1C1C'}}, fill:{fgColor:{rgb:'FFFFFF'}}, alignment:{vertical:'center'}, border:{bottom:{style:'hair',color:{rgb:'E8E4DD'}}} };
+  var nStyle = { font:{name:'Calibri',sz:10,bold:true,color:{rgb:'8B7355'}}, fill:{fgColor:{rgb:'FAF9F6'}}, alignment:{vertical:'center',horizontal:'right'}, border:{bottom:{style:'hair',color:{rgb:'E8E4DD'}}}, numFmt:'#,##0.00' };
+
+  for (var R = range.s.r; R <= range.e.r; R++) {
+    for (var C = range.s.c; C <= range.e.c; C++) {
+      var addr = XLSX.utils.encode_cell({r:R, c:C});
+      if (!ws[addr]) ws[addr] = {v:'',t:'s'};
+      if (R === 0) { ws[addr].s = hStyle; }
+      else if (typeof ws[addr].v === 'number') { ws[addr].s = nStyle; ws[addr].z = '#,##0.00'; }
+      else { ws[addr].s = (R%2===0) ? eStyle : oStyle; }
+    }
+  }
+  ws['!rows'] = [{hpt:26}];
 }
 
 // Export simulación
