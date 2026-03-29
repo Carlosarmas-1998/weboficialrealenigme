@@ -463,11 +463,11 @@
     <div class="card-title">Editar Gerente de Zona</div>
     <input type="hidden" id="editId"/>
     <div class="form-grid">
-      <div class="form-group"><label>DNI</label><input id="editDni"/></div>
-      <div class="form-group"><label>Nombre</label><input id="editNombre"/></div>
+      <div class="form-group"><label>DNI (no editable)</label><input id="editDni" readonly style="opacity:0.6;cursor:not-allowed;"/></div>
+      <div class="form-group"><label>Nombre (no editable)</label><input id="editNombre" readonly style="opacity:0.6;cursor:not-allowed;"/></div>
       <div class="form-group"><label>Tel&eacute;fono</label><input id="editTelefono"/></div>
       <div class="form-group"><label>Email</label><input id="editEmail" type="email"/></div>
-      <div class="form-group"><label>Fecha Nacimiento</label><input id="editFechaNac" type="date"/></div>
+      <div class="form-group"><label>Fecha Nacimiento (no editable)</label><input id="editFechaNac" type="date" readonly style="opacity:0.6;cursor:not-allowed;"/></div>
       <div class="form-group"><label>N&uacute;mero Cuenta</label><input id="editCuenta"/></div>
       <div class="form-group"><label>Banco</label><input id="editBanco"/></div>
       <div class="form-group"><label>RTN</label><input id="editRtn"/></div>
@@ -631,13 +631,27 @@ function fmtL(n) { return 'L ' + Number(n||0).toLocaleString('es-HN',{minimumFra
 
 async function getNextSequentialCode() {
   // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
-  var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-  var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
-  var maxCodeGer = await api('/rest/v1/gerentes_zona?select=codigo&order=codigo.desc&limit=1');
-  var numVend = (maxCodeVend && maxCodeVend.length) ? parseInt(maxCodeVend[0].codigo) : 0;
-  var numCoord = (maxCodeCoord && maxCodeCoord.length) ? parseInt(maxCodeCoord[0].codigo) : 0;
-  var numGer = (maxCodeGer && maxCodeGer.length) ? parseInt(maxCodeGer[0].codigo) : 0;
-  return String(Math.max(numVend, numCoord, numGer, 301200) + 1);
+  // Fetch ALL codes to handle alphanumeric codes safely
+  var allVend = await api('/rest/v1/vendedoras?select=codigo');
+  var allCoord = await api('/rest/v1/coordinadores?select=codigo');
+  var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
+  var allLogOp = await api('/rest/v1/logistica_operadores?select=codigo');
+
+  function getMaxNumeric(arr) {
+    if (!arr || !arr.length) return 0;
+    var max = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var val = parseInt(arr[i].codigo);
+      if (!isNaN(val) && val > max) max = val;
+    }
+    return max;
+  }
+
+  var numVend = getMaxNumeric(allVend);
+  var numCoord = getMaxNumeric(allCoord);
+  var numGer = getMaxNumeric(allGer);
+  var numLog = getMaxNumeric(allLogOp);
+  return String(Math.max(numVend, numCoord, numGer, numLog, 301200) + 1);
 }
 
 /* ── DEPARTAMENTOS & MUNICIPIOS ── */
@@ -788,6 +802,33 @@ async function guardarGerenteZona() {
   var fileExtra = document.getElementById('gzFileExtra').files[0];
   var editId = document.getElementById('gzEditId').value;
   if (!editId && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar el DNI y la confirmaci\u00f3n de cuenta bancaria.'; return; }
+
+  // DNI uniqueness validation — check across ALL professional tables
+  if (!editId) {
+    try {
+      var dniEncoded = encodeURIComponent(dni);
+      var dniVend = await api('/rest/v1/vendedoras?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_ingreso,activo');
+      var dniCoord = await api('/rest/v1/coordinadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+      var dniGer = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+      var duplicado = null;
+      var duplicadoTipo = '';
+      if (dniVend && dniVend.length) { duplicado = dniVend[0]; duplicadoTipo = 'Vendedora'; }
+      else if (dniCoord && dniCoord.length) { duplicado = dniCoord[0]; duplicadoTipo = 'Coordinador'; }
+      else if (dniGer && dniGer.length) { duplicado = dniGer[0]; duplicadoTipo = 'Gerente de Zona'; }
+      if (duplicado) {
+        var estado = duplicado.activo ? 'ACTIVO' : 'BAJA';
+        alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\n' +
+          'Tipo: ' + duplicadoTipo + '\n' +
+          'Nombre: ' + (duplicado.nombre || 'N/A') + '\n' +
+          'Codigo: ' + (duplicado.codigo || 'N/A') + '\n' +
+          'DNI: ' + (duplicado.dni || 'N/A') + '\n' +
+          'Fecha Nacimiento: ' + (duplicado.fecha_nacimiento || 'N/A') + '\n' +
+          'Estado: ' + estado);
+        err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + duplicadoTipo + ' (' + estado + ').';
+        return;
+      }
+    } catch(dniErr) { console.warn('Error validando DNI:', dniErr); }
+  }
 
   // Auto-get ALL municipios of the selected department
   var allMunis = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&select=id');
@@ -1278,7 +1319,7 @@ async function loadMsgAdmin() {
   }
 
   var prevLen = feed.children.length;
-  feed.innerHTML = mensajes.map(function(m) {
+  feed.innerHTML = mensajes.filter(function(m){ return !m.eliminado; }).map(function(m) {
     var isMe = (m.emisor === 'DIVISIONAL');
     var cls = isMe ? 'right' : 'left';
     var sender = isMe ? 'T\u00fa' : 'Gerencia General';
@@ -1289,9 +1330,18 @@ async function loadMsgAdmin() {
       }).join('') + '</div>';
     }
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    return '<div class="chat-bubble ' + cls + '"><div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
+    var deleteBtn = isMe ? '<button onclick="eliminarMsgAdmin(\'' + m.id + '\')" style="background:none;border:none;color:var(--gris);font-size:0.6rem;cursor:pointer;padding:2px 6px;opacity:0.6;float:right;" title="Eliminar para todos">&times; Eliminar</button>' : '';
+    return '<div class="chat-bubble ' + cls + '">' + deleteBtn + '<div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
   }).join('');
   feed.scrollTop = feed.scrollHeight;
+}
+
+async function eliminarMsgAdmin(msgId) {
+  if (!confirm('\u00bfEliminar este mensaje para todos?')) return;
+  try {
+    await apiPatch('/rest/v1/mensajes_divisional?id=eq.' + msgId, { eliminado: true });
+    loadMsgAdmin();
+  } catch(e) { alert('Error al eliminar: ' + (e.message || e)); }
 }
 
 /* ══════════════════════════════════════════
@@ -1393,7 +1443,7 @@ async function loadMsgZona() {
     return;
   }
 
-  feed.innerHTML = mensajes.map(function(m) {
+  feed.innerHTML = mensajes.filter(function(m){ return !m.eliminado; }).map(function(m) {
     var isMe = (m.emisor === 'DIVISIONAL');
     var cls = isMe ? 'right' : 'left';
     var sender = isMe ? 'T\u00fa' : esc(selectedZonaGerente.nombre);
@@ -1404,9 +1454,18 @@ async function loadMsgZona() {
       }).join('') + '</div>';
     }
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    return '<div class="chat-bubble ' + cls + '"><div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
+    var deleteBtn = isMe ? '<button onclick="eliminarMsgZona(\'' + m.id + '\')" style="background:none;border:none;color:var(--gris);font-size:0.6rem;cursor:pointer;padding:2px 6px;opacity:0.6;float:right;" title="Eliminar para todos">&times; Eliminar</button>' : '';
+    return '<div class="chat-bubble ' + cls + '">' + deleteBtn + '<div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
   }).join('');
   feed.scrollTop = feed.scrollHeight;
+}
+
+async function eliminarMsgZona(msgId) {
+  if (!confirm('\u00bfEliminar este mensaje para todos?')) return;
+  try {
+    await apiPatch('/rest/v1/mensajes_zona?id=eq.' + msgId, { eliminado: true });
+    loadMsgZona();
+  } catch(e) { alert('Error al eliminar: ' + (e.message || e)); }
 }
 
 /* ══════════════════════════════════════════

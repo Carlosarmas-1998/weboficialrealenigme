@@ -791,6 +791,33 @@ async function guardarCoordinador() {
   var coordIdVal = document.getElementById('mcCoordId').value;
   if (!coordIdVal && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar DNI y confirmación de cuenta.'; return; }
 
+  // DNI uniqueness validation — check across ALL professional tables (only for new coordinators)
+  if (!coordIdVal) {
+    try {
+      var dniEnc = encodeURIComponent(dni);
+      var dniV = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo');
+      var dniC = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+      var dniG = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+      var dup = null;
+      var dupTipo = '';
+      if (dniC && dniC.length) { dup = dniC[0]; dupTipo = 'Coordinador'; }
+      else if (dniG && dniG.length) { dup = dniG[0]; dupTipo = 'Gerente de Zona'; }
+      else if (dniV && dniV.length) { dup = dniV[0]; dupTipo = 'Vendedora'; }
+      if (dup) {
+        var est = dup.activo ? 'ACTIVO' : 'BAJA';
+        alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\n' +
+          'Tipo: ' + dupTipo + '\n' +
+          'Nombre: ' + (dup.nombre || 'N/A') + '\n' +
+          'Codigo: ' + (dup.codigo || 'N/A') + '\n' +
+          'DNI: ' + (dup.dni || 'N/A') + '\n' +
+          'Fecha Nacimiento: ' + (dup.fecha_nacimiento || 'N/A') + '\n' +
+          'Estado: ' + est);
+        err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + dupTipo + ' (' + est + ').';
+        return;
+      }
+    } catch(dniErr) { console.warn('Error validando DNI:', dniErr); }
+  }
+
   var payload = {
     nombre: nombre,
     dni: dni,
@@ -809,14 +836,21 @@ async function guardarCoordinador() {
       await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, payload);
       suc.textContent = 'Coordinador actualizado.';
     } else {
-      // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
-      var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-      var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
-      var maxCodeGer = await api('/rest/v1/gerentes_zona?select=codigo&order=codigo.desc&limit=1');
-      var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
-      var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-      var numGer = maxCodeGer.length ? parseInt(maxCodeGer[0].codigo) : 0;
-      var codigo = Math.max(numVend, numCoord, numGer, 301200) + 1;
+      // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
+      var allVend = await api('/rest/v1/vendedoras?select=codigo');
+      var allCoord = await api('/rest/v1/coordinadores?select=codigo');
+      var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
+      var allLogOp = await api('/rest/v1/logistica_operadores?select=codigo');
+      function getMaxNumericCoord(arr) {
+        if (!arr || !arr.length) return 0;
+        var max = 0;
+        for (var i = 0; i < arr.length; i++) {
+          var val = parseInt(arr[i].codigo);
+          if (!isNaN(val) && val > max) max = val;
+        }
+        return max;
+      }
+      var codigo = Math.max(getMaxNumericCoord(allVend), getMaxNumericCoord(allCoord), getMaxNumericCoord(allGer), getMaxNumericCoord(allLogOp), 301200) + 1;
 
       payload.codigo = String(codigo);
       payload.sector_id = sectorId;
@@ -1183,19 +1217,39 @@ function updateMuniInfo() {
 
 async function buscarExistente() {
   var dni = document.getElementById('nomDni').value.trim();
-  var alert = document.getElementById('nomExisteAlert');
-  alert.style.display = 'none';
+  var alertEl = document.getElementById('nomExisteAlert');
+  alertEl.style.display = 'none';
   if (!dni) return;
 
   try {
-    var vends = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
-    if (vends.length) {
+    var dniEnc = encodeURIComponent(dni);
+    var vends = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo,direccion,telefono,email');
+    var coords = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var gers = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+
+    var encontrado = null;
+    var encontradoTipo = '';
+    if (coords && coords.length) { encontrado = coords[0]; encontradoTipo = 'Coordinador'; }
+    else if (gers && gers.length) { encontrado = gers[0]; encontradoTipo = 'Gerente de Zona'; }
+
+    // If found as coordinator or GZ, block and show alert
+    if (encontrado) {
+      var est = encontrado.activo ? 'ACTIVO' : 'BAJA';
+      alertEl.innerHTML = '<p style="font-size:0.8rem;color:var(--danger);font-weight:600;">DNI DUPLICADO: Esta persona ya existe como ' + encontradoTipo + '.<br>' +
+        'Nombre: ' + (encontrado.nombre || 'N/A') + ' | Codigo: ' + (encontrado.codigo || 'N/A') + ' | Estado: ' + est + '</p>';
+      alertEl.style.display = 'block';
+      return;
+    }
+
+    // If found as vendedora, autofill (existing behavior for re-nombramientos)
+    if (vends && vends.length) {
       var v = vends[0];
       document.getElementById('nomNombre').value = v.nombre || '';
       document.getElementById('nomDireccion').value = v.direccion || '';
       document.getElementById('nomTelefono').value = v.telefono || '';
       document.getElementById('nomEmail').value = v.email || '';
-      alert.style.display = 'block';
+      alertEl.innerHTML = '<p style="font-size:0.8rem;color:var(--danger);font-weight:600;">Esta persona ya esta registrada como Vendedora (Codigo: ' + (v.codigo || 'N/A') + ', Estado: ' + (v.activo ? 'ACTIVO' : 'BAJA') + '). Se notificara a Gerencia Divisional.</p>';
+      alertEl.style.display = 'block';
     }
   } catch(e) { console.error(e); }
 }
@@ -1219,15 +1273,43 @@ async function guardarNombramiento() {
     err.textContent = 'Complete todos los campos obligatorios.'; return;
   }
 
+  // DNI uniqueness validation — block if exists as Coordinador or Gerente de Zona
   try {
-    // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
-    var maxCodeVend = await api('/rest/v1/vendedoras?select=codigo&order=codigo.desc&limit=1');
-    var maxCodeCoord = await api('/rest/v1/coordinadores?select=codigo&order=codigo.desc&limit=1');
-    var maxCodeGer = await api('/rest/v1/gerentes_zona?select=codigo&order=codigo.desc&limit=1');
-    var numVend = maxCodeVend.length ? parseInt(maxCodeVend[0].codigo) : 0;
-    var numCoord = maxCodeCoord.length ? parseInt(maxCodeCoord[0].codigo) : 0;
-    var numGer = maxCodeGer.length ? parseInt(maxCodeGer[0].codigo) : 0;
-    var codigo = Math.max(numVend, numCoord, numGer, 301200) + 1;
+    var dniEncNom = encodeURIComponent(dni);
+    var dniCoordNom = await api('/rest/v1/coordinadores?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var dniGerNom = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var dupNom = null;
+    var dupTipoNom = '';
+    if (dniCoordNom && dniCoordNom.length) { dupNom = dniCoordNom[0]; dupTipoNom = 'Coordinador'; }
+    else if (dniGerNom && dniGerNom.length) { dupNom = dniGerNom[0]; dupTipoNom = 'Gerente de Zona'; }
+    if (dupNom) {
+      var estNom = dupNom.activo ? 'ACTIVO' : 'BAJA';
+      alert('DNI DUPLICADO - Esta persona ya existe como ' + dupTipoNom + ':\n\n' +
+        'Nombre: ' + (dupNom.nombre || 'N/A') + '\n' +
+        'Codigo: ' + (dupNom.codigo || 'N/A') + '\n' +
+        'DNI: ' + (dupNom.dni || 'N/A') + '\n' +
+        'Estado: ' + estNom);
+      err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + dupTipoNom + ' (' + estNom + ').';
+      return;
+    }
+  } catch(dniErrNom) { console.warn('Error validando DNI en nombramiento:', dniErrNom); }
+
+  try {
+    // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
+    var allVendN = await api('/rest/v1/vendedoras?select=codigo');
+    var allCoordN = await api('/rest/v1/coordinadores?select=codigo');
+    var allGerN = await api('/rest/v1/gerentes_zona?select=codigo');
+    var allLogN = await api('/rest/v1/logistica_operadores?select=codigo');
+    function getMaxNumericNom(arr) {
+      if (!arr || !arr.length) return 0;
+      var max = 0;
+      for (var i = 0; i < arr.length; i++) {
+        var val = parseInt(arr[i].codigo);
+        if (!isNaN(val) && val > max) max = val;
+      }
+      return max;
+    }
+    var codigo = Math.max(getMaxNumericNom(allVendN), getMaxNumericNom(allCoordN), getMaxNumericNom(allGerN), getMaxNumericNom(allLogN), 301200) + 1;
 
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
