@@ -1620,7 +1620,7 @@ async function sendChat(pedidoId) {
 // POSTULACIONES
 // ================================================================
 async function loadPostulaciones() {
-  var data = await supaGet('web_postulaciones', '&order=created_at.desc');
+  var data = await supaGet('web_postulaciones', '&archivado=eq.false&order=created_at.desc');
   cachedPostulaciones = data;
 
   var tbody = document.getElementById('postulacionesBody');
@@ -1651,7 +1651,7 @@ async function loadPostulaciones() {
     html += '</select></td>';
     html += '<td><textarea style="min-width:150px;" onblur="savePostulacionNotes(' + p.id + ', this.value)" placeholder="Notas...">' + esc(p.notas_admin || '') + '</textarea></td>';
     html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
-    html += '<td><button class="btn btn-danger btn-sm" onclick="eliminarPostulacion(\'' + p.id + '\')"><span>Eliminar</span></button></td>';
+    html += '<td><button class="btn btn-danger btn-sm" onclick="eliminarPostulacion(\'' + p.id + '\')"><span>🗑 Papelera</span></button></td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;
@@ -1748,17 +1748,14 @@ async function savePostulacionNotes(id, notes) {
 }
 
 async function eliminarPostulacion(id) {
-  if (!confirm('¿Eliminar esta postulación permanentemente? Esta acción no se puede deshacer.')) return;
+  if (!confirm('¿Enviar esta postulación a la papelera?')) return;
   try {
-    var res = await fetch(SUPA_URL + '/rest/v1/web_postulaciones?id=eq.' + id, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
-    });
-    if (res.ok) {
-      showToast('Postulación eliminada');
+    var ok = await supaPatch('web_postulaciones', id, { archivado: true });
+    if (ok) {
+      showToast('Postulación enviada a la papelera');
       loadPostulaciones();
     } else {
-      showToast('Error al eliminar postulación', true);
+      showToast('Error al archivar postulación', true);
     }
   } catch(e) {
     showToast('Error de conexión', true);
