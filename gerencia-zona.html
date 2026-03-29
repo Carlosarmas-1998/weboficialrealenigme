@@ -117,10 +117,8 @@
     .chat-input-bar{display:flex;gap:8px;padding:12px;background:var(--surface);border-top:1px solid var(--borde);align-items:flex-end;}
     .chat-input-bar textarea{flex:1;padding:10px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;resize:none;min-height:44px;max-height:100px;outline:none;background:var(--marfil);border-radius:4px;}
     .chat-input-bar textarea:focus{border-color:var(--dorado);}
-    .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.7rem;transition:all .3s;margin-top:4px;margin-right:4px;}
+    .react-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.7rem;transition:all .3s;margin-top:4px;}
     .react-btn:hover,.react-btn.reacted{background:rgba(203,170,99,0.2);border-color:var(--dorado);}
-    .delete-msg-btn{background:none;border:1px solid var(--borde);border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.65rem;color:var(--danger);transition:all .3s;margin-top:4px;}
-    .delete-msg-btn:hover{background:rgba(192,57,43,0.1);border-color:var(--danger);}
 
     /* ── SALARY CARD ── */
     .salary-card{background:linear-gradient(135deg,var(--carbon) 0%,#2a2a2a 100%);border:none;color:var(--marfil);padding:28px;}
@@ -136,11 +134,6 @@
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:500;display:none;}
     .modal-overlay.active{display:flex;}
     .modal-box{background:var(--surface);border-radius:6px;padding:28px;width:520px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
-
-    /* ── SEARCH BAR ── */
-    .search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-    .search-bar input{flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);transition:border-color .3s;}
-    .search-bar input:focus{border-color:var(--dorado);}
 
     @media(max-width:768px){
       .topbar{padding:10px 16px;}
@@ -162,14 +155,16 @@
     .search-result-card .src-field .src-value{font-weight:500;}
 
     .upload-field{margin-top:8px;}
-    .upload-field label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dorado);display:block;margin-bottom:6px;font-weight:600;}
-    .upload-field input[type=file]{width:100%;padding:8px;background:var(--surface);border:1px solid var(--borde);color:var(--carbon);font-size:.8rem;cursor:pointer;}
-    .upload-field input[type=file]::-webkit-file-upload-button{background:var(--dorado);color:#0a0a0a;border:none;padding:6px 14px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-right:10px;}
+    .upload-field label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;font-weight:600;}
+    .upload-field input[type=file]{width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.8rem;cursor:pointer;}
+    .upload-field input[type=file]::-webkit-file-upload-button{background:var(--gold);color:#0a0a0a;border:none;padding:6px 14px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-right:10px;}
   </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ═══════════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════════ -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <div class="logo">ENIGME</div>
@@ -181,7 +176,9 @@
   </div>
 </div>
 
-<!-- APP WRAPPER -->
+<!-- ═══════════════════════════════════════════
+     APP WRAPPER
+     ═══════════════════════════════════════════ -->
 <div class="app-wrapper" id="appWrapper">
 
 <div class="topbar">
@@ -193,10 +190,10 @@
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('sectores',this)">Mis Sectores</button>
+  <button class="tab-btn active" onclick="switchTab('sectores',this)">Sectores</button>
   <button class="tab-btn" onclick="switchTab('pedidos',this)">Subir Pedidos</button>
   <button class="tab-btn" onclick="switchTab('nombramientos',this)">Nombramientos</button>
-  <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona - Resumen</button>
+  <button class="tab-btn" onclick="switchTab('resumen',this)">Mi Zona Resumen</button>
   <button class="tab-btn" onclick="switchTab('mensajeria',this)">Mensajer&iacute;a</button>
   <button class="tab-btn" onclick="switchTab('registros',this)">Registros</button>
   <button class="tab-btn" onclick="switchTab('bajas',this)">Bajas / Consultas</button>
@@ -204,7 +201,9 @@
 
 <div class="container">
 
-  <!-- TAB 1: MIS SECTORES (S1-S15) -->
+  <!-- ══════════════════════════════════════════
+       TAB 1: SECTORES (S1-S14)
+       ══════════════════════════════════════════ -->
   <div class="tab-panel active" id="panel-sectores">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mis Sectores</h2>
     <div class="sector-grid" id="sectorGrid">
@@ -212,7 +211,9 @@
     </div>
   </div>
 
-  <!-- TAB 2: SUBIR PEDIDOS -->
+  <!-- ══════════════════════════════════════════
+       TAB 2: SUBIR PEDIDOS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-pedidos">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Subir Pedido</h2>
     <div class="card">
@@ -247,8 +248,8 @@
               <tr>
                 <td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td>
                 <td><input class="pi-ref" placeholder="Ej: J0015" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td>
-                <td class="pi-nombre" style="font-size:.8rem;color:var(--gris);">&#8212;</td>
-                <td class="pi-precio" style="font-weight:500;color:var(--dorado);">&#8212;</td>
+                <td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td>
+                <td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td>
                 <td class="pi-total" style="font-weight:600;">0.00</td>
                 <td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>
               </tr>
@@ -280,7 +281,9 @@
     </div>
   </div>
 
-  <!-- TAB 3: NOMBRAMIENTOS -->
+  <!-- ══════════════════════════════════════════
+       TAB 3: NOMBRAMIENTOS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-nombramientos">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Nuevo Nombramiento</h2>
     <div class="card">
@@ -314,7 +317,7 @@
       </div>
 
       <div id="nomExisteAlert" style="display:none;background:rgba(192,57,43,0.08);border:1px solid var(--danger);border-radius:4px;padding:12px;margin-top:12px;">
-        <p style="font-size:0.8rem;color:var(--danger);font-weight:600;">Esta persona ya est&aacute; registrada en el sistema.</p>
+        <p style="font-size:0.8rem;color:var(--danger);font-weight:600;">Esta persona ya est&aacute; registrada en el sistema. Se notificar&aacute; a Gerencia Divisional.</p>
       </div>
 
       <div style="margin-top:16px;">
@@ -343,9 +346,11 @@
     </div>
   </div>
 
-  <!-- TAB 4: MI ZONA - RESUMEN -->
+  <!-- ══════════════════════════════════════════
+       TAB 4: MI ZONA RESUMEN
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-resumen">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mi Zona - Resumen</h2>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Resumen de Mi Zona</h2>
 
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;">
       <select id="resCampana" onchange="loadResumen()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
@@ -388,7 +393,9 @@
     </div>
   </div>
 
-  <!-- TAB 5: MENSAJERIA -->
+  <!-- ══════════════════════════════════════════
+       TAB 5: MENSAJERIA
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-mensajeria">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Conversaci&oacute;n con Gerencia Divisional</h2>
 
@@ -413,22 +420,26 @@
     <p id="chatError" class="error-msg"></p>
   </div>
 
-  <!-- TAB 6: REGISTROS -->
+  <!-- ══════════════════════════════════════════
+       TAB 6: REGISTROS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-registros">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Registros de Mi Zona</h2>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Registros</h2>
 
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-      <button class="btn" id="regBtnCoords" onclick="switchRegistro('coords')">Coordinadores</button>
-      <button class="btn btn-outline" id="regBtnVends" onclick="switchRegistro('vends')">Vendedoras</button>
-      <div style="flex:1;min-width:200px;">
-        <input id="regSearchInput" placeholder="Buscar por nombre, DNI o codigo..." oninput="filterRegistros()" style="width:100%;padding:10px 14px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.85rem;outline:none;background:var(--marfil);"/>
-      </div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn" id="regBtnNom" onclick="switchRegistro('nom')">Nombramientos</button>
+      <button class="btn btn-outline" id="regBtnPed" onclick="switchRegistro('ped')">Pedidos</button>
+      <select id="regCampana" onchange="loadRegistros()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+        <option value="">Todas las campa&ntilde;as</option>
+      </select>
     </div>
 
     <div id="regContent"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p></div>
   </div>
 
-  <!-- TAB 7: BAJAS / CONSULTAS -->
+  <!-- ══════════════════════════════════════════
+       TAB 7: BAJAS / CONSULTAS
+       ══════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-bajas">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Bajas / Consultas de Profesionales</h2>
 
@@ -464,7 +475,9 @@
 </div><!-- /container -->
 </div><!-- /app-wrapper -->
 
-<!-- MODAL: Assign/Edit Coordinator -->
+<!-- ═══════════════════════════════════════════
+     MODAL: Assign/Edit Coordinator
+     ═══════════════════════════════════════════ -->
 <div class="modal-overlay" id="modalCoord">
   <div class="modal-box">
     <div class="card-title" id="modalCoordTitle">Asignar Coordinador</div>
@@ -474,17 +487,17 @@
     <div class="form-grid">
       <div class="form-group"><label>Nombre Completo *</label><input id="mcNombre" placeholder="Nombre completo"/></div>
       <div class="form-group"><label>DNI *</label><input id="mcDni" placeholder="0000-0000-00000"/></div>
-      <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="mcDireccion" placeholder="Direcci&oacute;n"/></div>
+      <div class="form-group"><label>Tel&eacute;fono *</label><input id="mcTelefono" placeholder="+504..."/></div>
       <div class="form-group"><label>Correo Electr&oacute;nico</label><input id="mcEmail" type="email" placeholder="correo@email.com"/></div>
+      <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="mcDireccion" placeholder="Direcci&oacute;n"/></div>
       <div class="form-group"><label>RTN</label><input id="mcRtn" placeholder="RTN"/></div>
+      <div class="form-group"><label>Fecha de Nacimiento</label><input id="mcFechaNac" type="date"/></div>
+      <div class="form-group"><label>Fecha de Ingreso</label><input id="mcFechaIngreso" type="date"/></div>
       <div class="form-group"><label>N&uacute;mero de Cuenta</label><input id="mcCuenta" placeholder="Cuenta bancaria"/></div>
       <div class="form-group"><label>Nombre del Banco</label><input id="mcBanco" placeholder="Ej: BAC, Ficohsa"/></div>
-      <div class="form-group"><label>Fecha de Nacimiento *</label><input id="mcFechaNac" type="date"/></div>
-      <div class="form-group"><label>Fecha de Ingreso</label><input id="mcFechaIngreso" type="date"/></div>
-      <div class="form-group"><label>Tel&eacute;fono</label><input id="mcTelefono" placeholder="+504..."/></div>
     </div>
-    <div style="margin-top:16px;border-top:1px solid var(--borde);padding-top:14px;">
-      <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dorado);margin-bottom:10px;font-weight:600;">Documentos de Alta</div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:600;">◈ Documentos de Alta</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
         <div class="upload-field"><label>1. DNI (Foto/PDF) *</label><input type="file" id="mcFileDni" accept="image/*,.pdf"/></div>
         <div class="upload-field"><label>2. Confirm. Cuenta *</label><input type="file" id="mcFileCuenta" accept="image/*,.pdf"/></div>
@@ -505,7 +518,7 @@
    ENIGME - GERENCIA DE ZONA - PANEL COMPLETO
    ================================================================ */
 var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
 var H  = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
@@ -518,15 +531,13 @@ var selectedMunicipios = [];
 var resChartComp   = null;
 var resChartSector = null;
 var chatInterval   = null;
-var regMode = 'coords';
-var regCoordsCache = [];
-var regVendsCache = [];
+var regMode = 'nom';
 
 /* ══════════════════════════════════════════
-   LOGIN - uses localStorage key enigme_gz_session
+   LOGIN
    ══════════════════════════════════════════ */
 (function checkSession() {
-  var s = localStorage.getItem('enigme_gz_session');
+  var s = sessionStorage.getItem('enigme_gz_session');
   if (s) {
     session = JSON.parse(s);
     showApp();
@@ -549,7 +560,7 @@ async function doLogin() {
     if (gerente.password_temporal !== password) { errEl.textContent = 'Contrasena incorrecta.'; return; }
 
     session = gerente;
-    localStorage.setItem('enigme_gz_session', JSON.stringify(session));
+    sessionStorage.setItem('enigme_gz_session', JSON.stringify(session));
     showApp();
   } catch(e) {
     errEl.textContent = 'Error de conexion. Intente de nuevo.';
@@ -572,7 +583,7 @@ function showApp() {
 }
 
 function logout() {
-  localStorage.removeItem('enigme_gz_session');
+  sessionStorage.removeItem('enigme_gz_session');
   if (chatInterval) clearInterval(chatInterval);
   session = null;
   document.getElementById('appWrapper').style.display = 'none';
@@ -611,36 +622,13 @@ async function apiPatch(path, body) {
   var res = await fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
   return res;
 }
-async function apiDelete(path) {
-  var res = await fetch(SB + path, { method: 'DELETE', headers: H });
-  return res;
-}
 
 function fmtL(n) { return 'L ' + Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-/* ── SEQUENTIAL CODE GENERATION ── */
-async function generarCodigoSecuencial() {
-  var allVend = await api('/rest/v1/vendedoras?select=codigo');
-  var allCoord = await api('/rest/v1/coordinadores?select=codigo');
-  var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
-  var allLog = [];
-  try { allLog = await api('/rest/v1/logistica_operadores?select=codigo'); } catch(e) {}
-  function getMax(arr) {
-    if (!arr || !arr.length) return 0;
-    var max = 0;
-    for (var i = 0; i < arr.length; i++) {
-      var val = parseInt(arr[i].codigo);
-      if (!isNaN(val) && val > max) max = val;
-    }
-    return max;
-  }
-  return Math.max(getMax(allVend), getMax(allCoord), getMax(allGer), getMax(allLog), 301200) + 1;
-}
 
 /* ── LOAD CAMPANAS ── */
 async function loadCampanas() {
   try { campanas = await api('/rest/v1/campanas?order=numero'); } catch(e) { campanas = []; }
-  ['pedCampana','nomCampana','resCampana','nomListCampana'].forEach(function(selId) {
+  ['pedCampana','nomCampana','resCampana','nomListCampana','regCampana'].forEach(function(selId) {
     var sel = document.getElementById(selId);
     if (!sel) return;
     while (sel.options.length > 1) sel.remove(1);
@@ -658,7 +646,7 @@ function getCampNum(id) {
 }
 
 /* ══════════════════════════════════════════
-   TAB 1: MIS SECTORES (S1-S15 grid)
+   TAB 1: SECTORES (S1-S14 grid)
    ══════════════════════════════════════════ */
 async function loadSectores() {
   try {
@@ -681,7 +669,7 @@ function renderSectorGrid() {
   var grid = document.getElementById('sectorGrid');
   var html = '';
 
-  for (var i = 1; i <= 15; i++) {
+  for (var i = 1; i <= 14; i++) {
     var sector = null;
     sectores.forEach(function(s){ if (s.numero_sector === i) sector = s; });
     var coord = sector ? coordMap[sector.id] : null;
@@ -699,7 +687,6 @@ function renderSectorGrid() {
       html += '<div class="sector-detail">DNI: ' + esc(coord.dni || '-') + '</div>';
       html += '<div class="sector-detail">Tel: ' + esc(coord.telefono || '-') + '</div>';
       html += '<div class="sector-detail">Email: ' + esc(coord.email || '-') + '</div>';
-      html += '<div class="sector-detail">Direccion: ' + esc(coord.direccion || '-') + '</div>';
       html += '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">';
       html += '<button class="btn btn-sm btn-outline" onclick="abrirEditarCoord(\'' + sector.id + '\',' + i + ',\'' + coord.id + '\')">Editar</button>';
       html += '<button class="btn btn-sm btn-danger" onclick="bajaCoordinador(\'' + coord.id + '\',\'' + sector.id + '\')">Dar de Baja</button>';
@@ -744,6 +731,7 @@ async function crearSector(num) {
 }
 
 function setCoordFieldsEditable(editable) {
+  // When editing, lock nombre, DNI, fecha_nacimiento
   var lockFields = ['mcNombre', 'mcDni', 'mcFechaNac'];
   lockFields.forEach(function(id) {
     var el = document.getElementById(id);
@@ -812,22 +800,23 @@ async function guardarCoordinador() {
   var email     = document.getElementById('mcEmail').value.trim();
   var direccion = document.getElementById('mcDireccion').value.trim();
 
-  if (!nombre || !dni || !direccion) {
-    err.textContent = 'Nombre, DNI y direccion son obligatorios.'; return;
+  if (!nombre || !dni || !telefono || !direccion) {
+    err.textContent = 'Nombre, DNI, telefono y direccion son obligatorios.'; return;
   }
 
   var fileDni = document.getElementById('mcFileDni').files[0];
   var fileCuenta = document.getElementById('mcFileCuenta').files[0];
   var fileExtra = document.getElementById('mcFileExtra').files[0];
-  if (!coordId && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar DNI y confirmacion de cuenta.'; return; }
+  var coordIdVal = document.getElementById('mcCoordId').value;
+  if (!coordIdVal && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar DNI y confirmación de cuenta.'; return; }
 
-  /* DNI uniqueness check (only for new) */
-  if (!coordId) {
+  // DNI uniqueness validation — check across ALL professional tables (only for new coordinators)
+  if (!coordIdVal) {
     try {
       var dniEnc = encodeURIComponent(dni);
-      var dniV = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,activo');
-      var dniC = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,activo');
-      var dniG = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,activo');
+      var dniV = await api('/rest/v1/vendedoras?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_ingreso,activo');
+      var dniC = await api('/rest/v1/coordinadores?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+      var dniG = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEnc + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
       var dup = null;
       var dupTipo = '';
       if (dniC && dniC.length) { dup = dniC[0]; dupTipo = 'Coordinador'; }
@@ -835,7 +824,13 @@ async function guardarCoordinador() {
       else if (dniV && dniV.length) { dup = dniV[0]; dupTipo = 'Vendedora'; }
       if (dup) {
         var est = dup.activo ? 'ACTIVO' : 'BAJA';
-        alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\nTipo: ' + dupTipo + '\nNombre: ' + (dup.nombre || 'N/A') + '\nCodigo: ' + (dup.codigo || 'N/A') + '\nDNI: ' + (dup.dni || 'N/A') + '\nEstado: ' + est);
+        alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\n' +
+          'Tipo: ' + dupTipo + '\n' +
+          'Nombre: ' + (dup.nombre || 'N/A') + '\n' +
+          'Codigo: ' + (dup.codigo || 'N/A') + '\n' +
+          'DNI: ' + (dup.dni || 'N/A') + '\n' +
+          'Fecha Nacimiento: ' + (dup.fecha_nacimiento || 'N/A') + '\n' +
+          'Estado: ' + est);
         err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + dupTipo + ' (' + est + ').';
         return;
       }
@@ -844,9 +839,9 @@ async function guardarCoordinador() {
 
   var payload;
   if (coordId) {
-    /* Editing: nombre, DNI, fecha_nacimiento are NOT editable */
+    // Editing: do NOT send nombre, dni, fecha_nacimiento (they are locked)
     payload = {
-      telefono: telefono || null,
+      telefono: telefono,
       email: email || null,
       direccion: direccion,
       rtn: document.getElementById('mcRtn').value.trim() || null,
@@ -855,10 +850,11 @@ async function guardarCoordinador() {
       nombre_banco: document.getElementById('mcBanco').value.trim() || null
     };
   } else {
+    // Creating: include all fields
     payload = {
       nombre: nombre,
       dni: dni,
-      telefono: telefono || null,
+      telefono: telefono,
       email: email || null,
       direccion: direccion,
       rtn: document.getElementById('mcRtn').value.trim() || null,
@@ -872,25 +868,23 @@ async function guardarCoordinador() {
   try {
     if (coordId) {
       await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, payload);
-
-      /* Upload new documents if provided */
-      if (fileDni || fileCuenta || fileExtra) {
-        async function uploadDocEdit(file, folder) {
-          var ext = file.name.split('.').pop();
-          var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
-          var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
-            method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
-          });
-          return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
-        }
-        if (fileDni) await uploadDocEdit(fileDni, 'altas/coord-' + coordId);
-        if (fileCuenta) await uploadDocEdit(fileCuenta, 'altas/coord-' + coordId);
-        if (fileExtra) await uploadDocEdit(fileExtra, 'altas/coord-' + coordId);
-      }
-
       suc.textContent = 'Coordinador actualizado.';
     } else {
-      var codigo = await generarCodigoSecuencial();
+      // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
+      var allVend = await api('/rest/v1/vendedoras?select=codigo');
+      var allCoord = await api('/rest/v1/coordinadores?select=codigo');
+      var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
+      var allLogOp = await api('/rest/v1/logistica_operadores?select=codigo');
+      function getMaxNumericCoord(arr) {
+        if (!arr || !arr.length) return 0;
+        var max = 0;
+        for (var i = 0; i < arr.length; i++) {
+          var val = parseInt(arr[i].codigo);
+          if (!isNaN(val) && val > max) max = val;
+        }
+        return max;
+      }
+      var codigo = Math.max(getMaxNumericCoord(allVend), getMaxNumericCoord(allCoord), getMaxNumericCoord(allGer), getMaxNumericCoord(allLogOp), 301200) + 1;
 
       payload.codigo = String(codigo);
       payload.sector_id = sectorId;
@@ -899,13 +893,12 @@ async function guardarCoordinador() {
 
       await apiPost('/rest/v1/coordinadores', payload);
 
-      /* Also create vendedora entry with shared code */
       try {
         await apiPost('/rest/v1/vendedoras', {
           codigo: String(codigo),
           nombre: nombre,
           dni: dni,
-          telefono: telefono || null,
+          telefono: telefono,
           direccion: direccion,
           email: email || null,
           sector_id: sectorId,
@@ -917,7 +910,7 @@ async function guardarCoordinador() {
 
       suc.textContent = 'Coordinador asignado. Codigo: ' + codigo;
 
-      /* Upload documents */
+      // Upload documents
       async function uploadDocCoord(file, folder) {
         var ext = file.name.split('.').pop();
         var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
@@ -930,11 +923,10 @@ async function guardarCoordinador() {
       var aCuenta = await uploadDocCoord(fileCuenta, 'altas/coord-' + codigo);
       var aExtra = fileExtra ? await uploadDocCoord(fileExtra, 'altas/coord-' + codigo) : '';
       var sectorNum = document.getElementById('mcSectorNum').value || '';
-
-      /* Save to registros_alta */
-      try {
-        await apiPost('/rest/v1/registros_alta', {
-          tipo: 'coordinador', nombre: nombre, dni: dni, telefono: telefono || null,
+      await fetch(SB + '/rest/v1/registros_alta', {
+        method: 'POST', headers: HJ,
+        body: JSON.stringify({
+          tipo: 'coordinador', nombre: nombre, dni: dni, telefono: telefono,
           email: email || null, direccion: direccion, codigo: String(codigo),
           rtn: document.getElementById('mcRtn').value.trim() || null,
           numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
@@ -945,14 +937,16 @@ async function guardarCoordinador() {
           zona: session.zona_nombre || '',
           gerencia_divisional: session.gerencia_nombre || '',
           archivo_dni: aDni, archivo_cuenta: aCuenta, archivo_extra: aExtra
-        });
-      } catch(e){ console.warn('registro_alta coord:', e); }
+        })
+      }).catch(function(e){ console.warn('registro_alta coord:', e); });
 
-      /* Send welcome email */
-      if (email) {
+      // Send welcome email
+      var coordEmail = (document.getElementById('mcEmail') || {}).value || '';
+      var coordNombre = (document.getElementById('mcNombre') || {}).value || '';
+      if (coordEmail) {
         fetch(SB + '/functions/v1/send-welcome-email', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tipo: 'coordinador', nombre: nombre, email: email, codigo: codigo })
+          body: JSON.stringify({ tipo: 'coordinador', nombre: coordNombre, email: coordEmail, codigo: codigo })
         }).catch(function(){});
       }
     }
@@ -977,6 +971,7 @@ async function bajaCoordinador(coordId, sectorId) {
 /* ══════════════════════════════════════════
    TAB 2: SUBIR PEDIDOS
    ══════════════════════════════════════════ */
+// ── CATÁLOGO DE PRODUCTOS (auto-complete) ──
 var catalogoProductos = [];
 async function loadCatalogo() {
   try {
@@ -991,25 +986,20 @@ function buscarProducto(input) {
   var tr = input.closest('tr');
   var nombreTd = tr.querySelector('.pi-nombre');
   var precioTd = tr.querySelector('.pi-precio');
-  if (!codigo) { nombreTd.textContent = '\u2014'; precioTd.textContent = '\u2014'; calcRow(input); return; }
+  if (!codigo) { nombreTd.textContent = '—'; precioTd.textContent = '—'; calcRow(input); return; }
 
-  var found = null;
-  for (var i = 0; i < catalogoProductos.length; i++) {
-    if (catalogoProductos[i].codigo && catalogoProductos[i].codigo.toUpperCase() === codigo) {
-      found = catalogoProductos[i]; break;
-    }
-  }
+  var found = catalogoProductos.find(function(p) { return p.codigo.toUpperCase() === codigo; });
   if (found) {
     nombreTd.textContent = found.nombre;
-    nombreTd.style.color = 'var(--carbon)';
+    nombreTd.style.color = 'var(--text)';
     precioTd.textContent = 'L ' + parseFloat(found.precio).toFixed(2);
     precioTd.style.color = 'var(--dorado)';
     input.style.borderColor = 'var(--success)';
     calcRow(input);
   } else {
-    nombreTd.textContent = 'No encontrado';
+    nombreTd.textContent = '⚠ No encontrado';
     nombreTd.style.color = 'var(--danger)';
-    precioTd.textContent = '\u2014';
+    precioTd.textContent = '—';
     input.style.borderColor = 'var(--danger)';
     tr.querySelector('.pi-total').textContent = '0.00';
     calcTotals();
@@ -1038,17 +1028,6 @@ async function buscarProfesional() {
       document.getElementById('profTelefono').textContent = profData.telefono || '-';
       document.getElementById('profDireccion').textContent = profData.direccion || '-';
       card.classList.add('visible');
-
-      /* Auto-select sector if known */
-      if (profData.sector_id) {
-        var pedSectorSel = document.getElementById('pedSector');
-        for (var k = 0; k < pedSectorSel.options.length; k++) {
-          if (pedSectorSel.options[k].value === profData.sector_id) {
-            pedSectorSel.value = profData.sector_id;
-            break;
-          }
-        }
-      }
     }
   } catch(e) { console.error(e); }
 }
@@ -1056,7 +1035,7 @@ async function buscarProfesional() {
 function addRow() {
   var tbody = document.getElementById('pedItems');
   var tr = document.createElement('tr');
-  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Codigo" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--gris);">\u2014</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">\u2014</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
+  tr.innerHTML = '<td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Código" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td>';
   tbody.appendChild(tr);
   tr.querySelector('.pi-ref').focus();
 }
@@ -1091,9 +1070,11 @@ function handleEnterPed(e, input) {
     e.preventDefault();
     var tr = input.closest('tr');
     if (input.classList.contains('pi-ref')) {
+      // Buscar producto y luego agregar nueva fila
       buscarProducto(input);
       addRow();
     } else if (input.classList.contains('pi-cant')) {
+      // De cantidad saltar al código
       var refInput = tr.querySelector('.pi-ref');
       if (refInput) refInput.focus();
     }
@@ -1121,14 +1102,18 @@ async function guardarPedido() {
     var nombreProd = rows[i].querySelector('.pi-nombre').textContent.trim();
     var precioText = rows[i].querySelector('.pi-precio').textContent.replace(/[^0-9.]/g, '');
     var precio = parseFloat(precioText) || 0;
-    if (!ref || cant <= 0 || precio <= 0 || nombreProd === '\u2014' || nombreProd.indexOf('No encontrado') !== -1) continue;
+    if (!ref || cant <= 0 || precio <= 0 || nombreProd === '—' || nombreProd.indexOf('No encontrado') !== -1) continue;
     var subtotal = cant * precio;
     items.push({
       cantidad: cant,
       codigo_producto: ref,
       nombre_producto: nombreProd,
       precio_catalogo_unitario: precio,
+      iva_unitario: 0,
+      venta_neta_unitaria: precio * 0.85,
       subtotal_catalogo: subtotal,
+      subtotal_iva: 0,
+      subtotal_con_iva: subtotal,
       subtotal_venta_neta: subtotal * 0.85
     });
     totalBruto += subtotal;
@@ -1142,7 +1127,6 @@ async function guardarPedido() {
     var codigoPedido = 'PED-' + Date.now().toString(36).toUpperCase();
 
     var vendedoraId = profData.id;
-    /* If profData came from coordinadores, find or use vendedora record */
     if (!profData.sector_id && !profData.zona_id) {
       var vends = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(profData.codigo));
       if (vends.length) vendedoraId = vends[0].id;
@@ -1150,7 +1134,7 @@ async function guardarPedido() {
 
     var pedido = await apiPost('/rest/v1/pedidos', {
       codigo_pedido: codigoPedido,
-      campana_id: campanaId,
+      campana_id: parseInt(campanaId),
       vendedora_id: vendedoraId,
       gerente_id: session.id,
       sector_id: sectorId,
@@ -1158,10 +1142,7 @@ async function guardarPedido() {
       total_iva: 0,
       total_con_iva: totalBruto,
       total_venta_neta: totalNeto,
-      ano: new Date().getFullYear(),
-      estado: 'pendiente',
-      direccion_entrega: profData.direccion || '',
-      telefono_entrega: profData.telefono || ''
+      ano: new Date().getFullYear()
     });
 
     var pedidoId = pedido[0].id;
@@ -1171,7 +1152,6 @@ async function guardarPedido() {
       method: 'POST', headers: HJ, body: JSON.stringify(itemsData)
     });
 
-    /* Upload files (max 2) */
     var files = document.getElementById('pedArchivos').files;
     for (var f = 0; f < Math.min(files.length, 2); f++) {
       var file = files[f];
@@ -1179,7 +1159,7 @@ async function guardarPedido() {
       var path = 'pedidos/' + pedidoId + '/' + (f + 1) + '.' + ext;
       await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
         method: 'POST',
-        headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' },
+        headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
         body: file
       });
     }
@@ -1196,7 +1176,7 @@ function resetPedidoForm() {
   document.getElementById('pedCodigo').value = '';
   document.getElementById('profCard').classList.remove('visible');
   profData = null;
-  document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Codigo" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--gris);">\u2014</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">\u2014</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
+  document.getElementById('pedItems').innerHTML = '<tr><td><input type="number" min="1" class="pi-cant" value="1" oninput="calcRow(this)" onkeydown="handleEnterPed(event,this)"/></td><td><input class="pi-ref" placeholder="Código" onblur="buscarProducto(this)" onkeydown="handleEnterPed(event,this)"/></td><td class="pi-nombre" style="font-size:.8rem;color:var(--text-muted);">—</td><td class="pi-precio" style="font-weight:500;color:var(--dorado);">—</td><td class="pi-total" style="font-weight:600;">0.00</td><td><button style="border:none;cursor:pointer;background:none;color:var(--danger);font-size:1rem;" onclick="removeRow(this)">&times;</button></td></tr>';
   document.getElementById('pedTotalBruto').textContent = 'L 0.00';
   document.getElementById('pedTotalNeto').textContent = 'L 0.00';
   document.getElementById('pedArchivos').value = '';
@@ -1286,6 +1266,7 @@ async function buscarExistente() {
     if (coords && coords.length) { encontrado = coords[0]; encontradoTipo = 'Coordinador'; }
     else if (gers && gers.length) { encontrado = gers[0]; encontradoTipo = 'Gerente de Zona'; }
 
+    // If found as coordinator or GZ, block and show alert
     if (encontrado) {
       var est = encontrado.activo ? 'ACTIVO' : 'BAJA';
       alertEl.innerHTML = '<p style="font-size:0.8rem;color:var(--danger);font-weight:600;">DNI DUPLICADO: Esta persona ya existe como ' + encontradoTipo + '.<br>' +
@@ -1294,6 +1275,7 @@ async function buscarExistente() {
       return;
     }
 
+    // If found as vendedora, autofill (existing behavior for re-nombramientos)
     if (vends && vends.length) {
       var v = vends[0];
       document.getElementById('nomNombre').value = v.nombre || '';
@@ -1319,36 +1301,56 @@ async function guardarNombramiento() {
   var sectorId  = document.getElementById('nomSector').value;
   var campanaId = document.getElementById('nomCampana').value;
   var deptoId   = document.getElementById('nomDepto').value;
+  var muniIds   = selectedMunicipios.map(function(s){ return s.id; });
 
   if (!dni || !nombre || !direccion || !telefono || !sectorId || !campanaId) {
     err.textContent = 'Complete todos los campos obligatorios.'; return;
   }
 
-  /* DNI uniqueness: block if Coordinador or Gerente de Zona */
+  // DNI uniqueness validation — block if exists as Coordinador or Gerente de Zona
   try {
     var dniEncNom = encodeURIComponent(dni);
-    var dniCoordNom = await api('/rest/v1/coordinadores?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,activo');
-    var dniGerNom = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,activo');
+    var dniCoordNom = await api('/rest/v1/coordinadores?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var dniGerNom = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncNom + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
     var dupNom = null;
     var dupTipoNom = '';
     if (dniCoordNom && dniCoordNom.length) { dupNom = dniCoordNom[0]; dupTipoNom = 'Coordinador'; }
     else if (dniGerNom && dniGerNom.length) { dupNom = dniGerNom[0]; dupTipoNom = 'Gerente de Zona'; }
     if (dupNom) {
       var estNom = dupNom.activo ? 'ACTIVO' : 'BAJA';
-      alert('DNI DUPLICADO - Esta persona ya existe como ' + dupTipoNom + ':\n\nNombre: ' + (dupNom.nombre || 'N/A') + '\nCodigo: ' + (dupNom.codigo || 'N/A') + '\nEstado: ' + estNom);
+      alert('DNI DUPLICADO - Esta persona ya existe como ' + dupTipoNom + ':\n\n' +
+        'Nombre: ' + (dupNom.nombre || 'N/A') + '\n' +
+        'Codigo: ' + (dupNom.codigo || 'N/A') + '\n' +
+        'DNI: ' + (dupNom.dni || 'N/A') + '\n' +
+        'Estado: ' + estNom);
       err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + dupTipoNom + ' (' + estNom + ').';
       return;
     }
   } catch(dniErrNom) { console.warn('Error validando DNI en nombramiento:', dniErrNom); }
 
   try {
-    var codigo = await generarCodigoSecuencial();
+    // Código secuencial desde 301201 — fetch ALL codes, filter numeric to handle alphanumeric codes
+    var allVendN = await api('/rest/v1/vendedoras?select=codigo');
+    var allCoordN = await api('/rest/v1/coordinadores?select=codigo');
+    var allGerN = await api('/rest/v1/gerentes_zona?select=codigo');
+    var allLogN = await api('/rest/v1/logistica_operadores?select=codigo');
+    function getMaxNumericNom(arr) {
+      if (!arr || !arr.length) return 0;
+      var max = 0;
+      for (var i = 0; i < arr.length; i++) {
+        var val = parseInt(arr[i].codigo);
+        if (!isNaN(val) && val > max) max = val;
+      }
+      return max;
+    }
+    var codigo = Math.max(getMaxNumericNom(allVendN), getMaxNumericNom(allCoordN), getMaxNumericNom(allGerN), getMaxNumericNom(allLogN), 301200) + 1;
 
     var existentes = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
     var yaExiste = existentes.length > 0;
 
     var fechaIngreso = document.getElementById('nomFechaIngreso').value || null;
 
+    // Solo columnas que existen en la tabla vendedoras
     var vendPayload = {
       codigo: String(codigo),
       nombre: nombre,
@@ -1366,6 +1368,7 @@ async function guardarNombramiento() {
       vendedora = await apiPost('/rest/v1/vendedoras', vendPayload);
     } catch(vendErr) {
       console.warn('vendedoras insert failed:', vendErr);
+      // Try to find existing by DNI
       try {
         var existByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(dni));
         if (existByDni.length) { vendedora = existByDni; }
@@ -1379,7 +1382,7 @@ async function guardarNombramiento() {
 
     var nomPayload = {
       codigo_nombramiento: 'NOM-' + String(codigo),
-      campana_ingreso_id: campanaId,
+      campana_ingreso_id: parseInt(campanaId),
       vendedora_id: vendedoraId,
       gerente_id: session.id,
       sector_id: sectorId,
@@ -1394,10 +1397,8 @@ async function guardarNombramiento() {
       ano: new Date().getFullYear(),
       fecha_ingreso: fechaIngreso
     };
-
     var nomData = await apiPost('/rest/v1/nombramientos', nomPayload);
 
-    /* Upload files (max 2) */
     var files = document.getElementById('nomArchivos').files;
     if (nomData[0] && files.length) {
       for (var f = 0; f < Math.min(files.length, 2); f++) {
@@ -1406,13 +1407,12 @@ async function guardarNombramiento() {
         var path = 'nombramientos/' + nomData[0].id + '/' + (f + 1) + '.' + ext;
         await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
           method: 'POST',
-          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' },
+          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
           body: file
         });
       }
     }
 
-    /* Notify divisional if duplicate */
     if (yaExiste && session.gerencia_divisional_id) {
       try {
         await apiPost('/rest/v1/web_notificaciones', {
@@ -1425,7 +1425,7 @@ async function guardarNombramiento() {
     }
 
     suc.textContent = 'Nombramiento registrado. Codigo asignado: ' + codigo;
-    ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail','nomFechaNac','nomFechaIngreso'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['nomDni','nomNombre','nomDireccion','nomTelefono','nomEmail','nomFechaNac'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('nomDepto').value = '';
     document.getElementById('nomSector').value = '';
     document.getElementById('nomCampana').value = '';
@@ -1461,7 +1461,7 @@ async function loadNombramientos() {
 }
 
 /* ══════════════════════════════════════════
-   TAB 4: MI ZONA - RESUMEN + SALARY
+   TAB 4: MI ZONA RESUMEN + SALARY
    ══════════════════════════════════════════ */
 async function loadResumen() {
   var campanaId = document.getElementById('resCampana').value;
@@ -1518,7 +1518,7 @@ async function loadResumen() {
 
 async function renderResCharts(sectorLabels, sectorVentas, ano, campanaId) {
   if (resChartSector) resChartSector.destroy();
-  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad','#e67e22','#1abc9c','#34495e','#f39c12','#d35400','#2c3e50','#7f8c8d','#16a085'];
+  var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad','#e67e22','#1abc9c','#34495e','#f39c12','#d35400','#2c3e50','#7f8c8d'];
   resChartSector = new Chart(document.getElementById('resChartSector'), {
     type: 'bar',
     data: {
@@ -1664,21 +1664,14 @@ async function loadMensajesGZ() {
       }).join('') + '</div>';
     }
 
-    var actionsHtml = '';
-
-    /* Heart reaction for divisional messages */
+    var reactHtml = '';
     if (!isZona) {
       var totalReactions = m.mensajes_reacciones ? m.mensajes_reacciones.length : 0;
       var yaReacciono = false;
       if (m.mensajes_reacciones) {
         m.mensajes_reacciones.forEach(function(r) { if (r.gerente_zona_id === session.id) yaReacciono = true; });
       }
-      actionsHtml += '<button class="react-btn' + (yaReacciono ? ' reacted' : '') + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')">&#10084;&#65039; ' + totalReactions + '</button>';
-    }
-
-    /* Delete button for own (zona) messages */
-    if (isZona) {
-      actionsHtml += '<button class="delete-msg-btn" onclick="eliminarMensajeZona(\'' + m.id + '\')">Eliminar</button>';
+      reactHtml = '<button class="react-btn' + (yaReacciono ? ' reacted' : '') + '" onclick="toggleReaction(\'' + m.id + '\',' + yaReacciono + ')">&#10084;&#65039; ' + totalReactions + '</button>';
     }
 
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
@@ -1688,7 +1681,7 @@ async function loadMensajesGZ() {
       '<div style="font-size:0.85rem;line-height:1.6;">' + esc(m.texto || '').replace(/\n/g, '<br>') + '</div>' +
       fotos +
       '<div class="chat-time">' + fecha + '</div>' +
-      (actionsHtml ? '<div style="display:flex;gap:4px;flex-wrap:wrap;">' + actionsHtml + '</div>' : '') +
+      reactHtml +
       '</div>';
   }).join('');
 
@@ -1721,7 +1714,7 @@ async function enviarMensajeZona() {
         var path = 'mensajes_zona/' + msgId + '/' + (f + 1) + '.' + ext;
         var upRes = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
           method: 'POST',
-          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' },
+          headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type },
           body: file
         });
         if (upRes.ok) {
@@ -1761,114 +1754,128 @@ async function toggleReaction(msgId, yaReacciono) {
   } catch(e) { console.error(e); }
 }
 
-async function eliminarMensajeZona(msgId) {
-  if (!confirm('Eliminar este mensaje?')) return;
-  try {
-    /* Delete photos first */
-    await fetch(SB + '/rest/v1/mensajes_zona_fotos?mensaje_zona_id=eq.' + msgId, { method: 'DELETE', headers: H });
-    /* Delete the message */
-    await fetch(SB + '/rest/v1/mensajes_zona?id=eq.' + msgId + '&gerente_zona_id=eq.' + session.id, { method: 'DELETE', headers: H });
-    loadMensajesGZ();
-  } catch(e) { console.error(e); }
-}
-
 /* ══════════════════════════════════════════
-   TAB 6: REGISTROS (Coordinadores + Vendedoras)
+   TAB 6: REGISTROS
    ══════════════════════════════════════════ */
 function switchRegistro(mode) {
   regMode = mode;
-  document.getElementById('regBtnCoords').className = mode === 'coords' ? 'btn' : 'btn btn-outline';
-  document.getElementById('regBtnVends').className = mode === 'vends' ? 'btn' : 'btn btn-outline';
+  document.getElementById('regBtnNom').className = mode === 'nom' ? 'btn' : 'btn btn-outline';
+  document.getElementById('regBtnPed').className = mode === 'ped' ? 'btn' : 'btn btn-outline';
   loadRegistros();
 }
 
 async function loadRegistros() {
+  var campanaId = document.getElementById('regCampana').value;
   var container = document.getElementById('regContent');
   container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Cargando...</p>';
 
   try {
-    if (regMode === 'coords') {
-      regCoordsCache = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id + '&order=nombre');
-      renderRegistrosCoords(regCoordsCache);
+    if (regMode === 'nom') {
+      var filter = 'gerente_id=eq.' + session.id;
+      if (campanaId) filter += '&campana_ingreso_id=eq.' + campanaId;
+      var noms = await api('/rest/v1/nombramientos?' + filter + '&order=created_at.desc&limit=200');
+
+      if (!noms.length) {
+        container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin nombramientos.</p>';
+        return;
+      }
+
+      var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Direccion</th><th>Email</th><th>Sector</th><th>Campana</th><th>Fecha</th><th>Archivos</th></tr></thead><tbody>';
+      for (var i = 0; i < noms.length; i++) {
+        var n = noms[i];
+        var sNum = '';
+        sectores.forEach(function(s){ if (s.id === n.sector_id) sNum = 'S' + s.numero_sector; });
+
+        var archivosHtml = '';
+        try {
+          var archivos = await fetch(SB + '/storage/v1/object/list/archivos-corporativos/nombramientos/' + n.id, { headers: H });
+          if (archivos.ok) {
+            var fileList = await archivos.json();
+            if (fileList.length) {
+              archivosHtml = fileList.map(function(af) {
+                var url = SB + '/storage/v1/object/public/archivos-corporativos/nombramientos/' + n.id + '/' + af.name;
+                var isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(af.name);
+                return isImg ?
+                  '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width:40px;height:40px;object-fit:cover;border-radius:3px;"/></a>' :
+                  '<a href="' + url + '" target="_blank" class="btn btn-sm btn-outline" style="font-size:0.55rem;">PDF</a>';
+              }).join(' ');
+            }
+          }
+        } catch(fe) {}
+
+        html += '<tr>' +
+          '<td style="color:var(--dorado);font-weight:600;">' + esc(n.codigo_nombramiento) + '</td>' +
+          '<td>' + esc(n.nombre) + '</td>' +
+          '<td>' + esc(n.dni) + '</td>' +
+          '<td>' + esc(n.telefono || '-') + '</td>' +
+          '<td>' + esc(n.direccion || '-') + '</td>' +
+          '<td>' + esc(n.email || '-') + '</td>' +
+          '<td>' + sNum + '</td>' +
+          '<td>C' + getCampNum(n.campana_ingreso_id) + '</td>' +
+          '<td>' + new Date(n.created_at).toLocaleDateString('es-HN') + '</td>' +
+          '<td>' + (archivosHtml || '-') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+
     } else {
-      regVendsCache = await api('/rest/v1/vendedoras?gerente_id=eq.' + session.id + '&order=nombre');
-      renderRegistrosVends(regVendsCache);
+      var filter = 'gerente_id=eq.' + session.id;
+      if (campanaId) filter += '&campana_id=eq.' + campanaId;
+      var peds = await api('/rest/v1/pedidos?' + filter + '&order=created_at.desc&limit=200');
+
+      if (!peds.length) {
+        container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin pedidos.</p>';
+        return;
+      }
+
+      var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Vendedora</th><th>Sector</th><th>Campana</th><th>Venta Bruta</th><th>Venta Neta</th><th>Fecha</th><th>Archivos</th></tr></thead><tbody>';
+      for (var i = 0; i < peds.length; i++) {
+        var p = peds[i];
+        var sNum = '';
+        sectores.forEach(function(s){ if (s.id === p.sector_id) sNum = 'S' + s.numero_sector; });
+
+        var vendNombre = '-';
+        try {
+          if (p.vendedora_id) {
+            var v = await api('/rest/v1/vendedoras?id=eq.' + p.vendedora_id + '&select=nombre,codigo');
+            if (v.length) vendNombre = v[0].nombre + ' (' + v[0].codigo + ')';
+          }
+        } catch(ve) {}
+
+        var archivosHtml = '';
+        try {
+          var archivos = await fetch(SB + '/storage/v1/object/list/archivos-corporativos/pedidos/' + p.id, { headers: H });
+          if (archivos.ok) {
+            var fileList = await archivos.json();
+            if (fileList.length) {
+              archivosHtml = fileList.map(function(af) {
+                var url = SB + '/storage/v1/object/public/archivos-corporativos/pedidos/' + p.id + '/' + af.name;
+                var isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(af.name);
+                return isImg ?
+                  '<a href="' + url + '" target="_blank"><img src="' + url + '" style="width:40px;height:40px;object-fit:cover;border-radius:3px;"/></a>' :
+                  '<a href="' + url + '" target="_blank" class="btn btn-sm btn-outline" style="font-size:0.55rem;">PDF</a>';
+              }).join(' ');
+            }
+          }
+        } catch(fe) {}
+
+        html += '<tr>' +
+          '<td style="color:var(--dorado);font-weight:600;">' + esc(p.codigo_pedido) + '</td>' +
+          '<td>' + esc(vendNombre) + '</td>' +
+          '<td>' + sNum + '</td>' +
+          '<td>C' + getCampNum(p.campana_id) + '</td>' +
+          '<td>' + fmtL(p.subtotal_catalogo) + '</td>' +
+          '<td>' + fmtL(p.total_venta_neta) + '</td>' +
+          '<td>' + new Date(p.created_at).toLocaleDateString('es-HN') + '</td>' +
+          '<td>' + (archivosHtml || '-') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
     }
   } catch(e) {
     container.innerHTML = '<p style="color:var(--danger);text-align:center;padding:40px;">Error al cargar registros.</p>';
     console.error(e);
   }
-}
-
-function filterRegistros() {
-  var query = (document.getElementById('regSearchInput').value || '').trim().toLowerCase();
-  if (regMode === 'coords') {
-    if (!query) { renderRegistrosCoords(regCoordsCache); return; }
-    var filtered = regCoordsCache.filter(function(c) {
-      return (c.nombre || '').toLowerCase().indexOf(query) !== -1 ||
-             (c.dni || '').toLowerCase().indexOf(query) !== -1 ||
-             (c.codigo || '').toLowerCase().indexOf(query) !== -1;
-    });
-    renderRegistrosCoords(filtered);
-  } else {
-    if (!query) { renderRegistrosVends(regVendsCache); return; }
-    var filtered = regVendsCache.filter(function(v) {
-      return (v.nombre || '').toLowerCase().indexOf(query) !== -1 ||
-             (v.dni || '').toLowerCase().indexOf(query) !== -1 ||
-             (v.codigo || '').toLowerCase().indexOf(query) !== -1;
-    });
-    renderRegistrosVends(filtered);
-  }
-}
-
-function renderRegistrosCoords(coords) {
-  var container = document.getElementById('regContent');
-  if (!coords.length) {
-    container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin coordinadores registrados.</p>';
-    return;
-  }
-  var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Email</th><th>Direccion</th><th>Sector</th><th>Estado</th></tr></thead><tbody>';
-  coords.forEach(function(c) {
-    var sNum = '';
-    sectores.forEach(function(s){ if (s.id === c.sector_id) sNum = 'S' + s.numero_sector; });
-    var estadoBadge = c.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Baja</span>';
-    html += '<tr>' +
-      '<td style="color:var(--dorado);font-weight:600;">' + esc(c.codigo) + '</td>' +
-      '<td>' + esc(c.nombre) + '</td>' +
-      '<td>' + esc(c.dni || '-') + '</td>' +
-      '<td>' + esc(c.telefono || '-') + '</td>' +
-      '<td>' + esc(c.email || '-') + '</td>' +
-      '<td>' + esc(c.direccion || '-') + '</td>' +
-      '<td>' + sNum + '</td>' +
-      '<td>' + estadoBadge + '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  container.innerHTML = html;
-}
-
-function renderRegistrosVends(vends) {
-  var container = document.getElementById('regContent');
-  if (!vends.length) {
-    container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">Sin vendedoras registradas.</p>';
-    return;
-  }
-  var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Email</th><th>Direccion</th><th>Sector</th><th>Estado</th></tr></thead><tbody>';
-  vends.forEach(function(v) {
-    var sNum = '';
-    sectores.forEach(function(s){ if (s.id === v.sector_id) sNum = 'S' + s.numero_sector; });
-    var estadoBadge = v.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Baja</span>';
-    html += '<tr>' +
-      '<td style="color:var(--dorado);font-weight:600;">' + esc(v.codigo) + '</td>' +
-      '<td>' + esc(v.nombre) + '</td>' +
-      '<td>' + esc(v.dni || '-') + '</td>' +
-      '<td>' + esc(v.telefono || '-') + '</td>' +
-      '<td>' + esc(v.email || '-') + '</td>' +
-      '<td>' + esc(v.direccion || '-') + '</td>' +
-      '<td>' + sNum + '</td>' +
-      '<td>' + estadoBadge + '</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  container.innerHTML = html;
 }
 
 /* ══════════════════════════════════════════
@@ -1878,24 +1885,12 @@ function setupFileInfoListeners() {
   var pedFiles = document.getElementById('pedArchivos');
   if (pedFiles) pedFiles.addEventListener('change', function() {
     var info = document.getElementById('pedFilesInfo');
-    if (this.files.length > 2) {
-      info.textContent = 'Maximo 2 archivos permitidos.';
-      info.style.color = 'var(--danger)';
-    } else {
-      info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
-      info.style.color = 'var(--gris)';
-    }
+    info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
   });
   var nomFiles = document.getElementById('nomArchivos');
   if (nomFiles) nomFiles.addEventListener('change', function() {
     var info = document.getElementById('nomFilesInfo');
-    if (this.files.length > 2) {
-      info.textContent = 'Maximo 2 archivos permitidos.';
-      info.style.color = 'var(--danger)';
-    } else {
-      info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
-      info.style.color = 'var(--gris)';
-    }
+    info.textContent = this.files.length ? this.files.length + ' archivo(s) seleccionado(s)' : '';
   });
 }
 
@@ -1915,7 +1910,7 @@ async function loadBajasCoords() {
       container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin coordinadores activos.</p>';
       return;
     }
-    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
+    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>DNI</th><th>Tel&eacute;fono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
     coords.forEach(function(c) {
       var sNum = '';
       sectores.forEach(function(s){ if (s.id === c.sector_id) sNum = 'S' + s.numero_sector; });
@@ -1944,7 +1939,7 @@ async function loadBajasVends() {
       container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Sin vendedoras activas.</p>';
       return;
     }
-    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>Codigo</th><th>Nombre</th><th>DNI</th><th>Telefono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
+    var html = '<div style="overflow-x:auto;"><table><thead><tr><th>C&oacute;digo</th><th>Nombre</th><th>DNI</th><th>Tel&eacute;fono</th><th>Email</th><th>Sector</th><th>Acciones</th></tr></thead><tbody>';
     vends.forEach(function(v) {
       var sNum = '';
       sectores.forEach(function(s){ if (s.id === v.sector_id) sNum = 'S' + s.numero_sector; });
@@ -1993,21 +1988,22 @@ async function buscarProfesionalBaja() {
   resultsEl.innerHTML = '';
 
   var query = document.getElementById('bajaBuscar').value.trim();
-  if (!query) { errEl.textContent = 'Ingrese un DNI o codigo para buscar.'; return; }
+  if (!query) { errEl.textContent = 'Ingrese un DNI o c\u00f3digo para buscar.'; return; }
 
   var results = [];
 
   try {
-    /* Search coordinadores by codigo or DNI */
+    // Search coordinadores by codigo or DNI
     var coordsByCodigo = await api('/rest/v1/coordinadores?codigo=eq.' + encodeURIComponent(query) + '&select=*');
     var coordsByDni = await api('/rest/v1/coordinadores?dni=eq.' + encodeURIComponent(query) + '&select=*');
 
+    // Merge without duplicates
     var coordIds = {};
     coordsByCodigo.concat(coordsByDni).forEach(function(c) {
       if (!coordIds[c.id]) { coordIds[c.id] = true; c._tipo_profesional = 'Coordinador/a'; results.push(c); }
     });
 
-    /* Search vendedoras by codigo or DNI */
+    // Search vendedoras by codigo or DNI
     var vendsByCodigo = await api('/rest/v1/vendedoras?codigo=eq.' + encodeURIComponent(query) + '&select=*');
     var vendsByDni = await api('/rest/v1/vendedoras?dni=eq.' + encodeURIComponent(query) + '&select=*');
 
@@ -2030,6 +2026,7 @@ async function buscarProfesionalBaja() {
         sectores.forEach(function(s){ if (s.id === r.sector_id) sectorName = 'S' + s.numero_sector; });
       }
 
+      // Try to find coordinator info for vendedoras
       var coordInfo = '';
       if (r._tipo_profesional === 'Vendedora/Asesora' && r.sector_id) {
         var coord = coordMap[r.sector_id];
@@ -2044,10 +2041,10 @@ async function buscarProfesionalBaja() {
       html += '<div class="src-grid">';
       html += '<div class="src-field"><span class="src-label">Nombre</span><span class="src-value">' + esc(r.nombre || '-') + '</span></div>';
       html += '<div class="src-field"><span class="src-label">DNI</span><span class="src-value">' + esc(r.dni || '-') + '</span></div>';
-      html += '<div class="src-field"><span class="src-label">Codigo</span><span class="src-value" style="color:var(--dorado);font-weight:600;">' + esc(r.codigo || '-') + '</span></div>';
-      html += '<div class="src-field"><span class="src-label">Telefono</span><span class="src-value">' + esc(r.telefono || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">C\u00f3digo</span><span class="src-value" style="color:var(--dorado);font-weight:600;">' + esc(r.codigo || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Tel\u00e9fono</span><span class="src-value">' + esc(r.telefono || '-') + '</span></div>';
       html += '<div class="src-field"><span class="src-label">Email</span><span class="src-value">' + esc(r.email || '-') + '</span></div>';
-      html += '<div class="src-field"><span class="src-label">Direccion</span><span class="src-value">' + esc(r.direccion || '-') + '</span></div>';
+      html += '<div class="src-field"><span class="src-label">Direcci\u00f3n</span><span class="src-value">' + esc(r.direccion || '-') + '</span></div>';
       html += '<div class="src-field"><span class="src-label">Sector</span><span class="src-value">' + (sectorName || '-') + '</span></div>';
       html += '<div class="src-field"><span class="src-label">Fecha de Alta / Ingreso</span><span class="src-value">' + (r.fecha_ingreso ? new Date(r.fecha_ingreso).toLocaleDateString('es-HN') : (r.created_at ? new Date(r.created_at).toLocaleDateString('es-HN') : '-')) + '</span></div>';
 
@@ -2058,20 +2055,21 @@ async function buscarProfesionalBaja() {
         html += '<div class="src-field"><span class="src-label">Motivo de Baja</span><span class="src-value" style="color:var(--danger);">' + esc(r.motivo_baja) + '</span></div>';
       }
 
+      // Coordinator-specific: sector info
       if (r._tipo_profesional === 'Coordinador/a') {
         if (r.rtn) html += '<div class="src-field"><span class="src-label">RTN</span><span class="src-value">' + esc(r.rtn) + '</span></div>';
-        if (r.numero_cuenta) html += '<div class="src-field"><span class="src-label">Numero de Cuenta</span><span class="src-value">' + esc(r.numero_cuenta) + '</span></div>';
+        if (r.numero_cuenta) html += '<div class="src-field"><span class="src-label">N\u00famero de Cuenta</span><span class="src-value">' + esc(r.numero_cuenta) + '</span></div>';
         if (r.nombre_banco) html += '<div class="src-field"><span class="src-label">Banco</span><span class="src-value">' + esc(r.nombre_banco) + '</span></div>';
-        if (r.fecha_nacimiento) html += '<div class="src-field"><span class="src-label">Fecha de Nacimiento</span><span class="src-value">' + new Date(r.fecha_nacimiento).toLocaleDateString('es-HN') + '</span></div>';
       }
 
+      // Vendedora-specific: coordinator info
       if (r._tipo_profesional === 'Vendedora/Asesora' && coordInfo) {
         html += '<div class="src-field"><span class="src-label">Coordinador/a</span><span class="src-value">' + esc(coordInfo) + '</span></div>';
       }
 
-      html += '</div>'; /* close src-grid */
+      html += '</div>'; // close src-grid
 
-      /* Only Dar de Baja button for active, NO delete */
+      // Action buttons - only Baja for active professionals, no Eliminar
       if (isActive) {
         html += '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--borde);">';
         if (r._tipo_profesional === 'Coordinador/a') {
@@ -2082,7 +2080,7 @@ async function buscarProfesionalBaja() {
         html += '</div>';
       }
 
-      html += '</div>'; /* close search-result-card */
+      html += '</div>'; // close search-result-card
     }
 
     resultsEl.innerHTML = html;
