@@ -187,7 +187,7 @@
       .dropdown:hover .dropbtn svg { transform: rotate(180deg); }
     }
     
-    .dropdown.active .dropdown-content { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; }
+    .dropdown.active .dropdown-content { opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important; pointer-events: auto !important; }
     .dropdown.active .dropbtn svg { transform: rotate(180deg); }
 
     .dropdown-content a { color: #e8e0d4 !important; font-family: "Jost", sans-serif; font-weight: 500; padding: 12px 24px; font-size: 0.65rem; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.04); transition: all 0.3s ease; }
@@ -294,7 +294,8 @@
         background: rgba(28, 28, 28, 0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(201, 169, 110, 0.15);
       }
-      
+      .dropdown.active .dropdown-content { transform: translateX(-50%) translateY(0) !important; }
+
       .dropdown-content a { font-size: 0.55rem; padding: 15px;  color: #e8e0d4 !important; }
       .dropdown-content a:hover { padding-left: 15px; }
       .nav-link:not(.dropbtn) { width: auto; display: inline-block; margin-top: 0; padding: 10px 5px; font-size: 0.55rem; }
@@ -353,100 +354,6 @@
       .whatsapp-float { bottom: 15px; right: 15px; width: 35px; height: 35px; }
       .whatsapp-float svg { width: 16px; height: 16px; }
     }
-    /* ── COOKIE POPUP ── */
-    .cookie-overlay {
-      position: fixed; inset: 0; z-index: 100000;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.6s ease;
-      padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    }
-    .cookie-overlay.visible { opacity: 1; }
-    .cookie-overlay.hiding { opacity: 0; pointer-events: none; }
-    .cookie-modal {
-      background: linear-gradient(145deg, #1C1C1C 0%, #2A2A2A 100%);
-      border: 1px solid rgba(203, 170, 99, 0.3);
-      border-radius: 8px; max-width: 480px; width: 100%;
-      padding: 45px 40px 35px; text-align: center;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(203,170,99,0.1);
-      transform: translateY(30px) scale(0.95);
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .cookie-overlay.visible .cookie-modal { transform: translateY(0) scale(1); }
-    .cookie-modal-brand {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
-      letter-spacing: 0.35em; color: #CBAA63; margin-bottom: 8px; font-weight: 500;
-    }
-    .cookie-modal-divider {
-      width: 50px; height: 1px; background: linear-gradient(90deg, transparent, #CBAA63, transparent);
-      margin: 0 auto 24px;
-    }
-    .cookie-modal-title {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
-      color: #fff; margin-bottom: 12px; font-weight: 400; letter-spacing: 0.05em;
-    }
-    .cookie-modal-text {
-      font-family: 'Jost', sans-serif; font-size: 0.82rem;
-      color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 8px;
-    }
-    .cookie-modal-section {
-      margin-top: 20px; padding-top: 18px;
-      border-top: 1px solid rgba(203,170,99,0.15);
-    }
-    .cookie-modal-section-title {
-      font-family: 'Jost', sans-serif; font-size: 0.75rem; font-weight: 500;
-      color: #CBAA63; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
-    }
-    .cookie-btns { display: flex; gap: 12px; margin-top: 28px; justify-content: center; flex-wrap: wrap; }
-    .cookie-btn-accept {
-      padding: 13px 36px; background: linear-gradient(135deg, #CBAA63, #E8D090);
-      border: none; color: #1C1C1C; font-family: 'Jost', sans-serif;
-      font-size: 0.78rem; font-weight: 600; letter-spacing: 2px;
-      text-transform: uppercase; cursor: pointer; border-radius: 4px;
-      transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(203,170,99,0.3);
-    }
-    .cookie-btn-accept:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(203,170,99,0.5); }
-    .cookie-btn-decline {
-      padding: 13px 36px; background: transparent;
-      border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5);
-      font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 400;
-      letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
-      border-radius: 4px; transition: all 0.3s ease;
-    }
-    .cookie-btn-decline:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
-    .cookie-btn-continue {
-      padding: 13px 36px; background: transparent;
-      border: 1px solid rgba(203,170,99,0.4); color: #CBAA63;
-      font-family: 'Jost', sans-serif; font-size: 0.78rem; font-weight: 500;
-      letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
-      border-radius: 4px; transition: all 0.3s ease; margin-top: 18px;
-    }
-    .cookie-btn-continue:hover { background: rgba(203,170,99,0.1); border-color: #CBAA63; }
-    .cookie-social-thanks {
-      display: none; text-align: center;
-    }
-    .cookie-social-thanks.visible { display: block; }
-    .cookie-social-thanks h3 {
-      font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
-      color: #fff; margin-bottom: 6px; font-weight: 400; letter-spacing: 0.05em;
-    }
-    .cookie-social-thanks p {
-      font-family: 'Jost', sans-serif; font-size: 0.82rem;
-      color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 20px;
-    }
-    .cookie-social-links {
-      display: flex; gap: 18px; justify-content: center; align-items: center;
-      margin-bottom: 8px;
-    }
-    .cookie-social-links a {
-      display: flex; align-items: center; gap: 8px; padding: 10px 20px;
-      border-radius: 6px; text-decoration: none; font-family: 'Jost', sans-serif;
-      font-size: 0.78rem; font-weight: 500; letter-spacing: 1px;
-      transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.15);
-      color: #fff;
-    }
-    .cookie-social-links a:hover { transform: translateY(-2px); border-color: rgba(203,170,99,0.5); }
-    .cookie-social-links a svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     /* ── IMAGE HERO ── */
     .image-hero {
@@ -648,8 +555,6 @@
     .abril-tooltip.visible { opacity: 1; transform: translateY(0); }
 
     @media (max-width: 768px) {
-      .cookie-modal { padding: 35px 25px 30px; }
-      .cookie-modal-brand { font-size: 1.4rem; }
       .hero-subscribe-form { flex-direction: column; }
       .hero-subscribe-form input { border-right: 1px solid rgba(201,169,110,0.3); font-size: 0.9rem; padding: 16px 18px; }
       .hero-subscribe-form button { padding: 14px 20px; font-size: 0.78rem; }
@@ -661,21 +566,10 @@
       .abril-tooltip { bottom: 78px; left: 16px; font-size: 0.65rem; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
-      .cookie-modal { padding: 30px 20px 25px; }
-      .cookie-modal-brand { font-size: 1.2rem; letter-spacing: 0.25em; }
-      .cookie-btns { flex-direction: column; }
-      .cookie-btn-accept, .cookie-btn-decline { width: 100%; }
-      .cookie-social-links { flex-direction: column; gap: 10px; }
-      .cookie-social-links a { justify-content: center; }
       .abril-tooltip { bottom: 76px; left: 16px; }
     }
     /* ── EXTRA RESPONSIVE FIXES ── */
 
-    /* Cookie modal scrollable on short screens */
-    @media (max-height: 600px) {
-      .cookie-overlay { align-items: flex-start; }
-      .cookie-modal { max-height: 90vh; overflow-y: auto; margin: 20px 0; }
-    }
 
     /* MI ESPACIO modal scrollable on small screens */
     #miEspacioModal > div {
@@ -723,50 +617,6 @@
 </head>
 <body>
 
-  <!-- ══ COOKIE & NOTIFICATION POPUP ══ -->
-  <div class="cookie-overlay" id="cookieOverlay" style="display:none">
-    <div class="cookie-modal">
-      <div class="cookie-modal-brand">&Egrave;NIGME</div>
-      <div class="cookie-modal-divider"></div>
-      <!-- Phase 1: Cookie consent -->
-      <div id="cookieConsentPhase">
-        <h3 class="cookie-modal-title">Tu Experiencia Importa</h3>
-        <p class="cookie-modal-text">
-          Utilizamos cookies para mejorar tu experiencia de navegaci&oacute;n y ofrecerte contenido personalizado de nuestras colecciones exclusivas.
-        </p>
-        <div class="cookie-modal-section">
-          <div class="cookie-modal-section-title">Notificaciones</div>
-          <p class="cookie-modal-text">
-            Activa las notificaciones para recibir alertas sobre nuevas colecciones, descuentos exclusivos y lanzamientos de La Casa &Egrave;NIGME.
-          </p>
-        </div>
-        <div class="cookie-btns">
-          <button class="cookie-btn-accept" onclick="acceptCookies()">Aceptar Todo</button>
-          <button class="cookie-btn-decline" onclick="declineCookies()">Solo Necesarias</button>
-        </div>
-      </div>
-      <!-- Phase 2: Social follow (shown after accepting) -->
-      <div class="cookie-social-thanks" id="cookieSocialPhase">
-        <h3>&iexcl;Gracias!</h3>
-        <p>S&iacute;guenos en nuestras redes para no perderte nada:</p>
-        <div class="cookie-social-links">
-          <a href="https://instagram.com/enigmeofficial" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
-            Instagram
-          </a>
-          <a href="https://tiktok.com/@enigmeofficial" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.69a8.16 8.16 0 004.76 1.52v-3.4a4.85 4.85 0 01-1-.12z"/></svg>
-            TikTok
-          </a>
-          <a href="https://wa.me/34602149162" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp
-          </a>
-        </div>
-        <button class="cookie-btn-continue" onclick="dismissCookiePopup()">Continuar</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ══ CHATBOT TOOLTIP ══ -->
   <div class="abril-tooltip" id="abrilTooltip">ESTOY AQU&Iacute; PARA AYUDARTE</div>
@@ -1103,90 +953,10 @@
     };
   </script>
 
-  <!-- ══ COOKIE, SUBSCRIPTION & CHATBOT LOGIC ══ -->
+  <!-- ══ SUBSCRIPTION & CHATBOT LOGIC ══ -->
   <script>
     // Email sending via Supabase Edge Function (no API keys exposed)
 
-    // ── Cookie Popup ──
-    var cookieAutoDismissTimer = null;
-
-    function showCookiePopup() {
-      if (localStorage.getItem('enigme_cookies_accepted')) return;
-      setTimeout(function() {
-        var overlay = document.getElementById('cookieOverlay');
-        if (!overlay) return;
-        overlay.style.display = 'flex';
-        requestAnimationFrame(function() {
-          overlay.classList.add('visible');
-        });
-      }, 1000);
-    }
-
-    function dismissCookiePopup() {
-      if (cookieAutoDismissTimer) { clearTimeout(cookieAutoDismissTimer); cookieAutoDismissTimer = null; }
-      var overlay = document.getElementById('cookieOverlay');
-      if (!overlay) return;
-      overlay.classList.remove('visible');
-      overlay.classList.add('hiding');
-      setTimeout(function() {
-        overlay.style.display = 'none';
-        overlay.classList.remove('hiding');
-        // Reset phases for next potential use
-        var phase1 = document.getElementById('cookieConsentPhase');
-        var phase2 = document.getElementById('cookieSocialPhase');
-        if (phase1) phase1.style.display = '';
-        if (phase2) phase2.classList.remove('visible');
-        showAbrilTooltip();
-      }, 600);
-    }
-
-    function setRealCookies(level) {
-      var expires = new Date();
-      expires.setFullYear(expires.getFullYear() + 1);
-      var expStr = '; expires=' + expires.toUTCString() + '; path=/; SameSite=Lax';
-      document.cookie = 'enigme_consent=' + level + expStr;
-      if (level === 'all') {
-        document.cookie = 'enigme_analytics=1' + expStr;
-        document.cookie = 'enigme_marketing=1' + expStr;
-      } else {
-        document.cookie = 'enigme_analytics=0' + expStr;
-        document.cookie = 'enigme_marketing=0' + expStr;
-      }
-    }
-
-    function showSocialPhase() {
-      var phase1 = document.getElementById('cookieConsentPhase');
-      var phase2 = document.getElementById('cookieSocialPhase');
-      if (phase1) phase1.style.display = 'none';
-      if (phase2) phase2.classList.add('visible');
-      // Auto-dismiss after 4 seconds
-      cookieAutoDismissTimer = setTimeout(function() {
-        dismissCookiePopup();
-      }, 4000);
-    }
-
-    function acceptCookies() {
-      localStorage.setItem('enigme_cookies_accepted', 'true');
-      localStorage.setItem('enigme_cookies_date', new Date().toISOString());
-      setRealCookies('all');
-      // Request notification permission
-      if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().then(function(permission) {
-          if (permission === 'granted') {
-            localStorage.setItem('enigme_notifications', 'granted');
-          }
-        });
-      }
-      // Show social follow phase instead of immediately dismissing
-      showSocialPhase();
-    }
-
-    function declineCookies() {
-      localStorage.setItem('enigme_cookies_accepted', 'minimal');
-      localStorage.setItem('enigme_cookies_date', new Date().toISOString());
-      setRealCookies('minimal');
-      dismissCookiePopup();
-    }
 
     // ── Chatbot Tooltip ──
     function showAbrilTooltip() {
@@ -1362,16 +1132,13 @@
 
     // ── Init ──
     document.addEventListener('DOMContentLoaded', function() {
-      showCookiePopup();
       // Hide subscription overlay if already subscribed
       if (localStorage.getItem('enigme_subscriber_email')) {
         var subOverlay = document.getElementById('heroSubscribeOverlay');
         if (subOverlay) subOverlay.style.display = 'none';
       }
-      // If cookies already accepted, show tooltip directly
-      if (localStorage.getItem('enigme_cookies_accepted')) {
-        setTimeout(showAbrilTooltip, 2000);
-      }
+      // Show chatbot tooltip after a short delay
+      setTimeout(showAbrilTooltip, 2000);
     });
   </script>
 

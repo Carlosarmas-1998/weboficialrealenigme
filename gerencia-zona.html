@@ -551,6 +551,18 @@ var resChartComp   = null;
 var resChartSector = null;
 var chatInterval   = null;
 var regMode = 'nom';
+var configNombr = { umbral: 20, pagoAlto: 320, pagoBajo: 220 };
+
+async function loadConfigNombramientos() {
+  try {
+    var data = await api('/rest/v1/config_multinivel?select=clave,valor');
+    data.forEach(function(c) {
+      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 20;
+      if (c.clave === 'pago_nombramiento_alto') configNombr.pagoAlto = Number(c.valor) || 320;
+      if (c.clave === 'pago_nombramiento_bajo') configNombr.pagoBajo = Number(c.valor) || 220;
+    });
+  } catch(e) { console.error('Error loading config nombramientos:', e); }
+}
 
 /* ══════════════════════════════════════════
    LOGIN
@@ -597,6 +609,7 @@ function showApp() {
   loadSectores();
   loadDepartamentosNom();
   loadNombramientos();
+  loadConfigNombramientos();
   startChatRefresh();
   setupFileInfoListeners();
 }
@@ -638,7 +651,20 @@ async function apiPost(path, body) {
   return res.json();
 }
 async function apiPatch(path, body) {
-  var res = await fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+  var res = await fetch(SB + path, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SK,
+      'Authorization': 'Bearer ' + SK,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    var errText = '';
+    try { errText = await res.text(); } catch(e){}
+    console.error('apiPatch error:', res.status, errText);
+  }
   return res;
 }
 
@@ -969,7 +995,7 @@ async function guardarCoordinador() {
         })
       }).catch(function(e){ console.warn('registro_alta coord:', e); });
 
-      // Send welcome email via Web3Forms
+      // Send welcome email via Edge Function
       var coordEmail = (document.getElementById('mcEmail') || {}).value || '';
       var coordNombre = (document.getElementById('mcNombre') || {}).value || '';
       if (coordEmail) {
@@ -982,16 +1008,14 @@ async function guardarCoordinador() {
           '</table>' +
           '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Bienvenido/a al equipo. Contacte a su Gerente de Zona para mas informacion.</p>'
         );
-        fetch('https://api.web3forms.com/submit', {
+        fetch(SB + '/functions/v1/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-            to: coordEmail,
-            from_name: 'ENIGME',
-            subject: 'ENIGME | Bienvenido/a al Equipo',
-            message: coordWelcomeBody,
-            botcheck: ''
+            destinatario: coordEmail,
+            asunto: 'ENIGME | Bienvenido/a al Equipo',
+            contenido_html: coordWelcomeBody,
+            tipo: 'bienvenida_coordinador'
           })
         }).catch(function(){});
       }
@@ -1622,14 +1646,14 @@ function renderSalary(totalNeto, totalNoms, campanaId) {
   }
 
   var baseSalary = 16000;
-  var nomPayRate = totalNoms < 20 ? 220 : 320;
+  var nomPayRate = totalNoms < configNombr.umbral ? configNombr.pagoBajo : configNombr.pagoAlto;
   var nomPayment = totalNoms * nomPayRate;
   var commission = totalNeto * 0.03;
   var totalSalary = baseSalary + nomPayment + commission;
 
   el.innerHTML =
     '<div class="salary-row"><span class="sr-label">Salario Base</span><span class="sr-value">' + fmtL(baseSalary) + '</span></div>' +
-    '<div class="salary-row"><span class="sr-label">Nombramientos (' + totalNoms + ' x L' + nomPayRate + (totalNoms < 20 ? ' [<20]' : ' [>=20]') + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
+    '<div class="salary-row"><span class="sr-label">Nombramientos (' + totalNoms + ' x L' + nomPayRate + (totalNoms < configNombr.umbral ? ' [<' + configNombr.umbral + ']' : ' [>=' + configNombr.umbral + ']') + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
     '<div class="salary-row"><span class="sr-label">Comision 3% sobre Venta Neta (' + fmtL(totalNeto) + ')</span><span class="sr-value">' + fmtL(commission) + '</span></div>' +
     '<div class="salary-total">' + fmtL(totalSalary) + '</div>' +
     '<div style="text-align:center;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(250,249,246,0.5);margin-top:4px;">Salario Total Estimado</div>';
@@ -2211,16 +2235,14 @@ async function doChangePasswordGZ() {
         '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Su contrasena de acceso al portal de Gerencia de Zona ha sido cambiada exitosamente.</p>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si usted no realizo este cambio, contacte inmediatamente a su Gerencia Divisional.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SB + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-          to: session.email,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Contrasena Actualizada',
-          message: emailBody,
-          botcheck: ''
+          destinatario: session.email,
+          asunto: 'ENIGME | Contrasena Actualizada',
+          contenido_html: emailBody,
+          tipo: 'cambio_contrasena_gz'
         })
       }).catch(function(){});
     }
@@ -2232,16 +2254,14 @@ async function doChangePasswordGZ() {
       '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 8px;"><strong style="color:#CBAA63;">Gerente:</strong> ' + esc(session.nombre) + ' (' + esc(session.codigo) + ')</p>' +
       '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0;">Fecha: ' + new Date().toLocaleString('es-HN') + '</p>'
     );
-    fetch('https://api.web3forms.com/submit', {
+    fetch(SB + '/functions/v1/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-        to: 'carlosarmas@enigmeofficial.com',
-        from_name: 'ENIGME',
-        subject: 'ENIGME | Cambio de Contrasena - GZ ' + (session.codigo || ''),
-        message: adminEmailBody,
-        botcheck: ''
+        destinatario: 'carlosarmas@enigmeofficial.com',
+        asunto: 'ENIGME | Cambio de Contrasena - GZ ' + (session.codigo || ''),
+        contenido_html: adminEmailBody,
+        tipo: 'cambio_contrasena_gz_admin'
       })
     }).catch(function(){});
 

@@ -582,6 +582,18 @@ var chartComDist = null, chartComBar = null;
 var adminPolling = null, zonaPolling = null;
 var selectedZonaGerente = null;
 var adminFotoFiles = [], zonaFotoFiles = [];
+var configNombr = { umbral: 20, pagoAlto: 320, pagoBajo: 220 };
+
+async function loadConfigNombramientos() {
+  try {
+    var data = await api('/rest/v1/config_multinivel?select=clave,valor');
+    data.forEach(function(c) {
+      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 20;
+      if (c.clave === 'pago_nombramiento_alto') configNombr.pagoAlto = Number(c.valor) || 320;
+      if (c.clave === 'pago_nombramiento_bajo') configNombr.pagoBajo = Number(c.valor) || 220;
+    });
+  } catch(e) { console.error('Error loading config nombramientos:', e); }
+}
 
 /* ── INIT ── */
 (function init() {
@@ -640,6 +652,7 @@ function showApp() {
   loadDepartamentos();
   loadCampanas();
   loadGerentesZona();
+  loadConfigNombramientos();
 }
 
 function logout() {
@@ -681,7 +694,21 @@ async function apiPost(path, body) {
   return res.json();
 }
 async function apiPatch(path, body) {
-  return fetch(SB + path, { method: 'PATCH', headers: HJ, body: JSON.stringify(body) });
+  var res = await fetch(SB + path, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SK,
+      'Authorization': 'Bearer ' + SK,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    var errText = '';
+    try { errText = await res.text(); } catch(e){}
+    console.error('apiPatch error:', res.status, errText);
+  }
+  return res;
 }
 
 function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -981,7 +1008,7 @@ async function guardarGerenteZona() {
     });
 
     suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
-    // Send welcome email via Web3Forms
+    // Send welcome email via Supabase Edge Function
     if (email) {
       var deptoNombre = '';
       var deptoSel = document.getElementById('gzDepto');
@@ -998,16 +1025,14 @@ async function guardarGerenteZona() {
         '</table>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso. Acceda al portal desde su navegador web.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SB + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-          to: email,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Bienvenido/a al Equipo - Gerente de Zona',
-          message: welcomeBody,
-          botcheck: ''
+          destinatario: email,
+          asunto: 'ENIGME | Bienvenido/a al Equipo - Gerente de Zona',
+          contenido_html: welcomeBody,
+          tipo: 'bienvenida_gz'
         })
       }).catch(function(){});
     }
@@ -1204,16 +1229,14 @@ async function saveEditGZ() {
         '<ul style="list-style:none;padding:0;margin:0 0 16px;">' + changesHtml + '</ul>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si no reconoces estos cambios, contacta a tu Gerencia Divisional de inmediato.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SB + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-          to: gzEmail,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Tus datos han sido actualizados',
-          message: emailBody,
-          botcheck: ''
+          destinatario: gzEmail,
+          asunto: 'ENIGME | Tus datos han sido actualizados',
+          contenido_html: emailBody,
+          tipo: 'notificacion_edicion'
         })
       }).catch(function(e){ console.warn('Email notification error:', e); });
     }
@@ -1288,8 +1311,7 @@ async function loadDashboard() {
   var gLabels = [], gVentas = [];
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
-    // Nombramientos payment: <20 = L220 each, >=20 = L320 each
-    var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
+    var pagoNombr = s.nombramientos < configNombr.umbral ? s.nombramientos * configNombr.pagoBajo : s.nombramientos * configNombr.pagoAlto;
     var comGZ = s.neta * 0.03;
     var base = 16000;
     var totalGZ = base + pagoNombr + comGZ;
@@ -1630,7 +1652,7 @@ async function loadComisiones() {
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
     var base = 16000;
-    var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
+    var pagoNombr = s.nombramientos < configNombr.umbral ? s.nombramientos * configNombr.pagoBajo : s.nombramientos * configNombr.pagoAlto;
     var comGZ = s.neta * 0.03;
     var totalPagoGZ = base + pagoNombr + comGZ;
     totalNominaGZ += totalPagoGZ;
@@ -1987,16 +2009,14 @@ async function guardarOperadorLog() {
         '</ul>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SB + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-          to: email,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Bienvenido al Equipo de Logistica',
-          message: logWelcomeBody,
-          botcheck: ''
+          destinatario: email,
+          asunto: 'ENIGME | Bienvenido al Equipo de Logistica',
+          contenido_html: logWelcomeBody,
+          tipo: 'bienvenida_logistica'
         })
       }).catch(function(){});
     }
@@ -2278,16 +2298,14 @@ async function doChangePasswordGD() {
         '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Su contrasena de acceso al portal de Gerencia Divisional ha sido cambiada exitosamente.</p>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si usted no realizo este cambio, contacte inmediatamente a administracion.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SB + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-          to: session.email,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Contrasena Actualizada',
-          message: emailBody,
-          botcheck: ''
+          destinatario: session.email,
+          asunto: 'ENIGME | Contrasena Actualizada',
+          contenido_html: emailBody,
+          tipo: 'cambio_password'
         })
       }).catch(function(){});
     }
@@ -2299,16 +2317,14 @@ async function doChangePasswordGD() {
       '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 8px;"><strong style="color:#CBAA63;">Gerencia:</strong> ' + esc(session.nombre) + ' (' + esc(session.codigo) + ')</p>' +
       '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0;">Fecha: ' + new Date().toLocaleString('es-HN') + '</p>'
     );
-    fetch('https://api.web3forms.com/submit', {
+    fetch(SB + '/functions/v1/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
-        to: 'carlosarmas@enigmeofficial.com',
-        from_name: 'ENIGME',
-        subject: 'ENIGME | Cambio de Contrasena - GD ' + (session.codigo || ''),
-        message: adminEmailBody,
-        botcheck: ''
+        destinatario: 'carlosarmas@enigmeofficial.com',
+        asunto: 'ENIGME | Cambio de Contrasena - GD ' + (session.codigo || ''),
+        contenido_html: adminEmailBody,
+        tipo: 'notificacion_admin'
       })
     }).catch(function(){});
 

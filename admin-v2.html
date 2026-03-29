@@ -306,12 +306,6 @@
       <label>Filtrar estado:</label>
       <select id="pedidosFilter" onchange="loadPedidos()">
         <option value="">Todos</option>
-        <option value="enviado">Enviado</option>
-        <option value="Pagado">Pagado</option>
-        <option value="Preparando">Preparando</option>
-        <option value="En Reparto">En Reparto</option>
-        <option value="Entregado">Entregado</option>
-        <option value="Cancelado">Cancelado</option>
       </select>
     </div>
     <div class="table-wrap"><table>
@@ -883,6 +877,14 @@
       <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Nota Importante</div>
       <p style="font-size:.8rem;color:var(--text-muted);line-height:1.6;">Los cambios en configuraci&oacute;n se aplican en todo el sistema: comisiones, salarios, impuestos, gerencia de zona y gerencia divisional. El salario de log&iacute;stica es fijo y modificable desde aqu&iacute;.</p>
     </div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;color:var(--gold);margin-bottom:12px;">Estados del Pedido</div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:12px;">Define los estados posibles para los pedidos web. Separa cada estado con coma.</p>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="cfgEstadosPedido" value="" style="flex:1;min-width:300px;" placeholder="Recibido,Confirmado,En Preparaci&oacute;n,Enviado,Entregado,Cancelado"/>
+        <button class="btn btn-gold btn-sm" onclick="guardarEstadosPedido()"><span>Guardar Estados</span></button>
+      </div>
+    </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Clave</th><th>Valor</th><th>Descripci&oacute;n</th><th>Acciones</th></tr></thead>
       <tbody id="configBody"></tbody>
@@ -915,6 +917,10 @@ var cachedSuscripciones = [];
 var cachedAnalytics = [];
 var cachedNotificaciones = [];
 var refreshInterval = null;
+var estadosPedidoConfig = ['Recibido','Confirmado','En Preparación','Enviado','Entregado','Cancelado'];
+var cfgUmbralNombAlto = 25;
+var cfgPagoNombAlto = 320;
+var cfgPagoNombBajo = 220;
 
 // ================================================================
 // SUPABASE REST HELPERS
@@ -953,11 +959,16 @@ async function supaPatch(table, id, data) {
   try {
     var r = await fetch(SUPA_URL + '/rest/v1/' + table + '?id=eq.' + id, {
       method: 'PATCH',
-      headers: supaHeaders(),
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(data)
     });
-    return r.ok ? await r.json() : null;
-  } catch(e) { console.error('supaPatch error:', e); return null; }
+    if (!r.ok) { console.error('supaPatch error:', r.status, await r.text()); }
+    return r.ok;
+  } catch(e) { console.error('supaPatch error:', e); return false; }
 }
 
 async function supaDelete(table, id) {
@@ -1017,16 +1028,14 @@ function doLogout() {
 async function forgotPassword() {
   var msgEl = document.getElementById('forgotMsg');
   try {
-    var r = await fetch('https://api.web3forms.com/submit', {
+    var r = await fetch(SUPA_URL + '/functions/v1/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        access_key: WEB3FORMS_KEY,
-        to: RECOVERY_EMAIL,
-        subject: 'ENIGME | Recuperacion de Contrasena',
-        from_name: 'ENIGME',
-        message: 'Su contrasena del panel de administracion ENIGME es: ' + ADMIN_PASSWORD,
-        botcheck: ''
+        destinatario: RECOVERY_EMAIL,
+        asunto: 'ENIGME | Recuperacion de Contrasena',
+        contenido_html: buildEnigmeEmailAdmin('Recuperacion de Contrasena', '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0;">Su contrasena del panel de administracion ENIGME es: <strong style="color:#CBAA63;">' + ADMIN_PASSWORD + '</strong></p>'),
+        tipo: 'recuperacion_password'
       })
     });
     if (r.ok) {
@@ -1136,9 +1145,88 @@ function parseItems(items) {
 }
 
 // ================================================================
+// LOAD ESTADOS PEDIDO CONFIG
+// ================================================================
+async function loadEstadosPedido() {
+  var configs = await supaGet('config_multinivel', '&clave=eq.estados_pedido');
+  if (configs && configs.length) {
+    var val = configs[0].valor;
+    estadosPedidoConfig = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    var input = document.getElementById('cfgEstadosPedido');
+    if (input) input.value = val;
+  } else {
+    // Create default
+    await supaPost('config_multinivel', {
+      clave: 'estados_pedido',
+      valor: 'Recibido,Confirmado,En Preparación,Enviado,Entregado,Cancelado',
+      tipo: 'text',
+      descripcion: 'Estados posibles para pedidos web (separados por coma)',
+      editable: true
+    });
+  }
+  // Update filter select
+  var filterSel = document.getElementById('pedidosFilter');
+  if (filterSel) {
+    while (filterSel.options.length > 1) filterSel.remove(1);
+    estadosPedidoConfig.forEach(function(st) {
+      var opt = document.createElement('option');
+      opt.value = st; opt.textContent = st;
+      filterSel.appendChild(opt);
+    });
+  }
+}
+
+async function guardarEstadosPedido() {
+  var input = document.getElementById('cfgEstadosPedido');
+  if (!input) return;
+  var val = input.value.trim();
+  if (!val) { showToast('Ingrese al menos un estado', true); return; }
+  var configs = await supaGet('config_multinivel', '&clave=eq.estados_pedido');
+  if (configs && configs.length) {
+    await supaPatch('config_multinivel', configs[0].id, { valor: val });
+  } else {
+    await supaPost('config_multinivel', {
+      clave: 'estados_pedido',
+      valor: val,
+      tipo: 'text',
+      descripcion: 'Estados posibles para pedidos web (separados por coma)',
+      editable: true
+    });
+  }
+  estadosPedidoConfig = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  // Update filter select
+  var filterSel = document.getElementById('pedidosFilter');
+  if (filterSel) {
+    while (filterSel.options.length > 1) filterSel.remove(1);
+    estadosPedidoConfig.forEach(function(st) {
+      var opt = document.createElement('option');
+      opt.value = st; opt.textContent = st;
+      filterSel.appendChild(opt);
+    });
+  }
+  showToast('Estados de pedido actualizados. Se aplicarán en la próxima carga de pedidos.');
+}
+
+// ================================================================
+// LOAD CONFIG VALUES (nombramientos thresholds)
+// ================================================================
+async function loadConfigValues() {
+  var configs = await supaGet('config_multinivel', '');
+  if (configs && configs.length) {
+    configs.forEach(function(c) {
+      if (c.clave === 'umbral_nombramientos_alto') cfgUmbralNombAlto = parseInt(c.valor) || 25;
+      if (c.clave === 'pago_nombramiento_alto') cfgPagoNombAlto = parseFloat(c.valor) || 320;
+      if (c.clave === 'pago_nombramiento_bajo') cfgPagoNombBajo = parseFloat(c.valor) || 220;
+    });
+  }
+}
+
+// ================================================================
 // LOAD ALL DATA
 // ================================================================
 function loadAllData() {
+  loadEstadosPedido();
+  loadConfigValues();
   loadPedidos();
   loadPostulaciones();
   loadCookies();
@@ -1208,7 +1296,7 @@ async function loadPedidos() {
     html += '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(itemsStr) + '">' + esc(itemsStr) + '</td>';
     html += '<td style="white-space:nowrap;">' + sym + total.toFixed(2) + '</td>';
     html += '<td><select class="btn-sm" style="border-color:' + estadoColor + ';color:' + estadoColor + ';" onchange="changePedidoStatus(' + p.id + ', this.value, \'' + esc(estado) + '\')" ' + (isEntregado ? 'disabled' : '') + '>';
-    ['Recibido','Confirmado','En Preparación','Enviado','Entregado','Cancelado'].forEach(function(st){
+    estadosPedidoConfig.forEach(function(st){
       html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st + '</option>';
     });
     html += '</select></td>';
@@ -1399,11 +1487,15 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
 async function deletePedido(id) {
   if (!confirm('Enviar pedido #' + id + ' a la papelera?')) return;
   try {
-    await supaPatch('web_pedidos', id, { archivado: true });
-    showToast('Pedido enviado a la papelera');
-    loadPedidos();
+    var ok = await supaPatch('web_pedidos', id, { archivado: true });
+    if (ok) {
+      showToast('Pedido enviado a la papelera');
+      loadPedidos();
+    } else {
+      showToast('Error al archivar pedido', true);
+    }
   } catch(e) {
-    showToast('Error al archivar: ' + (e.message || e), 'error');
+    showToast('Error: ' + (e.message || e), true);
   }
 }
 
@@ -1413,7 +1505,11 @@ async function eliminarTodosPedidos() {
   try {
     var res = await fetch(SUPA_URL + '/rest/v1/web_pedidos?id=gt.0&archivado=eq.false', {
       method: 'PATCH',
-      headers: supaHeaders(),
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({ archivado: true })
     });
     if (res.ok) {
@@ -2197,7 +2293,7 @@ function exportSimulacion() {
 
   var ventaBruta = numAsesoras * ventaPromedio;
   var ventaNeta = ventaBruta * 0.85;
-  var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
+  var pagoPerNom = numAsesoras >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
   var costoNom = numAsesoras * pagoPerNom;
   var costoSalGZ = SUELDO_GZ * numGZ;
   var dGastos = ventaNeta * MODELO.gastosPagos;
@@ -2430,7 +2526,7 @@ async function crearGerenciaDivisional() {
       body: JSON.stringify({ tipo: 'gerente_divisional', nombre: nombre, dni: dni || null, telefono: telefono || null, email: email || null, direccion: direccion || null, codigo: codigo, numero_cuenta: cuenta || null, nombre_banco: banco || null, fecha_ingreso: fechaIngreso, departamento: deptoNombres.join(', '), password_temporal: password, archivo_dni: urlDni, archivo_cuenta: urlCuenta, archivo_extra: urlExtra })
     }).catch(function(e){ console.warn('registro_alta GD:', e); });
     showToast('Gerencia divisional creada exitosamente');
-    // Send welcome email via Web3Forms
+    // Send welcome email via Edge Function
     if (email) {
       var deptoNames = [];
       if (deptosContainer) {
@@ -2447,16 +2543,14 @@ async function crearGerenciaDivisional() {
         '</table>' +
         '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso.</p>'
       );
-      fetch('https://api.web3forms.com/submit', {
+      fetch(SUPA_URL + '/functions/v1/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
-          to: email,
-          from_name: 'ENIGME',
-          subject: 'ENIGME | Bienvenido/a - Gerencia Divisional',
-          message: gdWelcomeBody,
-          botcheck: ''
+          destinatario: email,
+          asunto: 'ENIGME | Bienvenido/a - Gerencia Divisional',
+          contenido_html: gdWelcomeBody,
+          tipo: 'bienvenida_gd'
         })
       }).catch(function(){});
     }
@@ -3544,7 +3638,7 @@ async function loadComisiones() {
     var pagoNomDetails = [];
     gdGerentes.forEach(function(gz) {
       var nomCount = nomPerGerente[gz.id] || 0;
-      var pagoPerNom = nomCount >= 20 ? 320 : 220;
+      var pagoPerNom = nomCount >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
       var pagoTotal = nomCount * pagoPerNom;
       totalPagoNom += pagoTotal;
       if (nomCount > 0) {
@@ -3617,7 +3711,7 @@ async function loadComisiones() {
     var dEmpresa = ventaNeta * MODELO.empresa;
 
     // --- GASTOS DEL 28% (lo que hay que pagar) ---
-    var pagoPerNom = numAsesoras >= 20 ? 320 : 220;
+    var pagoPerNom = numAsesoras >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
     var costoNombramientos = numAsesoras * pagoPerNom;
     var costoSalariosGZ = SUELDO_GZ * numGZ;
     var totalGastosReales = costoSalariosGZ + costoNombramientos;
@@ -3725,7 +3819,7 @@ async function loadComisiones() {
     '</div>' +
     '<div style="font-size:.68rem;color:var(--text-muted);padding:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;line-height:1.7;">' +
     '<strong style="color:var(--gold);">MODELO:</strong> Venta Bruta - <strong style="color:#b08fd0;">15% asesoras</strong> = <strong style="color:var(--success);">Venta Neta (85%)</strong>. De la Neta: 22% inserci\u00f3n + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 85%<br>' +
-    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u226419 \u2192 L220 c/u &bull; \u226520 \u2192 L320 c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
+    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u2264' + (cfgUmbralNombAlto - 1) + ' \u2192 L' + cfgPagoNombBajo + ' c/u &bull; \u2265' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombAlto + ' c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
     '</div>' +
     '<div id="simResultado"></div>' +
     '<div style="margin-top:16px;text-align:right;"><button class="btn btn-gold" onclick="exportSimulacion()" style="padding:10px 24px;border:1px solid var(--gold-dim);color:var(--gold);background:transparent;font-family:\'Jost\',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Exportar Simulaci\u00f3n Excel</button></div>' +
@@ -5423,7 +5517,11 @@ async function restaurarPapelera(papeleraId, tablaOrigen, registroId) {
     if (tablaOrigen && registroId) {
       await fetch(SUPA_URL + '/rest/v1/' + tablaOrigen + '?id=eq.' + registroId, {
         method: 'PATCH',
-        headers: supaHeaders(),
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ archivado: false })
       });
     }
@@ -5495,7 +5593,7 @@ async function guardarConfig(id, clave) {
 
     if (claveNorm.indexOf('nombramientos_altos') >= 0) {
       msg = 'Umbral de nombramientos altos actualizado a ' + newVal + '.';
-      detalle = ' Desde ' + newVal + ' nombramientos se contar\u00e1 el pago de L320. Se aplica en todo el sistema.';
+      detalle = ' Desde ' + newVal + ' nombramientos se contar\u00e1 el pago alto. Se aplica en todo el sistema.';
     } else if (claveNorm.indexOf('salario') >= 0 || claveNorm.indexOf('sueldo') >= 0) {
       msg = 'Salario actualizado a L' + newVal + '.';
       detalle = ' Este cambio afecta c\u00e1lculos de comisiones, punto de equilibrio y reportes de gerencia.';
