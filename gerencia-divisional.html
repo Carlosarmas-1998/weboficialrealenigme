@@ -1038,12 +1038,10 @@ async function saveEditGZ() {
   var g = gerentes.find(function(x){ return x.id === id; });
   if (!g) { errEl.textContent = 'Gerente no encontrado.'; return; }
 
+  // DNI, nombre, fecha_nacimiento are NOT editable after creation
   var body = {
-    dni: document.getElementById('editDni').value.trim(),
-    nombre: document.getElementById('editNombre').value.trim(),
     telefono: document.getElementById('editTelefono').value.trim(),
     email: document.getElementById('editEmail').value.trim() || null,
-    fecha_nacimiento: document.getElementById('editFechaNac').value || null,
     numero_cuenta: document.getElementById('editCuenta').value.trim(),
     nombre_banco: document.getElementById('editBanco').value.trim(),
     rtn: document.getElementById('editRtn').value.trim() || null,
@@ -1051,8 +1049,8 @@ async function saveEditGZ() {
     fecha_ingreso: document.getElementById('editFechaIngreso').value || null
   };
 
-  if (!body.dni || !body.nombre || !body.telefono) {
-    errEl.textContent = 'DNI, nombre y tel\u00e9fono son obligatorios.'; return;
+  if (!body.telefono) {
+    errEl.textContent = 'El tel\u00e9fono es obligatorio.'; return;
   }
 
   try {

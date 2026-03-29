@@ -730,6 +730,23 @@ async function crearSector(num) {
   } catch(e) { alert('Error al crear sector: ' + (e.message || JSON.stringify(e))); }
 }
 
+function setCoordFieldsEditable(editable) {
+  // When editing, lock nombre, DNI, fecha_nacimiento
+  var lockFields = ['mcNombre', 'mcDni', 'mcFechaNac'];
+  lockFields.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (editable) {
+      el.removeAttribute('readonly');
+      el.style.opacity = '1';
+      el.style.cursor = '';
+    } else {
+      el.setAttribute('readonly', true);
+      el.style.opacity = '0.6';
+      el.style.cursor = 'not-allowed';
+    }
+  });
+}
+
 function abrirAsignarCoord(sectorId, sectorNum) {
   document.getElementById('modalCoordTitle').textContent = 'Asignar Coordinador - S' + sectorNum;
   document.getElementById('mcSectorId').value = sectorId;
@@ -738,6 +755,7 @@ function abrirAsignarCoord(sectorId, sectorNum) {
   ['mcNombre','mcDni','mcTelefono','mcEmail','mcDireccion','mcRtn','mcFechaNac','mcFechaIngreso','mcCuenta','mcBanco'].forEach(function(id){ document.getElementById(id).value = ''; });
   document.getElementById('mcError').textContent = '';
   document.getElementById('mcSuccess').textContent = '';
+  setCoordFieldsEditable(true);
   document.getElementById('modalCoord').classList.add('active');
 }
 
@@ -760,6 +778,7 @@ function abrirEditarCoord(sectorId, sectorNum, coordId) {
   document.getElementById('mcBanco').value = coord.nombre_banco || '';
   document.getElementById('mcError').textContent = '';
   document.getElementById('mcSuccess').textContent = '';
+  setCoordFieldsEditable(false);
   document.getElementById('modalCoord').classList.add('active');
 }
 
@@ -818,18 +837,33 @@ async function guardarCoordinador() {
     } catch(dniErr) { console.warn('Error validando DNI:', dniErr); }
   }
 
-  var payload = {
-    nombre: nombre,
-    dni: dni,
-    telefono: telefono,
-    email: email || null,
-    direccion: direccion,
-    rtn: document.getElementById('mcRtn').value.trim() || null,
-    fecha_nacimiento: document.getElementById('mcFechaNac').value || null,
-    fecha_ingreso: document.getElementById('mcFechaIngreso').value || null,
-    numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
-    nombre_banco: document.getElementById('mcBanco').value.trim() || null
-  };
+  var payload;
+  if (coordId) {
+    // Editing: do NOT send nombre, dni, fecha_nacimiento (they are locked)
+    payload = {
+      telefono: telefono,
+      email: email || null,
+      direccion: direccion,
+      rtn: document.getElementById('mcRtn').value.trim() || null,
+      fecha_ingreso: document.getElementById('mcFechaIngreso').value || null,
+      numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
+      nombre_banco: document.getElementById('mcBanco').value.trim() || null
+    };
+  } else {
+    // Creating: include all fields
+    payload = {
+      nombre: nombre,
+      dni: dni,
+      telefono: telefono,
+      email: email || null,
+      direccion: direccion,
+      rtn: document.getElementById('mcRtn').value.trim() || null,
+      fecha_nacimiento: document.getElementById('mcFechaNac').value || null,
+      fecha_ingreso: document.getElementById('mcFechaIngreso').value || null,
+      numero_cuenta: document.getElementById('mcCuenta').value.trim() || null,
+      nombre_banco: document.getElementById('mcBanco').value.trim() || null
+    };
+  }
 
   try {
     if (coordId) {
