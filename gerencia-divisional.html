@@ -1311,12 +1311,8 @@ async function loadDashboard() {
   var gLabels = [], gVentas = [];
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
-    var pagoNombr;
-    if (s.nombramientos <= configNombr.umbral) {
-      pagoNombr = s.nombramientos * configNombr.pagoBajo;
-    } else {
-      pagoNombr = configNombr.umbral * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral) * configNombr.pagoAlto;
-    }
+    var tarifaNom = s.nombramientos <= configNombr.umbral ? configNombr.pagoBajo : configNombr.pagoAlto;
+    var pagoNombr = s.nombramientos * tarifaNom;
     var comGZ = s.neta * 0.03;
     var base = 16000;
     var totalGZ = base + pagoNombr + comGZ;
@@ -1657,12 +1653,8 @@ async function loadComisiones() {
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
     var base = 16000;
-    var pagoNombr;
-    if (s.nombramientos <= configNombr.umbral) {
-      pagoNombr = s.nombramientos * configNombr.pagoBajo;
-    } else {
-      pagoNombr = configNombr.umbral * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral) * configNombr.pagoAlto;
-    }
+    var tarifaNom = s.nombramientos <= configNombr.umbral ? configNombr.pagoBajo : configNombr.pagoAlto;
+    var pagoNombr = s.nombramientos * tarifaNom;
     var comGZ = s.neta * 0.03;
     var totalPagoGZ = base + pagoNombr + comGZ;
     totalNominaGZ += totalPagoGZ;

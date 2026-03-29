@@ -2324,12 +2324,8 @@ function exportSimulacion() {
 
   var ventaBruta = numAsesoras * ventaPromedio;
   var ventaNeta = ventaBruta * 0.85;
-  var costoNom;
-  if (numAsesoras <= cfgUmbralNombAlto) {
-    costoNom = numAsesoras * cfgPagoNombBajo;
-  } else {
-    costoNom = cfgUmbralNombAlto * cfgPagoNombBajo + (numAsesoras - cfgUmbralNombAlto) * cfgPagoNombAlto;
-  }
+  var tarifaNom = numAsesoras <= cfgUmbralNombAlto ? cfgPagoNombBajo : cfgPagoNombAlto;
+  var costoNom = numAsesoras * tarifaNom;
   var costoSalGZ = SUELDO_GZ * numGZ;
   var dGastos = ventaNeta * MODELO.gastosPagos;
   var sobrante = dGastos - costoSalGZ - costoNom;
@@ -2359,7 +2355,7 @@ function exportSimulacion() {
     { 'Concepto': '--- SE PAGA (Del Fondo 28% de Neta) ---', '%': '', 'Monto (L)': '' },
     { 'Concepto': 'Fondo 28% disponible', '%': '28% de Neta', 'Monto (L)': dGastos },
     { 'Concepto': 'Salario GZ (' + numGZ + ' x L16,000)', '%': '', 'Monto (L)': costoSalGZ },
-    { 'Concepto': 'Nombramientos (' + (numAsesoras <= cfgUmbralNombAlto ? numAsesoras + ' x L' + cfgPagoNombBajo : cfgUmbralNombAlto + ' x L' + cfgPagoNombBajo + ' + ' + (numAsesoras - cfgUmbralNombAlto) + ' x L' + cfgPagoNombAlto) + ')', '%': '', 'Monto (L)': costoNom },
+    { 'Concepto': 'Nombramientos (' + numAsesoras + ' x L' + tarifaNom + (numAsesoras <= cfgUmbralNombAlto ? ' [≤' + cfgUmbralNombAlto + ']' : ' [>' + cfgUmbralNombAlto + ']') + ')', '%': '', 'Monto (L)': costoNom },
     { 'Concepto': 'Total Pagos', '%': '', 'Monto (L)': costoSalGZ + costoNom },
     { 'Concepto': sobrante >= 0 ? 'SOBRANTE OPERATIVO' : 'DEFICIT', '%': '', 'Monto (L)': sobrante },
     { 'Concepto': '', '%': '', 'Monto (L)': '' },
@@ -3674,16 +3670,11 @@ async function loadComisiones() {
     gdGerentes.forEach(function(gz) {
       var nomCount = nomPerGerente[gz.id] || 0;
       var pagoTotal;
-      if (nomCount <= cfgUmbralNombAlto) {
-        pagoTotal = nomCount * cfgPagoNombBajo;
-      } else {
-        pagoTotal = cfgUmbralNombAlto * cfgPagoNombBajo + (nomCount - cfgUmbralNombAlto) * cfgPagoNombAlto;
-      }
+      var tarifaN = nomCount <= cfgUmbralNombAlto ? cfgPagoNombBajo : cfgPagoNombAlto;
+      pagoTotal = nomCount * tarifaN;
       totalPagoNom += pagoTotal;
       if (nomCount > 0) {
-        var nomDetail = nomCount <= cfgUmbralNombAlto
-          ? nomCount + ' x L' + cfgPagoNombBajo
-          : cfgUmbralNombAlto + ' x L' + cfgPagoNombBajo + ' + ' + (nomCount - cfgUmbralNombAlto) + ' x L' + cfgPagoNombAlto;
+        var nomDetail = nomCount + ' x L' + tarifaN + (nomCount <= cfgUmbralNombAlto ? '' : ' (>' + cfgUmbralNombAlto + ')');
         pagoNomDetails.push(gz.nombre + ': ' + nomDetail);
       }
     });
@@ -3753,12 +3744,8 @@ async function loadComisiones() {
     var dEmpresa = ventaNeta * MODELO.empresa;
 
     // --- GASTOS DEL 28% (lo que hay que pagar) ---
-    var costoNombramientos;
-    if (numAsesoras <= cfgUmbralNombAlto) {
-      costoNombramientos = numAsesoras * cfgPagoNombBajo;
-    } else {
-      costoNombramientos = cfgUmbralNombAlto * cfgPagoNombBajo + (numAsesoras - cfgUmbralNombAlto) * cfgPagoNombAlto;
-    }
+    var tarifaNomSim = numAsesoras <= cfgUmbralNombAlto ? cfgPagoNombBajo : cfgPagoNombAlto;
+    var costoNombramientos = numAsesoras * tarifaNomSim;
     var costoSalariosGZ = SUELDO_GZ * numGZ;
     var totalGastosReales = costoSalariosGZ + costoNombramientos;
     var sobranteFondo28 = dGastosPagos - totalGastosReales;
@@ -3809,7 +3796,7 @@ async function loadComisiones() {
     html += '<div class="table-wrap"><table>';
     html += '<thead><tr><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead><tbody>';
     html += '<tr><td>Salario Gerente(s) de Zona</td><td>' + numGZ + ' GZ x ' + L(SUELDO_GZ) + '</td><td style="color:var(--warn);">' + L(costoSalariosGZ) + '</td></tr>';
-    html += '<tr><td>Pago por Nombramientos</td><td>' + (numAsesoras <= cfgUmbralNombAlto ? numAsesoras + ' x ' + L(cfgPagoNombBajo) : cfgUmbralNombAlto + ' x ' + L(cfgPagoNombBajo) + ' + ' + (numAsesoras - cfgUmbralNombAlto) + ' x ' + L(cfgPagoNombAlto)) + '</td><td style="color:var(--warn);">' + L(costoNombramientos) + '</td></tr>';
+    html += '<tr><td>Pago por Nombramientos</td><td>' + numAsesoras + ' x ' + L(tarifaNomSim) + (numAsesoras <= cfgUmbralNombAlto ? ' (\u2264' + cfgUmbralNombAlto + ')' : ' (>' + cfgUmbralNombAlto + ')') + '</td><td style="color:var(--warn);">' + L(costoNombramientos) + '</td></tr>';
     html += '<tr style="border-top:2px solid var(--border);"><td style="font-weight:600;">Total Pagos</td><td></td><td style="font-weight:600;color:var(--warn);">' + L(totalGastosReales) + '</td></tr>';
     html += '<tr style="border-top:2px solid ' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';background:' + (esRentable ? 'rgba(107,158,120,0.08)' : 'rgba(158,107,107,0.08)') + ';"><td style="font-weight:700;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '\u2705 SOBRANTE OPERATIVO' : '\ud83d\udd34 D\u00c9FICIT') + '</td><td style="font-size:.75rem;color:var(--text-muted);">' + L(dGastosPagos) + ' - ' + L(totalGastosReales) + '</td><td style="font-weight:700;font-size:1.1rem;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</td></tr>';
     html += '</tbody></table></div></div>';
@@ -3865,7 +3852,7 @@ async function loadComisiones() {
     '</div>' +
     '<div style="font-size:.68rem;color:var(--text-muted);padding:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;line-height:1.7;">' +
     '<strong style="color:var(--gold);">MODELO:</strong> Venta Bruta - <strong style="color:#b08fd0;">15% asesoras</strong> = <strong style="color:var(--success);">Venta Neta (85%)</strong>. De la Neta: 22% inserci\u00f3n + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 85%<br>' +
-    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> 1-' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombBajo + ' c/u &bull; >' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombAlto + ' c/u (escalonado) &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
+    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u2264' + cfgUmbralNombAlto + ' \u2192 todos a L' + cfgPagoNombBajo + ' c/u &bull; >' + cfgUmbralNombAlto + ' \u2192 todos a L' + cfgPagoNombAlto + ' c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
     '</div>' +
     '<div id="simResultado"></div>' +
     '<div style="margin-top:16px;text-align:right;"><button class="btn btn-gold" onclick="exportSimulacion()" style="padding:10px 24px;border:1px solid var(--gold-dim);color:var(--gold);background:transparent;font-family:\'Jost\',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Exportar Simulaci\u00f3n Excel</button></div>' +

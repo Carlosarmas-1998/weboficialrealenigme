@@ -1646,19 +1646,13 @@ function renderSalary(totalNeto, totalNoms, campanaId) {
   }
 
   var baseSalary = 16000;
-  var pagoNombr;
-  if (totalNoms <= configNombr.umbral) {
-    pagoNombr = totalNoms * configNombr.pagoBajo;
-  } else {
-    pagoNombr = configNombr.umbral * configNombr.pagoBajo + (totalNoms - configNombr.umbral) * configNombr.pagoAlto;
-  }
+  var tarifaNom = totalNoms <= configNombr.umbral ? configNombr.pagoBajo : configNombr.pagoAlto;
+  var pagoNombr = totalNoms * tarifaNom;
   var nomPayment = pagoNombr;
   var commission = totalNeto * 0.03;
   var totalSalary = baseSalary + nomPayment + commission;
 
-  var nomDesc = totalNoms <= configNombr.umbral
-    ? totalNoms + ' x L' + configNombr.pagoBajo + ' [\u2264' + configNombr.umbral + ']'
-    : configNombr.umbral + ' x L' + configNombr.pagoBajo + ' + ' + (totalNoms - configNombr.umbral) + ' x L' + configNombr.pagoAlto + ' [>' + configNombr.umbral + ']';
+  var nomDesc = totalNoms + ' x L' + tarifaNom + (totalNoms <= configNombr.umbral ? ' [\u2264' + configNombr.umbral + ']' : ' [>' + configNombr.umbral + ']');
   el.innerHTML =
     '<div class="salary-row"><span class="sr-label">Salario Base</span><span class="sr-value">' + fmtL(baseSalary) + '</span></div>' +
     '<div class="salary-row"><span class="sr-label">Nombramientos (' + nomDesc + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +
