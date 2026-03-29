@@ -200,6 +200,7 @@
 <!-- ═══════════════════ TABS ═══════════════════ -->
 <div class="tabs">
   <button class="tab-btn active" data-tab="pedidos">Pedidos Asignados</button>
+  <button class="tab-btn" data-tab="ruta">📍 Ruta GPS</button>
   <button class="tab-btn" data-tab="directorio">Directorio</button>
   <button class="tab-btn" data-tab="salario">Mi Salario</button>
   <button class="tab-btn" data-tab="cajas">Resumen por Caja</button>
@@ -223,6 +224,19 @@
     </div>
     <div id="pedidosList">
       <div class="loading">Cargando pedidos...</div>
+    </div>
+  </div>
+
+  <!-- ── TAB: RUTA GPS ── -->
+  <div class="tab-panel" id="panel-ruta">
+    <div class="card">
+      <div class="card-title">📍 Organizar Entregas por Cercanía</div>
+      <p style="font-size:0.75rem;color:var(--gris);margin-bottom:16px;">Usa tu ubicación actual para ordenar los pedidos pendientes de entrega por distancia. Los más cercanos aparecen primero.</p>
+      <button class="btn" id="btnGeolocate" onclick="initGPSRoute()">📍 Obtener Mi Ubicación y Ordenar Ruta</button>
+      <div id="gpsStatus" style="font-size:0.7rem;color:var(--gris);margin-top:8px;"></div>
+    </div>
+    <div id="rutaContent">
+      <div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-text">Presiona el botón para organizar tu ruta</div><div class="empty-sub">Se ordenarán los pedidos en reparto por cercanía a tu ubicación</div></div>
     </div>
   </div>
 
@@ -409,8 +423,8 @@ async function loadAllData() {
 
     const pedidoIds = [...new Set(asigs.map(a => a.pedido_id))];
 
-    // Load pedidos
-    const pedidos = await api('pedidos', 'id=in.(' + pedidoIds.join(',') + ')');
+    // Load pedidos (excluir archivados)
+    const pedidos = await api('pedidos', 'id=in.(' + pedidoIds.join(',') + ')&or=(archivado.eq.false,archivado.is.null)');
     pedidos.forEach(p => pedidosMap[p.id] = p);
 
     // Load detalles
@@ -420,13 +434,13 @@ async function loadAllData() {
       detallesMap[d.pedido_id].push(d);
     });
 
-    // Load vendedoras from division
-    const vendedoras = await api('vendedoras', 'select=*');
+    // Load vendedoras (solo activas, no archivadas)
+    const vendedoras = await api('vendedoras', 'select=*&or=(archivado.eq.false,archivado.is.null)');
     vendedoras.forEach(v => vendedorasMap[v.id] = v);
     allVendedoras = vendedoras;
 
-    // Load coordinadores
-    const coordinadores = await api('coordinadores', 'select=*');
+    // Load coordinadores (solo activos, no archivados)
+    const coordinadores = await api('coordinadores', 'select=*&or=(archivado.eq.false,archivado.is.null)');
     coordinadores.forEach(c => coordinadoresMap[c.id] = c);
     allCoordinadores = coordinadores;
 
@@ -438,8 +452,8 @@ async function loadAllData() {
     const sectores = await api('sectores', 'select=*');
     sectores.forEach(s => sectoresMap[s.id] = s);
 
-    // Load gerentes
-    const gerentes = await api('gerentes_zona', 'select=*');
+    // Load gerentes (solo activos)
+    const gerentes = await api('gerentes_zona', 'select=*&or=(archivado.eq.false,archivado.is.null)');
     gerentes.forEach(g => gerentesMap[g.id] = g);
 
     renderPedidos();
@@ -1018,6 +1032,165 @@ document.getElementById('modalEntrega').addEventListener('click', function(e) {
 document.getElementById('modalEmpacado').addEventListener('click', function(e) {
   if (e.target === this) closeModalEmpacado();
 });
+
+/* ═══════════════════════════════════════════════════
+   TAB: RUTA GPS — Ordenar entregas por cercanía
+   ═══════════════════════════════════════════════════ */
+let myLat = null, myLng = null;
+
+function initGPSRoute() {
+  const statusEl = document.getElementById('gpsStatus');
+  const btn = document.getElementById('btnGeolocate');
+  btn.disabled = true;
+  statusEl.innerHTML = '⏳ Obteniendo ubicación GPS...';
+
+  if (!navigator.geolocation) {
+    statusEl.innerHTML = '❌ Tu navegador no soporta GPS. Se ordenará por dirección alfabéticamente.';
+    btn.disabled = false;
+    renderRutaSinGPS();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      myLat = pos.coords.latitude;
+      myLng = pos.coords.longitude;
+      statusEl.innerHTML = '✅ Ubicación obtenida — Ordenando entregas por cercanía...';
+      btn.disabled = false;
+      geocodeAndRender();
+    },
+    function(err) {
+      statusEl.innerHTML = '⚠️ No se pudo obtener GPS (' + err.message + '). Ordenando por dirección.';
+      btn.disabled = false;
+      renderRutaSinGPS();
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+  );
+}
+
+// Get pending deliveries (en_reparto state)
+function getPendingDeliveries() {
+  return asignaciones.filter(a => a.estado === 'en_reparto' || a.estado === 'empacado').map(a => {
+    const p = pedidosMap[a.pedido_id];
+    if (!p) return null;
+    const v = vendedorasMap[p.vendedora_id];
+    return {
+      asig: a,
+      pedido: p,
+      vendedora: v,
+      direccion: p.direccion_entrega || (v ? v.direccion : '') || 'Sin dirección',
+      nombre: v ? v.nombre : 'Desconocido',
+      codigo: p.codigo_pedido || '#' + p.id,
+      telefono: p.telefono_entrega || (v ? v.telefono : ''),
+      estado: a.estado,
+      dist: null, // will be calculated
+      lat: null, lng: null
+    };
+  }).filter(Boolean);
+}
+
+async function geocodeAndRender() {
+  const deliveries = getPendingDeliveries();
+  if (deliveries.length === 0) {
+    document.getElementById('rutaContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">No hay entregas pendientes</div><div class="empty-sub">Todos los pedidos han sido entregados</div></div>';
+    return;
+  }
+
+  // Try to geocode each address using Nominatim (free, no API key)
+  const statusEl = document.getElementById('gpsStatus');
+  statusEl.innerHTML = '🔍 Geocodificando ' + deliveries.length + ' direcciones...';
+
+  for (let i = 0; i < deliveries.length; i++) {
+    const d = deliveries[i];
+    try {
+      // Add "Honduras" to improve geocoding accuracy
+      const query = encodeURIComponent(d.direccion + ', Honduras');
+      const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + query + '&limit=1', {
+        headers: { 'User-Agent': 'ENIGME-Logistics/1.0' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        d.lat = parseFloat(data[0].lat);
+        d.lng = parseFloat(data[0].lon);
+        d.dist = haversine(myLat, myLng, d.lat, d.lng);
+      }
+    } catch(e) {}
+    // Rate limit: 1 request per second (Nominatim policy)
+    if (i < deliveries.length - 1) await new Promise(r => setTimeout(r, 1100));
+  }
+
+  // Sort by distance (closest first), unknowns at end
+  deliveries.sort((a, b) => {
+    if (a.dist === null && b.dist === null) return 0;
+    if (a.dist === null) return 1;
+    if (b.dist === null) return -1;
+    return a.dist - b.dist;
+  });
+
+  statusEl.innerHTML = '✅ Ruta optimizada — ' + deliveries.length + ' entregas ordenadas por cercanía';
+  renderRutaList(deliveries, true);
+}
+
+function renderRutaSinGPS() {
+  const deliveries = getPendingDeliveries();
+  if (deliveries.length === 0) {
+    document.getElementById('rutaContent').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">No hay entregas pendientes</div></div>';
+    return;
+  }
+  // Sort alphabetically by address
+  deliveries.sort((a, b) => a.direccion.localeCompare(b.direccion));
+  renderRutaList(deliveries, false);
+}
+
+function renderRutaList(deliveries, hasGPS) {
+  let html = '';
+  deliveries.forEach((d, idx) => {
+    const distText = d.dist !== null ? (d.dist < 1 ? Math.round(d.dist * 1000) + ' m' : d.dist.toFixed(1) + ' km') : 'Dist. desconocida';
+    const estadoBadge = d.estado === 'en_reparto'
+      ? '<span class="badge badge-en_reparto">En Reparto</span>'
+      : '<span class="badge badge-empacado">Empacado</span>';
+    const mapsUrl = d.lat && d.lng
+      ? 'https://www.google.com/maps/dir/?api=1&destination=' + d.lat + ',' + d.lng
+      : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(d.direccion + ', Honduras');
+
+    html += '<div class="pedido-card" style="border-left:3px solid ' + (d.estado === 'en_reparto' ? 'var(--warning)' : 'var(--info)') + ';">';
+    html += '<div class="pedido-header">';
+    html += '<div>';
+    html += '<div style="font-family:Cinzel,serif;font-size:0.7rem;color:var(--dorado);letter-spacing:0.1em;margin-bottom:2px;">PARADA ' + (idx + 1) + '</div>';
+    html += '<div class="pedido-code">' + d.codigo + '</div>';
+    html += '</div>';
+    html += '<div style="text-align:right;">' + estadoBadge;
+    if (hasGPS && d.dist !== null) {
+      html += '<div style="font-size:0.8rem;color:var(--dorado);font-weight:700;margin-top:4px;">📍 ' + distText + '</div>';
+    }
+    html += '</div></div>';
+    html += '<div class="pedido-body">';
+    html += '<div class="pedido-info-grid">';
+    html += '<div class="pedido-info-item"><div class="label">Destinatario</div><div style="font-weight:600;">' + d.nombre + '</div></div>';
+    html += '<div class="pedido-info-item"><div class="label">Dirección</div><div>' + d.direccion + '</div></div>';
+    html += '<div class="pedido-info-item"><div class="label">Teléfono</div><div>' + (d.telefono || '—') + '</div></div>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">';
+    html += '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="btn btn-sm" style="text-decoration:none;background:var(--dorado);color:var(--carbon);border-color:var(--dorado);">🗺️ Abrir en Google Maps</a>';
+    if (d.telefono) {
+      html += '<a href="tel:' + d.telefono + '" class="btn btn-sm btn-outline" style="text-decoration:none;">📞 Llamar</a>';
+      html += '<a href="https://wa.me/' + d.telefono.replace(/[^0-9]/g, '') + '?text=Hola%20' + encodeURIComponent(d.nombre) + ',%20soy%20de%20ENIGME.%20Su%20pedido%20' + encodeURIComponent(d.codigo) + '%20está%20en%20camino." target="_blank" rel="noopener" class="btn btn-sm" style="text-decoration:none;background:#25D366;color:#fff;border-color:#25D366;">💬 WhatsApp</a>';
+    }
+    html += '</div></div></div>';
+  });
+
+  document.getElementById('rutaContent').innerHTML = html;
+}
+
+// Haversine formula for distance between 2 GPS coordinates (in km)
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 /* ═══════════════════════════════════════════════════
    INIT
