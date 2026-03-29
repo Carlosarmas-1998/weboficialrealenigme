@@ -450,12 +450,59 @@
       })
       .then(function(res) {
         if (res.ok || res.status === 201) {
-          document.getElementById('email-success').style.display = 'block';
-          btn.innerText = 'REGISTRADO';
+          var successEl = document.getElementById('email-success');
+          successEl.innerHTML = 'Bienvenida al club exclusivo, querida. Ser&aacute; de las primeras en descubrir la Colecci&oacute;n Ella. Revise su correo para un mensaje especial de La Casa &Egrave;NIGME.';
+          successEl.style.display = 'block';
+          btn.innerText = 'REGISTRADA CON EXCLUSIVIDAD';
           emailInput.style.display = 'none';
           localStorage.setItem('enigme_ella_notify', 'true');
+
+          // Queue welcome email
+          var contenidoHtml = '<div style="margin:0;padding:0;background-color:#0a0a0a;font-family:Georgia,\'Times New Roman\',serif;">'
+            + '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a;padding:40px 0;">'
+            + '<tr><td align="center">'
+            + '<table width="600" cellpadding="0" cellspacing="0" style="background-color:#111111;border:1px solid #CBAA63;max-width:600px;width:100%;">'
+            + '<tr><td style="padding:40px 30px 20px;text-align:center;border-bottom:1px solid rgba(203,170,99,0.3);">'
+            + '<h1 style="margin:0;font-family:Georgia,\'Times New Roman\',serif;font-size:28px;letter-spacing:8px;color:#CBAA63;font-weight:400;">&#200; N I G M E</h1>'
+            + '</td></tr>'
+            + '<tr><td style="padding:40px 35px 10px;text-align:center;">'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#CBAA63;margin:0 0 25px;">Bienvenida al Club Exclusivo</p>'
+            + '<h2 style="font-family:Georgia,\'Times New Roman\',serif;font-size:22px;color:#ffffff;font-weight:400;letter-spacing:2px;margin:0 0 25px;line-height:1.4;">Ha sido admitida en nuestro c&iacute;rculo m&aacute;s selecto</h2>'
+            + '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 30px;"></div>'
+            + '</td></tr>'
+            + '<tr><td style="padding:0 35px 15px;text-align:center;">'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;color:#cccccc;line-height:2;margin:0 0 20px;">Ser&aacute; de las primeras en conocer la <strong style="color:#CBAA63;">Colecci&oacute;n Ella</strong>, nuestra l&iacute;nea de vestidos boutique que est&aacute; siendo confeccionada bajo los m&aacute;s altos est&aacute;ndares de la haute couture.</p>'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;color:#cccccc;line-height:2;margin:0 0 20px;">Cada pieza est&aacute; siendo elaborada con dedicaci&oacute;n artesanal, tejidos selectos y un cuidado que solo La Casa &#200;NIGME puede ofrecer.</p>'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:14px;color:#cccccc;line-height:2;margin:0 0 25px;">Como miembro de este club, recibir&aacute;: <strong style="color:#CBAA63;">acceso anticipado exclusivo</strong> y <strong style="color:#CBAA63;">precios VIP de prelanzamiento</strong> antes que nadie.</p>'
+            + '</td></tr>'
+            + '<tr><td style="padding:20px 35px 40px;text-align:center;border-top:1px solid rgba(203,170,99,0.15);">'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:12px;color:#CBAA63;letter-spacing:3px;margin:0 0 5px;font-style:italic;">Con distinci&oacute;n,</p>'
+            + '<p style="font-family:Georgia,\'Times New Roman\',serif;font-size:16px;color:#ffffff;letter-spacing:5px;margin:0;">LA CASA &#200;NIGME</p>'
+            + '</td></tr>'
+            + '<tr><td style="padding:15px;text-align:center;background-color:#0a0a0a;">'
+            + '<p style="font-family:Arial,sans-serif;font-size:9px;color:#555;letter-spacing:1px;margin:0;">&copy; 2026 &#200;NIGME HONDURAS. TODOS LOS DERECHOS RESERVADOS.</p>'
+            + '</td></tr>'
+            + '</table></td></tr></table></div>';
+
+          fetch('https://hajmyntnvurlcuwshjdd.supabase.co/rest/v1/email_queue', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              destinatario: email,
+              asunto: 'Bienvenida al Club Exclusivo | La Casa \u00C8NIGME',
+              tipo: 'bienvenida_ella',
+              estado: 'pendiente',
+              contenido_html: contenidoHtml
+            })
+          }).catch(function() {});
         } else {
-          btn.innerText = 'YA REGISTRADO';
+          btn.innerText = 'YA REGISTRADA';
+          document.getElementById('email-success').innerHTML = 'Este correo ya forma parte de nuestro c&iacute;rculo exclusivo. Le notificaremos del lanzamiento.';
           document.getElementById('email-success').style.display = 'block';
         }
       })

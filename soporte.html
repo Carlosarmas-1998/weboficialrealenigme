@@ -230,26 +230,137 @@
       border-color: var(--dorado);
     }
 
-    /* NOTA DE CORREO ELECTRÓNICO */
-    .email-note {
-      margin-top: 40px;
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* FILE UPLOAD */
+    .file-upload-area {
+      border: 2px dashed rgba(203, 170, 99, 0.4);
+      border-radius: 2px;
+      padding: 25px;
       text-align: center;
-      font-size: 0.75rem;
-      line-height: 1.8;
-      color: var(--gris-suave);
-    }
-
-    .email-note a {
-      color: var(--carbon);
-      font-weight: 600;
-      text-decoration: underline;
-      text-decoration-color: var(--dorado);
-      text-underline-offset: 4px;
       transition: var(--transition);
+      cursor: pointer;
+      background: var(--fondo-galeria);
+    }
+    .file-upload-area:hover {
+      border-color: var(--dorado);
+      background: rgba(203, 170, 99, 0.03);
+    }
+    .file-upload-area .upload-icon {
+      font-size: 1.8rem;
+      color: var(--dorado);
+      margin-bottom: 8px;
+    }
+    .file-upload-area .upload-text {
+      font-size: 0.7rem;
+      color: var(--gris-suave);
+      letter-spacing: 1px;
+      line-height: 1.8;
+    }
+    .file-upload-area .upload-text strong {
+      color: var(--carbon);
+    }
+    .file-upload-area input[type="file"] {
+      display: none;
+    }
+    .file-preview {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .file-preview-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border: 1px solid var(--dorado);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .file-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .file-preview-item .remove-file {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--carbon);
+      color: var(--blanco-dior);
+      border: none;
+      border-radius: 50%;
+      font-size: 0.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
     }
 
-    .email-note a:hover {
+    /* SUCCESS MESSAGE */
+    .soporte-success-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    .soporte-success-overlay.active {
+      display: flex;
+    }
+    .soporte-success-box {
+      background: var(--carbon);
+      border: 1px solid var(--dorado);
+      padding: 50px 40px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+    }
+    .soporte-success-box .success-icon {
+      font-size: 2.5rem;
       color: var(--dorado);
+      margin-bottom: 15px;
+    }
+    .soporte-success-box h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: var(--dorado);
+      margin-bottom: 12px;
+    }
+    .soporte-success-box p {
+      font-size: 0.75rem;
+      color: #ccc;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .soporte-success-box .btn-close-success {
+      padding: 12px 30px;
+      background: var(--dorado);
+      color: var(--carbon);
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      border-radius: 2px;
+    }
+    .soporte-success-box .btn-close-success:hover {
+      background: var(--blanco-dior);
     }
 
     /* =========================================
@@ -397,13 +508,10 @@
     </div>
 
     <div class="form-container">
-      <form action="https://api.web3forms.com/submit" method="POST">
-        
-        <input type="hidden" name="access_key" value="b74be360-5d4a-4506-b071-f1ec4ff4d64b">
-        <input type="hidden" name="subject" value="Nueva Solicitud de Soporte VIP - ÈNIGME">
+      <form id="soporte-form" onsubmit="return submitSoporteForm(event)">
 
         <div class="form-grid">
-          
+
           <div class="form-group full-width">
             <label for="nombre">Nombre Completo</label>
             <input type="text" id="nombre" name="nombre" placeholder="Ej. Isabella Martínez" required>
@@ -438,16 +546,34 @@
           </div>
 
           <div class="form-group full-width">
-            <button type="submit" class="btn-submit">Enviar Consulta a Asesoría</button>
+            <label>Fotografías (opcional, máx. 2 imágenes)</label>
+            <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('foto-input').click()">
+              <div class="upload-icon">&#128247;</div>
+              <div class="upload-text">
+                <strong>Haz clic para seleccionar fotos</strong><br>
+                JPG, PNG o WEBP &middot; Máximo 5 MB cada una
+              </div>
+              <input type="file" id="foto-input" accept=".jpg,.jpeg,.png,.webp" multiple>
+            </div>
+            <div class="file-preview" id="file-preview"></div>
+          </div>
+
+          <div class="form-group full-width">
+            <button type="submit" class="btn-submit" id="btn-soporte-submit">Enviar Consulta a Asesoría</button>
           </div>
 
         </div>
       </form>
     </div>
 
-    <div class="email-note">
-      <p>¿Deseas adjuntar fotografías, comprobantes o documentos PDF?</p>
-      <p>Escríbenos directamente a <a href="mailto:info@enigmeofficial.com">info@enigmeofficial.com</a></p>
+    <!-- Success overlay -->
+    <div class="soporte-success-overlay" id="soporte-success">
+      <div class="soporte-success-box">
+        <div class="success-icon">&#10004;</div>
+        <h3>Consulta Recibida</h3>
+        <p>Hemos recibido su solicitud de soporte. Nuestro equipo de asesoría VIP la revisará y le contactará a la brevedad posible.</p>
+        <button class="btn-close-success" onclick="closeSoporteSuccess()">Entendido</button>
+      </div>
     </div>
 
   </main>
@@ -525,6 +651,134 @@
     });
 
     window.onload = updateCounts;
+
+    /* =========================================
+       SOPORTE FORM: SUPABASE UPLOAD + INSERT
+       ========================================= */
+    var SUPABASE_URL = 'https://hajmyntnvurlcuwshjdd.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
+    var selectedFiles = [];
+
+    // File input handler
+    document.getElementById('foto-input').addEventListener('change', function(e) {
+      var files = Array.prototype.slice.call(e.target.files);
+      files.forEach(function(file) {
+        if (selectedFiles.length >= 2) return;
+        var validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (validTypes.indexOf(file.type) === -1) { alert('Solo se permiten imágenes JPG, PNG o WEBP.'); return; }
+        if (file.size > 5 * 1024 * 1024) { alert('Cada imagen no debe superar los 5 MB.'); return; }
+        selectedFiles.push(file);
+      });
+      renderPreviews();
+      e.target.value = '';
+    });
+
+    function renderPreviews() {
+      var container = document.getElementById('file-preview');
+      container.innerHTML = '';
+      selectedFiles.forEach(function(file, idx) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'file-preview-item';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-file';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = function(e) { e.stopPropagation(); selectedFiles.splice(idx, 1); renderPreviews(); };
+        wrapper.appendChild(img);
+        wrapper.appendChild(removeBtn);
+        container.appendChild(wrapper);
+      });
+    }
+
+    function uploadFileToSupabase(file) {
+      var timestamp = Date.now();
+      var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      var filePath = 'tickets/' + timestamp + '_' + safeName;
+      return fetch(SUPABASE_URL + '/storage/v1/object/soporte-archivos/' + filePath, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': file.type,
+          'x-upsert': 'true'
+        },
+        body: file
+      }).then(function(res) {
+        if (!res.ok) throw new Error('Upload failed');
+        return SUPABASE_URL + '/storage/v1/object/public/soporte-archivos/' + filePath;
+      });
+    }
+
+    function submitSoporteForm(e) {
+      e.preventDefault();
+      var nombre = document.getElementById('nombre').value.trim();
+      var correo = document.getElementById('correo').value.trim();
+      var departamento = document.getElementById('departamento').value;
+      var municipio = document.getElementById('municipio').value;
+      var mensaje = document.getElementById('mensaje').value.trim();
+
+      if (!nombre || !correo || !departamento || !municipio || !mensaje) return false;
+
+      var btn = document.getElementById('btn-soporte-submit');
+      btn.disabled = true;
+      btn.innerText = 'ENVIANDO...';
+
+      var uploadPromises = [];
+      for (var i = 0; i < selectedFiles.length; i++) {
+        uploadPromises.push(uploadFileToSupabase(selectedFiles[i]));
+      }
+
+      Promise.all(uploadPromises).then(function(urls) {
+        var foto1_url = urls[0] || null;
+        var foto2_url = urls[1] || null;
+
+        return fetch(SUPABASE_URL + '/rest/v1/web_soporte_tickets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            nombre: nombre,
+            correo: correo,
+            departamento: departamento,
+            municipio: municipio,
+            mensaje: mensaje,
+            foto1_url: foto1_url,
+            foto2_url: foto2_url,
+            estado: 'pendiente'
+          })
+        });
+      }).then(function(res) {
+        if (res.ok || res.status === 201) {
+          document.getElementById('soporte-form').reset();
+          selectedFiles = [];
+          document.getElementById('file-preview').innerHTML = '';
+          document.getElementById('municipio').disabled = true;
+          document.getElementById('municipio').innerHTML = '<option value="" disabled selected>Selecciona el departamento primero</option>';
+          document.getElementById('soporte-success').classList.add('active');
+          btn.innerText = 'ENVIADO';
+        } else {
+          btn.innerText = 'ERROR - INTENTE DE NUEVO';
+          btn.disabled = false;
+        }
+      }).catch(function() {
+        btn.innerText = 'ERROR - INTENTE DE NUEVO';
+        btn.disabled = false;
+      });
+
+      return false;
+    }
+
+    function closeSoporteSuccess() {
+      document.getElementById('soporte-success').classList.remove('active');
+      var btn = document.getElementById('btn-soporte-submit');
+      btn.innerText = 'Enviar Consulta a Asesoría';
+      btn.disabled = false;
+    }
 
     /* =========================================
        WHATSAPP FLOAT: SHOW ON INTERACTION, HIDE AFTER 3s

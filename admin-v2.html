@@ -222,6 +222,12 @@
   <div class="nav-item" data-tab="estructura_red" onclick="switchTab('estructura_red');loadEstructuraRed();">Estructura Red</div>
   <div class="nav-item" data-tab="papelera" onclick="switchTab('papelera');loadPapelera();">Papelera</div>
   <div class="nav-item" data-tab="configuracion" onclick="switchTab('configuracion');loadConfiguracion();">Configuraci&oacute;n</div>
+  <div style="margin-top:16px;padding:12px;border:1px solid var(--gold-dim);background:rgba(201,169,110,.04);">
+    <div style="font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:500;">&#9830; Mi Espacio &mdash; Portales</div>
+    <a href="gerencia-divisional.html" target="_blank" style="display:block;padding:7px 10px;font-size:.68rem;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .2s;border-left:2px solid transparent;" onmouseover="this.style.color='var(--gold)';this.style.borderLeftColor='var(--gold)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderLeftColor='transparent'">Gerencia Divisional</a>
+    <a href="gerencia-zona.html" target="_blank" style="display:block;padding:7px 10px;font-size:.68rem;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .2s;border-left:2px solid transparent;" onmouseover="this.style.color='var(--gold)';this.style.borderLeftColor='var(--gold)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderLeftColor='transparent'">Gerencia de Zona</a>
+    <a href="logistica.html" target="_blank" style="display:block;padding:7px 10px;font-size:.68rem;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .2s;border-left:2px solid transparent;" onmouseover="this.style.color='var(--gold)';this.style.borderLeftColor='var(--gold)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderLeftColor='transparent'">Log&iacute;stica</a>
+  </div>
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -717,6 +723,7 @@
         <select id="pwEstado" onchange="loadPedidosWeb()" style="min-width:140px;">
           <option value="">Todos los estados</option>
           <option value="pendiente">Pendiente</option>
+          <option value="procesando">Procesando</option>
           <option value="pagado">Pagado</option>
           <option value="enviado">Enviado</option>
           <option value="entregado">Entregado</option>
@@ -735,12 +742,14 @@
     <div class="page-header">
       <div class="page-title"><h1>Panel de <em>Deuda</em></h1><p>Control de deuda por profesional &middot; Vendedoras, Coordinadores y Gerentes de Zona</p></div>
       <div class="header-actions">
-        <input id="deudaBuscar" placeholder="Buscar por nombre, c&oacute;digo o DNI..." style="min-width:220px;padding:8px 12px;border:1px solid var(--border);font-size:.8rem;font-family:inherit;" onkeydown="if(event.key==='Enter')loadPanelDeuda()"/>
+        <input id="deudaBuscar" placeholder="Buscar por nombre o c&oacute;digo..." style="min-width:200px;padding:8px 12px;border:1px solid var(--border);font-size:.8rem;font-family:inherit;" onkeydown="if(event.key==='Enter')loadPanelDeuda()"/>
+        <input id="deudaBuscarDni" placeholder="Buscar por DNI..." style="min-width:160px;padding:8px 12px;border:1px solid var(--border);font-size:.8rem;font-family:inherit;" onkeydown="if(event.key==='Enter')loadPanelDeuda()"/>
         <select id="deudaTipo" onchange="loadPanelDeuda()" style="min-width:140px;">
           <option value="">Todos</option>
           <option value="vendedora">Vendedoras</option>
           <option value="coordinador">Coordinadores</option>
           <option value="gerente_zona">Gerentes Zona</option>
+          <option value="logistica">Log&iacute;stica</option>
         </select>
         <button class="btn" onclick="loadPanelDeuda()"><span>Refrescar</span></button>
       </div>
@@ -1778,9 +1787,9 @@ async function loadAnalytics() {
 // ================================================================
 async function cambiarEstadoExpediente(id, nuevoEstado) {
   try {
-    await fetch(SB + '/rest/v1/expedientes_juridicos?id=eq.' + id, {
+    await fetch(SUPA_URL + '/rest/v1/expedientes_juridicos?id=eq.' + id, {
       method: 'PATCH',
-      headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      headers: supaHeaders(),
       body: JSON.stringify({ estado: nuevoEstado })
     });
   } catch(e) { console.error(e); }
@@ -4288,26 +4297,26 @@ async function loadPedidosWeb() {
   container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">Cargando pedidos web...</div>';
 
   var estadoFilter = document.getElementById('pwEstado').value;
-  var url = SB + '/rest/v1/web_pedidos?order=created_at.desc&limit=100';
-  if (estadoFilter) url += '&estado=eq.' + estadoFilter;
+  var query = '&order=created_at.desc';
+  if (estadoFilter) query += '&estado=eq.' + estadoFilter;
 
   try {
-    var pedidos = await api(url);
+    var pedidos = await supaGet('web_pedidos', query);
     if (!pedidos || pedidos.error) pedidos = [];
 
     var totalPedidos = pedidos.length;
     var totalPagados = pedidos.filter(function(p){ return p.pagado; }).length;
+    var totalNoPagados = totalPedidos - totalPagados;
     var totalEUR = 0, totalHNL = 0;
     pedidos.forEach(function(p) {
-      if (p.pagado) {
-        totalEUR += parseFloat(p.total_eur || 0);
-        totalHNL += parseFloat(p.total_hnl || p.total || 0);
-      }
+      totalEUR += parseFloat(p.total_eur || 0);
+      totalHNL += parseFloat(p.total_hnl || p.total || 0);
     });
 
     statsEl.innerHTML =
       '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Total Pedidos</div></div>' +
-      '<div class="stat-card"><div class="stat-value">' + totalPagados + '</div><div class="stat-label">Pagados</div></div>' +
+      '<div class="stat-card"><div class="stat-value" style="color:#27ae60;">' + totalPagados + '</div><div class="stat-label">Pagados</div></div>' +
+      '<div class="stat-card"><div class="stat-value" style="color:#e67e22;">' + totalNoPagados + '</div><div class="stat-label">Sin Pagar</div></div>' +
       '<div class="stat-card"><div class="stat-value">&euro; ' + totalEUR.toFixed(2) + '</div><div class="stat-label">Total EUR</div></div>' +
       '<div class="stat-card"><div class="stat-value">L ' + totalHNL.toFixed(2) + '</div><div class="stat-label">Total HNL</div></div>';
 
@@ -4316,33 +4325,65 @@ async function loadPedidosWeb() {
       return;
     }
 
-    var html = '<div class="table-wrap"><table><thead><tr><th>C&oacute;digo</th><th>Cliente</th><th>Email</th><th>Moneda</th><th>Total</th><th>EUR</th><th>Estado</th><th>Pagado</th><th>Stripe ID</th><th>Fecha</th><th>Items</th><th>Acciones</th></tr></thead><tbody>';
+    var html = '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Correo</th><th>Direcci\u00f3n</th><th>Tel\u00e9fono</th><th>Pago</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
     pedidos.forEach(function(p) {
-      var estadoClass = p.pagado ? 'color:#27ae60;font-weight:600;' : (p.estado === 'cancelado' ? 'color:#c0392b;' : 'color:#f39c12;');
-      var items = '';
+      var isPaid = !!p.pagado;
+      var pagoStyle = isPaid ? 'color:#27ae60;font-weight:600;' : 'color:#e67e22;font-weight:600;';
+      var pagoText = isPaid ? '&#10004; Paid' : '&#10008; Unpaid';
+
+      // Build items detail
+      var itemsHtml = '';
       if (p.items && Array.isArray(p.items)) {
-        items = p.items.map(function(it){ return (it.qty || it.cantidad || 1) + 'x ' + (it.nombre || it.ref || '?'); }).join('<br>');
+        itemsHtml = '<div style="font-size:.72rem;line-height:1.6;">';
+        p.items.forEach(function(it) {
+          var nombre = it.nombre || it.name || it.ref || '?';
+          var codigo = it.codigo || it.code || it.ref || '';
+          var qty = it.qty || it.cantidad || it.quantity || 1;
+          var precio = parseFloat(it.precio || it.price || 0).toFixed(2);
+          itemsHtml += '<div style="margin-bottom:2px;">' + esc(nombre);
+          if (codigo) itemsHtml += ' <span style="color:var(--gold);">(' + esc(codigo) + ')</span>';
+          itemsHtml += ' x' + qty + ' - ' + precio + '</div>';
+        });
+        itemsHtml += '</div>';
+      } else {
+        itemsHtml = '<span style="color:var(--text-muted);">-</span>';
       }
-      var stripeId = p.stripe_payment_id ? ('<a href="https://dashboard.stripe.com/payments/' + p.stripe_payment_id + '" target="_blank" style="color:var(--gold);font-size:.7rem;">' + p.stripe_payment_id.substring(0,15) + '...</a>') : '-';
-      html += '<tr>' +
-        '<td style="font-weight:600;color:var(--gold);">' + esc(p.codigo || '-') + '</td>' +
+
+      // Address
+      var addr = esc(p.direccion_envio || '');
+      if (p.departamento) addr += (addr ? ', ' : '') + esc(p.departamento);
+      if (p.ciudad) addr += (addr ? ', ' : '') + esc(p.ciudad);
+      if (p.codigo_postal) addr += ' ' + esc(p.codigo_postal);
+      if (p.pais) addr += (addr ? ', ' : '') + esc(p.pais);
+      if (!addr) addr = '-';
+
+      // Status dropdown - disabled if not paid and trying to set procesando/enviado
+      var selectDisabled = !isPaid ? ' title="Pago pendiente - no se puede cambiar estado" style="padding:4px 8px;border:1px solid var(--border);font-size:.7rem;background:var(--surface);opacity:0.5;cursor:not-allowed;" disabled' : ' style="padding:4px 8px;border:1px solid var(--border);font-size:.7rem;background:var(--surface);"';
+
+      html += '<tr' + (!isPaid ? ' style="background:rgba(230,126,34,.04);"' : '') + '>' +
+        '<td style="font-weight:600;color:var(--gold);">' + esc(p.codigo || p.id || '-') + '</td>' +
+        '<td style="font-size:.75rem;white-space:nowrap;">' + formatDate(p.created_at) + '</td>' +
         '<td>' + esc(p.nombre_cliente || '-') + '</td>' +
         '<td style="font-size:.75rem;">' + esc(p.email_cliente || '-') + '</td>' +
-        '<td>' + esc(p.moneda || '-') + '</td>' +
-        '<td style="font-weight:600;">' + parseFloat(p.total || 0).toFixed(2) + '</td>' +
-        '<td>' + (p.total_eur ? '&euro;' + parseFloat(p.total_eur).toFixed(2) : '-') + '</td>' +
-        '<td><select onchange="updateWebPedidoEstado(\'' + p.id + '\',this.value)" style="padding:4px 8px;border:1px solid var(--border);font-size:.7rem;background:var(--surface);">' +
+        '<td style="font-size:.75rem;max-width:180px;">' + addr + '</td>' +
+        '<td style="font-size:.78rem;">' + esc(p.telefono_cliente || '-') + '</td>' +
+        '<td style="' + pagoStyle + '">' + pagoText + '</td>' +
+        '<td>' + itemsHtml + '</td>' +
+        '<td style="font-weight:600;white-space:nowrap;">' + parseFloat(p.total || 0).toFixed(2) + (p.total_eur ? ' <span style="font-size:.7rem;color:var(--text-muted);">(&euro;' + parseFloat(p.total_eur).toFixed(2) + ')</span>' : '') + '</td>' +
+        '<td><select onchange="updateWebPedidoEstado(\'' + p.id + '\',this.value,' + (isPaid ? 'true' : 'false') + ')"' + selectDisabled + '>' +
           '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
+          '<option value="procesando"' + (p.estado === 'procesando' ? ' selected' : '') + '>Procesando</option>' +
           '<option value="pagado"' + (p.estado === 'pagado' ? ' selected' : '') + '>Pagado</option>' +
           '<option value="enviado"' + (p.estado === 'enviado' ? ' selected' : '') + '>Enviado</option>' +
           '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
           '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
         '</select></td>' +
-        '<td style="' + estadoClass + '">' + (p.pagado ? '&#10004; S&iacute;' : '&#10008; No') + '</td>' +
-        '<td>' + stripeId + '</td>' +
-        '<td style="font-size:.75rem;">' + new Date(p.created_at).toLocaleDateString('es-HN') + '</td>' +
-        '<td style="font-size:.7rem;">' + items + '</td>' +
-        '<td><button class="btn btn-sm" onclick="verDetallePedidoWeb(' + p.id + ')">Ver</button></td></tr>';
+        '<td style="white-space:nowrap;">';
+      if (!isPaid && p.email_cliente) {
+        html += '<button class="btn btn-sm" style="border-color:#e67e22;color:#e67e22;margin-bottom:4px;" onclick="enviarRecordatorioPago(\'' + p.id + '\',\'' + esc(p.email_cliente) + '\',\'' + esc(p.nombre_cliente || '') + '\',\'' + esc(p.codigo || p.id || '') + '\',' + parseFloat(p.total || 0).toFixed(2) + ')"><span>Enviar Recordatorio</span></button> ';
+      }
+      var stripeId = p.stripe_payment_id ? ('<a href="https://dashboard.stripe.com/payments/' + p.stripe_payment_id + '" target="_blank" style="color:var(--gold);font-size:.65rem;display:block;margin-top:4px;">' + p.stripe_payment_id.substring(0,15) + '...</a>') : '';
+      html += stripeId + '</td></tr>';
     });
     html += '</tbody></table></div>';
     container.innerHTML = html;
@@ -4351,42 +4392,82 @@ async function loadPedidosWeb() {
   }
 }
 
-async function updateWebPedidoEstado(id, estado) {
+async function updateWebPedidoEstado(id, estado, isPaid) {
+  // Block procesando/enviado if payment not confirmed
+  if (!isPaid && (estado === 'procesando' || estado === 'enviado')) {
+    showToast('No se puede cambiar a "' + estado + '" sin pago confirmado.', true);
+    loadPedidosWeb();
+    return;
+  }
   try {
     var body = { estado: estado };
     if (estado === 'pagado') body.pagado = true;
-    await fetch(SB + '/rest/v1/web_pedidos?id=eq.' + id, {
-      method: 'PATCH', headers: HJ, body: JSON.stringify(body)
-    });
+    await supaPatch('web_pedidos', id, body);
     showToast('Estado actualizado a: ' + estado);
-  } catch(e) { showToast('Error al actualizar', 'error'); }
+    loadPedidosWeb();
+  } catch(e) { showToast('Error al actualizar', true); }
 }
 
 async function syncStripePayments() {
   showToast('Sincronizando con Stripe...');
   try {
     // Get all web_pedidos that have stripe_payment_id
-    var pedidos = await api(SB + '/rest/v1/web_pedidos?stripe_payment_id=neq.&select=id,stripe_payment_id,pagado,estado');
+    var pedidos = await supaGet('web_pedidos', '&stripe_payment_id=neq.&select=id,stripe_payment_id,pagado,estado');
     if (!pedidos || !pedidos.length) { showToast('No hay pedidos con Stripe ID para sincronizar.'); return; }
-    // Note: Full Stripe sync would require a server-side function.
-    // For now, mark pedidos with stripe_payment_id as pagado if not already
+    // Mark pedidos with stripe_payment_id as pagado if not already
     var updated = 0;
     for (var i = 0; i < pedidos.length; i++) {
       if (!pedidos[i].pagado && pedidos[i].stripe_payment_id) {
-        await fetch(SB + '/rest/v1/web_pedidos?id=eq.' + pedidos[i].id, {
-          method: 'PATCH', headers: HJ, body: JSON.stringify({ pagado: true, estado: 'pagado' })
-        });
+        await supaPatch('web_pedidos', pedidos[i].id, { pagado: true, estado: 'pagado' });
         updated++;
       }
     }
     showToast('Sincronizado: ' + updated + ' pedidos actualizados.');
     loadPedidosWeb();
-  } catch(e) { showToast('Error sincronizando: ' + e.message, 'error'); }
+  } catch(e) { showToast('Error sincronizando: ' + e.message, true); }
 }
 
 function verDetallePedidoWeb(id) {
-  // Simple alert with order details — could be expanded to modal
-  alert('Ver pedido web #' + id + ' — Se puede expandir a un modal detallado.');
+  // Simple alert with order details
+  alert('Ver pedido web #' + id + ' \u2014 Se puede expandir a un modal detallado.');
+}
+
+async function enviarRecordatorioPago(pedidoId, email, nombre, codigo, total) {
+  if (!confirm('\u00bfEnviar recordatorio de pago a ' + email + '?')) return;
+  var htmlContent = '<div style="max-width:600px;margin:0 auto;font-family:Georgia,serif;background:#0a0a0a;color:#e8e0d4;border:1px solid #222;">' +
+    '<div style="padding:40px 32px 20px;text-align:center;border-bottom:1px solid #1a1a1a;">' +
+      '<div style="font-size:28px;letter-spacing:.14em;color:#CBAA63;font-style:italic;">Enigme</div>' +
+      '<div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#6b6259;margin-top:6px;">PARIS</div>' +
+    '</div>' +
+    '<div style="padding:32px;">' +
+      '<p style="font-size:15px;line-height:1.7;color:#e8e0d4;">Estimado/a <strong style="color:#CBAA63;">' + (nombre || 'Cliente') + '</strong>,</p>' +
+      '<p style="font-size:14px;line-height:1.7;color:#c0b8a8;">Le recordamos que su pedido <strong style="color:#CBAA63;">#' + codigo + '</strong> por un monto de <strong style="color:#CBAA63;">' + total + '</strong> se encuentra pendiente de pago.</p>' +
+      '<p style="font-size:14px;line-height:1.7;color:#c0b8a8;">Para completar su compra, por favor finalice el proceso de pago a trav\u00e9s de nuestra pasarela segura Stripe. Su pedido ser\u00e1 procesado inmediatamente una vez confirmado el pago.</p>' +
+      '<div style="text-align:center;margin:30px 0;">' +
+        '<div style="display:inline-block;padding:14px 40px;border:1px solid #CBAA63;color:#CBAA63;font-size:12px;letter-spacing:.2em;text-transform:uppercase;">Pago Pendiente</div>' +
+      '</div>' +
+      '<p style="font-size:13px;line-height:1.6;color:#6b6259;">Si ya ha realizado el pago, ignore este mensaje. Para cualquier consulta, no dude en contactarnos.</p>' +
+    '</div>' +
+    '<div style="padding:20px 32px;border-top:1px solid #1a1a1a;text-align:center;">' +
+      '<div style="width:40px;height:1px;background:#CBAA63;margin:0 auto 12px;"></div>' +
+      '<p style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#6b6259;">Enigme Official &middot; enigmeofficial.com</p>' +
+    '</div>' +
+  '</div>';
+
+  try {
+    await supaPost('email_queue', {
+      to_email: email,
+      to_name: nombre || '',
+      subject: 'ENIGME \u2014 Recordatorio de Pago Pendiente | Pedido #' + codigo,
+      html_body: htmlContent,
+      status: 'pending',
+      tipo: 'recordatorio_pago',
+      referencia_id: pedidoId
+    });
+    showToast('Recordatorio de pago enviado a ' + email);
+  } catch(e) {
+    showToast('Error al enviar recordatorio: ' + (e.message || e), true);
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -4398,20 +4479,24 @@ async function loadPanelDeuda() {
   container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">Cargando deudas...</div>';
 
   var buscar = (document.getElementById('deudaBuscar').value || '').trim().toLowerCase();
+  var buscarDni = (document.getElementById('deudaBuscarDni').value || '').trim().toLowerCase();
   var tipo = document.getElementById('deudaTipo').value;
 
   try {
     // Load all professionals with deuda info
-    var vendedoras = [], coordinadores = [], gerentesZ = [];
+    var vendedoras = [], coordinadores = [], gerentesZ = [], logOperadores = [];
 
     if (!tipo || tipo === 'vendedora') {
-      vendedoras = await api(SB + '/rest/v1/vendedoras?select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
+      vendedoras = await supaGet('vendedoras', '&select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
     }
     if (!tipo || tipo === 'coordinador') {
-      coordinadores = await api(SB + '/rest/v1/coordinadores?select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
+      coordinadores = await supaGet('coordinadores', '&select=id,codigo,nombre,dni,telefono,deuda_actual,activo,sector_id,gerente_id&order=nombre') || [];
     }
     if (!tipo || tipo === 'gerente_zona') {
-      gerentesZ = await api(SB + '/rest/v1/gerentes_zona?select=id,codigo,nombre,dni,telefono,deuda_actual,activo&order=nombre') || [];
+      gerentesZ = await supaGet('gerentes_zona', '&select=id,codigo,nombre,dni,telefono,deuda_actual,activo&order=nombre') || [];
+    }
+    if (!tipo || tipo === 'logistica') {
+      logOperadores = await supaGet('logistica_operadores', '&select=id,codigo,nombre,dni,telefono,deuda_actual,activo&order=nombre') || [];
     }
 
     // Combine into unified list
@@ -4419,13 +4504,19 @@ async function loadPanelDeuda() {
     vendedoras.forEach(function(v){ v._tipo = 'Vendedora'; all.push(v); });
     coordinadores.forEach(function(c){ c._tipo = 'Coordinador'; all.push(c); });
     gerentesZ.forEach(function(g){ g._tipo = 'Gerente Zona'; all.push(g); });
+    logOperadores.forEach(function(l){ l._tipo = 'Log\u00edstica'; all.push(l); });
 
-    // Filter by search
+    // Filter by search (name/code)
     if (buscar) {
       all = all.filter(function(p) {
         return (p.nombre && p.nombre.toLowerCase().indexOf(buscar) >= 0) ||
-               (p.codigo && p.codigo.toLowerCase().indexOf(buscar) >= 0) ||
-               (p.dni && p.dni.toLowerCase().indexOf(buscar) >= 0);
+               (p.codigo && p.codigo.toLowerCase().indexOf(buscar) >= 0);
+      });
+    }
+    // Filter by DNI
+    if (buscarDni) {
+      all = all.filter(function(p) {
+        return (p.dni && p.dni.toLowerCase().indexOf(buscarDni) >= 0);
       });
     }
 
@@ -4482,18 +4573,16 @@ async function ajustarDeuda(id, tipo, signo) {
   var monto = parseFloat(inputEl ? inputEl.value : 0);
   if (!monto || monto <= 0) { showToast('Ingrese un monto v\u00e1lido.', 'error'); return; }
 
-  var tabla = tipo === 'Vendedora' ? 'vendedoras' : (tipo === 'Coordinador' ? 'coordinadores' : 'gerentes_zona');
+  var tabla = tipo === 'Vendedora' ? 'vendedoras' : (tipo === 'Coordinador' ? 'coordinadores' : (tipo === 'Log\u00edstica' ? 'logistica_operadores' : 'gerentes_zona'));
 
   try {
     // Get current deuda
-    var current = await api(SB + '/rest/v1/' + tabla + '?id=eq.' + id + '&select=deuda_actual');
+    var current = await supaGet(tabla, '&id=eq.' + id + '&select=deuda_actual');
     var deudaActual = (current && current.length) ? parseFloat(current[0].deuda_actual || 0) : 0;
     var nuevaDeuda = deudaActual + (monto * signo);
     if (nuevaDeuda < 0) nuevaDeuda = 0;
 
-    await fetch(SB + '/rest/v1/' + tabla + '?id=eq.' + id, {
-      method: 'PATCH', headers: HJ, body: JSON.stringify({ deuda_actual: nuevaDeuda })
-    });
+    await supaPatch(tabla, id, { deuda_actual: nuevaDeuda });
 
     showToast((signo > 0 ? 'Deuda aumentada' : 'Abono aplicado') + ': L ' + monto.toFixed(2));
     if (inputEl) inputEl.value = '';
@@ -4864,48 +4953,139 @@ async function loadPapelera() {
   container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Cargando papelera...</div>';
 
   try {
-    var searchVal = (document.getElementById('papeleraSearch').value || '').trim();
-    var query = '&order=created_at.desc';
-    if (searchVal) {
-      var like = encodeURIComponent('%' + searchVal + '%');
-      query += '&or=(nombre_display.ilike.' + like + ',codigo_display.ilike.' + like + ',tipo_registro.ilike.' + like + ')';
-    }
+    // Load archived items from each source table
+    var webPedidos = await supaGet('web_pedidos', '&archivado=eq.true&order=created_at.desc') || [];
+    var pedidosCorp = await supaGet('pedidos', '&archivado=eq.true&order=created_at.desc') || [];
+    var vendedoras = await supaGet('vendedoras', '&archivado=eq.true&order=created_at.desc') || [];
+    var coordinadores = await supaGet('coordinadores', '&archivado=eq.true&order=created_at.desc') || [];
+    var gerentesZ = await supaGet('gerentes_zona', '&archivado=eq.true&order=created_at.desc') || [];
+    var postulaciones = await supaGet('web_postulaciones', '&archivado=eq.true&order=created_at.desc') || [];
 
-    var items = await supaGet('papelera_corporativa', query);
+    var totalArchivados = webPedidos.length + pedidosCorp.length + vendedoras.length + coordinadores.length + gerentesZ.length + postulaciones.length;
 
-    // Group by tipo_registro
-    var groups = {};
-    items.forEach(function(it) {
-      var tipo = it.tipo_registro || 'otros';
-      if (!groups[tipo]) groups[tipo] = [];
-      groups[tipo].push(it);
-    });
-
-    var tipoCount = Object.keys(groups).length;
     statsEl.innerHTML =
-      '<div class="stat-card"><div class="stat-label">Total Archivados</div><div class="stat-value">' + items.length + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Tipos de Registro</div><div class="stat-value">' + tipoCount + '</div></div>';
+      '<div class="stat-card"><div class="stat-label">Total Archivados</div><div class="stat-value">' + totalArchivados + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Pedidos Web</div><div class="stat-value">' + webPedidos.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Pedidos Corp.</div><div class="stat-value">' + pedidosCorp.length + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Personal</div><div class="stat-value">' + (vendedoras.length + coordinadores.length + gerentesZ.length) + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Postulaciones</div><div class="stat-value">' + postulaciones.length + '</div></div>';
 
-    if (!items.length) {
+    if (!totalArchivados) {
       container.innerHTML = '<div class="empty-state">La papelera est\u00e1 vac\u00eda</div>';
       return;
     }
 
     var html = '';
-    for (var tipo in groups) {
-      html += '<div style="margin-bottom:24px;">';
-      html += '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem;font-weight:300;margin-bottom:12px;color:var(--gold);">' + esc(tipo) + ' (' + groups[tipo].length + ')</h3>';
-      html += '<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>C\u00f3digo</th><th>Fecha Archivado</th><th>Acciones</th></tr></thead><tbody>';
-      groups[tipo].forEach(function(it) {
-        html += '<tr>';
-        html += '<td>' + esc(it.nombre_display || '-') + '</td>';
-        html += '<td style="color:var(--gold);">' + esc(it.codigo_display || '-') + '</td>';
-        html += '<td style="white-space:nowrap;">' + formatDate(it.created_at) + '</td>';
-        html += '<td><button class="btn btn-gold btn-sm" onclick="restaurarPapelera(\'' + it.id + '\',\'' + esc(it.tabla_origen || '') + '\',\'' + esc(it.registro_id || '') + '\')"><span>Restaurar</span></button></td>';
-        html += '</tr>';
-      });
-      html += '</tbody></table></div></div>';
+
+    // Helper to build collapsible section
+    function papeleraSection(titulo, count, bodyHtml) {
+      var s = '';
+      s += '<div class="collapse-header" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\');">';
+      s += '<h3>' + titulo + ' <span style="font-size:.75rem;color:var(--text-muted);font-family:Jost,sans-serif;font-weight:300;">(' + count + ')</span></h3>';
+      s += '<span class="collapse-icon">&#9660;</span>';
+      s += '</div>';
+      s += '<div class="collapse-body">';
+      s += '<div class="collapse-body-inner">';
+      if (count === 0) {
+        s += '<div class="empty-state">Sin registros archivados</div>';
+      } else {
+        s += bodyHtml;
+      }
+      s += '</div></div>';
+      return s;
     }
+
+    // --- Pedidos Web ---
+    var pwHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Cliente</th><th>Email</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    webPedidos.forEach(function(p) {
+      pwHtml += '<tr>';
+      pwHtml += '<td style="color:var(--gold);">' + esc(p.codigo || '-') + '</td>';
+      pwHtml += '<td>' + esc(p.nombre_cliente || '-') + '</td>';
+      pwHtml += '<td style="font-size:.75rem;">' + esc(p.email_cliente || '-') + '</td>';
+      pwHtml += '<td>' + parseFloat(p.total || 0).toFixed(2) + '</td>';
+      pwHtml += '<td>' + esc(p.estado || '-') + '</td>';
+      pwHtml += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+      pwHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'web_pedidos\',' + p.id + ')"><span>Restaurar</span></button></td>';
+      pwHtml += '</tr>';
+    });
+    pwHtml += '</tbody></table></div>';
+    html += papeleraSection('Pedidos Web', webPedidos.length, pwHtml);
+
+    // --- Pedidos Corporativos ---
+    var pcHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Vendedora</th><th>Campa\u00f1a</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    pedidosCorp.forEach(function(p) {
+      pcHtml += '<tr>';
+      pcHtml += '<td style="color:var(--gold);">' + esc(p.codigo_pedido || '-') + '</td>';
+      pcHtml += '<td>' + esc(p.vendedora_nombre || '-') + '</td>';
+      pcHtml += '<td>' + esc(p.campana || '-') + '</td>';
+      pcHtml += '<td>' + parseFloat(p.total || 0).toFixed(2) + '</td>';
+      pcHtml += '<td>' + esc(p.estado || '-') + '</td>';
+      pcHtml += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+      pcHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'pedidos\',' + p.id + ')"><span>Restaurar</span></button></td>';
+      pcHtml += '</tr>';
+    });
+    pcHtml += '</tbody></table></div>';
+    html += papeleraSection('Pedidos Corporativos', pedidosCorp.length, pcHtml);
+
+    // --- Vendedoras ---
+    var vHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    vendedoras.forEach(function(v) {
+      vHtml += '<tr>';
+      vHtml += '<td style="color:var(--gold);">' + esc(v.codigo || '-') + '</td>';
+      vHtml += '<td>' + esc(v.nombre || '-') + '</td>';
+      vHtml += '<td>' + esc(v.dni || '-') + '</td>';
+      vHtml += '<td>' + esc(v.telefono || '-') + '</td>';
+      vHtml += '<td style="white-space:nowrap;">' + formatDate(v.created_at) + '</td>';
+      vHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'vendedoras\',' + v.id + ')"><span>Restaurar</span></button></td>';
+      vHtml += '</tr>';
+    });
+    vHtml += '</tbody></table></div>';
+    html += papeleraSection('Vendedoras', vendedoras.length, vHtml);
+
+    // --- Coordinadores ---
+    var cHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    coordinadores.forEach(function(c) {
+      cHtml += '<tr>';
+      cHtml += '<td style="color:var(--gold);">' + esc(c.codigo || '-') + '</td>';
+      cHtml += '<td>' + esc(c.nombre || '-') + '</td>';
+      cHtml += '<td>' + esc(c.dni || '-') + '</td>';
+      cHtml += '<td>' + esc(c.telefono || '-') + '</td>';
+      cHtml += '<td style="white-space:nowrap;">' + formatDate(c.created_at) + '</td>';
+      cHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'coordinadores\',' + c.id + ')"><span>Restaurar</span></button></td>';
+      cHtml += '</tr>';
+    });
+    cHtml += '</tbody></table></div>';
+    html += papeleraSection('Coordinadores', coordinadores.length, cHtml);
+
+    // --- Gerentes de Zona ---
+    var gzHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    gerentesZ.forEach(function(g) {
+      gzHtml += '<tr>';
+      gzHtml += '<td style="color:var(--gold);">' + esc(g.codigo || '-') + '</td>';
+      gzHtml += '<td>' + esc(g.nombre || '-') + '</td>';
+      gzHtml += '<td>' + esc(g.dni || '-') + '</td>';
+      gzHtml += '<td>' + esc(g.telefono || '-') + '</td>';
+      gzHtml += '<td style="white-space:nowrap;">' + formatDate(g.created_at) + '</td>';
+      gzHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'gerentes_zona\',' + g.id + ')"><span>Restaurar</span></button></td>';
+      gzHtml += '</tr>';
+    });
+    gzHtml += '</tbody></table></div>';
+    html += papeleraSection('Gerentes de Zona', gerentesZ.length, gzHtml);
+
+    // --- Postulaciones ---
+    var postHtml = '<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Puesto</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    postulaciones.forEach(function(p) {
+      postHtml += '<tr>';
+      postHtml += '<td>' + esc(p.nombre || '-') + '</td>';
+      postHtml += '<td style="font-size:.75rem;">' + esc(p.email || '-') + '</td>';
+      postHtml += '<td>' + esc(p.puesto || '-') + '</td>';
+      postHtml += '<td>' + esc(p.estado || '-') + '</td>';
+      postHtml += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
+      postHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'web_postulaciones\',' + p.id + ')"><span>Restaurar</span></button></td>';
+      postHtml += '</tr>';
+    });
+    postHtml += '</tbody></table></div>';
+    html += papeleraSection('Postulaciones', postulaciones.length, postHtml);
 
     container.innerHTML = html;
   } catch(e) {
@@ -4926,6 +5106,17 @@ async function restaurarPapelera(papeleraId, tablaOrigen, registroId) {
     }
     // Delete from papelera
     await supaDelete('papelera_corporativa', papeleraId);
+    showToast('Registro restaurado correctamente');
+    loadPapelera();
+  } catch(e) {
+    showToast('Error al restaurar: ' + (e.message || e), 'error');
+  }
+}
+
+async function restaurarDirecto(tabla, id) {
+  if (!confirm('\u00bfRestaurar este registro de ' + tabla + '?')) return;
+  try {
+    await supaPatch(tabla, id, { archivado: false });
     showToast('Registro restaurado correctamente');
     loadPapelera();
   } catch(e) {

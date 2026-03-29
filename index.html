@@ -2,7 +2,7 @@
 <html lang="es-HN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 
   <title>ÈNIGME | Alta Joyería, Plata 925 y Bolsos Boutique | Honduras y España</title>
   <meta name="description" content="ÈNIGME: Firma de alta joyería, bolsos boutique y accesorios de lujo. Oro 14K, Plata 925, Acero Inoxidable. Compra en Honduras (Lempiras) y España (Euros). Envíos a Choluteca, Valle, Tegucigalpa, San Pedro Sula, Madrid, Barcelona y toda España. Precios exclusivos, lujo accesible." />
@@ -97,7 +97,7 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
+    html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     body {
       background-color: var(--marfil);
@@ -654,6 +654,48 @@
       .cookie-social-links a { justify-content: center; }
       .abril-tooltip { bottom: 76px; left: 16px; }
     }
+    /* ── EXTRA RESPONSIVE FIXES ── */
+
+    /* Cookie modal scrollable on short screens */
+    @media (max-height: 600px) {
+      .cookie-overlay { align-items: flex-start; }
+      .cookie-modal { max-height: 90vh; overflow-y: auto; margin: 20px 0; }
+    }
+
+    /* MI ESPACIO modal scrollable on small screens */
+    #miEspacioModal > div {
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow-y: auto;
+    }
+
+    /* Dropdown safe for 320px screens */
+    @media (max-width: 360px) {
+      .dropdown-content { min-width: 160px; max-width: calc(100vw - 20px); }
+      .dropdown-content a { font-size: 0.5rem; padding: 10px; }
+      .hero-overlay { width: 95%; padding: 22px 16px 20px; }
+      .hero-overlay h2 { font-size: clamp(1rem, 5vw, 1.4rem); letter-spacing: 0.08em; }
+      .hero-overlay .hero-subtitle { font-size: 0.75rem; }
+      .hero-subscribe-form input { font-size: 0.82rem; padding: 14px 12px; }
+      .hero-subscribe-form button { font-size: 0.72rem; padding: 12px 16px; }
+      .hero-discount-badge { font-size: 0.58rem; padding: 6px 12px; }
+      .hero-subscribe-text { font-size: 0.65rem; }
+      .brand-nav { font-size: 0.95rem; letter-spacing: 0.14em; }
+      .navbar { padding: 6px 8px; gap: 4px; }
+      .nav-group { gap: 6px; }
+    }
+
+    /* Hero overlay overflow safety on very small phones */
+    .hero-overlay {
+      max-height: 85vh;
+      max-height: 85dvh;
+      overflow-y: auto;
+    }
+
+    /* Prevent 100vw overflow (scrollbar issue) */
+    .top-announcement { max-width: 100%; }
+    .navbar { max-width: 100%; }
+
   </style>
 </head>
 <body>
@@ -1144,6 +1186,32 @@
       }, 4000);
     }
 
+    // ── Sparkle Animation (moved outside for accessibility) ──
+    function createSparkles() {
+      var hero = document.querySelector('.image-hero');
+      if (!hero) return;
+      // Limit: remove any existing sparkle containers first
+      var existing = hero.querySelectorAll('.sparkle-container');
+      existing.forEach(function(el) { el.remove(); });
+      var container = document.createElement('div');
+      container.className = 'sparkle-container';
+      hero.appendChild(container);
+      var count = Math.min(30, 20); // Cap sparkle count for performance
+      for (var i = 0; i < count; i++) {
+        var s = document.createElement('div');
+        s.className = 'sparkle';
+        s.style.left = (40 + Math.random() * 20) + '%';
+        s.style.top = (70 + Math.random() * 20) + '%';
+        s.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
+        s.style.setProperty('--ty', (Math.random() * -200 - 50) + 'px');
+        s.style.animationDelay = (Math.random() * 0.5) + 's';
+        s.style.width = s.style.height = (4 + Math.random() * 8) + 'px';
+        container.appendChild(s);
+      }
+      // Auto-remove after animation completes to prevent DOM bloat
+      setTimeout(function() { container.remove(); }, 2500);
+    }
+
     // ── Email Subscription (Hero) ──
     async function handleHeroSubscribe(e) {
       e.preventDefault();
@@ -1250,22 +1318,6 @@
         }
 
         // 3) Show success with sparkle animation
-        function createSparkles() {
-          var container = document.createElement('div');
-          container.className = 'sparkle-container';
-          document.querySelector('.image-hero').appendChild(container);
-          for (var i = 0; i < 30; i++) {
-            var s = document.createElement('div');
-            s.className = 'sparkle';
-            s.style.left = (40 + Math.random() * 20) + '%';
-            s.style.top = (70 + Math.random() * 20) + '%';
-            s.style.setProperty('--tx', (Math.random() * 200 - 100) + 'px');
-            s.style.setProperty('--ty', (Math.random() * -200 - 50) + 'px');
-            s.style.animationDelay = (Math.random() * 0.5) + 's';
-            s.style.width = s.style.height = (4 + Math.random() * 8) + 'px';
-            container.appendChild(s);
-          }
-        }
         createSparkles();
         msgEl.textContent = '\u00a1Bienvenido al Club ENIGME! Redirigiendo al cat\u00e1logo...';
         msgEl.style.color = '#CBAA63';
