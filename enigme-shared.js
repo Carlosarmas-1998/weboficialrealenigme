@@ -994,18 +994,27 @@
      SHARE PRODUCT (GLOBAL)
   ========================================================== */
   function shareProduct(name, ref, imgSrc, price, lema) {
+    // Ensure name is never empty in the share text
+    var displayName = (name && name.trim()) ? name.trim() : (ref ? "Ref. " + ref : "Pieza exclusiva");
+
     // Build manifest URL so shared links go directly to the product page
     var pageName = window.location.pathname.split("/").pop() || "index.html";
     var catMap = { "joyeria.html": "joyeria", "boutique.html": "boutique", "plata.html": "plata", "liquidacion.html": "liquidacion" };
     var cat = catMap[pageName] || "joyeria";
+    // Extract numeric price (HNL) from price string like "L 649" or "L. 1,299"
+    var priceClean = "";
+    if (price) {
+      priceClean = String(price).replace(/[^\d]/g, "") || "0";
+    }
     var manifestUrl = window.location.origin + "/producto.html?ref=" + encodeURIComponent(ref || "") +
-      "&name=" + encodeURIComponent(name || "") +
+      "&name=" + encodeURIComponent(displayName) +
       "&img=" + encodeURIComponent(imgSrc || "") +
       "&lema=" + encodeURIComponent(lema || "") +
-      "&cat=" + encodeURIComponent(cat);
-    var text = "Descubre esta pieza de \u00C8NIGME: " + name;
+      "&cat=" + encodeURIComponent(cat) +
+      "&price=" + encodeURIComponent(priceClean);
+    var text = "Descubre esta pieza de \u00C8NIGME: " + displayName;
     if (navigator.share) {
-      navigator.share({ title: "\u00C8NIGME \u00B7 " + name, text: text, url: manifestUrl }).catch(function () {});
+      navigator.share({ title: "\u00C8NIGME \u00B7 " + displayName, text: text, url: manifestUrl }).catch(function () {});
     } else {
       var copyUrl = text + " " + manifestUrl;
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1120,14 +1129,48 @@
     document.querySelectorAll(".product-card").forEach(function(card) {
       var existingBtn = card.querySelector(".btn-share");
       var refEl = card.querySelector(".product-code");
-      var nameEl = card.querySelector(".product-name");
       var imgEl = card.querySelector(".product-media");
       var priceEl = card.querySelector(".product-price");
       var lemaEl = card.querySelector(".product-lema");
-      if (!refEl || !nameEl) return;
 
-      var ref = refEl.textContent.replace("REF: ", "").trim();
-      var name = nameEl.textContent.trim();
+      // Try multiple selectors for the product name
+      var nameEl = card.querySelector(".product-name")
+        || card.querySelector(".card-title")
+        || card.querySelector(".product-title")
+        || card.querySelector("h2")
+        || card.querySelector("h3")
+        || card.querySelector("h4");
+
+      var name = nameEl ? nameEl.textContent.trim() : "";
+
+      // Fallback: try data attribute on the card itself
+      if (!name && card.dataset && card.dataset.name) {
+        name = card.dataset.name;
+      }
+
+      // Fallback: try the btn-fav onclick which contains the product name
+      if (!name) {
+        var favBtn = card.querySelector(".btn-fav");
+        if (favBtn) {
+          var onclickStr = favBtn.getAttribute("onclick") || "";
+          var favMatch = onclickStr.match(/toggleFav\([^,]+,\s*'([^']+)'/);
+          if (favMatch) name = favMatch[1];
+        }
+      }
+
+      // Fallback: try the alt text of the image
+      if (!name && imgEl) {
+        var altText = imgEl.getAttribute("alt") || "";
+        if (altText && altText !== "Joyería ÈNIGME" && altText.indexOf("placeholder") === -1) {
+          name = altText;
+        }
+      }
+
+      var ref = refEl ? refEl.textContent.replace("REF: ", "").trim() : "";
+
+      // Skip cards with no name AND no ref (completely unidentifiable)
+      if (!name && !ref) return;
+
       var img = imgEl ? imgEl.getAttribute("src") : "";
       var price = priceEl ? priceEl.textContent.trim() : "";
       var lema = lemaEl ? lemaEl.textContent.trim() : "";

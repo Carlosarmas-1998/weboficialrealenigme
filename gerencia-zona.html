@@ -186,7 +186,26 @@
   <div class="topbar-info">
     <span id="userInfo"></span>
   </div>
+  <button class="topbar-logout" onclick="openChangePasswordGZ()" style="margin-right:6px;">Cambiar Contrase&ntilde;a</button>
   <button class="topbar-logout" onclick="logout()">Salir</button>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA GZ -->
+<div class="modal-overlay" id="passwordModalGZ">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="card-title">Cambiar Contrase&ntilde;a</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group"><label>Contrase&ntilde;a Actual</label><input id="pwGzCurrent" type="password" placeholder="Ingrese su contrase&ntilde;a actual"/></div>
+      <div class="form-group"><label>Nueva Contrase&ntilde;a</label><input id="pwGzNew" type="password" placeholder="M&iacute;nimo 6 caracteres"/></div>
+      <div class="form-group"><label>Confirmar Nueva Contrase&ntilde;a</label><input id="pwGzConfirm" type="password" placeholder="Repita la nueva contrase&ntilde;a"/></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn" onclick="doChangePasswordGZ()">Cambiar Contrase&ntilde;a</button>
+      <button class="btn btn-outline" onclick="closePasswordModalGZ()">Cancelar</button>
+    </div>
+    <p id="pwGzError" class="error-msg"></p>
+    <p id="pwGzSuccess" class="success-msg"></p>
+  </div>
 </div>
 
 <div class="tabs">
@@ -657,12 +676,14 @@ async function loadSectores() {
   populateSectorSelects();
 }
 
+var allCoordinadores = [];
 async function loadCoordinadores() {
   try {
     var coords = await api('/rest/v1/coordinadores?gerente_id=eq.' + session.id);
+    allCoordinadores = coords || [];
     coordMap = {};
     coords.forEach(function(c) { if (c.sector_id && c.activo) coordMap[c.sector_id] = c; });
-  } catch(e) { coordMap = {}; }
+  } catch(e) { coordMap = {}; allCoordinadores = []; }
 }
 
 function renderSectorGrid() {
@@ -693,7 +714,15 @@ function renderSectorGrid() {
       html += '</div>';
     } else if (sector) {
       html += '<div class="sector-empty">Sin coordinador asignado</div>';
-      html += '<button class="btn btn-sm" onclick="abrirAsignarCoord(\'' + sector.id + '\',' + i + ')" style="width:100%;margin-top:8px;">Asignar Coordinador</button>';
+      html += '<button class="btn btn-sm" onclick="abrirAsignarCoord(\'' + sector.id + '\',' + i + ')" style="width:100%;margin-top:8px;">Asignar Nuevo Coordinador</button>';
+      var prevCoords = allCoordinadores.filter(function(c) { return !c.activo && c.sector_id === sector.id; });
+      if (prevCoords.length) {
+        var prev = prevCoords[prevCoords.length - 1];
+        html += '<div style="margin-top:6px;padding:8px;background:rgba(192,57,43,0.06);border:1px solid rgba(192,57,43,0.15);border-radius:4px;font-size:0.72rem;color:var(--gris);">';
+        html += '<strong>Anterior:</strong> ' + esc(prev.nombre) + ' (C\u00f3d: ' + esc(prev.codigo) + ')';
+        if (prev.motivo_baja) html += '<br>Motivo: ' + esc(prev.motivo_baja);
+        html += '</div>';
+      }
     } else {
       html += '<div class="sector-empty">Sector no creado</div>';
       html += '<button class="btn btn-sm btn-outline" onclick="crearSector(' + i + ')" style="width:100%;margin-top:8px;">Crear Sector</button>';
@@ -940,13 +969,30 @@ async function guardarCoordinador() {
         })
       }).catch(function(e){ console.warn('registro_alta coord:', e); });
 
-      // Send welcome email
+      // Send welcome email via Web3Forms
       var coordEmail = (document.getElementById('mcEmail') || {}).value || '';
       var coordNombre = (document.getElementById('mcNombre') || {}).value || '';
       if (coordEmail) {
-        fetch(SB + '/functions/v1/send-welcome-email', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tipo: 'coordinador', nombre: coordNombre, email: coordEmail, codigo: codigo })
+        var coordWelcomeBody = buildEnigmeEmail(
+          'Bienvenido/a a ENIGME',
+          '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(coordNombre) + '</strong>,</p>' +
+          '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Ha sido designado/a como Coordinador/a en ENIGME. A continuacion sus credenciales de acceso:</p>' +
+          '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">' +
+          '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Codigo:</td><td style="padding:8px 0;font-size:14px;color:#CBAA63;font-weight:600;">' + esc(codigo) + '</td></tr>' +
+          '</table>' +
+          '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Bienvenido/a al equipo. Contacte a su Gerente de Zona para mas informacion.</p>'
+        );
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+            to: coordEmail,
+            from_name: 'ENIGME',
+            subject: 'ENIGME | Bienvenido/a al Equipo',
+            message: coordWelcomeBody,
+            botcheck: ''
+          })
         }).catch(function(){});
       }
     }
@@ -963,7 +1009,7 @@ async function bajaCoordinador(coordId, sectorId) {
   var motivo = prompt('Motivo de la baja:');
   if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
   try {
-    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim(), archivado: true });
     await loadSectores();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }
@@ -1965,7 +2011,7 @@ async function bajaCoordinadorFromTab(coordId, sectorId) {
   var motivo = prompt('Motivo de la baja:');
   if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
   try {
-    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, sector_id: null, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
+    await apiPatch('/rest/v1/coordinadores?id=eq.' + coordId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim(), archivado: true });
     await loadBajasTab();
     await loadSectores();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
@@ -1976,7 +2022,7 @@ async function bajaVendedora(vendId) {
   var motivo = prompt('Motivo de la baja:');
   if (!motivo || !motivo.trim()) { alert('Debe indicar el motivo de la baja.'); return; }
   try {
-    await apiPatch('/rest/v1/vendedoras?id=eq.' + vendId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim() });
+    await apiPatch('/rest/v1/vendedoras?id=eq.' + vendId, { activo: false, fecha_baja: new Date().toISOString(), motivo_baja: motivo.trim(), archivado: true });
     await loadBajasTab();
   } catch(e) { alert('Error: ' + (e.message || JSON.stringify(e))); }
 }
@@ -2086,6 +2132,122 @@ async function buscarProfesionalBaja() {
     resultsEl.innerHTML = html;
   } catch(e) {
     errEl.textContent = 'Error al buscar: ' + (e.message || 'Intente de nuevo.');
+    console.error(e);
+  }
+}
+
+/* ══════════════════════════════════════════
+   ENIGME EMAIL TEMPLATE BUILDER
+   ══════════════════════════════════════════ */
+function buildEnigmeEmail(title, bodyContent) {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#0A0A0A;font-family:Georgia,Helvetica,Arial,sans-serif;">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;"><tr><td align="center" style="padding:20px 0;">' +
+    '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0A0A0A;">' +
+    '<tr><td style="padding:40px 40px 20px;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;margin:0;">ENIGME</p>' +
+    '<div style="width:60px;height:1px;background:#CBAA63;margin:14px auto;"></div>' +
+    '<p style="font-size:11px;letter-spacing:4px;color:#6b6259;margin:0;text-transform:uppercase;">El arte de la exclusividad</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 0;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:18px;color:#CBAA63;letter-spacing:2px;margin:0;">' + title + '</p>' +
+    '<div style="width:40px;height:1px;background:rgba(203,170,99,0.3);margin:16px auto;"></div>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 30px;">' + bodyContent + '</td></tr>' +
+    '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+    '<tr><td style="padding:24px 40px;text-align:center;">' +
+    '<a href="https://enigmeofficial.com" style="display:inline-block;padding:12px 32px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Visitar Sitio Web</a>' +
+    '</td></tr>' +
+    '<tr><td style="padding:20px 40px 10px;text-align:center;">' +
+    '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">Preguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+    '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;margin:0 0 6px;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+    '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
+}
+
+/* ══════════════════════════════════════════
+   CAMBIAR CONTRASENA - GERENCIA DE ZONA
+   ══════════════════════════════════════════ */
+function openChangePasswordGZ() {
+  document.getElementById('pwGzCurrent').value = '';
+  document.getElementById('pwGzNew').value = '';
+  document.getElementById('pwGzConfirm').value = '';
+  document.getElementById('pwGzError').textContent = '';
+  document.getElementById('pwGzSuccess').textContent = '';
+  document.getElementById('passwordModalGZ').classList.add('active');
+}
+function closePasswordModalGZ() {
+  document.getElementById('passwordModalGZ').classList.remove('active');
+}
+document.getElementById('passwordModalGZ').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModalGZ();
+});
+
+async function doChangePasswordGZ() {
+  var errEl = document.getElementById('pwGzError');
+  var sucEl = document.getElementById('pwGzSuccess');
+  errEl.textContent = ''; sucEl.textContent = '';
+  var current = document.getElementById('pwGzCurrent').value.trim();
+  var newPw = document.getElementById('pwGzNew').value.trim();
+  var confirmPw = document.getElementById('pwGzConfirm').value.trim();
+
+  if (!current) { errEl.textContent = 'Ingrese su contrasena actual.'; return; }
+  if (current !== session.password_temporal) { errEl.textContent = 'La contrasena actual es incorrecta.'; return; }
+  if (!newPw || newPw.length < 6) { errEl.textContent = 'La nueva contrasena debe tener al menos 6 caracteres.'; return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Las contrasenas no coinciden.'; return; }
+  if (newPw === current) { errEl.textContent = 'La nueva contrasena debe ser diferente a la actual.'; return; }
+
+  try {
+    await apiPatch('/rest/v1/gerentes_zona?id=eq.' + session.id, { password_temporal: newPw });
+    session.password_temporal = newPw;
+    sessionStorage.setItem('enigme_gz_session', JSON.stringify(session));
+    sucEl.textContent = 'Contrasena actualizada exitosamente.';
+
+    // Notify GZ by email
+    if (session.email) {
+      var emailBody = buildEnigmeEmail(
+        'Contrasena Actualizada',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(session.nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Su contrasena de acceso al portal de Gerencia de Zona ha sido cambiada exitosamente.</p>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si usted no realizo este cambio, contacte inmediatamente a su Gerencia Divisional.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+          to: session.email,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Contrasena Actualizada',
+          message: emailBody,
+          botcheck: ''
+        })
+      }).catch(function(){});
+    }
+
+    // Notify admin
+    var adminEmailBody = buildEnigmeEmail(
+      'Cambio de Contrasena - Gerente de Zona',
+      '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Se ha registrado un cambio de contrasena.</p>' +
+      '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 8px;"><strong style="color:#CBAA63;">Gerente:</strong> ' + esc(session.nombre) + ' (' + esc(session.codigo) + ')</p>' +
+      '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0;">Fecha: ' + new Date().toLocaleString('es-HN') + '</p>'
+    );
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+        to: 'carlosarmas@enigmeofficial.com',
+        from_name: 'ENIGME',
+        subject: 'ENIGME | Cambio de Contrasena - GZ ' + (session.codigo || ''),
+        message: adminEmailBody,
+        botcheck: ''
+      })
+    }).catch(function(){});
+
+    setTimeout(closePasswordModalGZ, 2000);
+  } catch(e) {
+    errEl.textContent = 'Error al cambiar la contrasena.';
     console.error(e);
   }
 }

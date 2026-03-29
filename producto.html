@@ -225,6 +225,7 @@
       <div class="manifesto-content">
         <div class="manifesto-kicker fade-up" id="kickerText">La Casa ÈNIGME presenta</div>
         <h1 class="manifesto-title fade-up fade-up-delay1" id="productTitle">---</h1>
+        <div class="product-price-display fade-up fade-up-delay1" id="productPriceDisplay" style="font-family:'Cinzel',serif;font-size:1.4rem;color:#CBAA63;letter-spacing:0.1em;margin:8px 0 4px;"></div>
         <div class="manifesto-line fade-up fade-up-delay1"></div>
         <p class="manifesto-text fade-up fade-up-delay2" id="manifestoText"></p>
         <div class="destila-section fade-up fade-up-delay3">
@@ -260,6 +261,7 @@
     var productImg = decodeURIComponent(params.get('img') || 'portada.png');
     var productLema = decodeURIComponent(params.get('lema') || '');
     var productCategory = params.get('cat') || 'joyeria';
+    var productPrice = params.get('price') || '0';
 
     document.title = productName + ' | Manifiesto ÈNIGME';
 
@@ -267,6 +269,33 @@
     document.getElementById('refBadge').textContent = 'REF: ' + productRef;
     document.getElementById('heroImg').src = productImg;
     document.getElementById('productTitle').textContent = productName;
+
+    // ======= SHOW PRICE =======
+    var priceDisplayEl = document.getElementById('productPriceDisplay');
+    if (productPrice && productPrice !== '0') {
+      // Show price in the user's detected currency
+      var priceNum = parseInt(productPrice) || 0;
+      if (priceNum > 0) {
+        var moneda = localStorage.getItem('enigme_moneda') || 'HNL';
+        var simbolo = localStorage.getItem('enigme_simbolo') || 'L';
+        if (moneda === 'EUR') {
+          var tasa = 31.50;
+          var eurRaw = priceNum / tasa;
+          var eurRound = Math.round(eurRaw);
+          var lastD = eurRound % 10;
+          if (lastD <= 4) { eurRound = eurRound - lastD - 1; if (eurRound <= 0) eurRound = 9; }
+          else if (lastD >= 5 && lastD < 9) { eurRound = eurRound + (9 - lastD); }
+          priceDisplayEl.textContent = '\u20AC ' + eurRound.toFixed(2);
+        } else {
+          priceDisplayEl.textContent = 'L ' + priceNum.toLocaleString('es-HN');
+        }
+        priceDisplayEl.setAttribute('data-price-hnl', priceNum);
+      } else {
+        priceDisplayEl.style.display = 'none';
+      }
+    } else {
+      priceDisplayEl.style.display = 'none';
+    }
 
     // ======= MANIFESTO GENERATOR =======
     function generateManifesto(name, category, lema) {
@@ -352,7 +381,7 @@
       if (existing !== -1) {
         cart[existing].qty = (cart[existing].qty || 1) + 1;
       } else {
-        cart.push({ ref: productRef, name: productName, price: 'L 0', img: productImg, qty: 1 });
+        cart.push({ ref: productRef, name: productName, price: 'L ' + productPrice, img: productImg, qty: 1 });
       }
       localStorage.setItem('enigme_cart', JSON.stringify(cart));
       updateCounts();

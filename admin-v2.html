@@ -113,6 +113,8 @@
     .status-entrevista{color:#b08fd0;border-color:#b08fd0;}
     .status-aceptada{color:var(--success);border-color:var(--success);}
     .status-rechazada{color:var(--danger);border-color:var(--danger);}
+    .status-enviado_logistica{color:#5a8fa0;border-color:#5a8fa0;background:rgba(90,143,160,.08);}
+    .status-pendiente{color:var(--warn);border-color:var(--warn);}
 
     /* CHAT */
     .chat-toggle{font-size:.7rem;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
@@ -154,20 +156,67 @@
     @keyframes toastIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
 
     /* MOBILE */
+    /* PEDIDO DETAIL EXPAND */
+    .pedido-detail-row td{padding:0 !important;border-bottom:1px solid var(--border);}
+    .pedido-detail-inner{padding:20px 24px;background:var(--surface2);border-top:1px solid var(--border);}
+    .pedido-detail-inner .pd-section{margin-bottom:16px;}
+    .pedido-detail-inner .pd-section-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:500;}
+    .pedido-detail-inner .pd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 20px;}
+    .pedido-detail-inner .pd-field{font-size:.78rem;color:var(--text);line-height:1.5;}
+    .pedido-detail-inner .pd-field .pd-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);display:block;}
+    .pedido-detail-inner table{font-size:.78rem;}
+    .pedido-detail-inner th{font-size:.6rem;padding:8px 10px;}
+    .pedido-detail-inner td{padding:6px 10px;font-size:.78rem;}
+    .btn-action-sm{padding:4px 10px;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all .2s;font-family:'Jost',sans-serif;white-space:nowrap;}
+    .btn-action-sm:hover{color:var(--text);border-color:var(--text-muted);}
+    .btn-action-sm.gold{border-color:var(--gold-dim);color:var(--gold);}
+    .btn-action-sm.gold:hover{background:var(--gold);color:#0a0a0a;}
+    .btn-action-sm.info{border-color:var(--info);color:var(--info);}
+    .btn-action-sm.info:hover{background:var(--info);color:#fff;}
+
+    /* MOBILE MENU TOGGLE */
+    .mobile-menu-btn{display:none;background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:6px 10px;font-family:'Jost',sans-serif;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+    .mobile-menu-btn:hover{background:var(--gold);color:#0a0a0a;}
+    .sidebar-nav-wrap{display:contents;}
+
+    /* MOBILE RESPONSIVE */
     @media(max-width:768px){
-      .sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--border);padding:16px;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;}
+      .mobile-menu-btn{display:inline-block;}
+      .sidebar-nav-wrap{display:none;width:100%;flex-direction:row;flex-wrap:wrap;gap:4px;}
+      .sidebar-nav-wrap.mobile-open{display:flex;}
+      .sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--border);padding:12px 16px;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;overflow-x:auto;}
       .sidebar-brand{margin-bottom:0;margin-right:auto;}
       .sidebar-brand h2{font-size:1.1rem;}
       .sidebar-brand span{display:none;}
-      .nav-item{padding:8px 10px;font-size:.62rem;margin-bottom:0;}
+      .nav-item{padding:6px 8px;font-size:.58rem;margin-bottom:0;flex-shrink:0;}
       .sidebar-footer{margin-top:0;padding-top:0;margin-left:8px;}
-      .main{margin-left:0;padding:20px 16px;}
+      .main{margin-left:0;padding:16px 12px;}
       .stats-row{grid-template-columns:1fr 1fr;}
       .page-header{flex-direction:column;align-items:flex-start;}
+      .header-actions{width:100%;flex-wrap:wrap;}
+      .header-actions .btn,.header-actions select,.header-actions input{font-size:.65rem;padding:8px 12px;}
       .detail-grid{grid-template-columns:1fr;}
+      .table-wrap{-webkit-overflow-scrolling:touch;}
+      .filter-row{flex-direction:column;align-items:stretch;}
+      .filter-row select{width:100%;min-width:auto;}
+      .pedido-detail-inner .pd-grid{grid-template-columns:1fr;}
+      .btn-action-sm{padding:4px 8px;font-size:.55rem;}
+      /* Messaging grid */
+      #tab-msg_admin > div:last-child{grid-template-columns:1fr !important;min-height:auto !important;}
+      /* Ventas Corp charts */
+      div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}
     }
     @media(max-width:480px){
       .stats-row{grid-template-columns:1fr;}
+      .sidebar{padding:10px 12px;}
+      .nav-item{padding:5px 6px;font-size:.55rem;letter-spacing:.06em;}
+      .main{padding:12px 8px;}
+      .page-title h1{font-size:1.6rem;}
+      .btn{padding:8px 14px;font-size:.65rem;letter-spacing:.12em;}
+      .stat-card{padding:14px 16px;}
+      .stat-value{font-size:1.5rem;}
+      th{font-size:.58rem;padding:10px 8px;}
+      td{padding:8px;font-size:.78rem;}
     }
     /* COLLAPSIBLE SECTIONS */
     .collapse-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border:1px solid var(--border);cursor:pointer;margin-bottom:0;transition:all .2s;user-select:none;}
@@ -202,6 +251,8 @@
     <h2><em>E</em>nigme</h2>
     <span>Admin Panel</span>
   </div>
+  <button class="mobile-menu-btn" onclick="toggleMobileNav()">&#9776; Men&uacute;</button>
+  <div class="sidebar-nav-wrap" id="sidebarNavWrap">
   <div class="nav-item active" data-tab="pedidos" onclick="switchTab('pedidos')">Pedidos</div>
   <div class="nav-item" data-tab="postulaciones" onclick="switchTab('postulaciones')">Postulaciones</div>
   <div class="nav-item" data-tab="cookies" onclick="switchTab('cookies')">Cookies</div>
@@ -228,6 +279,7 @@
     <a href="gerencia-zona.html" target="_blank" style="display:block;padding:7px 10px;font-size:.68rem;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .2s;border-left:2px solid transparent;" onmouseover="this.style.color='var(--gold)';this.style.borderLeftColor='var(--gold)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderLeftColor='transparent'">Gerencia de Zona</a>
     <a href="logistica.html" target="_blank" style="display:block;padding:7px 10px;font-size:.68rem;letter-spacing:.1em;color:var(--text-muted);text-decoration:none;transition:color .2s;border-left:2px solid transparent;" onmouseover="this.style.color='var(--gold)';this.style.borderLeftColor='var(--gold)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderLeftColor='transparent'">Log&iacute;stica</a>
   </div>
+  </div><!-- /sidebar-nav-wrap -->
   <div class="sidebar-footer">
     <div id="pwaInstallBtn" onclick="installPWA()" style="display:none;align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;cursor:pointer;border:1px solid var(--gold-dim);transition:all .2s;" onmouseover="this.style.background='var(--gold)';this.style.color='#0a0a0a'" onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
@@ -776,7 +828,7 @@
       </table></div>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>C&oacute;digo Pedido</th><th>Vendedora</th><th>C&oacute;d. Vendedora</th><th>Gerente Zona</th><th>Campa&ntilde;a</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Productos</th></tr></thead>
+      <thead><tr><th>C&oacute;digo Pedido</th><th>Vendedora</th><th>C&oacute;d. Vendedora</th><th>Gerente Zona</th><th>Campa&ntilde;a</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Productos</th><th>Acciones</th></tr></thead>
       <tbody id="pcorpBody"></tbody>
     </table></div>
     <div class="empty-state" id="pcorpEmpty" style="display:none;">No hay pedidos corporativos</div>
@@ -826,6 +878,10 @@
       <div class="header-actions">
         <button class="btn" onclick="loadConfiguracion()"><span>Refrescar</span></button>
       </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:16px;margin-bottom:16px;">
+      <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">Nota Importante</div>
+      <p style="font-size:.8rem;color:var(--text-muted);line-height:1.6;">Los cambios en configuraci&oacute;n se aplican en todo el sistema: comisiones, salarios, impuestos, gerencia de zona y gerencia divisional. El salario de log&iacute;stica es fijo y modificable desde aqu&iacute;.</p>
     </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Clave</th><th>Valor</th><th>Descripci&oacute;n</th><th>Acciones</th></tr></thead>
@@ -967,9 +1023,10 @@ async function forgotPassword() {
       body: JSON.stringify({
         access_key: WEB3FORMS_KEY,
         to: RECOVERY_EMAIL,
-        subject: 'Enigme Admin - Recuperacion de contrasena',
-        message: 'Tu contrasena del panel de administracion Enigme es: ' + ADMIN_PASSWORD,
-        from_name: 'Enigme Admin Panel'
+        subject: 'ENIGME | Recuperacion de Contrasena',
+        from_name: 'ENIGME',
+        message: 'Su contrasena del panel de administracion ENIGME es: ' + ADMIN_PASSWORD,
+        botcheck: ''
       })
     });
     if (r.ok) {
@@ -997,6 +1054,16 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
   var tabEl = document.getElementById('tab-'+tab);
   if (tabEl) tabEl.classList.add('active');
+  // Auto-close mobile nav on tab switch
+  var navWrap = document.getElementById('sidebarNavWrap');
+  if (navWrap && window.innerWidth <= 768) {
+    navWrap.classList.remove('mobile-open');
+  }
+}
+
+function toggleMobileNav() {
+  var navWrap = document.getElementById('sidebarNavWrap');
+  if (navWrap) navWrap.classList.toggle('mobile-open');
 }
 
 // ================================================================
@@ -1086,13 +1153,13 @@ function loadAllData() {
 // ================================================================
 async function loadPedidos() {
   var filterVal = document.getElementById('pedidosFilter').value;
-  var query = '&order=created_at.desc';
+  var query = '&order=created_at.desc&or=(archivado.eq.false,archivado.is.null)';
   if (filterVal) query += '&estado=eq.' + encodeURIComponent(filterVal);
   var data = await supaGet('web_pedidos', query);
   cachedPedidos = data;
 
   // Stats always unfiltered
-  var allData = filterVal ? await supaGet('web_pedidos', '&order=created_at.desc') : data;
+  var allData = filterVal ? await supaGet('web_pedidos', '&order=created_at.desc&or=(archivado.eq.false,archivado.is.null)') : data;
   var totalOrders = allData.length;
   var eurTotal = 0;
   var hnlTotal = 0;
@@ -1279,8 +1346,9 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
             '<table width="600" style="max-width:600px;width:100%;">' +
             '<tr><td style="text-align:center;padding:40px 40px 20px;">' +
             '<div style="width:50px;height:1px;background:#CBAA63;margin:0 auto 16px;"></div>' +
-            '<h1 style="font-family:Georgia,serif;font-size:28px;font-weight:300;color:#e8e0d4;letter-spacing:6px;margin:0;">ENIGME</h1>' +
-            '<p style="font-size:9px;letter-spacing:6px;color:#6b6259;margin:8px 0 0;text-transform:uppercase;">La Casa</p></td></tr>' +
+            '<p style="font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;margin:0;">ENIGME</p>' +
+            '<div style="width:60px;height:1px;background:#CBAA63;margin:14px auto;"></div>' +
+            '<p style="font-size:11px;letter-spacing:4px;color:#6b6259;margin:0;text-transform:uppercase;">El arte de la exclusividad</p></td></tr>' +
             '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div></td></tr>' +
             '<tr><td style="padding:30px 40px 15px;text-align:center;">' +
             '<h2 style="font-family:Georgia,serif;font-size:20px;font-weight:300;color:#CBAA63;letter-spacing:2px;margin:0 0 6px;">Actualizaci\u00f3n de Pedido</h2>' +
@@ -1296,8 +1364,10 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
             '<a href="https://enigmeofficial.com/catalogo.html" style="display:inline-block;padding:14px 36px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Seguir Explorando</a></td></tr>' +
             '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
             '<tr><td style="padding:20px 40px;text-align:center;">' +
-            '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">\u00bfPreguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
-            '<p style="font-size:8px;color:#4a4540;letter-spacing:2px;margin:0;">\u00a9 2026 ENIGME \u00b7 TODOS LOS DERECHOS RESERVADOS</p></td></tr>' +
+            '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">Preguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+            '<a href="https://enigmeofficial.com" style="font-size:9px;color:#CBAA63;letter-spacing:2px;text-decoration:none;">enigmeofficial.com</a>' +
+            '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;margin:6px 0;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+            '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p></td></tr>' +
             '</table></td></tr></table></body></html>';
 
           fetch(SUPA_URL + '/functions/v1/send-email', {
@@ -1327,29 +1397,30 @@ async function changePedidoStatus(id, newStatus, oldStatus) {
 }
 
 async function deletePedido(id) {
-  if (!confirm('Eliminar pedido #' + id + ' permanentemente?')) return;
-  var ok = await supaDelete('web_pedidos', id);
-  if (ok) {
-    showToast('Pedido eliminado');
+  if (!confirm('Enviar pedido #' + id + ' a la papelera?')) return;
+  try {
+    await supaPatch('web_pedidos', id, { archivado: true });
+    showToast('Pedido enviado a la papelera');
     loadPedidos();
-  } else {
-    showToast('Error al eliminar', true);
+  } catch(e) {
+    showToast('Error al archivar: ' + (e.message || e), 'error');
   }
 }
 
 async function eliminarTodosPedidos() {
-  if (!confirm('¿Eliminar TODOS los pedidos web? Esta acción es irreversible.')) return;
-  if (!confirm('¿Está completamente seguro? Se perderán todos los datos de pedidos.')) return;
+  if (!confirm('¿Enviar TODOS los pedidos web a la papelera?')) return;
+  if (!confirm('¿Está completamente seguro?')) return;
   try {
-    var res = await fetch(SUPA_URL + '/rest/v1/web_pedidos?id=gt.0', {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    var res = await fetch(SUPA_URL + '/rest/v1/web_pedidos?id=gt.0&archivado=eq.false', {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ archivado: true })
     });
     if (res.ok) {
-      showToast('Todos los pedidos eliminados');
+      showToast('Todos los pedidos enviados a la papelera');
       loadPedidos();
     } else {
-      showToast('Error al eliminar pedidos', true);
+      showToast('Error al archivar pedidos', true);
     }
   } catch(e) { showToast('Error: ' + e.message, true); }
 }
@@ -1467,7 +1538,7 @@ async function changePostulacionStatus(id, newStatus) {
         'Pendiente': 'Tu solicitud ha sido recibida y se encuentra pendiente de revisión.',
         'En Revisión': 'Tu solicitud está siendo evaluada por nuestro equipo.',
         'Entrevista': '¡Felicidades! Queremos conocerte. Te contactaremos para agendar una entrevista.',
-        'Aceptado': '¡Bienvenido/a a La Casa ENIGME! Nos complace informarte que has sido aceptado/a.',
+        'Aceptado': 'Bienvenido/a a ENIGME. Nos complace informarte que has sido aceptado/a.',
         'Rechazado': 'Agradecemos tu interés. En este momento no podemos avanzar con tu solicitud, pero te mantendremos en consideración para futuras oportunidades.'
       };
       var statusColors = {
@@ -1485,8 +1556,9 @@ async function changePostulacionStatus(id, newStatus) {
         '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">' +
         '<tr><td style="text-align:center;padding:40px 40px 30px;">' +
         '<div style="width:60px;height:1px;background:#CBAA63;margin:0 auto 20px;"></div>' +
-        '<h1 style="font-family:Georgia,serif;font-size:28px;font-weight:300;color:#e8e0d4;letter-spacing:4px;margin:0;">ENIGME</h1>' +
-        '<p style="font-size:10px;letter-spacing:6px;color:#6b6259;margin:8px 0 0;text-transform:uppercase;">La Casa</p>' +
+        '<p style="font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;margin:0;">ENIGME</p>' +
+        '<div style="width:60px;height:1px;background:#CBAA63;margin:14px auto;"></div>' +
+        '<p style="font-size:11px;letter-spacing:4px;color:#6b6259;margin:0;text-transform:uppercase;">El arte de la exclusividad</p>' +
         '</td></tr>' +
         '<tr><td style="padding:0 40px;">' +
         '<div style="height:1px;background:linear-gradient(to right,transparent,#CBAA63,transparent);"></div>' +
@@ -1508,7 +1580,10 @@ async function changePostulacionStatus(id, newStatus) {
         '<div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div>' +
         '</td></tr>' +
         '<tr><td style="padding:30px 40px;text-align:center;">' +
-        '<p style="font-size:10px;color:#4a4540;letter-spacing:2px;margin:0;">© 2026 ENIGME · TODOS LOS DERECHOS RESERVADOS</p>' +
+        '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">Preguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+        '<a href="https://enigmeofficial.com" style="font-size:9px;color:#CBAA63;letter-spacing:2px;text-decoration:none;">enigmeofficial.com</a>' +
+        '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;margin:6px 0;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+        '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
         '</td></tr>' +
         '</table></td></tr></table></body></html>';
       fetch(SUPA_URL + '/functions/v1/send-email', {
@@ -2355,15 +2430,34 @@ async function crearGerenciaDivisional() {
       body: JSON.stringify({ tipo: 'gerente_divisional', nombre: nombre, dni: dni || null, telefono: telefono || null, email: email || null, direccion: direccion || null, codigo: codigo, numero_cuenta: cuenta || null, nombre_banco: banco || null, fecha_ingreso: fechaIngreso, departamento: deptoNombres.join(', '), password_temporal: password, archivo_dni: urlDni, archivo_cuenta: urlCuenta, archivo_extra: urlExtra })
     }).catch(function(e){ console.warn('registro_alta GD:', e); });
     showToast('Gerencia divisional creada exitosamente');
-    // Send welcome email
+    // Send welcome email via Web3Forms
     if (email) {
       var deptoNames = [];
       if (deptosContainer) {
         deptosContainer.querySelectorAll('input[type=checkbox]:checked').forEach(function(cb) { deptoNames.push(cb.parentElement.textContent.trim()); });
       }
-      fetch(SUPA_URL + '/functions/v1/send-welcome-email', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo: 'gerencia_divisional', nombre: nombre, email: email, codigo: codigo, departamento: deptoNames.join(', ') })
+      var gdWelcomeBody = buildEnigmeEmailAdmin(
+        'Bienvenido/a a ENIGME',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Ha sido designado/a como Gerente Divisional en ENIGME. A continuacion sus credenciales de acceso:</p>' +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Codigo:</td><td style="padding:8px 0;font-size:14px;color:#CBAA63;font-weight:600;">' + esc(codigo) + '</td></tr>' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Contrasena:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(password) + '</td></tr>' +
+        (deptoNames.length ? '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Departamentos:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(deptoNames.join(', ')) + '</td></tr>' : '') +
+        '</table>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          to: email,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Bienvenido/a - Gerencia Divisional',
+          message: gdWelcomeBody,
+          botcheck: ''
+        })
       }).catch(function(){});
     }
     document.getElementById('gdFormWrap').style.display = 'none';
@@ -3023,17 +3117,18 @@ async function eliminarNombramiento(id) {
 }
 
 async function eliminarTodosNombramientos() {
-  if (!confirm('¿Eliminar TODOS los nombramientos? Esta acción es irreversible.')) return;
-  if (!confirm('¿Está completamente seguro? Se perderán todos los datos de nombramientos.')) return;
+  if (!confirm('¿Enviar TODOS los nombramientos a la papelera?')) return;
+  if (!confirm('¿Está completamente seguro?')) return;
   try {
-    var res = await fetch(SUPA_URL + '/rest/v1/nombramientos?id=gt.0', {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    var res = await fetch(SUPA_URL + '/rest/v1/nombramientos?id=gt.0&archivado=eq.false', {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ archivado: true })
     });
     if (res.ok) {
-      showToast('Todos los nombramientos eliminados');
+      showToast('Todos los nombramientos enviados a la papelera');
       loadVentasCorp();
-    } else { showToast('Error al eliminar', true); }
+    } else { showToast('Error al archivar', true); }
   } catch(e) { showToast('Error: ' + e.message, true); }
 }
 
@@ -4440,7 +4535,7 @@ async function enviarRecordatorioPago(pedidoId, email, nombre, codigo, total) {
     '<table width="600" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid rgba(203,170,99,0.3);max-width:600px;width:100%;">' +
     '<tr><td style="padding:40px 30px 20px;text-align:center;border-bottom:1px solid rgba(203,170,99,0.2);">' +
       '<h1 style="margin:0;font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;font-weight:400;">&Egrave;NIGME</h1>' +
-      '<p style="margin:10px 0 0;font-size:10px;letter-spacing:4px;color:rgba(203,170,99,0.6);text-transform:uppercase;">Aura &middot; Misterio &middot; Presencia</p>' +
+      '<p style="margin:10px 0 0;font-size:10px;letter-spacing:4px;color:rgba(203,170,99,0.6);text-transform:uppercase;">El arte de la exclusividad</p>' +
     '</td></tr>' +
     '<tr><td style="background:linear-gradient(90deg,#111,#CBAA63,#111);height:2px;"></td></tr>' +
     '<tr><td style="padding:40px 35px;">' +
@@ -4456,10 +4551,11 @@ async function enviarRecordatorioPago(pedidoId, email, nombre, codigo, total) {
       '<p style="font-size:13px;line-height:1.7;color:#6b6259;">Si ya ha realizado el pago, ignore este mensaje. Para cualquier consulta, escr&iacute;banos a <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a> o por <a href="https://wa.me/34602149162" style="color:#CBAA63;text-decoration:none;">WhatsApp</a>.</p>' +
     '</td></tr>' +
     '<tr><td style="background:#0a0a0a;padding:30px 35px;text-align:center;border-top:1px solid rgba(203,170,99,0.15);">' +
-      '<p style="margin:0;font-family:Georgia,serif;font-size:11px;letter-spacing:4px;color:#CBAA63;">AURA &middot; MISTERIO &middot; PRESENCIA</p>' +
-      '<p style="margin:12px 0 0;font-size:10px;color:#555;">info@enigmeofficial.com &middot; +34 602 149 162</p>' +
+      '<p style="margin:0;font-family:Georgia,serif;font-size:11px;letter-spacing:4px;color:#CBAA63;">El arte de la exclusividad</p>' +
+      '<p style="margin:12px 0 0;font-size:10px;color:#555;">info@enigmeofficial.com</p>' +
       '<p style="margin:8px 0 0;font-size:10px;"><a href="https://enigmeofficial.com" style="color:#CBAA63;text-decoration:none;letter-spacing:2px;">enigmeofficial.com</a></p>' +
-      '<p style="margin:10px 0 0;font-size:9px;letter-spacing:1px;color:#444;">&copy; 2026 &Egrave;NIGME. TODOS LOS DERECHOS RESERVADOS.</p>' +
+      '<p style="margin:10px 0 0;font-size:9px;letter-spacing:1px;color:#444;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+      '<p style="margin:6px 0 0;font-size:8px;color:#3a3530;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
     '</td></tr>' +
     '</table></td></tr></table></div>';
 
@@ -4612,19 +4708,30 @@ async function ajustarDeuda(id, tipo, signo) {
 // ================================================================
 var cachedPedidosCorp = [];
 
+// Store detail maps globally for pedidos corp detail expansion
+var _pcorpDetMap = {};
+var _pcorpVendMap = {};
+var _pcorpGzMap = {};
+var _pcorpPedidosMap = {};
+var _pcorpCoordMap = {};
+var _pcorpSectorMap = {};
+
 async function loadPedidosCorp() {
   var statsEl = document.getElementById('pcorpStats');
   var tbody = document.getElementById('pcorpBody');
   var emptyEl = document.getElementById('pcorpEmpty');
   var resumenWrap = document.getElementById('pcorpResumen');
   var resumenBody = document.getElementById('pcorpResumenBody');
-  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text-muted);">Cargando...</td></tr>';
 
   try {
     var pedidos = await supaGet('pedidos', '&order=created_at.desc');
     var detalles = await supaGet('pedidos_detalle', '');
-    var vendedoras = await supaGet('vendedoras', '&select=id,codigo,nombre');
+    var vendedoras = await supaGet('vendedoras', '&select=id,codigo,nombre,dni,telefono,direccion,sector_id,coordinador_id,gerente_id');
     var gerentes = await supaGet('gerentes_zona', '&select=id,codigo,nombre');
+    var coordinadores = await supaGet('coordinadores', '&select=id,codigo,nombre') || [];
+    var sectores = await supaGet('sectores', '&select=id,nombre,zona_id') || [];
+    var zonas = await supaGet('zonas', '&select=id,nombre') || [];
 
     cachedPedidosCorp = pedidos;
 
@@ -4633,6 +4740,18 @@ async function loadPedidosCorp() {
     vendedoras.forEach(function(v) { vendMap[v.id] = v; });
     var gzMap = {};
     gerentes.forEach(function(g) { gzMap[g.id] = g; });
+    var coordMap = {};
+    coordinadores.forEach(function(c) { coordMap[c.id] = c; });
+    var sectorMap = {};
+    sectores.forEach(function(s) { sectorMap[s.id] = s; });
+    var zonaMap = {};
+    zonas.forEach(function(z) { zonaMap[z.id] = z; });
+
+    // Store globally for detail expansion
+    _pcorpVendMap = vendMap;
+    _pcorpGzMap = gzMap;
+    _pcorpCoordMap = coordMap;
+    _pcorpSectorMap = sectorMap;
 
     // Group detalles by pedido_id
     var detMap = {};
@@ -4640,6 +4759,10 @@ async function loadPedidosCorp() {
       if (!detMap[d.pedido_id]) detMap[d.pedido_id] = [];
       detMap[d.pedido_id].push(d);
     });
+    _pcorpDetMap = detMap;
+
+    // Store pedidos by id
+    pedidos.forEach(function(p) { _pcorpPedidosMap[p.id] = p; });
 
     // Summary: total quantities per product code
     var prodSummary = {};
@@ -4670,13 +4793,23 @@ async function loadPedidosCorp() {
     var totalPedidos = pedidos.length;
     var totalItems = detalles.length;
     var totalBruto = 0;
-    pedidos.forEach(function(p) { totalBruto += parseFloat(p.total || 0); });
+    var totalNeto = 0;
+    var pendientes = 0;
+    var enviadosLog = 0;
+    pedidos.forEach(function(p) {
+      totalBruto += parseFloat(p.total || p.subtotal_catalogo || 0);
+      totalNeto += parseFloat(p.total_venta_neta || 0);
+      if (p.estado === 'pendiente' || !p.estado) pendientes++;
+      if (p.estado === 'enviado_logistica') enviadosLog++;
+    });
 
     statsEl.innerHTML =
       '<div class="stat-card"><div class="stat-label">Total Pedidos</div><div class="stat-value">' + totalPedidos + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Total Items</div><div class="stat-value">' + totalItems + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Productos Distintos</div><div class="stat-value">' + summaryArr.length + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L ' + totalBruto.toFixed(2) + '</div></div>';
+      '<div class="stat-card"><div class="stat-label">Venta Bruta</div><div class="stat-value">L ' + totalBruto.toFixed(2) + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value">' + pendientes + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Enviados a Log.</div><div class="stat-value">' + enviadosLog + '</div></div>';
 
     if (!pedidos.length) {
       tbody.innerHTML = '';
@@ -4688,26 +4821,199 @@ async function loadPedidosCorp() {
     var html = '';
     pedidos.forEach(function(p) {
       var vend = vendMap[p.vendedora_id] || {};
-      var gz = gzMap[p.gerente_zona_id] || {};
+      var gz = gzMap[p.gerente_zona_id || p.gerente_id] || {};
       var dets = detMap[p.id] || [];
       var prodsHtml = dets.map(function(d) {
         return esc(d.codigo_producto || '?') + ' x' + (d.cantidad || 1);
       }).join(', ') || '-';
-      html += '<tr>';
-      html += '<td style="color:var(--gold);white-space:nowrap;">' + esc(p.codigo || 'PED-' + p.id) + '</td>';
+      var pedidoId = p.id;
+      var isEnviadoLog = p.estado === 'enviado_logistica';
+
+      html += '<tr id="pcorp-row-' + pedidoId + '">';
+      html += '<td style="color:var(--gold);white-space:nowrap;">' + esc(p.codigo || p.codigo_pedido || 'PED-' + p.id) + '</td>';
       html += '<td>' + esc(vend.nombre || p.vendedora_nombre || '-') + '</td>';
       html += '<td>' + esc(vend.codigo || p.vendedora_codigo || '-') + '</td>';
       html += '<td>' + esc(gz.nombre || '-') + '</td>';
-      html += '<td>' + esc(p.campana || '-') + '</td>';
-      html += '<td>L ' + (parseFloat(p.total || 0)).toFixed(2) + '</td>';
-      html += '<td><span class="status-badge ' + statusClass(p.estado) + '">' + esc(p.estado || 'pendiente') + '</span></td>';
+      html += '<td>' + esc(p.campana || p.campana_id || '-') + '</td>';
+      html += '<td>L ' + (parseFloat(p.total || p.subtotal_catalogo || 0)).toFixed(2) + '</td>';
+      html += '<td><span class="status-badge ' + statusClass(p.estado) + '" id="pcorp-estado-' + pedidoId + '">' + esc(p.estado || 'pendiente') + '</span></td>';
       html += '<td style="white-space:nowrap;">' + formatDate(p.created_at) + '</td>';
       html += '<td style="max-width:240px;font-size:.78rem;">' + prodsHtml + '</td>';
+      html += '<td style="white-space:nowrap;">';
+      html += '<button class="btn-action-sm gold" onclick="togglePedidoCorpDetail(\'' + pedidoId + '\')" title="Ver detalle completo">Ver Pedido</button> ';
+      if (!isEnviadoLog) {
+        html += '<button class="btn-action-sm info" id="pcorp-btn-log-' + pedidoId + '" onclick="enviarALogistica(\'' + pedidoId + '\')" title="Enviar a log\u00edstica">Enviar a Log.</button>';
+      } else {
+        html += '<span style="font-size:.6rem;color:var(--info);letter-spacing:.1em;text-transform:uppercase;">Enviado</span>';
+      }
+      html += '</td>';
       html += '</tr>';
     });
     tbody.innerHTML = html;
   } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--danger);">Error: ' + esc(e.message || e) + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--danger);">Error: ' + esc(e.message || e) + '</td></tr>';
+  }
+}
+
+function togglePedidoCorpDetail(pedidoId) {
+  var existingDetail = document.getElementById('pcorp-detail-' + pedidoId);
+  if (existingDetail) {
+    existingDetail.remove();
+    return;
+  }
+
+  var p = _pcorpPedidosMap[pedidoId];
+  if (!p) { showToast('Pedido no encontrado', 'error'); return; }
+
+  var vend = _pcorpVendMap[p.vendedora_id] || {};
+  var gz = _pcorpGzMap[p.gerente_zona_id || p.gerente_id] || {};
+  var coord = vend.coordinador_id ? (_pcorpCoordMap[vend.coordinador_id] || {}) : {};
+  var sector = vend.sector_id ? (_pcorpSectorMap[vend.sector_id] || {}) : {};
+  var dets = _pcorpDetMap[p.id] || [];
+
+  var totalBruto = parseFloat(p.total || p.subtotal_catalogo || 0);
+  var totalNeto = parseFloat(p.total_venta_neta || (totalBruto * 0.85) || 0);
+
+  var html = '<td colspan="10"><div class="pedido-detail-inner">';
+
+  // Vendedora/Asesora info
+  html += '<div class="pd-section">';
+  html += '<div class="pd-section-title">Vendedora / Asesora</div>';
+  html += '<div class="pd-grid">';
+  html += '<div class="pd-field"><span class="pd-label">Nombre</span>' + esc(vend.nombre || p.vendedora_nombre || '-') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">C\u00f3digo</span>' + esc(vend.codigo || p.vendedora_codigo || '-') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">DNI</span>' + esc(vend.dni || '-') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">Tel\u00e9fono</span>' + esc(vend.telefono || '-') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">Direcci\u00f3n</span>' + esc(vend.direccion || '-') + '</div>';
+  html += '</div></div>';
+
+  // Estructura info (coordinador, sector, zona)
+  html += '<div class="pd-section">';
+  html += '<div class="pd-section-title">Estructura / Ubicaci\u00f3n</div>';
+  html += '<div class="pd-grid">';
+  html += '<div class="pd-field"><span class="pd-label">Coordinador</span>' + esc(coord.nombre || '-') + (coord.codigo ? ' (' + esc(coord.codigo) + ')' : '') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">Gerente de Zona</span>' + esc(gz.nombre || '-') + (gz.codigo ? ' (' + esc(gz.codigo) + ')' : '') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">Sector</span>' + esc(sector.nombre || p.sector || '-') + '</div>';
+  html += '<div class="pd-field"><span class="pd-label">Campa\u00f1a</span>' + esc(p.campana || p.campana_id || '-') + '</div>';
+  if (p.observaciones) {
+    html += '<div class="pd-field" style="grid-column:1/-1;"><span class="pd-label">Observaciones</span>' + esc(p.observaciones) + '</div>';
+  }
+  html += '</div></div>';
+
+  // Product items table
+  html += '<div class="pd-section">';
+  html += '<div class="pd-section-title">Productos del Pedido (' + dets.length + ' items)</div>';
+  if (dets.length > 0) {
+    html += '<div class="table-wrap"><table><thead><tr>';
+    html += '<th>#</th><th>C\u00f3digo</th><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th>';
+    html += '</tr></thead><tbody>';
+    var sumItems = 0;
+    dets.forEach(function(d, i) {
+      var qty = parseInt(d.cantidad) || 1;
+      var precio = parseFloat(d.precio_catalogo_unitario || d.precio || 0);
+      var subtotal = parseFloat(d.subtotal_catalogo || (precio * qty));
+      sumItems += subtotal;
+      html += '<tr>';
+      html += '<td>' + (i + 1) + '</td>';
+      html += '<td style="color:var(--gold);font-family:monospace;">' + esc(d.codigo_producto || '-') + '</td>';
+      html += '<td>' + esc(d.nombre_producto || d.producto || '-') + '</td>';
+      html += '<td style="text-align:center;">' + qty + '</td>';
+      html += '<td style="text-align:right;">L ' + precio.toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</td>';
+      html += '<td style="text-align:right;">L ' + subtotal.toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</td>';
+      html += '</tr>';
+    });
+    html += '<tr style="border-top:2px solid var(--gold-dim);">';
+    html += '<td colspan="3"></td><td style="text-align:center;font-weight:600;">Total</td>';
+    html += '<td></td><td style="text-align:right;font-weight:600;color:var(--gold);">L ' + sumItems.toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</td>';
+    html += '</tr>';
+    html += '</tbody></table></div>';
+  } else {
+    html += '<p style="font-size:.75rem;color:var(--text-muted);font-style:italic;">Sin detalle de productos registrado</p>';
+  }
+  html += '</div>';
+
+  // Totals
+  html += '<div class="pd-section">';
+  html += '<div class="pd-section-title">Totales</div>';
+  html += '<div class="pd-grid">';
+  html += '<div class="pd-field"><span class="pd-label">Total Bruto (Cat\u00e1logo)</span><span style="font-size:1.1rem;color:var(--gold);font-weight:500;">L ' + totalBruto.toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</span></div>';
+  html += '<div class="pd-field"><span class="pd-label">Total Neto (-15%)</span><span style="font-size:1.1rem;color:var(--warn);font-weight:500;">L ' + totalNeto.toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</span></div>';
+  if (p.total_con_iva) {
+    html += '<div class="pd-field"><span class="pd-label">Total con IVA</span><span style="font-size:1.1rem;color:var(--text);">L ' + parseFloat(p.total_con_iva).toLocaleString('es-HN', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  html += '<div class="pd-field"><span class="pd-label">Estado</span><span class="status-badge ' + statusClass(p.estado) + '">' + esc(p.estado || 'pendiente') + '</span></div>';
+  html += '</div></div>';
+
+  // Attached files/photos if any
+  if (p.fotos || p.archivos || p.foto_url) {
+    html += '<div class="pd-section">';
+    html += '<div class="pd-section-title">Archivos Adjuntos</div>';
+    var files = p.fotos || p.archivos || [];
+    if (typeof files === 'string') { try { files = JSON.parse(files); } catch(e) { files = [files]; } }
+    if (p.foto_url && (!files || !files.length)) files = [p.foto_url];
+    if (Array.isArray(files) && files.length) {
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      files.forEach(function(url) {
+        if (typeof url === 'string' && url) {
+          html += '<a href="' + esc(url) + '" target="_blank" style="display:inline-block;border:1px solid var(--border);padding:4px;"><img src="' + esc(url) + '" style="max-width:120px;max-height:90px;display:block;" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=padding:8px;font-size:.7rem;color:var(--text-muted);>Archivo</span>\';"/></a>';
+        }
+      });
+      html += '</div>';
+    } else {
+      html += '<p style="font-size:.75rem;color:var(--text-muted);">Sin archivos adjuntos</p>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div></td>';
+
+  // Insert detail row after the pedido row
+  var parentRow = document.getElementById('pcorp-row-' + pedidoId);
+  if (parentRow) {
+    var detailRow = document.createElement('tr');
+    detailRow.id = 'pcorp-detail-' + pedidoId;
+    detailRow.className = 'pedido-detail-row';
+    detailRow.innerHTML = html;
+    parentRow.parentNode.insertBefore(detailRow, parentRow.nextSibling);
+  }
+}
+
+async function enviarALogistica(pedidoId) {
+  if (!confirm('\u00bfEnviar este pedido a log\u00edstica?')) return;
+
+  try {
+    var res = await fetch(SUPA_URL + '/rest/v1/pedidos?id=eq.' + pedidoId, {
+      method: 'PATCH',
+      headers: supaHeaders(),
+      body: JSON.stringify({ estado: 'enviado_logistica' })
+    });
+
+    if (res.ok) {
+      // Update the status badge in the table
+      var statusEl = document.getElementById('pcorp-estado-' + pedidoId);
+      if (statusEl) {
+        statusEl.className = 'status-badge status-enviado_logistica';
+        statusEl.textContent = 'enviado_logistica';
+      }
+      // Replace button with sent label
+      var btnEl = document.getElementById('pcorp-btn-log-' + pedidoId);
+      if (btnEl) {
+        btnEl.outerHTML = '<span style="font-size:.6rem;color:var(--info);letter-spacing:.1em;text-transform:uppercase;">Enviado</span>';
+      }
+      // Update cached data
+      if (_pcorpPedidosMap[pedidoId]) {
+        _pcorpPedidosMap[pedidoId].estado = 'enviado_logistica';
+      }
+      // Close detail if open
+      var detailEl = document.getElementById('pcorp-detail-' + pedidoId);
+      if (detailEl) detailEl.remove();
+
+      showToast('Pedido enviado a log\u00edstica');
+    } else {
+      showToast('Error al enviar a log\u00edstica', 'error');
+    }
+  } catch(e) {
+    showToast('Error: ' + (e.message || e), 'error');
   }
 }
 
@@ -5043,14 +5349,15 @@ async function loadPapelera() {
     html += papeleraSection('Pedidos Corporativos', pedidosCorp.length, pcHtml);
 
     // --- Vendedoras ---
-    var vHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    var vHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Motivo Baja</th><th>Fecha Baja</th><th>Acciones</th></tr></thead><tbody>';
     vendedoras.forEach(function(v) {
       vHtml += '<tr>';
       vHtml += '<td style="color:var(--gold);">' + esc(v.codigo || '-') + '</td>';
       vHtml += '<td>' + esc(v.nombre || '-') + '</td>';
       vHtml += '<td>' + esc(v.dni || '-') + '</td>';
       vHtml += '<td>' + esc(v.telefono || '-') + '</td>';
-      vHtml += '<td style="white-space:nowrap;">' + formatDate(v.created_at) + '</td>';
+      vHtml += '<td>' + esc(v.motivo_baja || '-') + '</td>';
+      vHtml += '<td style="white-space:nowrap;">' + (v.fecha_baja ? formatDate(v.fecha_baja) : '-') + '</td>';
       vHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'vendedoras\',' + v.id + ')"><span>Restaurar</span></button></td>';
       vHtml += '</tr>';
     });
@@ -5058,14 +5365,15 @@ async function loadPapelera() {
     html += papeleraSection('Vendedoras', vendedoras.length, vHtml);
 
     // --- Coordinadores ---
-    var cHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    var cHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Motivo Baja</th><th>Fecha Baja</th><th>Acciones</th></tr></thead><tbody>';
     coordinadores.forEach(function(c) {
       cHtml += '<tr>';
       cHtml += '<td style="color:var(--gold);">' + esc(c.codigo || '-') + '</td>';
       cHtml += '<td>' + esc(c.nombre || '-') + '</td>';
       cHtml += '<td>' + esc(c.dni || '-') + '</td>';
       cHtml += '<td>' + esc(c.telefono || '-') + '</td>';
-      cHtml += '<td style="white-space:nowrap;">' + formatDate(c.created_at) + '</td>';
+      cHtml += '<td>' + esc(c.motivo_baja || '-') + '</td>';
+      cHtml += '<td style="white-space:nowrap;">' + (c.fecha_baja ? formatDate(c.fecha_baja) : '-') + '</td>';
       cHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'coordinadores\',' + c.id + ')"><span>Restaurar</span></button></td>';
       cHtml += '</tr>';
     });
@@ -5073,14 +5381,14 @@ async function loadPapelera() {
     html += papeleraSection('Coordinadores', coordinadores.length, cHtml);
 
     // --- Gerentes de Zona ---
-    var gzHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    var gzHtml = '<div class="table-wrap"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Fecha Baja</th><th>Acciones</th></tr></thead><tbody>';
     gerentesZ.forEach(function(g) {
       gzHtml += '<tr>';
       gzHtml += '<td style="color:var(--gold);">' + esc(g.codigo || '-') + '</td>';
       gzHtml += '<td>' + esc(g.nombre || '-') + '</td>';
       gzHtml += '<td>' + esc(g.dni || '-') + '</td>';
       gzHtml += '<td>' + esc(g.telefono || '-') + '</td>';
-      gzHtml += '<td style="white-space:nowrap;">' + formatDate(g.created_at) + '</td>';
+      gzHtml += '<td style="white-space:nowrap;">' + (g.fecha_baja ? formatDate(g.fecha_baja) : '-') + '</td>';
       gzHtml += '<td><button class="btn btn-gold btn-sm" onclick="restaurarDirecto(\'gerentes_zona\',' + g.id + ')"><span>Restaurar</span></button></td>';
       gzHtml += '</tr>';
     });
@@ -5163,7 +5471,7 @@ async function loadConfiguracion() {
       html += '<td style="color:var(--gold);font-weight:500;white-space:nowrap;">' + esc(c.clave) + '</td>';
       html += '<td><input type="text" id="cfgVal_' + c.id + '" value="' + esc(c.valor || '') + '" style="max-width:300px;"/></td>';
       html += '<td style="font-size:.78rem;color:var(--text-muted);">' + esc(c.descripcion || '') + '</td>';
-      html += '<td><button class="btn btn-gold btn-sm" onclick="guardarConfig(\'' + c.id + '\')"><span>Guardar</span></button></td>';
+      html += '<td><button class="btn btn-gold btn-sm" onclick="guardarConfig(\'' + c.id + '\',\'' + esc(c.clave || '') + '\')"><span>Guardar</span></button></td>';
       html += '</tr>';
     });
     tbody.innerHTML = html;
@@ -5172,17 +5480,72 @@ async function loadConfiguracion() {
   }
 }
 
-async function guardarConfig(id) {
+async function guardarConfig(id, clave) {
   var inputEl = document.getElementById('cfgVal_' + id);
   if (!inputEl) return;
   var newVal = inputEl.value;
 
   try {
     await supaPatch('config_multinivel', id, { valor: newVal });
-    showToast('Configuraci\u00f3n guardada');
+
+    // Build descriptive message based on config key
+    var claveNorm = (clave || '').toLowerCase();
+    var msg = 'Configuraci\u00f3n guardada correctamente.';
+    var detalle = ' Este cambio se aplicar\u00e1 en todo el sistema (comisiones, gerencia de zona, gerencia divisional).';
+
+    if (claveNorm.indexOf('nombramientos_altos') >= 0) {
+      msg = 'Umbral de nombramientos altos actualizado a ' + newVal + '.';
+      detalle = ' Desde ' + newVal + ' nombramientos se contar\u00e1 el pago de L320. Se aplica en todo el sistema.';
+    } else if (claveNorm.indexOf('salario') >= 0 || claveNorm.indexOf('sueldo') >= 0) {
+      msg = 'Salario actualizado a L' + newVal + '.';
+      detalle = ' Este cambio afecta c\u00e1lculos de comisiones, punto de equilibrio y reportes de gerencia.';
+    } else if (claveNorm.indexOf('comision') >= 0 || claveNorm.indexOf('porcentaje') >= 0) {
+      msg = 'Porcentaje de comisi\u00f3n actualizado a ' + newVal + '%.';
+      detalle = ' Se aplica autom\u00e1ticamente en comisiones, gerencia de zona y gerencia divisional.';
+    } else if (claveNorm.indexOf('impuesto') >= 0 || claveNorm.indexOf('iva') >= 0 || claveNorm.indexOf('tax') >= 0) {
+      msg = 'Valor de impuesto actualizado.';
+      detalle = ' Afecta c\u00e1lculos de venta neta y comisiones en todo el sistema.';
+    } else if (claveNorm.indexOf('logistica') >= 0) {
+      msg = 'Configuraci\u00f3n de log\u00edstica actualizada a ' + newVal + '.';
+      detalle = ' El salario de log\u00edstica se refleja en el panel de deuda y reportes.';
+    } else if (claveNorm.indexOf('descuento') >= 0) {
+      msg = 'Descuento actualizado a ' + newVal + '%.';
+      detalle = ' Se aplica en c\u00e1lculos de venta neta en todo el sistema.';
+    }
+
+    showToast(msg + detalle);
   } catch(e) {
     showToast('Error al guardar: ' + (e.message || e), 'error');
   }
+}
+
+/* ══════════════════════════════════════════
+   ENIGME EMAIL TEMPLATE BUILDER (Admin)
+   ══════════════════════════════════════════ */
+function buildEnigmeEmailAdmin(title, bodyContent) {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#0A0A0A;font-family:Georgia,Helvetica,Arial,sans-serif;">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;"><tr><td align="center" style="padding:20px 0;">' +
+    '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0A0A0A;">' +
+    '<tr><td style="padding:40px 40px 20px;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;margin:0;">ENIGME</p>' +
+    '<div style="width:60px;height:1px;background:#CBAA63;margin:14px auto;"></div>' +
+    '<p style="font-size:11px;letter-spacing:4px;color:#6b6259;margin:0;text-transform:uppercase;">El arte de la exclusividad</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 0;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:18px;color:#CBAA63;letter-spacing:2px;margin:0;">' + title + '</p>' +
+    '<div style="width:40px;height:1px;background:rgba(203,170,99,0.3);margin:16px auto;"></div>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 30px;">' + bodyContent + '</td></tr>' +
+    '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+    '<tr><td style="padding:24px 40px;text-align:center;">' +
+    '<a href="https://enigmeofficial.com" style="display:inline-block;padding:12px 32px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Visitar Sitio Web</a>' +
+    '</td></tr>' +
+    '<tr><td style="padding:20px 40px 10px;text-align:center;">' +
+    '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">Preguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+    '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;margin:0 0 6px;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+    '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
 }
 </script>
 </body>

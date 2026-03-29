@@ -162,7 +162,26 @@
 <div class="topbar">
   <div class="topbar-brand">ENIGME &middot; GERENCIA DIVISIONAL</div>
   <div class="topbar-info" id="topbarInfo"></div>
+  <button class="topbar-logout" onclick="openChangePasswordGD()" style="margin-right:6px;">Cambiar Contrase&ntilde;a</button>
   <button class="topbar-logout" onclick="logout()">Salir</button>
+</div>
+
+<!-- MODAL CAMBIAR CONTRASEÑA GD -->
+<div class="modal-overlay" id="passwordModalGD">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="card-title">Cambiar Contrase&ntilde;a</div>
+    <div class="form-grid" style="grid-template-columns:1fr;">
+      <div class="form-group"><label>Contrase&ntilde;a Actual</label><input id="pwGdCurrent" type="password" placeholder="Ingrese su contrase&ntilde;a actual"/></div>
+      <div class="form-group"><label>Nueva Contrase&ntilde;a</label><input id="pwGdNew" type="password" placeholder="M&iacute;nimo 6 caracteres"/></div>
+      <div class="form-group"><label>Confirmar Nueva Contrase&ntilde;a</label><input id="pwGdConfirm" type="password" placeholder="Repita la nueva contrase&ntilde;a"/></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn" onclick="doChangePasswordGD()">Cambiar Contrase&ntilde;a</button>
+      <button class="btn btn-outline" onclick="closePasswordModalGD()">Cancelar</button>
+    </div>
+    <p id="pwGdError" class="error-msg"></p>
+    <p id="pwGdSuccess" class="success-msg"></p>
+  </div>
 </div>
 
 <div class="tabs">
@@ -962,14 +981,34 @@ async function guardarGerenteZona() {
     });
 
     suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
-    // Send welcome email
+    // Send welcome email via Web3Forms
     if (email) {
       var deptoNombre = '';
       var deptoSel = document.getElementById('gzDepto');
       if (deptoSel.selectedIndex > 0) deptoNombre = deptoSel.options[deptoSel.selectedIndex].text;
-      fetch(SB + '/functions/v1/send-welcome-email', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo: 'gerente_zona', nombre: nombre, email: email, codigo: codigo, zona: zonaNombre, departamento: deptoNombre })
+      var welcomeBody = buildEnigmeEmail(
+        'Bienvenido/a a ENIGME',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Ha sido designado/a como Gerente de Zona en ENIGME. A continuacion sus credenciales de acceso:</p>' +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Codigo:</td><td style="padding:8px 0;font-size:14px;color:#CBAA63;font-weight:600;">' + esc(codigo) + '</td></tr>' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Contrasena:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(gzPassword) + '</td></tr>' +
+        (zonaNombre ? '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Zona:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(zonaNombre) + '</td></tr>' : '') +
+        (deptoNombre ? '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Departamento:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(deptoNombre) + '</td></tr>' : '') +
+        '</table>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso. Acceda al portal desde su navegador web.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+          to: email,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Bienvenido/a al Equipo - Gerente de Zona',
+          message: welcomeBody,
+          botcheck: ''
+        })
       }).catch(function(){});
     }
     cancelFormGZ();
@@ -991,7 +1030,7 @@ async function changeGzPw(id) {
 
 async function bajaGerente(id) {
   if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos se conservar\u00e1n.')) return;
-  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, fecha_baja: new Date().toISOString().split('T')[0] });
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, fecha_baja: new Date().toISOString(), archivado: true });
   loadGerentesZona();
 }
 
@@ -1145,6 +1184,40 @@ async function saveEditGZ() {
 
     sucEl.textContent = 'Datos y documentos actualizados.';
     loadGerentesZona();
+
+    // Send notification email to GZ about updated data
+    var gzEmail = body.email || g.email;
+    if (gzEmail) {
+      var changedFields = [];
+      if (body.telefono !== g.telefono) changedFields.push('Telefono: ' + body.telefono);
+      if (body.email !== g.email) changedFields.push('Email: ' + (body.email || 'N/A'));
+      if (body.numero_cuenta !== g.numero_cuenta) changedFields.push('Numero de Cuenta');
+      if (body.nombre_banco !== g.nombre_banco) changedFields.push('Banco: ' + body.nombre_banco);
+      if (body.rtn !== g.rtn) changedFields.push('RTN');
+      if (body.direccion !== g.direccion) changedFields.push('Direccion');
+      if (body.fecha_ingreso !== g.fecha_ingreso) changedFields.push('Fecha de Ingreso');
+      var changesHtml = changedFields.length ? changedFields.map(function(f){ return '<li style="padding:4px 0;color:#e8e0d4;font-size:14px;">' + f + '</li>'; }).join('') : '<li style="padding:4px 0;color:#e8e0d4;font-size:14px;">Datos generales y/o documentos</li>';
+      var emailBody = buildEnigmeEmail(
+        'Tus datos han sido actualizados',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(g.nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Tu Gerencia Divisional ha actualizado la siguiente informacion en tu perfil:</p>' +
+        '<ul style="list-style:none;padding:0;margin:0 0 16px;">' + changesHtml + '</ul>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si no reconoces estos cambios, contacta a tu Gerencia Divisional de inmediato.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+          to: gzEmail,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Tus datos han sido actualizados',
+          message: emailBody,
+          botcheck: ''
+        })
+      }).catch(function(e){ console.warn('Email notification error:', e); });
+    }
+
     setTimeout(closeEditModal, 1500);
   } catch(e) {
     errEl.textContent = 'Error al actualizar.';
@@ -1894,6 +1967,40 @@ async function guardarOperadorLog() {
       porcentaje_comision: comision, activo: true
     });
     suc.textContent = 'Operador log\u00edstico creado. C\u00f3digo: ' + codigo;
+
+    // Send welcome email to logistica operator
+    if (email) {
+      var logWelcomeBody = buildEnigmeEmail(
+        'Bienvenido al Equipo de Logistica',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Ha sido incorporado/a al equipo de logistica de ENIGME. A continuacion sus credenciales de acceso:</p>' +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Codigo:</td><td style="padding:8px 0;font-size:14px;color:#CBAA63;font-weight:600;">' + esc(codigo) + '</td></tr>' +
+        '<tr><td style="padding:8px 0;font-size:13px;color:#6b6259;">Contrasena:</td><td style="padding:8px 0;font-size:14px;color:#e8e0d4;">' + esc(password) + '</td></tr>' +
+        '</table>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 8px;">Sus responsabilidades incluyen:</p>' +
+        '<ul style="list-style:none;padding:0;margin:0 0 16px;">' +
+        '<li style="padding:4px 0;color:#e8e0d4;font-size:13px;">&#8226; Recibir mercancia</li>' +
+        '<li style="padding:4px 0;color:#e8e0d4;font-size:13px;">&#8226; Seleccionar por asesora</li>' +
+        '<li style="padding:4px 0;color:#e8e0d4;font-size:13px;">&#8226; Organizar meticulosamente los productos en sus respectivas cajas</li>' +
+        '<li style="padding:4px 0;color:#e8e0d4;font-size:13px;">&#8226; Entregarlos en sus respectivas direcciones</li>' +
+        '</ul>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Le recomendamos cambiar su contrasena al primer ingreso.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+          to: email,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Bienvenido al Equipo de Logistica',
+          message: logWelcomeBody,
+          botcheck: ''
+        })
+      }).catch(function(){});
+    }
+
     document.getElementById('logNombre').value = '';
     document.getElementById('logDni').value = '';
     document.getElementById('logTelefono').value = '';
@@ -2092,6 +2199,122 @@ async function darBajaProfesional() {
     if (bcFoundTable === 'gerentes_zona') loadGerentesZona();
   } catch(e) {
     document.getElementById('bcError').textContent = 'Error al procesar la baja: ' + (e.message || e.details || 'Error desconocido');
+    console.error(e);
+  }
+}
+
+/* ══════════════════════════════════════════
+   ENIGME EMAIL TEMPLATE BUILDER
+   ══════════════════════════════════════════ */
+function buildEnigmeEmail(title, bodyContent) {
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body style="margin:0;padding:0;background:#0A0A0A;font-family:Georgia,Helvetica,Arial,sans-serif;">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;"><tr><td align="center" style="padding:20px 0;">' +
+    '<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0A0A0A;">' +
+    '<tr><td style="padding:40px 40px 20px;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:28px;letter-spacing:8px;color:#CBAA63;margin:0;">ENIGME</p>' +
+    '<div style="width:60px;height:1px;background:#CBAA63;margin:14px auto;"></div>' +
+    '<p style="font-size:11px;letter-spacing:4px;color:#6b6259;margin:0;text-transform:uppercase;">El arte de la exclusividad</p>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 0;text-align:center;">' +
+    '<p style="font-family:Georgia,serif;font-size:18px;color:#CBAA63;letter-spacing:2px;margin:0;">' + title + '</p>' +
+    '<div style="width:40px;height:1px;background:rgba(203,170,99,0.3);margin:16px auto;"></div>' +
+    '</td></tr>' +
+    '<tr><td style="padding:10px 40px 30px;">' + bodyContent + '</td></tr>' +
+    '<tr><td style="padding:0 40px;"><div style="height:1px;background:linear-gradient(to right,transparent,#222,transparent);"></div></td></tr>' +
+    '<tr><td style="padding:24px 40px;text-align:center;">' +
+    '<a href="https://enigmeofficial.com" style="display:inline-block;padding:12px 32px;border:1px solid #CBAA63;color:#CBAA63;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;font-weight:600;">Visitar Sitio Web</a>' +
+    '</td></tr>' +
+    '<tr><td style="padding:20px 40px 10px;text-align:center;">' +
+    '<p style="font-size:10px;color:#6b6259;letter-spacing:1px;margin:0 0 6px;">Preguntas? <a href="mailto:info@enigmeofficial.com" style="color:#CBAA63;text-decoration:none;">info@enigmeofficial.com</a></p>' +
+    '<p style="font-size:9px;color:#4a4540;letter-spacing:2px;margin:0 0 6px;">&copy; 2026 ENIGME. Todos los derechos reservados.</p>' +
+    '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
+}
+
+/* ══════════════════════════════════════════
+   CAMBIAR CONTRASENA - GERENCIA DIVISIONAL
+   ══════════════════════════════════════════ */
+function openChangePasswordGD() {
+  document.getElementById('pwGdCurrent').value = '';
+  document.getElementById('pwGdNew').value = '';
+  document.getElementById('pwGdConfirm').value = '';
+  document.getElementById('pwGdError').textContent = '';
+  document.getElementById('pwGdSuccess').textContent = '';
+  document.getElementById('passwordModalGD').classList.add('show');
+}
+function closePasswordModalGD() {
+  document.getElementById('passwordModalGD').classList.remove('show');
+}
+document.getElementById('passwordModalGD').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModalGD();
+});
+
+async function doChangePasswordGD() {
+  var errEl = document.getElementById('pwGdError');
+  var sucEl = document.getElementById('pwGdSuccess');
+  errEl.textContent = ''; sucEl.textContent = '';
+  var current = document.getElementById('pwGdCurrent').value.trim();
+  var newPw = document.getElementById('pwGdNew').value.trim();
+  var confirm = document.getElementById('pwGdConfirm').value.trim();
+
+  if (!current) { errEl.textContent = 'Ingrese su contrasena actual.'; return; }
+  if (current !== session.password_temporal) { errEl.textContent = 'La contrasena actual es incorrecta.'; return; }
+  if (!newPw || newPw.length < 6) { errEl.textContent = 'La nueva contrasena debe tener al menos 6 caracteres.'; return; }
+  if (newPw !== confirm) { errEl.textContent = 'Las contrasenas no coinciden.'; return; }
+  if (newPw === current) { errEl.textContent = 'La nueva contrasena debe ser diferente a la actual.'; return; }
+
+  try {
+    await apiPatch('/rest/v1/gerencias_divisionales?id=eq.' + session.id, { password_temporal: newPw });
+    session.password_temporal = newPw;
+    sessionStorage.setItem('enigme_gd_session', JSON.stringify(session));
+    sucEl.textContent = 'Contrasena actualizada exitosamente.';
+
+    // Notify GD by email
+    if (session.email) {
+      var emailBody = buildEnigmeEmail(
+        'Contrasena Actualizada',
+        '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Estimado/a <strong style="color:#CBAA63;">' + esc(session.nombre) + '</strong>,</p>' +
+        '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 16px;">Su contrasena de acceso al portal de Gerencia Divisional ha sido cambiada exitosamente.</p>' +
+        '<p style="font-size:13px;color:#6b6259;line-height:1.7;margin:0;">Si usted no realizo este cambio, contacte inmediatamente a administracion.</p>'
+      );
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+          to: session.email,
+          from_name: 'ENIGME',
+          subject: 'ENIGME | Contrasena Actualizada',
+          message: emailBody,
+          botcheck: ''
+        })
+      }).catch(function(){});
+    }
+
+    // Notify admin
+    var adminEmailBody = buildEnigmeEmail(
+      'Cambio de Contrasena - Gerencia Divisional',
+      '<p style="font-size:14px;color:#e8e0d4;line-height:1.8;margin:0 0 12px;">Se ha registrado un cambio de contrasena.</p>' +
+      '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0 0 8px;"><strong style="color:#CBAA63;">Gerencia:</strong> ' + esc(session.nombre) + ' (' + esc(session.codigo) + ')</p>' +
+      '<p style="font-size:14px;color:#b0a898;line-height:1.8;margin:0;">Fecha: ' + new Date().toLocaleString('es-HN') + '</p>'
+    );
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'd79e2bbc-89ef-46f0-a498-7714f86e04c1',
+        to: 'carlosarmas@enigmeofficial.com',
+        from_name: 'ENIGME',
+        subject: 'ENIGME | Cambio de Contrasena - GD ' + (session.codigo || ''),
+        message: adminEmailBody,
+        botcheck: ''
+      })
+    }).catch(function(){});
+
+    setTimeout(closePasswordModalGD, 2000);
+  } catch(e) {
+    errEl.textContent = 'Error al cambiar la contrasena.';
     console.error(e);
   }
 }

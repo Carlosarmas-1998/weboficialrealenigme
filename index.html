@@ -100,8 +100,8 @@
     html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     body {
-      background-color: var(--marfil);
-      color: var(--carbon);
+      background-color: #0A0A0A;
+      color: #FFFFFF;
       font-family: 'Montserrat', sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
@@ -140,27 +140,27 @@
     @keyframes goldShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
     @keyframes ripplePulse { 0% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0.5); } 70% { box-shadow: 0 0 0 12px rgba(203, 170, 99, 0); } 100% { box-shadow: 0 0 0 0 rgba(203, 170, 99, 0); } }
     @keyframes sparkle { 0%,100% { box-shadow: 0 0 4px rgba(203,170,99,0.4), 0 0 8px rgba(203,170,99,0.2); } 25% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 16px rgba(203,170,99,0.4), 4px -4px 6px rgba(255,255,255,0.3); } 50% { box-shadow: 0 0 12px rgba(203,170,99,0.6), 0 0 24px rgba(203,170,99,0.3), -4px 4px 8px rgba(255,255,255,0.2); } 75% { box-shadow: 0 0 8px rgba(203,170,99,0.8), 0 0 18px rgba(203,170,99,0.4), 3px 3px 6px rgba(255,255,255,0.3); } }
-    .catalogo-btn { position:relative; display:inline-block; padding:16px 40px; font-weight:800; font-size:clamp(0.85rem,1.6vw,1.1rem); letter-spacing:6px; text-transform:uppercase; color:var(--carbon) !important; background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brillo) 40%, var(--dorado) 70%, #d4b66a 100%); background-size:300% 300%; border:none; border-radius:4px; animation: goldShimmer 4s infinite linear, sparkle 2s infinite ease-in-out, ripplePulse 2.5s infinite ease-in-out; transition:all .3s; overflow:hidden; box-shadow: 0 4px 20px rgba(203,170,99,0.5); text-decoration:none !important; }
+    .catalogo-btn { position:relative; display:inline-block; padding:16px 40px; font-weight:800; font-size:clamp(1rem,2vw,1.4rem); letter-spacing:8px; text-transform:uppercase; color:var(--carbon) !important; background:linear-gradient(135deg, var(--dorado) 0%, var(--dorado-brillo) 40%, var(--dorado) 70%, #d4b66a 100%); background-size:300% 300%; border:none; border-radius:4px; animation: goldShimmer 4s infinite linear, sparkle 2s infinite ease-in-out, ripplePulse 2.5s infinite ease-in-out; transition:all .3s; overflow:hidden; box-shadow: 0 4px 20px rgba(203,170,99,0.5); text-decoration:none !important; }
     .catalogo-btn:hover { transform:translateY(-3px) scale(1.05); filter:brightness(1.15); box-shadow: 0 8px 30px rgba(203,170,99,0.7); }
     .catalogo-btn::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,rgba(255,255,255,0.3) 0%,transparent 60%); animation:sparkleMove 3s infinite linear; pointer-events:none; }
-    @media(max-width:768px){ .catalogo-btn { padding:14px 32px; font-size:clamp(0.75rem,3vw,0.95rem); letter-spacing:5px; } }
-    @media(max-width:480px){ .catalogo-btn { padding:12px 26px; font-size:0.75rem; letter-spacing:4px; } }
+    @media(max-width:768px){ .catalogo-btn { padding:14px 32px; font-size:clamp(0.85rem,3vw,1.1rem); letter-spacing:6px; } }
+    @media(max-width:480px){ .catalogo-btn { padding:12px 26px; font-size:0.85rem; letter-spacing:5px; } }
     @keyframes sparkleMove { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
     /* ── NAVBAR ── */
     .navbar {
       width: 100%; max-width: 100%; padding: 20px 4vw; display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--linea-fina); background: rgba(250, 249, 246, 0.98);
+      border-bottom: 1px solid rgba(203,170,99,0.2); background: rgba(10, 10, 10, 0.98);
       backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
       transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
-    .brand-nav { font-family: 'Cinzel', serif; font-size: clamp(1.1rem, 2.2vw, 1.4rem); letter-spacing: 0.35em; color: var(--carbon); text-align: center; font-weight: 500; position: absolute; left: 50%; transform: translateX(-50%); }
+    .brand-nav { font-family: 'Cinzel', serif; font-size: clamp(1.1rem, 2.2vw, 1.4rem); letter-spacing: 0.35em; color: #CBAA63; text-align: center; font-weight: 500; position: absolute; left: 50%; transform: translateX(-50%); }
     .nav-group { display: flex; gap: clamp(8px, 1.5vw, 20px); align-items: center; flex: 1; }
     .nav-group.right { justify-content: flex-end; }
     
-    .nav-link { 
-      font-size: clamp(0.5rem, 0.7vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; color: var(--carbon); 
-      font-weight: 600; position: relative; padding-bottom: 4px; cursor: pointer; 
+    .nav-link {
+      font-size: clamp(0.5rem, 0.7vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; color: #FFFFFF;
+      font-weight: 600; position: relative; padding-bottom: 4px; cursor: pointer;
     }
     .nav-link::after { content: ''; position: absolute; width: 100%; height: 1.5px; bottom: 0; left: 0; background-color: var(--dorado); transform: scaleX(0); transform-origin: right; transition: transform 0.4s ease; }
     .nav-link:hover, .nav-link.active { color: var(--dorado); }
@@ -168,9 +168,9 @@
 
     /* ── DROPDOWN ── */
     .dropdown { position: relative; display: inline-block; }
-    .dropbtn { 
-      font-size: clamp(0.5rem, 0.7vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; 
-      color: var(--carbon); font-weight: 700 !important; background: none; border: none; 
+    .dropbtn {
+      font-size: clamp(0.5rem, 0.7vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase;
+      color: #FFFFFF; font-weight: 700 !important; background: none; border: none;
       font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 8px 0; 
       outline: none; -webkit-tap-highlight-color: transparent;
     }
@@ -194,8 +194,24 @@
     .dropdown-content a:last-child { border-bottom: none; }
     .dropdown-content a:hover { background: rgba(201, 169, 110, 0.08); color: #CBAA63 !important; padding-left: 28px; }
 
+    .dropdown-content a.mi-espacio-link {
+      background: linear-gradient(135deg, rgba(203,170,99,0.15) 0%, rgba(232,208,144,0.1) 100%);
+      color: #CBAA63 !important;
+      font-weight: 700;
+      text-align: center;
+      padding: 14px 24px;
+      letter-spacing: 0.15em;
+      border-bottom: 1px solid rgba(203,170,99,0.25);
+      animation: sparkle 3s infinite ease-in-out;
+    }
+    .dropdown-content a.mi-espacio-link:hover {
+      background: linear-gradient(135deg, rgba(203,170,99,0.3) 0%, rgba(232,208,144,0.2) 100%);
+      color: #E8D090 !important;
+      padding-left: 24px;
+    }
+
     /* ── HERO ── */
-    .hero { position: relative; width: 100%; background-color: var(--marfil); display: flex; justify-content: center; align-items: center; overflow: hidden; border-bottom: 1px solid var(--linea-fina); }
+    .hero { position: relative; width: 100%; background-color: #0A0A0A; display: flex; justify-content: center; align-items: center; overflow: hidden; border-bottom: 1px solid rgba(203,170,99,0.2); }
     .hero-img { width: 100%; height: auto; max-width: 100%; display: block; object-fit: contain; }
 
     /* ── CERT BANNER ── */
@@ -210,24 +226,24 @@
     .btn-gold:hover { background-color: transparent; color: var(--dorado); }
 
     /* ── EDITORIAL MAGAZINE ── */
-    .editorial-magazine { background-color: var(--fondo-editorial); padding: clamp(60px, 10vw, 120px) 5vw; }
+    .editorial-magazine { background-color: #111111; padding: clamp(60px, 10vw, 120px) 5vw; }
     .magazine-container { max-width: 1000px; margin: 0 auto; }
     .magazine-header { text-align: center; margin-bottom: clamp(50px, 7vw, 80px); }
     .magazine-kicker { font-family: 'Cinzel', serif; font-style: italic; font-size: clamp(0.85rem, 1.2vw, 1rem); color: var(--dorado); letter-spacing: 0.2em; margin-bottom: 25px; }
-    .magazine-header h1 { font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 4vw, 3.2rem); line-height: 1.2; color: var(--carbon); margin-bottom: 30px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
-    .magazine-intro { font-size: clamp(0.85rem, 1.1vw, 1rem); line-height: 2.2; color: var(--gris-suave); font-weight: 300; max-width: 800px; margin: 0 auto; }
-    .chapter-block { display: flex; flex-direction: column; gap: 15px; padding: clamp(30px, 5vw, 50px) 0; border-bottom: 1px solid var(--linea-fina); transition: var(--transition); }
+    .magazine-header h1 { font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 4vw, 3.2rem); line-height: 1.2; color: #FFFFFF; margin-bottom: 30px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
+    .magazine-intro { font-size: clamp(0.85rem, 1.1vw, 1rem); line-height: 2.2; color: rgba(255,255,255,0.6); font-weight: 300; max-width: 800px; margin: 0 auto; }
+    .chapter-block { display: flex; flex-direction: column; gap: 15px; padding: clamp(30px, 5vw, 50px) 0; border-bottom: 1px solid rgba(203,170,99,0.15); transition: var(--transition); }
     .chapter-block:hover { padding-left: 20px; border-bottom-color: var(--dorado); }
     .chapter-number { font-family: 'Cinzel', serif; font-size: clamp(0.6rem, 0.9vw, 0.7rem); letter-spacing: 4px; color: var(--dorado); text-transform: uppercase; font-weight: 600; }
-    .chapter-title { font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--carbon); letter-spacing: 0.1em; text-transform: uppercase; }
-    .chapter-text { font-size: clamp(0.8rem, 1vw, 0.9rem); line-height: 2; color: var(--gris-suave); font-weight: 300; max-width: 800px; }
-    .magazine-index { margin-top: clamp(50px, 7vw, 80px); padding: clamp(30px, 5vw, 60px); background-color: var(--blanco-dior); border: 1px solid var(--linea-fina); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-    .index-title { font-family: 'Cinzel', serif; font-style: italic; font-size: clamp(1rem, 1.5vw, 1.2rem); color: var(--carbon); margin-bottom: 40px; letter-spacing: 0.1em; }
+    .chapter-title { font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 2vw, 1.6rem); color: #FFFFFF; letter-spacing: 0.1em; text-transform: uppercase; }
+    .chapter-text { font-size: clamp(0.8rem, 1vw, 0.9rem); line-height: 2; color: rgba(255,255,255,0.6); font-weight: 300; max-width: 800px; }
+    .magazine-index { margin-top: clamp(50px, 7vw, 80px); padding: clamp(30px, 5vw, 60px); background-color: #1A1A1A; border: 1px solid rgba(203,170,99,0.15); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .index-title { font-family: 'Cinzel', serif; font-style: italic; font-size: clamp(1rem, 1.5vw, 1.2rem); color: #FFFFFF; margin-bottom: 40px; letter-spacing: 0.1em; }
     .index-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px 30px; list-style: none; }
-    .index-list li { font-size: clamp(0.6rem, 0.9vw, 0.7rem); letter-spacing: 2px; color: var(--carbon); font-weight: 500; text-transform: uppercase; }
+    .index-list li { font-size: clamp(0.6rem, 0.9vw, 0.7rem); letter-spacing: 2px; color: #FFFFFF; font-weight: 500; text-transform: uppercase; }
     .index-list li::before { content: "\2726"; color: var(--dorado); margin-right: 10px; }
     .magazine-cta { display: flex; justify-content: center; gap: 30px; margin-top: 60px; flex-wrap: wrap; }
-    .btn-editorial { display: inline-block; padding: 16px 40px; font-size: clamp(0.6rem, 0.9vw, 0.75rem); letter-spacing: 4px; text-transform: uppercase; font-weight: 600; color: var(--carbon); border: 1px solid var(--dorado); background-color: transparent; transition: var(--transition); cursor: pointer; border-radius: 2px; animation: ripplePulse 2.5s infinite; }
+    .btn-editorial { display: inline-block; padding: 16px 40px; font-size: clamp(0.6rem, 0.9vw, 0.75rem); letter-spacing: 4px; text-transform: uppercase; font-weight: 600; color: #FFFFFF; border: 1px solid var(--dorado); background-color: transparent; transition: var(--transition); cursor: pointer; border-radius: 2px; animation: ripplePulse 2.5s infinite; }
     .btn-editorial.primary { background: linear-gradient(120deg, var(--dorado) 0%, var(--dorado-brillo) 50%, var(--dorado) 100%); background-size: 200% auto; border: none; animation: goldShimmer 3s infinite linear, ripplePulse 2.5s infinite; box-shadow: 0 5px 15px rgba(203, 170, 99, 0.4); }
     .btn-editorial:not(.primary) { animation-delay: 1.25s; }
     .btn-editorial:hover { background: var(--carbon); border: 1px solid var(--carbon); color: var(--dorado); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: none; }
@@ -238,12 +254,12 @@
     .whatsapp-float svg { width: 22px; height: 22px; fill: currentColor; }
 
     /* ── FOOTER ── */
-    .footer { border-top: 1px solid var(--linea-fina); padding: clamp(30px, 5vw, 50px) 20px; text-align: center; background-color: var(--blanco-dior); }
-    .footer-logo { font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 2.5vw, 1.8rem); letter-spacing: 0.3em; color: var(--carbon); margin-bottom: 12px; }
+    .footer { border-top: 1px solid rgba(203,170,99,0.3); padding: clamp(30px, 5vw, 50px) 20px; text-align: center; background-color: #0A0A0A; }
+    .footer-logo { font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 2.5vw, 1.8rem); letter-spacing: 0.3em; color: #CBAA63; margin-bottom: 12px; }
     .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
-    .footer-links a { font-size: clamp(0.5rem, 0.8vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; color: var(--carbon); font-weight: 500; border-bottom: 1px solid transparent; padding-bottom: 3px; transition: var(--transition); }
+    .footer-links a { font-size: clamp(0.5rem, 0.8vw, 0.6rem); letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); font-weight: 500; border-bottom: 1px solid transparent; padding-bottom: 3px; transition: var(--transition); }
     .footer-links a:hover { color: var(--dorado); border-color: var(--dorado); }
-    .footer-copy { font-size: clamp(0.4rem, 0.6vw, 0.5rem); letter-spacing: 0.25em; text-transform: uppercase; color: var(--gris-suave); opacity: 0.6; font-weight: 300; }
+    .footer-copy { font-size: clamp(0.4rem, 0.6vw, 0.5rem); letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.4); font-weight: 300; }
 
     /* ── RESPONSIVE: LAPTOP (900-1200px) ── */
     @media (max-width: 1200px) {
@@ -442,8 +458,7 @@
     }
     .image-hero img.hero-img {
       width: 100%;
-      height: 100vh;
-      height: 100dvh;
+      max-height: 80vh;
       object-fit: cover;
       display: block;
     }
@@ -642,7 +657,7 @@
       .hero-overlay h2 { font-size: clamp(1.2rem, 5vw, 1.6rem); letter-spacing: 0.12em; }
       .hero-overlay .hero-subtitle { font-size: 0.82rem; }
       .hero-discount-badge { font-size: 0.65rem; padding: 8px 16px; }
-      .image-hero img.hero-img { height: auto; aspect-ratio: 3/4; }
+      .image-hero img.hero-img { height: auto; max-height: none; object-fit: contain; }
       .abril-tooltip { bottom: 78px; left: 16px; font-size: 0.65rem; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
@@ -695,6 +710,14 @@
     /* Prevent 100vw overflow (scrollbar issue) */
     .top-announcement { max-width: 100%; }
     .navbar { max-width: 100%; }
+
+    /* ── GLOBAL RESPONSIVE SAFETY ── */
+    img, video, iframe { max-width: 100%; }
+    section, main, footer, nav { max-width: 100%; overflow-x: hidden; }
+
+    /* ── DARK THEME ADDITIONAL REFINEMENTS ── */
+    .image-hero { background: #0A0A0A; }
+    .btn-editorial:hover { background: #CBAA63; border: 1px solid #CBAA63; color: #0A0A0A; }
 
   </style>
 </head>
@@ -768,6 +791,7 @@
           <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
         </button>
         <div class="dropdown-content">
+          <a href="#" class="mi-espacio-link" onclick="event.preventDefault();document.getElementById('miEspacioModal').style.display='flex';">MI ESPACIO</a>
           <a href="index.html">Inicio</a>
           <a href="joyeria.html">Alta Joyer&iacute;a</a>
           <a href="boutique.html">Bolsos Boutique</a>
@@ -780,7 +804,6 @@
           <a href="certificado.html">Certificado</a>
         </div>
       </div>
-      <a href="#" class="nav-link" style="font-weight:600;letter-spacing:2px;" onclick="event.preventDefault();document.getElementById('miEspacioModal').style.display='flex';">MI ESPACIO</a>
     </div>
 
     <div class="brand-nav">&Egrave; N I G M E</div>
