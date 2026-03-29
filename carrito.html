@@ -1654,23 +1654,34 @@
         const totalDisplay = getCartPriceDisplay(total);
         document.getElementById('summary-total').innerText = totalDisplay;
 
-        // ── CLUB ENIGME SUBSCRIBER 10% DISCOUNT ──
+        // ── CLUB ENIGME SUBSCRIBER 10% DISCOUNT (NO aplica a SETS ni Liquidación) ──
         const discountBanner = document.getElementById('subscriber-discount-banner');
         const discountSummary = document.getElementById('subscriber-discount-summary');
-        if (subscriberDiscountActive && total > 0) {
-          // Use the DISPLAYED prices for consistency (with psychological pricing for EUR)
+        // Calculate discountable total (exclude SETS and Liquidación items)
+        let discountableTotal = 0;
+        cart.forEach(function(item) {
+          var ref = (item.ref || '').toUpperCase();
+          var cat = (item.cat || '').toLowerCase();
+          var isSet = ref.indexOf('SET') === 0 || cat === 'sets';
+          var isLiq = item.isLiquidation || cat === 'liquidacion' || ref.indexOf('LQ') === 0;
+          if (!isSet && !isLiq) {
+            var p = parseInt((item.price || '0').toString().replace(/\D/g, ''));
+            discountableTotal += p * (item.qty || 1);
+          }
+        });
+        if (subscriberDiscountActive && total > 0 && discountableTotal > 0) {
+          // 10% discount ONLY on eligible items (not SETS, not Liquidación)
           let discountDisplay, discountedDisplay, stripeHNL;
           if (monedaCart === 'EUR') {
-            // Get the psychological EUR total (same as what's shown)
-            const eurTotal = psychologicalPrice(total / TASA_CAMBIO_CHECKOUT);
-            const discEUR = parseFloat((eurTotal * 0.10).toFixed(2));
-            const finalEUR = parseFloat((eurTotal - discEUR).toFixed(2));
-            discountDisplay = '- \u20AC ' + discEUR.toFixed(2);
-            discountedDisplay = '\u20AC ' + finalEUR.toFixed(2);
-            // Convert final EUR back to HNL for internal tracking
+            var eurDiscountable = psychologicalPrice(discountableTotal / TASA_CAMBIO_CHECKOUT);
+            var discEUR = parseFloat((eurDiscountable * 0.10).toFixed(2));
+            var eurTotal = psychologicalPrice(total / TASA_CAMBIO_CHECKOUT);
+            var finalEUR = parseFloat((eurTotal - discEUR).toFixed(2));
+            discountDisplay = '- \u20ac ' + discEUR.toFixed(2);
+            discountedDisplay = '\u20ac ' + finalEUR.toFixed(2);
             stripeHNL = Math.round(finalEUR * TASA_CAMBIO_CHECKOUT);
           } else {
-            const discountHNL = Math.round(total * 0.10);
+            var discountHNL = Math.round(discountableTotal * 0.10);
             stripeHNL = total - discountHNL;
             discountDisplay = '- L ' + discountHNL.toLocaleString('es-HN');
             discountedDisplay = 'L ' + stripeHNL.toLocaleString('es-HN');
@@ -2944,5 +2955,6 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
+<script src="enigme-popup.js"></script>
 </body>
 </html>

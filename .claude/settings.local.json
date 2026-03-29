@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ba81347e-f958-4a9b-ab40-92664d7c43f8__upload-asset-from-url",
+      "mcp__ba81347e-f958-4a9b-ab40-92664d7c43f8__create-design-from-candidate",
+      "mcp__d55928d5-942c-4d0c-ac1c-eb0c7dde2f83__execute_sql",
+      "Bash(ls *.html)",
+      "mcp__d55928d5-942c-4d0c-ac1c-eb0c7dde2f83__list_edge_functions",
+      "mcp__d55928d5-942c-4d0c-ac1c-eb0c7dde2f83__get_edge_function",
+      "mcp__d55928d5-942c-4d0c-ac1c-eb0c7dde2f83__get_logs"
+    ]
+  }
+}
