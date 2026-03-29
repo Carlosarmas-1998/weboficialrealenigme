@@ -582,13 +582,13 @@ var chartComDist = null, chartComBar = null;
 var adminPolling = null, zonaPolling = null;
 var selectedZonaGerente = null;
 var adminFotoFiles = [], zonaFotoFiles = [];
-var configNombr = { umbral: 20, pagoAlto: 320, pagoBajo: 220 };
+var configNombr = { umbral: 21, pagoAlto: 320, pagoBajo: 220 };
 
 async function loadConfigNombramientos() {
   try {
     var data = await api('/rest/v1/config_multinivel?select=clave,valor');
     data.forEach(function(c) {
-      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 20;
+      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 21;
       if (c.clave === 'pago_nombramiento_alto') configNombr.pagoAlto = Number(c.valor) || 320;
       if (c.clave === 'pago_nombramiento_bajo') configNombr.pagoBajo = Number(c.valor) || 220;
     });
@@ -1312,10 +1312,10 @@ async function loadDashboard() {
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
     var pagoNombr;
-    if (s.nombramientos < configNombr.umbral) {
+    if (s.nombramientos <= configNombr.umbral) {
       pagoNombr = s.nombramientos * configNombr.pagoBajo;
     } else {
-      pagoNombr = (configNombr.umbral - 1) * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral + 1) * configNombr.pagoAlto;
+      pagoNombr = configNombr.umbral * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral) * configNombr.pagoAlto;
     }
     var comGZ = s.neta * 0.03;
     var base = 16000;
@@ -1658,10 +1658,10 @@ async function loadComisiones() {
     var s = gs[gId];
     var base = 16000;
     var pagoNombr;
-    if (s.nombramientos < configNombr.umbral) {
+    if (s.nombramientos <= configNombr.umbral) {
       pagoNombr = s.nombramientos * configNombr.pagoBajo;
     } else {
-      pagoNombr = (configNombr.umbral - 1) * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral + 1) * configNombr.pagoAlto;
+      pagoNombr = configNombr.umbral * configNombr.pagoBajo + (s.nombramientos - configNombr.umbral) * configNombr.pagoAlto;
     }
     var comGZ = s.neta * 0.03;
     var totalPagoGZ = base + pagoNombr + comGZ;

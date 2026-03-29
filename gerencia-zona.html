@@ -551,13 +551,13 @@ var resChartComp   = null;
 var resChartSector = null;
 var chatInterval   = null;
 var regMode = 'nom';
-var configNombr = { umbral: 20, pagoAlto: 320, pagoBajo: 220 };
+var configNombr = { umbral: 21, pagoAlto: 320, pagoBajo: 220 };
 
 async function loadConfigNombramientos() {
   try {
     var data = await api('/rest/v1/config_multinivel?select=clave,valor');
     data.forEach(function(c) {
-      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 20;
+      if (c.clave === 'umbral_nombramientos_alto') configNombr.umbral = Number(c.valor) || 21;
       if (c.clave === 'pago_nombramiento_alto') configNombr.pagoAlto = Number(c.valor) || 320;
       if (c.clave === 'pago_nombramiento_bajo') configNombr.pagoBajo = Number(c.valor) || 220;
     });
@@ -1647,18 +1647,18 @@ function renderSalary(totalNeto, totalNoms, campanaId) {
 
   var baseSalary = 16000;
   var pagoNombr;
-  if (totalNoms < configNombr.umbral) {
+  if (totalNoms <= configNombr.umbral) {
     pagoNombr = totalNoms * configNombr.pagoBajo;
   } else {
-    pagoNombr = (configNombr.umbral - 1) * configNombr.pagoBajo + (totalNoms - configNombr.umbral + 1) * configNombr.pagoAlto;
+    pagoNombr = configNombr.umbral * configNombr.pagoBajo + (totalNoms - configNombr.umbral) * configNombr.pagoAlto;
   }
   var nomPayment = pagoNombr;
   var commission = totalNeto * 0.03;
   var totalSalary = baseSalary + nomPayment + commission;
 
-  var nomDesc = totalNoms < configNombr.umbral
-    ? totalNoms + ' x L' + configNombr.pagoBajo + ' [<' + configNombr.umbral + ']'
-    : (configNombr.umbral - 1) + ' x L' + configNombr.pagoBajo + ' + ' + (totalNoms - configNombr.umbral + 1) + ' x L' + configNombr.pagoAlto + ' [>=' + configNombr.umbral + ']';
+  var nomDesc = totalNoms <= configNombr.umbral
+    ? totalNoms + ' x L' + configNombr.pagoBajo + ' [\u2264' + configNombr.umbral + ']'
+    : configNombr.umbral + ' x L' + configNombr.pagoBajo + ' + ' + (totalNoms - configNombr.umbral) + ' x L' + configNombr.pagoAlto + ' [>' + configNombr.umbral + ']';
   el.innerHTML =
     '<div class="salary-row"><span class="sr-label">Salario Base</span><span class="sr-value">' + fmtL(baseSalary) + '</span></div>' +
     '<div class="salary-row"><span class="sr-label">Nombramientos (' + nomDesc + ')</span><span class="sr-value">' + fmtL(nomPayment) + '</span></div>' +

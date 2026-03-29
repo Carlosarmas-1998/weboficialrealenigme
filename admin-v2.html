@@ -115,6 +115,9 @@
     .status-rechazada{color:var(--danger);border-color:var(--danger);}
     .status-enviado_logistica{color:#5a8fa0;border-color:#5a8fa0;background:rgba(90,143,160,.08);}
     .status-pendiente{color:var(--warn);border-color:var(--warn);}
+    .status-en_proceso{color:var(--info);border-color:var(--info);}
+    .status-resuelto{color:var(--success);border-color:var(--success);}
+    .status-cerrado{color:var(--text-muted);border-color:var(--text-muted);}
 
     /* CHAT */
     .chat-toggle{font-size:.7rem;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
@@ -255,6 +258,7 @@
   <div class="sidebar-nav-wrap" id="sidebarNavWrap">
   <div class="nav-item active" data-tab="pedidos" onclick="switchTab('pedidos')">Pedidos</div>
   <div class="nav-item" data-tab="postulaciones" onclick="switchTab('postulaciones')">Postulaciones</div>
+  <div class="nav-item" data-tab="soporte" onclick="switchTab('soporte')">&#128233; Soporte</div>
   <div class="nav-item" data-tab="cookies" onclick="switchTab('cookies')">Cookies</div>
   <div class="nav-item" data-tab="suscripciones" onclick="switchTab('suscripciones')">Suscripciones</div>
   <div class="nav-item" data-tab="analytics" onclick="switchTab('analytics');loadAnalytics();">◈ Analytics</div>
@@ -329,6 +333,22 @@
       <tbody id="postulacionesBody"></tbody>
     </table></div>
     <div class="empty-state" id="postulacionesEmpty" style="display:none;">No hay postulaciones</div>
+  </div>
+
+  <!-- TAB: SOPORTE -->
+  <div class="tab-content" id="tab-soporte">
+    <div class="page-header">
+      <div class="page-title"><h1>Sop<em>orte</em></h1><p>Tickets de soporte</p></div>
+      <div class="header-actions">
+        <button class="btn" onclick="loadSoporte()"><span>Refrescar</span></button>
+      </div>
+    </div>
+    <div id="soporteStats" class="stats-row"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nombre</th><th>Correo</th><th>Departamento</th><th>Municipio</th><th>Mensaje</th><th>Fotos</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="soporteBody"></tbody>
+    </table></div>
+    <div class="empty-state" id="soporteEmpty" style="display:none;">No hay tickets de soporte</div>
   </div>
 
   <!-- TAB: COOKIES -->
@@ -918,9 +938,11 @@ var cachedAnalytics = [];
 var cachedNotificaciones = [];
 var refreshInterval = null;
 var estadosPedidoConfig = ['Recibido','Confirmado','En Preparación','Enviado','Entregado','Cancelado'];
-var cfgUmbralNombAlto = 25;
+var cfgUmbralNombAlto = 21;
 var cfgPagoNombAlto = 320;
 var cfgPagoNombBajo = 220;
+var cfgComisionLogistica = 8;
+var cfgSalarioLogistica = 12000;
 
 // ================================================================
 // SUPABASE REST HELPERS
@@ -1063,6 +1085,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
   var tabEl = document.getElementById('tab-'+tab);
   if (tabEl) tabEl.classList.add('active');
+  if (tab === 'soporte') loadSoporte();
   // Auto-close mobile nav on tab switch
   var navWrap = document.getElementById('sidebarNavWrap');
   if (navWrap && window.innerWidth <= 768) {
@@ -1215,10 +1238,11 @@ async function loadConfigValues() {
   var foundSalarioLogistica = false;
   if (configs && configs.length) {
     configs.forEach(function(c) {
-      if (c.clave === 'umbral_nombramientos_alto') cfgUmbralNombAlto = parseInt(c.valor) || 25;
+      if (c.clave === 'umbral_nombramientos_alto') cfgUmbralNombAlto = parseInt(c.valor) || 21;
       if (c.clave === 'pago_nombramiento_alto') cfgPagoNombAlto = parseFloat(c.valor) || 320;
       if (c.clave === 'pago_nombramiento_bajo') cfgPagoNombBajo = parseFloat(c.valor) || 220;
-      if (c.clave === 'salario_logistica') foundSalarioLogistica = true;
+      if (c.clave === 'salario_logistica') { cfgSalarioLogistica = parseFloat(c.valor) || 12000; foundSalarioLogistica = true; }
+      if (c.clave === 'comision_logistica') cfgComisionLogistica = parseFloat(c.valor) || 8;
     });
   }
   // Seed salario_logistica if missing
@@ -2303,8 +2327,12 @@ function exportSimulacion() {
 
   var ventaBruta = numAsesoras * ventaPromedio;
   var ventaNeta = ventaBruta * 0.85;
-  var pagoPerNom = numAsesoras >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
-  var costoNom = numAsesoras * pagoPerNom;
+  var costoNom;
+  if (numAsesoras <= cfgUmbralNombAlto) {
+    costoNom = numAsesoras * cfgPagoNombBajo;
+  } else {
+    costoNom = cfgUmbralNombAlto * cfgPagoNombBajo + (numAsesoras - cfgUmbralNombAlto) * cfgPagoNombAlto;
+  }
   var costoSalGZ = SUELDO_GZ * numGZ;
   var dGastos = ventaNeta * MODELO.gastosPagos;
   var sobrante = dGastos - costoSalGZ - costoNom;
@@ -2323,7 +2351,7 @@ function exportSimulacion() {
     { 'Concepto': '= VENTA NETA', '%': '85%', 'Monto (L)': ventaNeta },
     { 'Concepto': 'Precio de Insercion (Producto)', '%': '22% de Neta', 'Monto (L)': ventaNeta * 0.22 },
     { 'Concepto': 'Comision Asesoras', '%': '15% de Neta', 'Monto (L)': ventaNeta * 0.15 },
-    { 'Concepto': 'Logistica', '%': '8% de Neta', 'Monto (L)': ventaNeta * 0.08 },
+    { 'Concepto': 'Logistica', '%': cfgComisionLogistica + '% de Neta', 'Monto (L)': ventaNeta * (cfgComisionLogistica / 100) },
     { 'Concepto': 'Comision Gerencia Divisional', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
     { 'Concepto': 'Comision Gerencia de Zona', '%': '3% de Neta', 'Monto (L)': ventaNeta * 0.03 },
     { 'Concepto': 'Gerencia General', '%': '5% de Neta', 'Monto (L)': ventaNeta * 0.05 },
@@ -2334,7 +2362,7 @@ function exportSimulacion() {
     { 'Concepto': '--- SE PAGA (Del Fondo 28% de Neta) ---', '%': '', 'Monto (L)': '' },
     { 'Concepto': 'Fondo 28% disponible', '%': '28% de Neta', 'Monto (L)': dGastos },
     { 'Concepto': 'Salario GZ (' + numGZ + ' x L16,000)', '%': '', 'Monto (L)': costoSalGZ },
-    { 'Concepto': 'Nombramientos (' + numAsesoras + ' x L' + pagoPerNom + ')', '%': '', 'Monto (L)': costoNom },
+    { 'Concepto': 'Nombramientos (' + (numAsesoras <= cfgUmbralNombAlto ? numAsesoras + ' x L' + cfgPagoNombBajo : cfgUmbralNombAlto + ' x L' + cfgPagoNombBajo + ' + ' + (numAsesoras - cfgUmbralNombAlto) + ' x L' + cfgPagoNombAlto) + ')', '%': '', 'Monto (L)': costoNom },
     { 'Concepto': 'Total Pagos', '%': '', 'Monto (L)': costoSalGZ + costoNom },
     { 'Concepto': sobrante >= 0 ? 'SOBRANTE OPERATIVO' : 'DEFICIT', '%': '', 'Monto (L)': sobrante },
     { 'Concepto': '', '%': '', 'Monto (L)': '' },
@@ -3648,11 +3676,18 @@ async function loadComisiones() {
     var pagoNomDetails = [];
     gdGerentes.forEach(function(gz) {
       var nomCount = nomPerGerente[gz.id] || 0;
-      var pagoPerNom = nomCount >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
-      var pagoTotal = nomCount * pagoPerNom;
+      var pagoTotal;
+      if (nomCount <= cfgUmbralNombAlto) {
+        pagoTotal = nomCount * cfgPagoNombBajo;
+      } else {
+        pagoTotal = cfgUmbralNombAlto * cfgPagoNombBajo + (nomCount - cfgUmbralNombAlto) * cfgPagoNombAlto;
+      }
       totalPagoNom += pagoTotal;
       if (nomCount > 0) {
-        pagoNomDetails.push(gz.nombre + ': ' + nomCount + ' x L' + pagoPerNom);
+        var nomDetail = nomCount <= cfgUmbralNombAlto
+          ? nomCount + ' x L' + cfgPagoNombBajo
+          : cfgUmbralNombAlto + ' x L' + cfgPagoNombBajo + ' + ' + (nomCount - cfgUmbralNombAlto) + ' x L' + cfgPagoNombAlto;
+        pagoNomDetails.push(gz.nombre + ': ' + nomDetail);
       }
     });
     var pagoNomHtml = 'L' + totalPagoNom.toLocaleString('es-HN',{minimumFractionDigits:2});
@@ -3684,7 +3719,7 @@ async function loadComisiones() {
   window.MODELO = {
     insercion: 0.22,
     asesoras: 0.15,
-    logistica: 0.08,
+    logistica: cfgComisionLogistica / 100,
     divisional: 0.05,
     zona: 0.03,
     gerenciaGral: 0.05,
@@ -3721,8 +3756,12 @@ async function loadComisiones() {
     var dEmpresa = ventaNeta * MODELO.empresa;
 
     // --- GASTOS DEL 28% (lo que hay que pagar) ---
-    var pagoPerNom = numAsesoras >= cfgUmbralNombAlto ? cfgPagoNombAlto : cfgPagoNombBajo;
-    var costoNombramientos = numAsesoras * pagoPerNom;
+    var costoNombramientos;
+    if (numAsesoras <= cfgUmbralNombAlto) {
+      costoNombramientos = numAsesoras * cfgPagoNombBajo;
+    } else {
+      costoNombramientos = cfgUmbralNombAlto * cfgPagoNombBajo + (numAsesoras - cfgUmbralNombAlto) * cfgPagoNombAlto;
+    }
     var costoSalariosGZ = SUELDO_GZ * numGZ;
     var totalGastosReales = costoSalariosGZ + costoNombramientos;
     var sobranteFondo28 = dGastosPagos - totalGastosReales;
@@ -3773,7 +3812,7 @@ async function loadComisiones() {
     html += '<div class="table-wrap"><table>';
     html += '<thead><tr><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead><tbody>';
     html += '<tr><td>Salario Gerente(s) de Zona</td><td>' + numGZ + ' GZ x ' + L(SUELDO_GZ) + '</td><td style="color:var(--warn);">' + L(costoSalariosGZ) + '</td></tr>';
-    html += '<tr><td>Pago por Nombramientos</td><td>' + numAsesoras + ' nomb. x ' + L(pagoPerNom) + (numAsesoras >= 20 ? ' (\u226520)' : ' (<20)') + '</td><td style="color:var(--warn);">' + L(costoNombramientos) + '</td></tr>';
+    html += '<tr><td>Pago por Nombramientos</td><td>' + (numAsesoras <= cfgUmbralNombAlto ? numAsesoras + ' x ' + L(cfgPagoNombBajo) : cfgUmbralNombAlto + ' x ' + L(cfgPagoNombBajo) + ' + ' + (numAsesoras - cfgUmbralNombAlto) + ' x ' + L(cfgPagoNombAlto)) + '</td><td style="color:var(--warn);">' + L(costoNombramientos) + '</td></tr>';
     html += '<tr style="border-top:2px solid var(--border);"><td style="font-weight:600;">Total Pagos</td><td></td><td style="font-weight:600;color:var(--warn);">' + L(totalGastosReales) + '</td></tr>';
     html += '<tr style="border-top:2px solid ' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';background:' + (esRentable ? 'rgba(107,158,120,0.08)' : 'rgba(158,107,107,0.08)') + ';"><td style="font-weight:700;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '\u2705 SOBRANTE OPERATIVO' : '\ud83d\udd34 D\u00c9FICIT') + '</td><td style="font-size:.75rem;color:var(--text-muted);">' + L(dGastosPagos) + ' - ' + L(totalGastosReales) + '</td><td style="font-weight:700;font-size:1.1rem;color:' + (esRentable ? 'var(--success)' : 'var(--danger)') + ';">' + (esRentable ? '+' : '') + L(sobranteFondo28) + '</td></tr>';
     html += '</tbody></table></div></div>';
@@ -3829,7 +3868,7 @@ async function loadComisiones() {
     '</div>' +
     '<div style="font-size:.68rem;color:var(--text-muted);padding:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;line-height:1.7;">' +
     '<strong style="color:var(--gold);">MODELO:</strong> Venta Bruta - <strong style="color:#b08fd0;">15% asesoras</strong> = <strong style="color:var(--success);">Venta Neta (85%)</strong>. De la Neta: 22% inserci\u00f3n + 8% log\u00edstica + 5% GD + 3% GZ + 5% gerencia gral + 4% marketing + <strong>28% gastos pagos</strong> + <strong style="color:var(--success);">10% empresa</strong> = 85%<br>' +
-    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> \u2264' + (cfgUmbralNombAlto - 1) + ' \u2192 L' + cfgPagoNombBajo + ' c/u &bull; \u2265' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombAlto + ' c/u &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
+    '<strong style="color:var(--gold);">NOMBRAMIENTOS:</strong> 1-' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombBajo + ' c/u &bull; >' + cfgUmbralNombAlto + ' \u2192 L' + cfgPagoNombAlto + ' c/u (escalonado) &bull; <strong>Sueldo GZ: L16,000 brutos</strong> &bull; Pedido m\u00ednimo: L2,499' +
     '</div>' +
     '<div id="simResultado"></div>' +
     '<div style="margin-top:16px;text-align:right;"><button class="btn btn-gold" onclick="exportSimulacion()" style="padding:10px 24px;border:1px solid var(--gold-dim);color:var(--gold);background:transparent;font-family:\'Jost\',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;">Exportar Simulaci\u00f3n Excel</button></div>' +
@@ -5622,6 +5661,8 @@ async function guardarConfig(id, clave) {
     }
 
     showToast(msg + detalle);
+    // Reload config values into memory so changes take effect immediately
+    await loadConfigValues();
   } catch(e) {
     showToast('Error al guardar: ' + (e.message || e), 'error');
   }
@@ -5654,6 +5695,80 @@ function buildEnigmeEmailAdmin(title, bodyContent) {
     '<p style="font-size:8px;color:#3a3530;margin:0;">Si no desea recibir estas notificaciones, contacte a su administrador.</p>' +
     '</td></tr>' +
     '</table></td></tr></table></body></html>';
+}
+
+// ================================================================
+// SOPORTE TICKETS
+// ================================================================
+var cachedSoporte = [];
+
+async function loadSoporte() {
+  var data = await supaGet('web_soporte_tickets', '&order=created_at.desc');
+  cachedSoporte = data;
+
+  var tbody = document.getElementById('soporteBody');
+  var emptyEl = document.getElementById('soporteEmpty');
+  var statsEl = document.getElementById('soporteStats');
+
+  // Stats
+  var total = data.length;
+  var pendientes = data.filter(function(t){ return (t.estado || 'pendiente') === 'pendiente'; }).length;
+  var enProceso = data.filter(function(t){ return t.estado === 'en_proceso'; }).length;
+  var resueltos = data.filter(function(t){ return t.estado === 'resuelto'; }).length;
+  var cerrados = data.filter(function(t){ return t.estado === 'cerrado'; }).length;
+
+  statsEl.innerHTML =
+    '<div class="stat-card"><div class="stat-label">Total Tickets</div><div class="stat-value">' + total + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" style="color:var(--warn);">' + pendientes + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">En Proceso</div><div class="stat-value" style="color:var(--info);">' + enProceso + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Resueltos</div><div class="stat-value" style="color:var(--success);">' + resueltos + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Cerrados</div><div class="stat-value" style="color:var(--text-muted);">' + cerrados + '</div></div>';
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  var html = '';
+  data.forEach(function(t) {
+    var estado = t.estado || 'pendiente';
+    var fecha = t.created_at ? new Date(t.created_at).toLocaleString('es-GT') : '-';
+
+    // Build photos cell
+    var fotosHtml = '';
+    if (t.foto1_url) {
+      fotosHtml += '<a href="' + esc(t.foto1_url) + '" target="_blank" rel="noopener"><img src="' + esc(t.foto1_url) + '" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border);margin-right:4px;cursor:pointer;" alt="Foto 1"/></a>';
+    }
+    if (t.foto2_url) {
+      fotosHtml += '<a href="' + esc(t.foto2_url) + '" target="_blank" rel="noopener"><img src="' + esc(t.foto2_url) + '" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border);cursor:pointer;" alt="Foto 2"/></a>';
+    }
+    if (!fotosHtml) fotosHtml = '<span style="color:var(--text-muted);font-size:.75rem;">Sin fotos</span>';
+
+    html += '<tr>';
+    html += '<td>' + esc(t.nombre || '-') + '</td>';
+    html += '<td>' + esc(t.correo || '-') + '</td>';
+    html += '<td>' + esc(t.departamento || '-') + '</td>';
+    html += '<td>' + esc(t.municipio || '-') + '</td>';
+    html += '<td style="max-width:280px;"><details><summary style="cursor:pointer;color:var(--gold);font-size:.75rem;">Ver mensaje</summary><div style="margin-top:6px;font-size:.78rem;white-space:pre-wrap;">' + esc(t.mensaje || '-') + '</div></details></td>';
+    html += '<td>' + fotosHtml + '</td>';
+    html += '<td><select class="btn-sm" style="min-width:110px;" onchange="changeSoporteStatus(' + t.id + ', this.value)">';
+    ['pendiente','en_proceso','resuelto','cerrado'].forEach(function(st) {
+      html += '<option value="' + st + '"' + (estado === st ? ' selected' : '') + '>' + st.replace('_',' ') + '</option>';
+    });
+    html += '</select></td>';
+    html += '<td style="white-space:nowrap;font-size:.78rem;">' + fecha + '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+async function changeSoporteStatus(id, newStatus) {
+  var ok = await supaPatch('web_soporte_tickets', id, { estado: newStatus });
+  if (ok) { showToast('Estado actualizado'); loadSoporte(); }
+  else showToast('Error al actualizar', true);
 }
 </script>
 </body>
