@@ -74,11 +74,6 @@
 
     .chart-container{position:relative;height:280px;margin:20px 0;}
 
-    /* ── MULTISELECT ── */
-    .multiselect{border:1px solid var(--borde);background:var(--marfil);max-height:180px;overflow-y:auto;padding:8px;}
-    .multiselect label{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.8rem;cursor:pointer;}
-    .multiselect input[type="checkbox"]{accent-color:var(--dorado);}
-
     /* ── BADGES ── */
     .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.6rem;letter-spacing:0.05em;font-weight:600;}
     .badge-active{background:rgba(39,174,96,0.1);color:var(--success);}
@@ -94,7 +89,6 @@
     .chat-bubble.right{align-self:flex-end;background:var(--dorado);color:var(--carbon);border-bottom-right-radius:4px;}
     .chat-bubble.left{align-self:flex-start;background:var(--surface);color:var(--carbon);border:1px solid var(--borde);border-bottom-left-radius:4px;}
     .chat-sender{font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;opacity:0.7;}
-    .chat-right .chat-sender{color:var(--dorado);}
     .chat-time{font-size:0.6rem;opacity:0.6;margin-top:6px;text-align:right;}
     .chat-photos{display:flex;gap:6px;margin-top:8px;}
     .chat-photos img{max-width:180px;max-height:130px;border-radius:6px;object-fit:cover;cursor:pointer;}
@@ -124,6 +118,20 @@
     .modal-box{background:var(--surface);border-radius:4px;padding:30px;max-width:720px;width:94%;max-height:90vh;overflow-y:auto;}
     .modal-box .card-title{margin-bottom:20px;}
 
+    /* ── HEART REACTION ── */
+    .heart-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;transition:transform .2s;padding:2px 4px;}
+    .heart-btn:hover{transform:scale(1.3);}
+    .heart-count{font-size:0.65rem;color:var(--gris);margin-left:2px;}
+
+    /* ── RANGO BADGE ── */
+    .rango-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.6rem;letter-spacing:0.08em;font-weight:700;text-transform:uppercase;}
+    .rango-inicio{background:#e0dcd5;color:#666;}
+    .rango-bronce{background:#cd7f32;color:#fff;}
+    .rango-plata{background:#c0c0c0;color:#333;}
+    .rango-oro{background:#ffd700;color:#333;}
+    .rango-platino{background:#e5e4e2;color:#333;border:1px solid #aaa;}
+    .rango-diamante{background:linear-gradient(135deg,#b9f2ff,#e0e0ff);color:#333;border:1px solid #88c8d8;}
+
     @media(max-width:768px){
       .topbar{padding:10px 16px;}
       .tabs{padding:0 8px;}.tab-btn{padding:12px 10px;font-size:0.55rem;}
@@ -144,7 +152,7 @@
 </head>
 <body>
 
-<!-- ═══════════ LOGIN OVERLAY ═══════════ -->
+<!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <h1>ENIGME</h1>
@@ -156,7 +164,7 @@
   </div>
 </div>
 
-<!-- ═══════════ APP ═══════════ -->
+<!-- APP -->
 <div class="app-wrap" id="appWrap">
 
 <div class="topbar">
@@ -166,21 +174,22 @@
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('gerentes',this)">Gerentes de Zona</button>
+  <button class="tab-btn active" onclick="switchTab('gerentes',this)">Mis Gerentes de Zona</button>
   <button class="tab-btn" onclick="switchTab('dashboard',this)">Dashboard</button>
-  <button class="tab-btn" onclick="switchTab('msgAdmin',this)">Mensajer&iacute;a General</button>
+  <button class="tab-btn" onclick="switchTab('msgGeneral',this)">Mensajer&iacute;a General</button>
   <button class="tab-btn" onclick="switchTab('msgZona',this)">Mensajer&iacute;a Zonas</button>
   <button class="tab-btn" onclick="switchTab('comisiones',this)">Comisiones y Pagos</button>
   <button class="tab-btn" onclick="switchTab('pedidosDiv',this)">Pedidos Divisi&oacute;n</button>
   <button class="tab-btn" onclick="switchTab('logistica',this)">Log&iacute;stica</button>
+  <button class="tab-btn" onclick="switchTab('bajas',this)">Bajas / Consultas</button>
 </div>
 
 <div class="container">
 
-  <!-- ══════════ TAB 1: GERENTES DE ZONA ══════════ -->
+  <!-- TAB 1: MIS GERENTES DE ZONA -->
   <div class="tab-panel active" id="panel-gerentes">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Gerentes de Zona</h2>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Mis Gerentes de Zona</h2>
       <button class="btn" onclick="toggleFormGZ()" id="btnNuevoGZ">+ Nuevo Gerente</button>
     </div>
 
@@ -199,7 +208,7 @@
         <div class="form-group"><label>Direcci&oacute;n Exacta *</label><input id="gzDireccion" placeholder="Direcci&oacute;n completa"/></div>
         <div class="form-group"><label>Fecha de Ingreso *</label><input id="gzFechaIngreso" type="date"/></div>
         <div class="form-group">
-          <label>Departamento * (se asigna departamento completo)</label>
+          <label>Departamento *</label>
           <select id="gzDepto">
             <option value="">Seleccione departamento...</option>
           </select>
@@ -240,7 +249,7 @@
     <div id="listaGZ"><p style="color:var(--gris);text-align:center;padding:40px;font-size:0.85rem;">Cargando...</p></div>
   </div>
 
-  <!-- ══════════ TAB 2: DASHBOARD POR CAMPANA ══════════ -->
+  <!-- TAB 2: DASHBOARD POR CAMPANA -->
   <div class="tab-panel" id="panel-dashboard">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Dashboard por Campa&ntilde;a</h2>
@@ -256,7 +265,6 @@
       <div class="stat-card"><div class="stat-label">Seleccione una campa&ntilde;a</div></div>
     </div>
 
-    <!-- Payments per gerente -->
     <div id="dashPaymentsSection" style="display:none;">
       <div class="card comision-highlight" style="margin-bottom:20px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;">
@@ -298,29 +306,30 @@
     </div>
   </div>
 
-  <!-- ══════════ TAB 3: MENSAJERIA CON GERENCIA GENERAL ══════════ -->
-  <div class="tab-panel" id="panel-msgAdmin">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerencia General</h2>
+  <!-- TAB 3: MENSAJERIA GENERAL (broadcast to all GZ) -->
+  <div class="tab-panel" id="panel-msgGeneral">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mensajer&iacute;a General</h2>
+    <p style="font-size:0.75rem;color:var(--gris);margin-bottom:16px;">Los mensajes aqu&iacute; son visibles para todos sus Gerentes de Zona.</p>
     <div class="chat-container">
-      <div class="chat-feed" id="chatAdminFeed">
+      <div class="chat-feed" id="chatGeneralFeed">
         <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.85rem;">Cargando mensajes...</p>
       </div>
       <div class="chat-input-bar">
         <label style="cursor:pointer;display:flex;align-items:center;padding:8px;border:1px solid var(--borde);border-radius:4px;background:var(--marfil);" title="Adjuntar fotos (max 2)">
           &#128247;
-          <input type="file" id="adminFotos" accept="image/*" multiple style="display:none;" onchange="previewAdminFotos(this)"/>
+          <input type="file" id="generalFotos" accept="image/*" multiple style="display:none;" onchange="previewGeneralFotos(this)"/>
         </label>
-        <div id="adminFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
-        <textarea id="adminTexto" placeholder="Escriba su mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsgAdmin();}"></textarea>
-        <button class="btn" onclick="enviarMsgAdmin()" style="white-space:nowrap;">Enviar</button>
+        <div id="generalFotosPreview" style="display:flex;gap:4px;align-items:center;"></div>
+        <textarea id="generalTexto" placeholder="Escriba un mensaje para todos los GZ..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsgGeneral();}"></textarea>
+        <button class="btn" onclick="enviarMsgGeneral()" style="white-space:nowrap;">Enviar</button>
       </div>
     </div>
-    <p id="adminMsgError" class="error-msg"></p>
+    <p id="generalMsgError" class="error-msg"></p>
   </div>
 
-  <!-- ══════════ TAB 4: MENSAJERIA CON GERENTES DE ZONA ══════════ -->
+  <!-- TAB 4: MENSAJERIA CON GERENTES DE ZONA (private) -->
   <div class="tab-panel" id="panel-msgZona">
-    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Chat con Gerentes de Zona</h2>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Mensajer&iacute;a Zonas (Privada)</h2>
     <div class="chat-split">
       <div class="chat-list" id="zonaListPanel">
         <p style="color:var(--gris);text-align:center;padding:20px;font-size:0.8rem;">Cargando...</p>
@@ -344,7 +353,7 @@
     <p id="zonaMsgError" class="error-msg"></p>
   </div>
 
-  <!-- ══════════ TAB 5: COMISIONES Y PAGOS ══════════ -->
+  <!-- TAB 5: COMISIONES Y PAGOS -->
   <div class="tab-panel" id="panel-comisiones">
     <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Comisiones y Pagos</h2>
 
@@ -376,7 +385,7 @@
       <div class="card-title">Desglose de Pagos por Gerente de Zona</div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Gerente</th><th>Zona</th><th>Base</th><th>Nombramientos</th><th>Pago Nombr.</th><th>Comisi&oacute;n 3%</th><th>Total Pago GZ</th></tr></thead>
+          <thead><tr><th>Gerente</th><th>Zona</th><th>Rango</th><th>Base</th><th>Nombramientos</th><th>Pago Nombr.</th><th>Comisi&oacute;n 3%</th><th>Bono Rango</th><th>Total Pago GZ</th></tr></thead>
           <tbody id="comTable"></tbody>
         </table>
       </div>
@@ -394,14 +403,17 @@
     </div>
   </div>
 
-  <!-- ══════════ TAB 6: PEDIDOS DE MI DIVISION ══════════ -->
+  <!-- TAB 6: PEDIDOS DE MI DIVISION -->
   <div class="tab-panel" id="panel-pedidosDiv">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Pedidos de Mi Divisi&oacute;n</h2>
-      <div style="display:flex;gap:10px;align-items:center;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <select id="pedDivAno" onchange="loadPedidosDiv()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;"></select>
         <select id="pedDivCampana" onchange="loadPedidosDiv()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
           <option value="">Todas las campa&ntilde;as</option>
+        </select>
+        <select id="pedDivGZ" onchange="loadPedidosDiv()" style="padding:8px 12px;border:1px solid var(--borde);font-family:'Montserrat',sans-serif;font-size:0.8rem;">
+          <option value="">Todos los GZ</option>
         </select>
         <button class="btn btn-sm" onclick="loadPedidosDiv()">Refrescar</button>
       </div>
@@ -409,7 +421,6 @@
 
     <div class="stats-grid" id="pedDivStats"></div>
 
-    <!-- Aggregated product summary -->
     <div class="card" id="pedDivResumenCard" style="display:none;">
       <div class="card-title" style="color:var(--dorado);">&#9830; Resumen Global de Productos (toda la divisi&oacute;n)</div>
       <div style="overflow-x:auto;">
@@ -420,18 +431,16 @@
       </div>
     </div>
 
-    <!-- Orders grouped by GZ -->
     <div id="pedDivContent"><p style="color:var(--gris);text-align:center;padding:40px;font-size:0.85rem;">Seleccione filtros y haga clic en Refrescar</p></div>
   </div>
 
-  <!-- ══════════ TAB 7: LOGISTICA ══════════ -->
+  <!-- TAB 7: LOGISTICA -->
   <div class="tab-panel" id="panel-logistica">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
       <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;">Operadores Log&iacute;sticos</h2>
       <button class="btn" id="btnNuevoLog" onclick="document.getElementById('formLog').style.display='block';this.style.display='none';">+ Nuevo Operador</button>
     </div>
 
-    <!-- Form crear operador logístico -->
     <div class="card" id="formLog" style="display:none;margin-bottom:24px;">
       <div class="card-title">Registrar Operador Log&iacute;stico</div>
       <div class="form-grid">
@@ -452,12 +461,34 @@
     </div>
 
     <div id="listaLog"><p style="color:var(--gris);text-align:center;padding:40px;">Cargando operadores...</p></div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="card-title">Estado de Entregas</div>
+      <div id="logEntregasContent"><p style="color:var(--gris);text-align:center;padding:20px;font-size:.8rem;">Cargando estado de entregas...</p></div>
+    </div>
+  </div>
+
+  <!-- TAB 8: BAJAS / CONSULTAS -->
+  <div class="tab-panel" id="panel-bajas">
+    <h2 style="font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:0.1em;margin-bottom:20px;">Bajas / Consultas</h2>
+    <div class="card">
+      <div class="card-title">Buscar por DNI o C&oacute;digo</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="flex:1;min-width:200px;">
+          <label>DNI o C&oacute;digo</label>
+          <input id="bajaBuscar" placeholder="Ingrese DNI o c&oacute;digo..." onkeydown="if(event.key==='Enter')buscarBaja()"/>
+        </div>
+        <button class="btn" onclick="buscarBaja()">Buscar</button>
+      </div>
+      <p id="bajaError" class="error-msg"></p>
+    </div>
+    <div id="bajaResultado"></div>
   </div>
 
 </div><!-- /container -->
 </div><!-- /app-wrap -->
 
-<!-- ═══════════ EDIT MODAL ═══════════ -->
+<!-- EDIT MODAL -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-box">
     <div class="card-title">Editar Gerente de Zona</div>
@@ -475,12 +506,9 @@
       <div class="form-group"><label>Fecha Ingreso</label><input id="editFechaIngreso" type="date"/></div>
     </div>
 
-    <!-- Document editing section -->
     <div style="margin-top:18px;border-top:1px solid var(--borde);padding-top:16px;">
       <div style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dorado);margin-bottom:12px;font-weight:600;">&#9672; Documentos de Alta (Reemplazar Fotos)</div>
-      <div id="editDocsCurrentContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:14px;">
-        <!-- Current docs will be loaded here -->
-      </div>
+      <div id="editDocsCurrentContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:14px;"></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
         <div class="upload-field">
           <label>Reemplazar DNI</label>
@@ -511,7 +539,7 @@
    ENIGME - GERENCIA DIVISIONAL - COMPLETE PANEL
    ================================================================ */
 var SB = 'https://hajmyntnvurlcuwshjdd.supabase.co';
-var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXXYAkw';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhham15bnRudnVybGN1d3NoamRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMDM2MjEsImV4cCI6MjA4ODU3OTYyMX0.XGF5wPX1sI9VgG11bnr41lCxeqTfFVHEhBIfBXYAkw';
 var H  = { 'apikey': SK, 'Authorization': 'Bearer ' + SK };
 var HJ = { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
@@ -522,26 +550,38 @@ var gerentes = [];
 var campanas = [];
 var chartComparativa = null, chartDistribucion = null, chartTendencia = null;
 var chartComDist = null, chartComBar = null;
-var adminPolling = null, zonaPolling = null;
+var generalPolling = null, zonaPolling = null;
 var selectedZonaGerente = null;
-var adminFotoFiles = [], zonaFotoFiles = [];
+var generalFotoFiles = [], zonaFotoFiles = [];
+
+/* ── ESCALAFON / RANGO ── */
+var RANGOS = [
+  { nombre: 'Inicio',    ventaMin: 0,       ventaMax: 49999,    bono: 0 },
+  { nombre: 'Bronce',    ventaMin: 50000,    ventaMax: 99999,    bono: 2000 },
+  { nombre: 'Plata',     ventaMin: 100000,   ventaMax: 199999,   bono: 5000 },
+  { nombre: 'Oro',       ventaMin: 200000,   ventaMax: 349999,   bono: 10000 },
+  { nombre: 'Platino',   ventaMin: 350000,   ventaMax: 499999,   bono: 18000 },
+  { nombre: 'Diamante',  ventaMin: 500000,   ventaMax: Infinity, bono: 30000 }
+];
+
+function getRango(ventaNeta) {
+  var vn = Number(ventaNeta) || 0;
+  for (var i = RANGOS.length - 1; i >= 0; i--) {
+    if (vn >= RANGOS[i].ventaMin) return RANGOS[i];
+  }
+  return RANGOS[0];
+}
+
+function rangoBadgeHtml(rango) {
+  var cls = 'rango-' + rango.nombre.toLowerCase();
+  return '<span class="rango-badge ' + cls + '">' + rango.nombre + '</span>';
+}
 
 /* ── INIT ── */
 (function init() {
-  var s = sessionStorage.getItem('enigme_gd_session');
+  var s = localStorage.getItem('enigme_gd_session');
   if (s) {
-    session = JSON.parse(s);
-    showApp();
-  }
-  // Also check old localStorage key for backwards compat
-  if (!session) {
-    var old = localStorage.getItem('enigme_gd_session');
-    if (old) {
-      session = JSON.parse(old);
-      sessionStorage.setItem('enigme_gd_session', old);
-      localStorage.removeItem('enigme_gd_session');
-      showApp();
-    }
+    try { session = JSON.parse(s); showApp(); } catch(e) { localStorage.removeItem('enigme_gd_session'); }
   }
 })();
 
@@ -559,9 +599,21 @@ async function doLogin() {
     if (!data || !data.length) { errEl.textContent = 'C\u00f3digo no encontrado.'; return; }
     var gd = data[0];
     if (!gd.activo) { errEl.textContent = 'USUARIO DE BAJA. Su cuenta ha sido desactivada por la Gerencia General. Contacte a info@enigmeofficial.com'; errEl.style.fontWeight = '700'; return; }
-    if (gd.password_temporal !== password) { errEl.textContent = 'Contrase\u00f1a incorrecta.'; return; }
+
+    /* Check password: first try gerencias_divisionales.password_temporal, then accesos_corporativos */
+    var pwOk = false;
+    if (gd.password_temporal === password) {
+      pwOk = true;
+    } else {
+      try {
+        var acc = await api('/rest/v1/accesos_corporativos?codigo=eq.' + encodeURIComponent(codigo) + '&select=password');
+        if (acc && acc.length && acc[0].password === password) pwOk = true;
+      } catch(e2) {}
+    }
+    if (!pwOk) { errEl.textContent = 'Contrase\u00f1a incorrecta.'; return; }
+
     session = gd;
-    sessionStorage.setItem('enigme_gd_session', JSON.stringify(gd));
+    localStorage.setItem('enigme_gd_session', JSON.stringify(gd));
     showApp();
   } catch(e) {
     errEl.textContent = 'Error de conexi\u00f3n.';
@@ -587,7 +639,6 @@ function showApp() {
 
 function logout() {
   stopAllPolling();
-  sessionStorage.removeItem('enigme_gd_session');
   localStorage.removeItem('enigme_gd_session');
   location.reload();
 }
@@ -600,15 +651,16 @@ function switchTab(tab, btn) {
   document.getElementById('panel-' + tab).classList.add('active');
   stopAllPolling();
   if (tab === 'dashboard') loadDashboard();
-  if (tab === 'msgAdmin') { loadMsgAdmin(); adminPolling = setInterval(loadMsgAdmin, 10000); }
+  if (tab === 'msgGeneral') { loadMsgGeneral(); generalPolling = setInterval(loadMsgGeneral, 10000); }
   if (tab === 'msgZona') { renderZonaList(); if (selectedZonaGerente) { loadMsgZona(); zonaPolling = setInterval(loadMsgZona, 10000); } }
   if (tab === 'comisiones') loadComisiones();
   if (tab === 'pedidosDiv') { initPedDivSelectors(); loadPedidosDiv(); }
-  if (tab === 'logistica') loadOperadoresLog();
+  if (tab === 'logistica') { loadOperadoresLog(); loadEntregasStatus(); }
+  if (tab === 'bajas') { /* nothing to preload */ }
 }
 
 function stopAllPolling() {
-  if (adminPolling) { clearInterval(adminPolling); adminPolling = null; }
+  if (generalPolling) { clearInterval(generalPolling); generalPolling = null; }
   if (zonaPolling) { clearInterval(zonaPolling); zonaPolling = null; }
 }
 
@@ -630,8 +682,6 @@ function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;'
 function fmtL(n) { return 'L ' + Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
 async function getNextSequentialCode() {
-  // Código secuencial desde 301201 — consulta vendedoras, coordinadores Y gerentes de zona
-  // Fetch ALL codes to handle alphanumeric codes safely
   var allVend = await api('/rest/v1/vendedoras?select=codigo');
   var allCoord = await api('/rest/v1/coordinadores?select=codigo');
   var allGer = await api('/rest/v1/gerentes_zona?select=codigo');
@@ -654,7 +704,16 @@ async function getNextSequentialCode() {
   return String(Math.max(numVend, numCoord, numGer, numLog, 301200) + 1);
 }
 
-/* ── DEPARTAMENTOS & MUNICIPIOS ── */
+async function uploadFile(file, folder) {
+  var ext = file.name.split('.').pop();
+  var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+  var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
+    method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
+  });
+  return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
+}
+
+/* ── DEPARTAMENTOS ── */
 async function loadDepartamentos() {
   departamentos = await api('/rest/v1/departamentos?order=nombre');
   if (!departamentos || departamentos.error) departamentos = [];
@@ -667,13 +726,10 @@ async function loadDepartamentos() {
   });
 }
 
-// Municipios are auto-assigned based on department selection (entire department)
-
 /* ── CAMPANAS ── */
 async function loadCampanas() {
   campanas = await api('/rest/v1/campanas?order=numero');
   if (!campanas || campanas.error) campanas = [];
-  // Dashboard selectors
   var selD = document.getElementById('dashCampana');
   selD.innerHTML = '<option value="">Seleccione campa\u00f1a</option>';
   campanas.forEach(function(c) {
@@ -681,7 +737,6 @@ async function loadCampanas() {
     opt.value = c.id; opt.textContent = 'Campa\u00f1a ' + c.numero;
     selD.appendChild(opt);
   });
-  // Year selectors
   var curYear = new Date().getFullYear();
   ['dashAno','comAno'].forEach(function(id) {
     var sel = document.getElementById(id);
@@ -692,7 +747,6 @@ async function loadCampanas() {
       sel.appendChild(opt);
     }
   });
-  // Comisiones campaign selector
   var selC = document.getElementById('comCampana');
   selC.innerHTML = '<option value="">Todas las campa\u00f1as</option>';
   campanas.forEach(function(c) {
@@ -702,9 +756,9 @@ async function loadCampanas() {
   });
 }
 
-/* ══════════════════════════════════════════
-   TAB 1: GERENTES DE ZONA (max 7)
-   ══════════════════════════════════════════ */
+/* ======================================================
+   TAB 1: MIS GERENTES DE ZONA (max 7)
+   ====================================================== */
 function toggleFormGZ() {
   var f = document.getElementById('formGZ');
   f.style.display = f.style.display === 'none' ? 'block' : 'none';
@@ -729,7 +783,6 @@ async function loadGerentesZona() {
   try {
     gerentes = await api('/rest/v1/gerentes_zona?gerencia_divisional_id=eq.' + session.id + '&order=created_at.desc');
     if (!gerentes || gerentes.error) gerentes = [];
-    // Load zona names
     for (var i = 0; i < gerentes.length; i++) {
       if (gerentes[i].zona_id) {
         var z = await api('/rest/v1/zonas?id=eq.' + gerentes[i].zona_id + '&select=id,nombre');
@@ -738,7 +791,6 @@ async function loadGerentesZona() {
     }
   } catch(e) { gerentes = []; }
   renderGerentesZona();
-  // Update nuevo button
   var btn = document.getElementById('btnNuevoGZ');
   var activeCount = gerentes.filter(function(g){ return g.activo; }).length;
   btn.disabled = activeCount >= 7;
@@ -800,46 +852,41 @@ async function guardarGerenteZona() {
   var fileDni = document.getElementById('gzFileDni').files[0];
   var fileCuenta = document.getElementById('gzFileCuenta').files[0];
   var fileExtra = document.getElementById('gzFileExtra').files[0];
-  var editId = document.getElementById('gzEditId').value;
-  if (!editId && (!fileDni || !fileCuenta)) { err.textContent = 'Debe adjuntar el DNI y la confirmaci\u00f3n de cuenta bancaria.'; return; }
+  if (!fileDni || !fileCuenta) { err.textContent = 'Debe adjuntar el DNI y la confirmaci\u00f3n de cuenta bancaria.'; return; }
 
-  // DNI uniqueness validation — check across ALL professional tables
-  if (!editId) {
-    try {
-      var dniEncoded = encodeURIComponent(dni);
-      var dniVend = await api('/rest/v1/vendedoras?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_ingreso,activo');
-      var dniCoord = await api('/rest/v1/coordinadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
-      var dniGer = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
-      var duplicado = null;
-      var duplicadoTipo = '';
-      if (dniVend && dniVend.length) { duplicado = dniVend[0]; duplicadoTipo = 'Vendedora'; }
-      else if (dniCoord && dniCoord.length) { duplicado = dniCoord[0]; duplicadoTipo = 'Coordinador'; }
-      else if (dniGer && dniGer.length) { duplicado = dniGer[0]; duplicadoTipo = 'Gerente de Zona'; }
-      if (duplicado) {
-        var estado = duplicado.activo ? 'ACTIVO' : 'BAJA';
-        alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\n' +
-          'Tipo: ' + duplicadoTipo + '\n' +
-          'Nombre: ' + (duplicado.nombre || 'N/A') + '\n' +
-          'Codigo: ' + (duplicado.codigo || 'N/A') + '\n' +
-          'DNI: ' + (duplicado.dni || 'N/A') + '\n' +
-          'Fecha Nacimiento: ' + (duplicado.fecha_nacimiento || 'N/A') + '\n' +
-          'Estado: ' + estado);
-        err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + duplicadoTipo + ' (' + estado + ').';
-        return;
-      }
-    } catch(dniErr) { console.warn('Error validando DNI:', dniErr); }
-  }
+  /* DNI uniqueness validation across ALL tables */
+  try {
+    var dniEncoded = encodeURIComponent(dni);
+    var dniVend = await api('/rest/v1/vendedoras?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_ingreso,activo');
+    var dniCoord = await api('/rest/v1/coordinadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var dniGer = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,fecha_nacimiento,activo');
+    var dniLog = await api('/rest/v1/logistica_operadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,dni,activo');
+    var duplicado = null;
+    var duplicadoTipo = '';
+    if (dniVend && dniVend.length) { duplicado = dniVend[0]; duplicadoTipo = 'Vendedora'; }
+    else if (dniCoord && dniCoord.length) { duplicado = dniCoord[0]; duplicadoTipo = 'Coordinador'; }
+    else if (dniGer && dniGer.length) { duplicado = dniGer[0]; duplicadoTipo = 'Gerente de Zona'; }
+    else if (dniLog && dniLog.length) { duplicado = dniLog[0]; duplicadoTipo = 'Operador Log\u00edstico'; }
+    if (duplicado) {
+      var estado = duplicado.activo ? 'ACTIVO' : 'BAJA';
+      alert('DNI DUPLICADO - Esta persona ya existe en el sistema:\n\n' +
+        'Tipo: ' + duplicadoTipo + '\n' +
+        'Nombre: ' + (duplicado.nombre || 'N/A') + '\n' +
+        'Codigo: ' + (duplicado.codigo || 'N/A') + '\n' +
+        'DNI: ' + (duplicado.dni || 'N/A') + '\n' +
+        'Estado: ' + estado);
+      err.textContent = 'No se puede registrar: el DNI ' + dni + ' ya existe como ' + duplicadoTipo + ' (' + estado + ').';
+      return;
+    }
+  } catch(dniErr) { console.warn('Error validando DNI:', dniErr); }
 
-  // Auto-get ALL municipios of the selected department
+  /* Auto-get ALL municipios of the selected department */
   var allMunis = await api('/rest/v1/municipios?departamento_id=eq.' + deptoId + '&select=id');
   var municipiosSeleccionados = (allMunis && !allMunis.error) ? allMunis.map(function(m){ return m.id; }) : [];
   if (!municipiosSeleccionados.length) { err.textContent = 'No se encontraron municipios para este departamento.'; return; }
 
   try {
-    // 1. Generate sequential code from 301201+ (shared across vendedoras, coordinadores, gerentes_zona)
     var codigo = await getNextSequentialCode();
-
-    // 2. Create zona (generate a unique zona code)
     var zonaCodigo = 'Z-' + codigo;
     var zonaData = await apiPost('/rest/v1/zonas', {
       nombre: zonaNombre,
@@ -848,7 +895,6 @@ async function guardarGerenteZona() {
     });
     var zonaId = zonaData[0].id;
 
-    // 3. Insert zonas_municipios
     var zmData = municipiosSeleccionados.map(function(mId) {
       return { zona_id: zonaId, municipio_id: mId };
     });
@@ -856,7 +902,6 @@ async function guardarGerenteZona() {
       method: 'POST', headers: HJ, body: JSON.stringify(zmData)
     });
 
-    // 4. Create gerente_zona
     var gzData = await apiPost('/rest/v1/gerentes_zona', {
       codigo: codigo,
       nombre: nombre,
@@ -876,24 +921,15 @@ async function guardarGerenteZona() {
       activo: true
     });
 
-    // 5. Create 14 sectores for this gerente
     var gerenteId = gzData[0].id;
 
-    // Upload documents
+    /* Upload documents */
     var archivoDni = '', archivoCuenta = '', archivoExtra = '';
-    async function uploadDoc(file, folder) {
-      var ext = file.name.split('.').pop();
-      var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
-      var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
-        method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
-      });
-      return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
-    }
-    if (fileDni) archivoDni = await uploadDoc(fileDni, 'altas/gz-' + codigo);
-    if (fileCuenta) archivoCuenta = await uploadDoc(fileCuenta, 'altas/gz-' + codigo);
-    if (fileExtra) archivoExtra = await uploadDoc(fileExtra, 'altas/gz-' + codigo);
+    if (fileDni) archivoDni = await uploadFile(fileDni, 'altas/gz-' + codigo);
+    if (fileCuenta) archivoCuenta = await uploadFile(fileCuenta, 'altas/gz-' + codigo);
+    if (fileExtra) archivoExtra = await uploadFile(fileExtra, 'altas/gz-' + codigo);
 
-    // Save registro de alta
+    /* Save registro de alta */
     var deptoSelect = document.getElementById('gzDepto');
     var deptoName = deptoSelect.options[deptoSelect.selectedIndex] ? deptoSelect.options[deptoSelect.selectedIndex].text : '';
     await fetch(SB + '/rest/v1/registros_alta', {
@@ -910,20 +946,17 @@ async function guardarGerenteZona() {
       })
     }).catch(function(e){ console.warn('registro_alta:', e); });
 
+    /* Create 14 sectores */
     var sectoresData = [];
     for (var s = 1; s <= 14; s++) {
-      sectoresData.push({
-        gerente_id: gerenteId,
-        numero_sector: s,
-        activo: true
-      });
+      sectoresData.push({ gerente_id: gerenteId, numero_sector: s, activo: true });
     }
     await fetch(SB + '/rest/v1/sectores', {
       method: 'POST', headers: HJ, body: JSON.stringify(sectoresData)
     });
 
     suc.textContent = 'Gerente de zona creado exitosamente. C\u00f3digo: ' + codigo;
-    // Send welcome email
+
     if (email) {
       var deptoNombre = '';
       var deptoSel = document.getElementById('gzDepto');
@@ -951,15 +984,16 @@ async function changeGzPw(id) {
 }
 
 async function bajaGerente(id) {
-  if (!confirm('\u00bfDar de baja a este gerente de zona? Los datos se conservar\u00e1n.')) return;
-  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, fecha_baja: new Date().toISOString().split('T')[0] });
+  var motivo = prompt('Motivo de baja:');
+  if (motivo === null) return;
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: false, fecha_baja: new Date().toISOString().split('T')[0], motivo_baja: motivo || 'Sin motivo' });
   loadGerentesZona();
 }
 
 async function altaGerente(id) {
   var activeCount = gerentes.filter(function(g){ return g.activo; }).length;
   if (activeCount >= 7) { alert('M\u00e1ximo 7 gerentes de zona activos.'); return; }
-  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true });
+  await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, { activo: true, fecha_baja: null, motivo_baja: null });
   loadGerentesZona();
 }
 
@@ -980,12 +1014,11 @@ async function openEditGZ(id) {
   document.getElementById('editFechaIngreso').value = g.fecha_ingreso || '';
   document.getElementById('editError').textContent = '';
   document.getElementById('editSuccess').textContent = '';
-  // Reset file inputs
   var fi1 = document.getElementById('editFileDni'); if(fi1) fi1.value = '';
   var fi2 = document.getElementById('editFileCuenta'); if(fi2) fi2.value = '';
   var fi3 = document.getElementById('editFileExtra'); if(fi3) fi3.value = '';
 
-  // Load current documents from registros_alta
+  /* Load current documents from registros_alta */
   var docsContainer = document.getElementById('editDocsCurrentContainer');
   docsContainer.innerHTML = '<p style="color:var(--gris);font-size:.75rem;">Cargando documentos...</p>';
   try {
@@ -1038,7 +1071,6 @@ async function saveEditGZ() {
   var g = gerentes.find(function(x){ return x.id === id; });
   if (!g) { errEl.textContent = 'Gerente no encontrado.'; return; }
 
-  // DNI, nombre, fecha_nacimiento are NOT editable after creation
   var body = {
     telefono: document.getElementById('editTelefono').value.trim(),
     email: document.getElementById('editEmail').value.trim() || null,
@@ -1056,36 +1088,26 @@ async function saveEditGZ() {
   try {
     await apiPatch('/rest/v1/gerentes_zona?id=eq.' + id, body);
 
-    // Handle file uploads (replace documents)
+    /* Handle file uploads (replace documents) */
     var fileDni = document.getElementById('editFileDni').files[0];
     var fileCuenta = document.getElementById('editFileCuenta').files[0];
     var fileExtra = document.getElementById('editFileExtra').files[0];
 
     if (fileDni || fileCuenta || fileExtra) {
-      async function uploadEditDoc(file, folder) {
-        var ext = file.name.split('.').pop();
-        var path = folder + '/' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
-        var r = await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
-          method: 'POST', headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file
-        });
-        return r.ok ? (SB + '/storage/v1/object/public/archivos-corporativos/' + path) : '';
-      }
-
       var updateDocs = {};
       if (fileDni) {
-        var newDniUrl = await uploadEditDoc(fileDni, 'altas/gz-' + g.codigo);
+        var newDniUrl = await uploadFile(fileDni, 'altas/gz-' + g.codigo);
         if (newDniUrl) updateDocs.archivo_dni = newDniUrl;
       }
       if (fileCuenta) {
-        var newCuentaUrl = await uploadEditDoc(fileCuenta, 'altas/gz-' + g.codigo);
+        var newCuentaUrl = await uploadFile(fileCuenta, 'altas/gz-' + g.codigo);
         if (newCuentaUrl) updateDocs.archivo_cuenta = newCuentaUrl;
       }
       if (fileExtra) {
-        var newExtraUrl = await uploadEditDoc(fileExtra, 'altas/gz-' + g.codigo);
+        var newExtraUrl = await uploadFile(fileExtra, 'altas/gz-' + g.codigo);
         if (newExtraUrl) updateDocs.archivo_extra = newExtraUrl;
       }
 
-      // Update registros_alta with new document URLs
       if (Object.keys(updateDocs).length) {
         await fetch(SB + '/rest/v1/registros_alta?codigo=eq.' + g.codigo + '&tipo=eq.gerente_zona', {
           method: 'PATCH', headers: HJ, body: JSON.stringify(updateDocs)
@@ -1093,14 +1115,14 @@ async function saveEditGZ() {
       }
     }
 
-    // Also update registros_alta basic data
+    /* Also update registros_alta basic data */
     await fetch(SB + '/rest/v1/registros_alta?codigo=eq.' + g.codigo + '&tipo=eq.gerente_zona', {
       method: 'PATCH', headers: HJ,
       body: JSON.stringify({
-        nombre: body.nombre, dni: body.dni, telefono: body.telefono,
+        telefono: body.telefono,
         email: body.email, direccion: body.direccion, rtn: body.rtn,
         numero_cuenta: body.numero_cuenta, nombre_banco: body.nombre_banco,
-        fecha_nacimiento: body.fecha_nacimiento, fecha_ingreso: body.fecha_ingreso
+        fecha_ingreso: body.fecha_ingreso
       })
     });
 
@@ -1113,9 +1135,9 @@ async function saveEditGZ() {
   }
 }
 
-/* ══════════════════════════════════════════
+/* ======================================================
    TAB 2: DASHBOARD POR CAMPANA
-   ══════════════════════════════════════════ */
+   ====================================================== */
 async function loadDashboard() {
   var campanaId = document.getElementById('dashCampana').value;
   var ano = document.getElementById('dashAno').value;
@@ -1162,21 +1184,18 @@ async function loadDashboard() {
     totalNombramientos++;
   });
 
-  // Stats cards
   document.getElementById('dashStats').innerHTML =
     '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Pedidos</div></div>' +
     '<div class="stat-card"><div class="stat-value">' + totalNombramientos + '</div><div class="stat-label">Nombramientos</div></div>' +
     '<div class="stat-card"><div class="stat-value">' + fmtL(totalBruta) + '</div><div class="stat-label">Venta Bruta</div></div>' +
     '<div class="stat-card"><div class="stat-value">' + fmtL(totalNeta) + '</div><div class="stat-label">Venta Neta</div></div>';
 
-  // Payments section
   var comisionDiv = totalNeta * 0.05;
   var totalNomina = comisionDiv;
   var rows = '';
   var gLabels = [], gVentas = [];
   Object.keys(gs).forEach(function(gId) {
     var s = gs[gId];
-    // Nombramientos payment: <20 = L220 each, >=20 = L320 each
     var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
     var comGZ = s.neta * 0.03;
     var base = 16000;
@@ -1191,7 +1210,6 @@ async function loadDashboard() {
   document.getElementById('dashTotalNomina').textContent = fmtL(totalNomina);
   document.getElementById('dashPaymentsSection').style.display = 'block';
 
-  // Charts
   renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano);
 }
 
@@ -1200,7 +1218,6 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
   campanas.forEach(function(c){ if (c.id == campanaId) campNum = c.numero; });
   var idFilter = 'in.(' + gerenteIds.join(',') + ')';
 
-  // Comparison: 2 previous + current
   var prevCamps = campanas.filter(function(c){ return c.numero < campNum; }).sort(function(a,b){ return b.numero - a.numero; }).slice(0, 2).reverse();
   var compareCamps = prevCamps.concat(campanas.filter(function(c){ return c.numero === campNum; }));
 
@@ -1220,7 +1237,6 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
 
-  // Distribution doughnut
   if (chartDistribucion) chartDistribucion.destroy();
   var colors = ['#CBAA63','#1C1C1C','#888','#c0392b','#27ae60','#2980b9','#8e44ad'];
   chartDistribucion = new Chart(document.getElementById('chartDistribucion'), {
@@ -1229,7 +1245,6 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
   });
 
-  // Tendencia line - all campaigns
   var tLabels = [], tVentas = [];
   for (var j = 0; j < campanas.length; j++) {
     var camp = campanas[j];
@@ -1247,24 +1262,24 @@ async function renderDashCharts(campanaId, gLabels, gVentas, gerenteIds, ano) {
   });
 }
 
-/* ══════════════════════════════════════════
-   TAB 3: MENSAJERIA CON GERENCIA GENERAL
-   ══════════════════════════════════════════ */
-function previewAdminFotos(input) {
+/* ======================================================
+   TAB 3: MENSAJERIA GENERAL (broadcast to all GZ)
+   ====================================================== */
+function previewGeneralFotos(input) {
   var files = Array.from(input.files).slice(0, 2);
-  adminFotoFiles = files;
-  var preview = document.getElementById('adminFotosPreview');
+  generalFotoFiles = files;
+  var preview = document.getElementById('generalFotosPreview');
   preview.innerHTML = '';
   files.forEach(function(f) {
     var url = URL.createObjectURL(f);
     preview.innerHTML += '<img src="' + url + '" style="max-height:36px;border-radius:4px;"/>';
   });
-  if (input.files.length > 2) document.getElementById('adminMsgError').textContent = 'M\u00e1ximo 2 fotos.';
+  if (input.files.length > 2) document.getElementById('generalMsgError').textContent = 'M\u00e1ximo 2 fotos.';
 }
 
-async function enviarMsgAdmin() {
-  var texto = document.getElementById('adminTexto').value.trim();
-  var errEl = document.getElementById('adminMsgError');
+async function enviarMsgGeneral() {
+  var texto = document.getElementById('generalTexto').value.trim();
+  var errEl = document.getElementById('generalMsgError');
   errEl.textContent = '';
   if (!texto) { errEl.textContent = 'Escriba un mensaje.'; return; }
 
@@ -1276,8 +1291,8 @@ async function enviarMsgAdmin() {
     });
     var msgId = msg[0].id;
 
-    for (var i = 0; i < adminFotoFiles.length; i++) {
-      var file = adminFotoFiles[i];
+    for (var i = 0; i < generalFotoFiles.length; i++) {
+      var file = generalFotoFiles[i];
       var ext = file.name.split('.').pop();
       var path = 'mensajes/' + msgId + '/' + (i + 1) + '.' + ext;
       await fetch(SB + '/storage/v1/object/archivos-corporativos/' + path, {
@@ -1289,18 +1304,18 @@ async function enviarMsgAdmin() {
       await apiPost('/rest/v1/mensajes_divisional_fotos', { mensaje_id: msgId, url_foto: publicUrl });
     }
 
-    document.getElementById('adminTexto').value = '';
-    document.getElementById('adminFotosPreview').innerHTML = '';
-    document.getElementById('adminFotos').value = '';
-    adminFotoFiles = [];
-    loadMsgAdmin();
+    document.getElementById('generalTexto').value = '';
+    document.getElementById('generalFotosPreview').innerHTML = '';
+    document.getElementById('generalFotos').value = '';
+    generalFotoFiles = [];
+    loadMsgGeneral();
   } catch(e) {
     errEl.textContent = e.message || 'Error al enviar mensaje.';
     console.error(e);
   }
 }
 
-async function loadMsgAdmin() {
+async function loadMsgGeneral() {
   var mensajes = [];
   try {
     mensajes = await api('/rest/v1/mensajes_divisional?gerencia_divisional_id=eq.' + session.id + '&select=*,mensajes_divisional_fotos(*)&order=created_at.asc');
@@ -1310,17 +1325,33 @@ async function loadMsgAdmin() {
     }
   } catch(e) { mensajes = []; }
 
-  var feed = document.getElementById('chatAdminFeed');
+  /* Load heart reactions for all messages */
+  var msgIds = mensajes.map(function(m){ return m.id; });
+  var reacciones = [];
+  if (msgIds.length) {
+    try {
+      reacciones = await api('/rest/v1/mensajes_divisional_reacciones?mensaje_id=in.(' + msgIds.join(',') + ')&select=*');
+      if (!reacciones || reacciones.error) reacciones = [];
+    } catch(e) { reacciones = []; }
+  }
+
+  /* Map reactions by message */
+  var reaccionMap = {};
+  reacciones.forEach(function(r) {
+    if (!reaccionMap[r.mensaje_id]) reaccionMap[r.mensaje_id] = [];
+    reaccionMap[r.mensaje_id].push(r);
+  });
+
+  var feed = document.getElementById('chatGeneralFeed');
   if (!mensajes.length) {
-    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a\u00fan. Inicie la conversaci\u00f3n con Gerencia General.</p>';
+    feed.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay mensajes a\u00fan. Escriba un mensaje para todos sus Gerentes de Zona.</p>';
     return;
   }
 
-  var prevLen = feed.children.length;
   feed.innerHTML = mensajes.filter(function(m){ return !m.eliminado; }).map(function(m) {
     var isMe = (m.emisor === 'DIVISIONAL');
     var cls = isMe ? 'right' : 'left';
-    var sender = isMe ? 'T\u00fa' : 'Gerencia General';
+    var sender = isMe ? 'T\u00fa (Divisional)' : (m.emisor_nombre || 'Gerente de Zona');
     var fotosHtml = '';
     if (m.mensajes_divisional_fotos && m.mensajes_divisional_fotos.length) {
       fotosHtml = '<div class="chat-photos">' + m.mensajes_divisional_fotos.map(function(f) {
@@ -1328,23 +1359,34 @@ async function loadMsgAdmin() {
       }).join('') + '</div>';
     }
     var fecha = new Date(m.created_at).toLocaleString('es-HN');
-    var deleteBtn = isMe ? '<button onclick="eliminarMsgAdmin(\'' + m.id + '\')" style="background:none;border:none;color:var(--gris);font-size:0.6rem;cursor:pointer;padding:2px 6px;opacity:0.6;float:right;" title="Eliminar para todos">&times; Eliminar</button>' : '';
-    return '<div class="chat-bubble ' + cls + '">' + deleteBtn + '<div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + '<div class="chat-time">' + fecha + '</div></div>';
+    var deleteBtn = isMe ? '<button onclick="eliminarMsgGeneral(\'' + m.id + '\')" style="background:none;border:none;color:var(--gris);font-size:0.6rem;cursor:pointer;padding:2px 6px;opacity:0.6;float:right;" title="Eliminar para todos">&times; Eliminar</button>' : '';
+
+    /* Heart reactions */
+    var hearts = reaccionMap[m.id] || [];
+    var heartCount = hearts.length;
+    var heartNames = hearts.map(function(h){ return h.nombre_gerente || 'GZ'; }).join(', ');
+    var heartsHtml = '<div style="margin-top:4px;display:flex;align-items:center;gap:4px;">';
+    heartsHtml += '<span style="font-size:0.75rem;color:#e74c3c;" title="' + esc(heartNames) + '">';
+    if (heartCount > 0) heartsHtml += '&#10084; ' + heartCount;
+    else heartsHtml += '<span style="opacity:0.3;">&#10084;</span>';
+    heartsHtml += '</span></div>';
+
+    return '<div class="chat-bubble ' + cls + '">' + deleteBtn + '<div class="chat-sender">' + sender + '</div>' + esc(m.texto).replace(/\n/g,'<br>') + fotosHtml + heartsHtml + '<div class="chat-time">' + fecha + '</div></div>';
   }).join('');
   feed.scrollTop = feed.scrollHeight;
 }
 
-async function eliminarMsgAdmin(msgId) {
+async function eliminarMsgGeneral(msgId) {
   if (!confirm('\u00bfEliminar este mensaje para todos?')) return;
   try {
     await apiPatch('/rest/v1/mensajes_divisional?id=eq.' + msgId, { eliminado: true });
-    loadMsgAdmin();
+    loadMsgGeneral();
   } catch(e) { alert('Error al eliminar: ' + (e.message || e)); }
 }
 
-/* ══════════════════════════════════════════
-   TAB 4: MENSAJERIA CON GERENTES DE ZONA
-   ══════════════════════════════════════════ */
+/* ======================================================
+   TAB 4: MENSAJERIA CON GERENTES DE ZONA (private)
+   ====================================================== */
 function renderZonaList() {
   var panel = document.getElementById('zonaListPanel');
   if (!gerentes.length) {
@@ -1466,9 +1508,9 @@ async function eliminarMsgZona(msgId) {
   } catch(e) { alert('Error al eliminar: ' + (e.message || e)); }
 }
 
-/* ══════════════════════════════════════════
+/* ======================================================
    TAB 5: COMISIONES Y PAGOS
-   ══════════════════════════════════════════ */
+   ====================================================== */
 async function loadComisiones() {
   var ano = document.getElementById('comAno').value;
   var campanaId = document.getElementById('comCampana').value;
@@ -1478,7 +1520,7 @@ async function loadComisiones() {
     document.getElementById('comDivTotal').textContent = 'L 0.00';
     document.getElementById('comNominaTotal').textContent = 'L 0.00';
     document.getElementById('comGrandTotal').textContent = 'L 0.00';
-    document.getElementById('comTable').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gris);">No hay gerentes de zona</td></tr>';
+    document.getElementById('comTable').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--gris);">No hay gerentes de zona</td></tr>';
     return;
   }
 
@@ -1494,6 +1536,22 @@ async function loadComisiones() {
   if (!pedidos || pedidos.error) pedidos = [];
   var nombramientos = await api(nombrQuery);
   if (!nombramientos || nombramientos.error) nombramientos = [];
+
+  /* Try to load from comisiones_gz / comisiones_divisional tables */
+  var comGzData = [];
+  var comDivData = [];
+  try {
+    var comGzQuery = '/rest/v1/comisiones_gz?gerente_zona_id=' + idFilter + '&ano=eq.' + ano;
+    var comDivQuery = '/rest/v1/comisiones_divisional?gerencia_divisional_id=eq.' + session.id + '&ano=eq.' + ano;
+    if (campanaId) {
+      comGzQuery += '&campana_id=eq.' + campanaId;
+      comDivQuery += '&campana_id=eq.' + campanaId;
+    }
+    comGzData = await api(comGzQuery);
+    if (!comGzData || comGzData.error) comGzData = [];
+    comDivData = await api(comDivQuery);
+    if (!comDivData || comDivData.error) comDivData = [];
+  } catch(e) { comGzData = []; comDivData = []; }
 
   var gs = {};
   gerentes.forEach(function(g) {
@@ -1511,6 +1569,13 @@ async function loadComisiones() {
   });
 
   var comDiv = totalNetaDiv * 0.05;
+  /* If comisiones_divisional has data, use it */
+  if (comDivData.length) {
+    var storedDiv = 0;
+    comDivData.forEach(function(cd){ storedDiv += parseFloat(cd.monto || 0); });
+    if (storedDiv > 0) comDiv = storedDiv;
+  }
+
   var totalNominaGZ = 0;
   var rows = '';
   var chartLabels = [], chartPagos = [];
@@ -1520,11 +1585,22 @@ async function loadComisiones() {
     var base = 16000;
     var pagoNombr = s.nombramientos < 20 ? s.nombramientos * 220 : s.nombramientos * 320;
     var comGZ = s.neta * 0.03;
-    var totalPagoGZ = base + pagoNombr + comGZ;
+    var rango = getRango(s.neta);
+    var bonoRango = rango.bono;
+    var totalPagoGZ = base + pagoNombr + comGZ + bonoRango;
+
+    /* If comisiones_gz has stored data for this GZ, use that total */
+    var storedGzCom = comGzData.filter(function(c){ return c.gerente_zona_id === gId; });
+    if (storedGzCom.length) {
+      var storedTotal = 0;
+      storedGzCom.forEach(function(sc){ storedTotal += parseFloat(sc.total_pago || 0); });
+      if (storedTotal > 0) totalPagoGZ = storedTotal;
+    }
+
     totalNominaGZ += totalPagoGZ;
     chartLabels.push(s.nombre);
     chartPagos.push(totalPagoGZ);
-    rows += '<tr><td>' + esc(s.nombre) + '</td><td>' + esc(s.zona) + '</td><td>' + fmtL(base) + '</td><td>' + s.nombramientos + '</td><td>' + fmtL(pagoNombr) + '</td><td>' + fmtL(comGZ) + '</td><td style="font-weight:600;color:var(--dorado);">' + fmtL(totalPagoGZ) + '</td></tr>';
+    rows += '<tr><td>' + esc(s.nombre) + '</td><td>' + esc(s.zona) + '</td><td>' + rangoBadgeHtml(rango) + '</td><td>' + fmtL(base) + '</td><td>' + s.nombramientos + '</td><td>' + fmtL(pagoNombr) + '</td><td>' + fmtL(comGZ) + '</td><td>' + fmtL(bonoRango) + '</td><td style="font-weight:600;color:var(--dorado);">' + fmtL(totalPagoGZ) + '</td></tr>';
   });
 
   var grandTotal = comDiv + totalNominaGZ;
@@ -1533,7 +1609,7 @@ async function loadComisiones() {
   document.getElementById('comGrandTotal').textContent = fmtL(grandTotal);
   document.getElementById('comTable').innerHTML = rows;
 
-  // Charts
+  /* Charts */
   if (chartComDist) chartComDist.destroy();
   chartComDist = new Chart(document.getElementById('chartComDist'), {
     type: 'doughnut',
@@ -1556,9 +1632,9 @@ async function loadComisiones() {
   });
 }
 
-/* ══════════════════════════════════════════
+/* ======================================================
    TAB 6: PEDIDOS DE MI DIVISION
-   ══════════════════════════════════════════ */
+   ====================================================== */
 var pedDivSelectorsInit = false;
 function initPedDivSelectors() {
   if (pedDivSelectorsInit) return;
@@ -1578,6 +1654,14 @@ function initPedDivSelectors() {
     opt.value = c.id; opt.textContent = 'Campa\u00f1a ' + c.numero;
     selC.appendChild(opt);
   });
+  /* GZ filter */
+  var selGZ = document.getElementById('pedDivGZ');
+  selGZ.innerHTML = '<option value="">Todos los GZ</option>';
+  gerentes.forEach(function(g) {
+    var opt = document.createElement('option');
+    opt.value = g.id; opt.textContent = esc(g.codigo) + ' - ' + g.nombre;
+    selGZ.appendChild(opt);
+  });
 }
 
 async function loadPedidosDiv() {
@@ -1590,8 +1674,10 @@ async function loadPedidosDiv() {
 
   var ano = document.getElementById('pedDivAno').value;
   var campanaId = document.getElementById('pedDivCampana').value;
+  var gzFilterId = document.getElementById('pedDivGZ').value;
 
-  var gerenteIds = gerentes.map(function(g){ return g.id; });
+  var filteredGerentes = gzFilterId ? gerentes.filter(function(g){ return g.id === gzFilterId; }) : gerentes;
+  var gerenteIds = filteredGerentes.map(function(g){ return g.id; });
   if (!gerenteIds.length) {
     statsEl.innerHTML = '<div class="stat-card"><div class="stat-label">No hay gerentes de zona</div></div>';
     container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:40px;">No hay gerentes de zona registrados para esta divisi\u00f3n.</p>';
@@ -1606,11 +1692,9 @@ async function loadPedidosDiv() {
     var pedidos = await api(pedidosQuery);
     if (!pedidos || pedidos.error) pedidos = [];
 
-    // Fetch all pedidos_detalle for these pedidos
     var pedidoIds = pedidos.map(function(p){ return p.id; });
     var detalles = [];
     if (pedidoIds.length) {
-      // Batch in groups of 50 to avoid URL length issues
       for (var batch = 0; batch < pedidoIds.length; batch += 50) {
         var batchIds = pedidoIds.slice(batch, batch + 50);
         var detQuery = '/rest/v1/pedidos_detalle?pedido_id=in.(' + batchIds.join(',') + ')&select=*';
@@ -1619,14 +1703,12 @@ async function loadPedidosDiv() {
       }
     }
 
-    // Map detalle by pedido_id
     var detalleMap = {};
     detalles.forEach(function(d) {
       if (!detalleMap[d.pedido_id]) detalleMap[d.pedido_id] = [];
       detalleMap[d.pedido_id].push(d);
     });
 
-    // Fetch vendedoras names for display
     var vendedoraIds = [];
     pedidos.forEach(function(p){ if (p.vendedora_id && vendedoraIds.indexOf(p.vendedora_id) === -1) vendedoraIds.push(p.vendedora_id); });
     var vendedoraMap = {};
@@ -1638,18 +1720,15 @@ async function loadPedidosDiv() {
       }
     }
 
-    // Fetch campanas map
     var campanaMap = {};
     campanas.forEach(function(c){ campanaMap[c.id] = c; });
 
-    // Group pedidos by gerente
     var pedidosByGZ = {};
     pedidos.forEach(function(p) {
       if (!pedidosByGZ[p.gerente_id]) pedidosByGZ[p.gerente_id] = [];
       pedidosByGZ[p.gerente_id].push(p);
     });
 
-    // Global aggregation
     var globalProductAgg = {};
     var totalPedidos = pedidos.length;
     var totalBruta = 0, totalNeta = 0, totalUnidades = 0;
@@ -1671,14 +1750,13 @@ async function loadPedidosDiv() {
       });
     });
 
-    // Stats
     statsEl.innerHTML =
       '<div class="stat-card"><div class="stat-value">' + totalPedidos + '</div><div class="stat-label">Pedidos</div></div>' +
       '<div class="stat-card"><div class="stat-value">' + totalUnidades.toLocaleString('es-HN') + '</div><div class="stat-label">Unidades</div></div>' +
       '<div class="stat-card"><div class="stat-value">' + fmtL(totalBruta) + '</div><div class="stat-label">Venta Bruta</div></div>' +
       '<div class="stat-card"><div class="stat-value">' + fmtL(totalNeta) + '</div><div class="stat-label">Venta Neta (-15%)</div></div>';
 
-    // Global product summary
+    /* Global product summary */
     var globalProds = Object.values(globalProductAgg);
     globalProds.sort(function(a, b) { return b.cantidad - a.cantidad; });
     if (globalProds.length) {
@@ -1695,9 +1773,9 @@ async function loadPedidosDiv() {
       resumenBody.innerHTML = resHtml;
     }
 
-    // Render orders grouped by GZ
+    /* Render orders grouped by GZ */
     var html = '';
-    gerentes.forEach(function(gz) {
+    filteredGerentes.forEach(function(gz) {
       var gzPedidos = pedidosByGZ[gz.id] || [];
       var zonaNombre = gz._zona ? gz._zona.nombre : '-';
       var gzBruta = 0, gzNeta = 0, gzUnidades = 0;
@@ -1761,7 +1839,7 @@ async function loadPedidosDiv() {
           html += '</div>';
         });
 
-        // GZ product aggregation
+        /* GZ product aggregation */
         var gzAgg = {};
         gzPedidos.forEach(function(p) {
           var items = detalleMap[p.id] || [];
@@ -1798,9 +1876,9 @@ async function loadPedidosDiv() {
   }
 }
 
-/* ══════════════════════════════════════════
-   TAB 7: LOGISTICA - CRUD OPERADORES
-   ══════════════════════════════════════════ */
+/* ======================================================
+   TAB 7: LOGISTICA - CRUD OPERADORES + DELIVERY STATUS
+   ====================================================== */
 async function loadOperadoresLog() {
   var container = document.getElementById('listaLog');
   try {
@@ -1815,17 +1893,23 @@ async function loadOperadoresLog() {
       var acciones = o.activo ?
         '<button class="btn btn-sm btn-danger" onclick="bajaOperadorLog(\'' + o.id + '\')">Baja</button>' :
         '<button class="btn btn-sm" onclick="altaOperadorLog(\'' + o.id + '\')">Alta</button>';
+      var pwVal = esc(o.password_temporal || '-');
+      var pwField = '<div style="display:flex;gap:4px;align-items:center;">' +
+        '<input type="text" id="logPw_' + o.id + '" value="' + pwVal + '" style="width:80px;padding:4px 6px;border:1px solid var(--borde);font-size:0.72rem;background:var(--marfil);"/>' +
+        '<button class="btn btn-sm" style="padding:3px 6px;font-size:0.5rem;" onclick="changeLogPw(\'' + o.id + '\')">OK</button></div>';
       return '<tr>' +
         '<td style="color:var(--dorado);font-weight:600;">' + esc(o.codigo) + '</td>' +
         '<td>' + esc(o.nombre) + '</td>' +
+        '<td>' + esc(o.dni || '-') + '</td>' +
         '<td>' + esc(o.telefono || '-') + '</td>' +
         '<td>' + esc(o.email || '-') + '</td>' +
+        '<td>' + esc(o.direccion || '-') + '</td>' +
         '<td>' + (o.porcentaje_comision || 0) + '%</td>' +
-        '<td>' + esc(o.password_temporal || '-') + '</td>' +
+        '<td>' + pwField + '</td>' +
         '<td>' + estado + '</td>' +
         '<td>' + acciones + '</td></tr>';
     }).join('');
-    container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>Tel\u00e9fono</th><th>Email</th><th>Comisi\u00f3n</th><th>Contrase\u00f1a</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Nombre</th><th>DNI</th><th>Tel\u00e9fono</th><th>Email</th><th>Direcci\u00f3n</th><th>Comisi\u00f3n</th><th>Contrase\u00f1a</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
   } catch(e) {
     container.innerHTML = '<p style="color:var(--danger);">Error al cargar operadores.</p>';
   }
@@ -1845,8 +1929,27 @@ async function guardarOperadorLog() {
   if (!nombre || !telefono || !password) { err.textContent = 'Nombre, tel\u00e9fono y contrase\u00f1a son obligatorios.'; return; }
   if (password.length < 6) { err.textContent = 'La contrase\u00f1a debe tener al menos 6 caracteres.'; return; }
 
+  /* DNI uniqueness check if DNI provided */
+  if (dni) {
+    try {
+      var dniEncoded = encodeURIComponent(dni);
+      var dniVend = await api('/rest/v1/vendedoras?dni=eq.' + dniEncoded + '&select=nombre,codigo,activo');
+      var dniCoord = await api('/rest/v1/coordinadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,activo');
+      var dniGer = await api('/rest/v1/gerentes_zona?dni=eq.' + dniEncoded + '&select=nombre,codigo,activo');
+      var dniLog = await api('/rest/v1/logistica_operadores?dni=eq.' + dniEncoded + '&select=nombre,codigo,activo');
+      var dup = null, dupTipo = '';
+      if (dniVend && dniVend.length) { dup = dniVend[0]; dupTipo = 'Vendedora'; }
+      else if (dniCoord && dniCoord.length) { dup = dniCoord[0]; dupTipo = 'Coordinador'; }
+      else if (dniGer && dniGer.length) { dup = dniGer[0]; dupTipo = 'Gerente de Zona'; }
+      else if (dniLog && dniLog.length) { dup = dniLog[0]; dupTipo = 'Operador Log\u00edstico'; }
+      if (dup) {
+        err.textContent = 'DNI duplicado: ya existe como ' + dupTipo + ' (' + (dup.nombre || '') + ' - ' + (dup.codigo || '') + ').';
+        return;
+      }
+    } catch(e2) { console.warn('Error validando DNI log:', e2); }
+  }
+
   try {
-    // Generate sequential code (same sequence as all professionals)
     var codigo = await getNextSequentialCode();
     await apiPost('/rest/v1/logistica_operadores', {
       codigo: codigo, nombre: nombre, dni: dni || null, telefono: telefono,
@@ -1868,6 +1971,14 @@ async function guardarOperadorLog() {
   }
 }
 
+async function changeLogPw(id) {
+  var input = document.getElementById('logPw_' + id);
+  var newPw = input ? input.value.trim() : '';
+  if (!newPw || newPw.length < 6) { alert('La contrase\u00f1a debe tener al menos 6 caracteres.'); return; }
+  await apiPatch('/rest/v1/logistica_operadores?id=eq.' + id, { password_temporal: newPw });
+  alert('Contrase\u00f1a actualizada.');
+}
+
 async function bajaOperadorLog(id) {
   if (!confirm('\u00bfDar de baja al operador log\u00edstico?')) return;
   await apiPatch('/rest/v1/logistica_operadores?id=eq.' + id, { activo: false });
@@ -1877,6 +1988,236 @@ async function bajaOperadorLog(id) {
 async function altaOperadorLog(id) {
   await apiPatch('/rest/v1/logistica_operadores?id=eq.' + id, { activo: true });
   loadOperadoresLog();
+}
+
+/* Delivery status view */
+async function loadEntregasStatus() {
+  var container = document.getElementById('logEntregasContent');
+  container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;font-size:.8rem;">Cargando...</p>';
+  try {
+    var gerenteIds = gerentes.map(function(g){ return g.id; });
+    if (!gerenteIds.length) {
+      container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay gerentes de zona para ver entregas.</p>';
+      return;
+    }
+    var idFilter = 'in.(' + gerenteIds.join(',') + ')';
+    var entregas = await api('/rest/v1/entregas?gerente_id=' + idFilter + '&order=created_at.desc&limit=50');
+    if (!entregas || entregas.error || !entregas.length) {
+      container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No hay entregas registradas a\u00fan.</p>';
+      return;
+    }
+
+    /* Load operator names */
+    var opIds = [];
+    entregas.forEach(function(e){ if (e.operador_id && opIds.indexOf(e.operador_id) === -1) opIds.push(e.operador_id); });
+    var opMap = {};
+    if (opIds.length) {
+      var opRes = await api('/rest/v1/logistica_operadores?id=in.(' + opIds.join(',') + ')&select=id,nombre,codigo');
+      if (opRes && !opRes.error) opRes.forEach(function(o){ opMap[o.id] = o; });
+    }
+
+    var gerenteMap = {};
+    gerentes.forEach(function(g){ gerenteMap[g.id] = g; });
+
+    var rows = entregas.map(function(e) {
+      var op = opMap[e.operador_id] || {};
+      var gz = gerenteMap[e.gerente_id] || {};
+      var estadoColor = e.estado === 'entregado' ? 'var(--success)' : (e.estado === 'en_ruta' ? 'var(--dorado)' : 'var(--gris)');
+      return '<tr>' +
+        '<td>' + esc(e.codigo_entrega || '-') + '</td>' +
+        '<td>' + esc(op.nombre || '-') + '</td>' +
+        '<td>' + esc(gz.nombre || '-') + '</td>' +
+        '<td style="color:' + estadoColor + ';font-weight:600;text-transform:uppercase;font-size:.7rem;">' + esc(e.estado || 'pendiente') + '</td>' +
+        '<td>' + (e.created_at ? e.created_at.split('T')[0] : '-') + '</td>' +
+        '<td>' + (e.fecha_entrega ? e.fecha_entrega.split('T')[0] : '-') + '</td>' +
+        '</tr>';
+    }).join('');
+    container.innerHTML = '<div style="overflow-x:auto;"><table><thead><tr><th>C\u00f3digo</th><th>Operador</th><th>Gerente Zona</th><th>Estado</th><th>Creado</th><th>Entregado</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">No se pudieron cargar las entregas.</p>';
+    console.warn('entregas error:', e);
+  }
+}
+
+/* ======================================================
+   TAB 8: BAJAS / CONSULTAS
+   ====================================================== */
+async function buscarBaja() {
+  var termino = document.getElementById('bajaBuscar').value.trim();
+  var errEl = document.getElementById('bajaError');
+  var resultado = document.getElementById('bajaResultado');
+  errEl.textContent = '';
+  resultado.innerHTML = '';
+
+  if (!termino) { errEl.textContent = 'Ingrese un DNI o c\u00f3digo para buscar.'; return; }
+
+  resultado.innerHTML = '<p style="color:var(--gris);text-align:center;padding:20px;">Buscando...</p>';
+
+  var terminoEnc = encodeURIComponent(termino);
+  var found = [];
+
+  try {
+    /* Search vendedoras */
+    var v1 = await api('/rest/v1/vendedoras?dni=eq.' + terminoEnc + '&select=*');
+    var v2 = await api('/rest/v1/vendedoras?codigo=eq.' + terminoEnc + '&select=*');
+    var vendedoras = [];
+    if (v1 && !v1.error) vendedoras = vendedoras.concat(v1);
+    if (v2 && !v2.error) v2.forEach(function(v){ if (!vendedoras.find(function(x){ return x.id === v.id; })) vendedoras.push(v); });
+    vendedoras.forEach(function(v){ found.push({ tipo: 'Vendedora', data: v }); });
+
+    /* Search coordinadores */
+    var c1 = await api('/rest/v1/coordinadores?dni=eq.' + terminoEnc + '&select=*');
+    var c2 = await api('/rest/v1/coordinadores?codigo=eq.' + terminoEnc + '&select=*');
+    var coords = [];
+    if (c1 && !c1.error) coords = coords.concat(c1);
+    if (c2 && !c2.error) c2.forEach(function(c){ if (!coords.find(function(x){ return x.id === c.id; })) coords.push(c); });
+    coords.forEach(function(c){ found.push({ tipo: 'Coordinador', data: c }); });
+
+    /* Search gerentes_zona */
+    var g1 = await api('/rest/v1/gerentes_zona?dni=eq.' + terminoEnc + '&select=*');
+    var g2 = await api('/rest/v1/gerentes_zona?codigo=eq.' + terminoEnc + '&select=*');
+    var gzs = [];
+    if (g1 && !g1.error) gzs = gzs.concat(g1);
+    if (g2 && !g2.error) g2.forEach(function(g){ if (!gzs.find(function(x){ return x.id === g.id; })) gzs.push(g); });
+    gzs.forEach(function(g){ found.push({ tipo: 'Gerente de Zona', data: g }); });
+
+    /* Search logistica_operadores */
+    var l1 = await api('/rest/v1/logistica_operadores?dni=eq.' + terminoEnc + '&select=*');
+    var l2 = await api('/rest/v1/logistica_operadores?codigo=eq.' + terminoEnc + '&select=*');
+    var logs = [];
+    if (l1 && !l1.error) logs = logs.concat(l1);
+    if (l2 && !l2.error) l2.forEach(function(l){ if (!logs.find(function(x){ return x.id === l.id; })) logs.push(l); });
+    logs.forEach(function(l){ found.push({ tipo: 'Operador Log\u00edstico', data: l }); });
+  } catch(e) {
+    errEl.textContent = 'Error al buscar: ' + (e.message || e);
+    return;
+  }
+
+  if (!found.length) {
+    resultado.innerHTML = '<div class="card" style="text-align:center;color:var(--gris);padding:30px;">No se encontr\u00f3 ninguna persona con DNI o c\u00f3digo "' + esc(termino) + '"</div>';
+    return;
+  }
+
+  var html = '';
+  found.forEach(function(item) {
+    var d = item.data;
+    var estadoBadge = d.activo ? '<span class="badge badge-active">Activo</span>' : '<span class="badge badge-inactive">Inactivo / Baja</span>';
+
+    html += '<div class="card" style="margin-bottom:16px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">';
+    html += '<div><span style="font-family:\'Cinzel\',serif;font-size:1rem;color:var(--dorado);letter-spacing:.1em;">' + esc(item.tipo) + '</span> ' + estadoBadge + '</div>';
+    if (d.activo) {
+      html += '<button class="btn btn-danger btn-sm" onclick="darDeBaja(\'' + esc(item.tipo) + '\',\'' + d.id + '\')">Dar de Baja</button>';
+    }
+    html += '</div>';
+
+    html += '<div class="form-grid" style="gap:12px;">';
+    var fields = [
+      ['C\u00f3digo', d.codigo],
+      ['Nombre', d.nombre],
+      ['DNI', d.dni],
+      ['Tel\u00e9fono', d.telefono],
+      ['Email', d.email],
+      ['Fecha Nacimiento', d.fecha_nacimiento],
+      ['N\u00famero Cuenta', d.numero_cuenta],
+      ['Banco', d.nombre_banco],
+      ['RTN', d.rtn],
+      ['Direcci\u00f3n', d.direccion],
+      ['Fecha Ingreso', d.fecha_ingreso],
+      ['Fecha Baja', d.fecha_baja],
+      ['Motivo Baja', d.motivo_baja],
+      ['Contrase\u00f1a', d.password_temporal]
+    ];
+    fields.forEach(function(f) {
+      if (f[1]) {
+        html += '<div style="font-size:.8rem;"><span style="font-size:.65rem;color:var(--gris);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:2px;">' + f[0] + '</span><strong>' + esc(String(f[1])) + '</strong></div>';
+      }
+    });
+    html += '</div>';
+
+    /* Load documents if available */
+    html += '<div id="bajaDocs_' + d.id + '" style="margin-top:12px;"></div>';
+
+    html += '</div>';
+  });
+
+  resultado.innerHTML = html;
+
+  /* Load documents for each found person */
+  found.forEach(function(item) {
+    var d = item.data;
+    if (d.codigo) {
+      loadBajaDocs(d.id, d.codigo, item.tipo);
+    }
+  });
+}
+
+async function loadBajaDocs(personId, codigo, tipo) {
+  var container = document.getElementById('bajaDocs_' + personId);
+  if (!container) return;
+  try {
+    var tipoMap = { 'Vendedora': 'vendedora', 'Coordinador': 'coordinador', 'Gerente de Zona': 'gerente_zona', 'Operador Log\u00edstico': 'logistica_operador' };
+    var tipoDb = tipoMap[tipo] || '';
+    var registros = [];
+    if (tipoDb) {
+      registros = await api('/rest/v1/registros_alta?codigo=eq.' + codigo + '&tipo=eq.' + tipoDb + '&select=archivo_dni,archivo_cuenta,archivo_extra&order=created_at.desc&limit=1');
+    }
+    if (!registros || registros.error || !registros.length) {
+      container.innerHTML = '';
+      return;
+    }
+    var reg = registros[0];
+    var docHtml = '<div style="font-size:.7rem;color:var(--dorado);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;">Documentos de Alta</div>';
+    docHtml += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+    if (reg.archivo_dni) {
+      var isPdf = reg.archivo_dni.toLowerCase().endsWith('.pdf');
+      docHtml += isPdf ? '<a href="' + reg.archivo_dni + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; DNI (PDF)</a>' :
+        '<img src="' + reg.archivo_dni + '" style="max-width:120px;max-height:90px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)" title="DNI"/>';
+    }
+    if (reg.archivo_cuenta) {
+      var isPdf2 = reg.archivo_cuenta.toLowerCase().endsWith('.pdf');
+      docHtml += isPdf2 ? '<a href="' + reg.archivo_cuenta + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Cuenta (PDF)</a>' :
+        '<img src="' + reg.archivo_cuenta + '" style="max-width:120px;max-height:90px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)" title="Cuenta"/>';
+    }
+    if (reg.archivo_extra) {
+      var isPdf3 = reg.archivo_extra.toLowerCase().endsWith('.pdf');
+      docHtml += isPdf3 ? '<a href="' + reg.archivo_extra + '" target="_blank" style="color:var(--dorado);font-size:.75rem;">&#128196; Extra (PDF)</a>' :
+        '<img src="' + reg.archivo_extra + '" style="max-width:120px;max-height:90px;border:1px solid var(--borde);border-radius:4px;cursor:pointer;object-fit:cover;" onclick="window.open(this.src)" title="Extra"/>';
+    }
+    docHtml += '</div>';
+    container.innerHTML = docHtml;
+  } catch(e) {
+    container.innerHTML = '';
+  }
+}
+
+async function darDeBaja(tipo, id) {
+  var motivo = prompt('Motivo de la baja:');
+  if (motivo === null) return;
+  if (!motivo.trim()) { alert('Debe ingresar un motivo.'); return; }
+
+  var tableMap = {
+    'Vendedora': 'vendedoras',
+    'Coordinador': 'coordinadores',
+    'Gerente de Zona': 'gerentes_zona',
+    'Operador Log\u00edstico': 'logistica_operadores'
+  };
+  var table = tableMap[tipo];
+  if (!table) { alert('Tipo no reconocido.'); return; }
+
+  try {
+    await apiPatch('/rest/v1/' + table + '?id=eq.' + id, {
+      activo: false,
+      fecha_baja: new Date().toISOString().split('T')[0],
+      motivo_baja: motivo.trim()
+    });
+    alert('Baja registrada exitosamente.');
+    buscarBaja();
+    if (tipo === 'Gerente de Zona') loadGerentesZona();
+    if (tipo === 'Operador Log\u00edstico') loadOperadoresLog();
+  } catch(e) {
+    alert('Error al dar de baja: ' + (e.message || e));
+  }
 }
 
 /* ── Close modal on outside click ── */
