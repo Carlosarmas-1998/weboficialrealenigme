@@ -506,8 +506,9 @@
         <div id="bcDocs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
       </div>
 
-      <div id="bcBajaSection" style="margin-top:10px;">
-        <button class="btn btn-danger" id="bcBtnBaja" onclick="darBajaProfesional()">Dar de Baja</button>
+      <div id="bcBajaSection" style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-danger" id="bcBtnBaja" onclick="darBajaProfesional()" style="display:none;">Dar de Baja</button>
+        <button class="btn" id="bcBtnAlta" onclick="darAltaProfesional()" style="display:none;background:var(--success);border-color:var(--success);color:#fff;">&#10003; Dar de Alta</button>
       </div>
     </div>
   </div>
@@ -2209,13 +2210,19 @@ function renderBcResultado() {
   });
   document.getElementById('bcDatos').innerHTML = html;
 
-  // Show/hide baja button
+  // Mostrar botón según estado
   var bajaSection = document.getElementById('bcBajaSection');
+  var btnBaja = document.getElementById('bcBtnBaja');
+  var btnAlta = document.getElementById('bcBtnAlta');
+  bajaSection.style.display = 'flex';
   if (esActivo) {
-    bajaSection.style.display = 'block';
-    document.getElementById('bcBtnBaja').disabled = false;
+    btnBaja.style.display = 'inline-block';
+    btnBaja.disabled = false;
+    btnAlta.style.display = 'none';
   } else {
-    bajaSection.style.display = 'none';
+    btnBaja.style.display = 'none';
+    btnAlta.style.display = 'inline-block';
+    btnAlta.disabled = false;
   }
 
   // Load documents
@@ -2294,6 +2301,44 @@ async function darBajaProfesional() {
     if (bcFoundTable === 'gerentes_zona') loadGerentesZona();
   } catch(e) {
     document.getElementById('bcError').textContent = 'Error al procesar la baja: ' + (e.message || e.details || 'Error desconocido');
+    console.error(e);
+  }
+}
+
+async function darAltaProfesional() {
+  if (!bcFoundRecord || !bcFoundTable) return;
+  var nombre = bcFoundRecord.nombre || 'este profesional';
+  if (!confirm('\u00bfDar de ALTA a ' + nombre + '?\n\nSu cuenta quedar\u00e1 activa nuevamente.')) return;
+
+  try {
+    document.getElementById('bcBtnAlta').disabled = true;
+    document.getElementById('bcBtnAlta').textContent = 'Procesando...';
+
+    await apiPatch('/rest/v1/' + bcFoundTable + '?id=eq.' + bcFoundRecord.id, {
+      activo: true,
+      fecha_baja: null,
+      motivo_baja: null,
+      archivado: false
+    });
+
+    document.getElementById('bcSuccess').textContent = 'Alta procesada exitosamente para ' + nombre + '.';
+    document.getElementById('bcError').textContent = '';
+
+    // Actualizar registro en memoria y re-renderizar
+    var updated = await api('/rest/v1/' + bcFoundTable + '?id=eq.' + bcFoundRecord.id + '&select=*');
+    if (updated && updated.length && !updated.error) {
+      bcFoundRecord = updated[0];
+      renderBcResultado();
+    }
+
+    // Refrescar lista de gerentes si aplica
+    if (bcFoundTable === 'gerentes_zona') loadGerentesZona();
+    if (bcFoundTable === 'logistica_operadores') loadOperadoresLogistica();
+
+  } catch(e) {
+    document.getElementById('bcError').textContent = 'Error al procesar el alta: ' + (e.message || e.details || 'Error desconocido');
+    document.getElementById('bcBtnAlta').disabled = false;
+    document.getElementById('bcBtnAlta').textContent = '\u2713 Dar de Alta';
     console.error(e);
   }
 }
