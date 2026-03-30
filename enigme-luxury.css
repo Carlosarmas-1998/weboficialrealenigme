@@ -237,10 +237,53 @@ img, video, iframe {
 }
 
 /* ── BOTÓN CART en navbar ── */
-.btn-cart,
 .nav-link[href="carrito.html"],
 .nav-btn-carrito {
   color: var(--texte) !important;
+}
+
+/* ── BOTONES "Añadir a la Bolsa" y acción principal ── */
+.btn-cart {
+  background-color: var(--carbon) !important;
+  color: var(--dorado) !important;
+  border: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+.btn-cart:hover,
+.btn-cart.added {
+  background-color: var(--dorado) !important;
+  color: var(--carbon) !important;
+}
+
+/* ── BOTÓN "Añadir a la Bolsa" en página de producto ── */
+.btn-add-cart {
+  background: var(--carbon) !important;
+  color: var(--dorado) !important;
+}
+.btn-add-cart:hover {
+  background: var(--dorado) !important;
+  color: var(--carbon) !important;
+}
+
+/* ── BOTONES de checkout (carrito) ── */
+.btn-checkout.whatsapp {
+  background-color: var(--carbon) !important;
+  color: var(--dorado) !important;
+  border: 1px solid var(--carbon) !important;
+}
+.btn-checkout.whatsapp:hover {
+  background-color: var(--dorado) !important;
+  color: var(--carbon) !important;
+}
+.btn-checkout.stripe {
+  background-color: var(--blanc-casse) !important;
+  color: var(--carbon) !important;
+  border: 1px solid var(--carbon) !important;
+}
+.btn-checkout.stripe:hover {
+  background-color: var(--carbon) !important;
+  color: #FAFAF8 !important;
 }
 
 /* Botón CATÁLOGO en index (override del estilo inline) */
