@@ -693,6 +693,7 @@
       .dropdown.active .dropbtn svg { transform: rotate(180deg); }
     }
   </style>
+  <link rel="stylesheet" href="enigme-luxury.css">
 </head>
 <body>
 
@@ -1301,7 +1302,21 @@
       const urlParams = new URLSearchParams(window.location.search);
       const paymentSuccess = urlParams.get('payment_success');
       const paymentCancelled = urlParams.get('payment_cancelled');
-      const pendingOrder = localStorage.getItem('enigme_pending_order');
+      const pendingOrderRaw = localStorage.getItem('enigme_pending_order');
+
+      // Validar que el pedido pendiente no haya caducado (4 horas máx.)
+      let pendingOrder = pendingOrderRaw;
+      if (pendingOrderRaw) {
+        try {
+          const po = JSON.parse(pendingOrderRaw);
+          const MAX_AGE = 4 * 60 * 60 * 1000; // 4 horas
+          if (po.savedAt && (Date.now() - po.savedAt) > MAX_AGE) {
+            localStorage.removeItem('enigme_pending_order');
+            localStorage.removeItem('enigme_order_email_data');
+            pendingOrder = null;
+          }
+        } catch (e) { pendingOrder = null; }
+      }
 
       // Clean URL params
       if (paymentSuccess || paymentCancelled) {
@@ -1398,9 +1413,16 @@
         return;
       }
 
-      // No params but pending order exists (user closed Stripe tab without paying) - clean up silently
-      if (pendingOrder && !paymentSuccess) {
-        // Don't remove - user might still be paying in another tab
+      // Si hay pendingOrder pero no params de Stripe y ha pasado más de 30 min → limpiar
+      if (pendingOrder && !paymentSuccess && !paymentCancelled) {
+        try {
+          const po = JSON.parse(pendingOrder);
+          const STALE = 30 * 60 * 1000; // 30 minutos
+          if (po.savedAt && (Date.now() - po.savedAt) > STALE) {
+            localStorage.removeItem('enigme_pending_order');
+            localStorage.removeItem('enigme_order_email_data');
+          }
+        } catch (e) { localStorage.removeItem('enigme_pending_order'); }
       }
     }
     // ═══════════════════════════════════════════════════════
@@ -1957,11 +1979,12 @@
           })
         }).catch(() => {});
 
-        // 5. Save pending order for receipt on return
+        // 5. Save pending order for receipt on return (expira en 4 horas)
         localStorage.setItem('enigme_pending_order', JSON.stringify({
           orderId, nombre: data.nombre, moneda, displayTotal,
           items: orderItems, totalHNL, totalEUR,
-          stripe_session_id: checkoutData.sessionId
+          stripe_session_id: checkoutData.sessionId,
+          savedAt: Date.now()
         }));
         localStorage.setItem('enigme_last_order_id', orderId);
 

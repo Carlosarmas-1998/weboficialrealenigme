@@ -1,0 +1,1005 @@
+/* ═══════════════════════════════════════════════════════════════
+   ÈNIGME — LUXURY DESIGN SYSTEM
+   Estilo Maison de Luxe · Dior · Hermès · La Maison
+   Cargar DESPUÉS del <style> inline en cada HTML para override
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── FUENTES ── */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;500;600&family=Montserrat:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap');
+
+/* ── VARIABLES LUXURY ── */
+:root {
+  /* Paleta base Maison */
+  --noir:            #000000;
+  --noir-profond:    #080808;
+  --noir-doux:       #111111;
+  --blanc:           #FFFFFF;
+  --blanc-casse:     #FAFAF8;
+  --creme:           #F5F1EA;
+  --creme-fonce:     #EDE8DF;
+
+  /* Or profond — más sofisticado que el amarillo */
+  --or:              #B8945A;
+  --or-chaud:        #CBAA63;
+  --or-pale:         #D4BB8C;
+  --or-brille:       #E8D090;
+  --or-oscuro:       #8C6E30;
+
+  /* Tipografía */
+  --texte:           #0A0A0A;
+  --texte-second:    #4A4A4A;
+  --texte-subtil:    #9A9A9A;
+  --texte-tres-subtil: #BABABA;
+
+  /* Líneas y bordes */
+  --ligne:           rgba(0, 0, 0, 0.07);
+  --ligne-media:     rgba(0, 0, 0, 0.12);
+  --ligne-forte:     rgba(0, 0, 0, 0.18);
+  --ligne-or:        rgba(184, 148, 90, 0.25);
+  --ligne-or-suave:  rgba(184, 148, 90, 0.12);
+
+  /* Transiciones refinadas */
+  --lenta:     all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  --normal:    all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --rapida:    all 0.25s ease;
+
+  /* Compatibilidad con variables existentes */
+  --dorado:          #B8945A;
+  --dorado-brillo:   #E8D090;
+  --carbon:          #080808;
+  --marfil:          #F5F1EA;
+  --blanco-dior:     #FFFFFF;
+  --blanco-puro:     #FFFFFF;
+  --gris-suave:      #9A9A9A;
+  --linea-fina:      rgba(0, 0, 0, 0.07);
+  --fondo-editorial: #F5F1EA;
+  --fondo-galeria:   #FAFAF8;
+  --transition:      all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE GLOBAL
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif !important;
+  background-color: var(--blanc-casse) !important;
+  color: var(--texte) !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.015em;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--normal);
+}
+
+img, video, iframe {
+  max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OCULTAR BARRAS DE ANUNCIOS
+   ═══════════════════════════════════════════════════════════════ */
+.top-announcement,
+.top-announcement * {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMACIONES LUXURY
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes luxLineGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes subtleGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184,148,90,0); }
+  50%       { box-shadow: 0 0 20px 0 rgba(184,148,90,0.15); }
+}
+
+/* Neutralizar animaciones excesivas */
+@keyframes goldShimmer   { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes ripplePulse   { 0%, 100% { box-shadow: none; } }
+@keyframes bagWigglePulse{ 0%, 100% { transform: scale(1) rotate(0deg); } }
+@keyframes sparkle       { 0%, 100% { box-shadow: none; } }
+@keyframes scrollBanner  { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s cubic-bezier(0.23, 1, 0.32, 1),
+              transform 0.9s cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+.fade-in.visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR — MAISON DE LUXE
+   ═══════════════════════════════════════════════════════════════ */
+.navbar {
+  background: rgba(250, 248, 244, 0.98) !important;
+  border-bottom: 1px solid var(--ligne-forte) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  padding: clamp(18px, 2.5vw, 28px) 5vw !important;
+  box-shadow: none !important;
+}
+
+.brand-nav {
+  font-family: 'Cinzel', serif !important;
+  color: var(--noir) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.45em !important;
+  font-size: clamp(1.1rem, 2vw, 1.5rem) !important;
+  text-transform: uppercase !important;
+}
+
+/* También aplicar al brand que use estilo inline */
+[style*="letter-spacing:0.4em"][style*="CBAA63"],
+[style*="letter-spacing: 0.4em"][style*="CBAA63"] {
+  color: var(--noir) !important;
+}
+
+.nav-link,
+.dropbtn {
+  color: var(--texte) !important;
+  font-weight: 400 !important;
+  letter-spacing: 2px !important;
+  font-size: clamp(0.47rem, 0.68vw, 0.57rem) !important;
+  transition: var(--normal) !important;
+}
+
+.nav-link::after {
+  background-color: var(--or) !important;
+  height: 1px !important;
+}
+
+.nav-link:hover,
+.nav-link.active,
+.dropbtn:hover {
+  color: var(--or) !important;
+}
+
+.dropdown:hover .dropbtn,
+.dropdown.active .dropbtn {
+  color: var(--or) !important;
+}
+
+/* ── DROPDOWN ── */
+.dropdown-content {
+  background: rgba(8, 8, 8, 0.97) !important;
+  border: 1px solid rgba(184, 148, 90, 0.12) !important;
+  border-top: 1.5px solid var(--or) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+.dropdown-content a {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-weight: 300 !important;
+  font-size: 0.6rem !important;
+  letter-spacing: 0.12em !important;
+  padding: 13px 24px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  transition: var(--normal) !important;
+}
+
+.dropdown-content a:hover {
+  color: var(--or) !important;
+  background: rgba(184, 148, 90, 0.06) !important;
+  padding-left: 30px !important;
+}
+
+.dropdown-content a.mi-espacio-link {
+  background: linear-gradient(135deg, rgba(184,148,90,0.12), rgba(232,208,144,0.06)) !important;
+  color: var(--or) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.15em !important;
+  border-bottom: 1px solid rgba(184, 148, 90, 0.2) !important;
+  animation: none !important;
+}
+
+.dropdown-content a.mi-espacio-link:hover {
+  background: linear-gradient(135deg, rgba(184,148,90,0.22), rgba(232,208,144,0.12)) !important;
+  padding-left: 24px !important;
+}
+
+/* ── BOTÓN CART en navbar ── */
+.btn-cart,
+.nav-link[href="carrito.html"],
+.nav-btn-carrito {
+  color: var(--texte) !important;
+}
+
+/* Botón CATÁLOGO en index (override del estilo inline) */
+.catalogo-btn,
+a.catalogo-btn {
+  background: transparent !important;
+  background-image: none !important;
+  animation: none !important;
+  border: 1px solid var(--or) !important;
+  color: var(--or) !important;
+  box-shadow: none !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: clamp(0.55rem, 0.85vw, 0.65rem) !important;
+  letter-spacing: 3px !important;
+  padding: 13px 32px !important;
+  transition: var(--normal) !important;
+}
+
+.catalogo-btn:hover,
+a.catalogo-btn:hover {
+  background: var(--or) !important;
+  color: var(--blanc) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTONES — LÍNEA LUXURY
+   ═══════════════════════════════════════════════════════════════ */
+.btn-gold {
+  display: inline-block;
+  background: transparent !important;
+  border: 1px solid var(--or) !important;
+  color: var(--or) !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: clamp(0.52rem, 0.8vw, 0.62rem) !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  padding: 13px 32px !important;
+  transition: var(--normal) !important;
+  animation: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  cursor: pointer;
+}
+
+.btn-gold:hover {
+  background: var(--or) !important;
+  color: var(--blanc) !important;
+  box-shadow: none !important;
+  transform: translateY(-2px) !important;
+}
+
+.btn-editorial {
+  background: transparent !important;
+  border: 1px solid var(--or) !important;
+  color: var(--or) !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: clamp(0.52rem, 0.8vw, 0.62rem) !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  padding: 13px 36px !important;
+  transition: var(--normal) !important;
+  animation: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  cursor: pointer;
+}
+
+.btn-editorial.primary,
+.btn-editorial[class*="primary"] {
+  background: var(--or) !important;
+  border-color: var(--or) !important;
+  color: var(--blanc) !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+.btn-editorial:hover {
+  background: var(--noir) !important;
+  border-color: var(--noir) !important;
+  color: var(--blanc) !important;
+  transform: translateY(-2px) !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* Botones de carrito y checkout */
+.btn-checkout,
+.btn-comprar,
+.btn-add-cart {
+  border-radius: 0 !important;
+  animation: none !important;
+  box-shadow: none !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 2px !important;
+  transition: var(--normal) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO — EDITORIAL NEGRO
+   ═══════════════════════════════════════════════════════════════ */
+.image-hero,
+.hero {
+  background: var(--noir-profond) !important;
+}
+
+/* Hero overlay de suscripción */
+.hero-overlay {
+  background: rgba(5, 5, 5, 0.82) !important;
+  border: 1px solid rgba(184, 148, 90, 0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.hero-overlay h2 {
+  font-family: 'Cinzel', serif !important;
+  color: var(--or) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+}
+
+.hero-subscribe-form button {
+  background: var(--or) !important;
+  background-image: none !important;
+  animation: none !important;
+  border: 1px solid var(--or) !important;
+  color: var(--blanc) !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 3px !important;
+  transition: var(--normal) !important;
+  border-radius: 0 !important;
+}
+
+.hero-subscribe-form button:hover {
+  background: var(--noir) !important;
+  border-color: var(--or) !important;
+}
+
+.hero-discount-badge {
+  color: var(--or) !important;
+  border: 1px solid rgba(184, 148, 90, 0.3) !important;
+  background: rgba(184, 148, 90, 0.06) !important;
+  letter-spacing: 3px !important;
+  font-size: 0.55rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CERT BANNER — ELEGANTE
+   ═══════════════════════════════════════════════════════════════ */
+.cert-banner {
+  background: linear-gradient(135deg, #080808 0%, #141414 60%, #0D0D0D 100%) !important;
+  border-bottom: 1px solid rgba(184, 148, 90, 0.2) !important;
+  border-top: none !important;
+}
+
+.cert-banner::before {
+  background: linear-gradient(to right,
+    rgba(255,255,255,0) 0%,
+    rgba(184,148,90,0.08) 50%,
+    rgba(255,255,255,0) 100%) !important;
+  animation: sweep 10s infinite !important;
+}
+
+.cert-banner-title {
+  font-family: 'Cinzel', serif !important;
+  color: var(--or) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+}
+
+.cert-banner-text {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-weight: 300 !important;
+  line-height: 2 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EDITORIAL MAGAZINE — NEGRO PROFUNDO
+   ═══════════════════════════════════════════════════════════════ */
+.editorial-magazine {
+  background-color: #080808 !important;
+}
+
+.magazine-kicker {
+  color: var(--or) !important;
+  font-family: 'Cinzel', serif !important;
+  font-style: italic !important;
+  letter-spacing: 0.25em !important;
+}
+
+.magazine-header h1,
+.magazine-header h2 {
+  color: var(--blanc) !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+}
+
+.magazine-intro,
+.magazine-intro p {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 300 !important;
+  line-height: 2.2 !important;
+}
+
+.chapter-block {
+  border-bottom: 1px solid rgba(184, 148, 90, 0.1) !important;
+  transition: var(--normal) !important;
+}
+
+.chapter-block:hover {
+  border-bottom-color: var(--or) !important;
+  padding-left: 16px !important;
+}
+
+.chapter-number {
+  color: var(--or) !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 4px !important;
+  font-size: 0.6rem !important;
+}
+
+.chapter-title {
+  color: var(--blanc) !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.chapter-text {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 300 !important;
+  line-height: 2 !important;
+}
+
+.magazine-index {
+  background-color: #0F0F0F !important;
+  border: 1px solid rgba(184, 148, 90, 0.12) !important;
+  box-shadow: none !important;
+}
+
+.index-title {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-family: 'Cinzel', serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.15em !important;
+}
+
+.index-list li {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-weight: 300 !important;
+  letter-spacing: 2px !important;
+  font-size: 0.6rem !important;
+}
+
+.index-list li::before {
+  content: "—" !important;
+  color: var(--or) !important;
+  margin-right: 10px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TARJETAS DE PRODUCTO — LÍNEA LIMPIA
+   ═══════════════════════════════════════════════════════════════ */
+.product-card,
+.category-card,
+.article-card,
+.boutique-card {
+  background: var(--blanc) !important;
+  border: 1px solid var(--ligne) !important;
+  box-shadow: none !important;
+  transition: var(--normal) !important;
+  border-radius: 0 !important;
+}
+
+.product-card::before,
+.product-card::after,
+.category-card::before,
+.category-card::after {
+  display: none !important;
+}
+
+.product-card:hover,
+.category-card:hover,
+.article-card:hover,
+.boutique-card:hover {
+  border-color: rgba(184, 148, 90, 0.35) !important;
+  box-shadow: 0 6px 36px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-4px) !important;
+}
+
+.product-card .card-top-accent,
+.category-card .card-top-accent {
+  background: var(--or) !important;
+}
+
+/* ── PRECIOS ── */
+.precio,
+.product-price,
+.price,
+.item-price {
+  color: var(--texte) !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px !important;
+}
+
+.precio-tachado,
+.precio-anterior,
+.price-old,
+.old-price,
+del, s {
+  color: var(--texte-subtil) !important;
+  text-decoration: line-through !important;
+  font-weight: 300 !important;
+}
+
+/* ─ Favoritos ─ */
+.btn-fav {
+  background: rgba(250, 248, 244, 0.9) !important;
+  border: 1px solid var(--ligne) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: var(--normal) !important;
+}
+
+.btn-fav:hover {
+  background: var(--blanc) !important;
+  border-color: var(--or) !important;
+}
+
+.btn-fav.active {
+  color: var(--or) !important;
+  border-color: rgba(184, 148, 90, 0.4) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CABECERAS DE SECCIÓN — ELEGANTES
+   ═══════════════════════════════════════════════════════════════ */
+.page-header,
+.gallery-header,
+.catalog-header,
+.section-header {
+  background: var(--noir-profond) !important;
+  border-bottom: 1px solid rgba(184, 148, 90, 0.2) !important;
+}
+
+.page-header h1,
+.gallery-header h1,
+.catalog-header h1,
+.section-header h1,
+.page-header h2,
+.gallery-header h2 {
+  font-family: 'Cinzel', serif !important;
+  color: var(--blanc) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+}
+
+.page-header .kicker,
+.gallery-header .kicker,
+.section-kicker {
+  color: var(--or) !important;
+  font-family: 'Cinzel', serif !important;
+  font-style: italic !important;
+  font-weight: 300 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORMULARIOS — MINIMALISTAS
+   ═══════════════════════════════════════════════════════════════ */
+input[type="email"],
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+  border-radius: 0 !important;
+  border: 1px solid var(--ligne-media) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.03em !important;
+  transition: border-color 0.3s ease !important;
+  outline: none !important;
+}
+
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--or) !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS — MINIMALISTAS
+   ═══════════════════════════════════════════════════════════════ */
+.enigme-toast,
+#enigmeToast {
+  background: var(--noir-profond) !important;
+  border: 1px solid rgba(184, 148, 90, 0.25) !important;
+  color: var(--or) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.08em !important;
+  font-size: 0.7rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER — MAISON
+   ═══════════════════════════════════════════════════════════════ */
+.footer,
+footer {
+  background: var(--noir-profond) !important;
+  border-top: 1px solid rgba(184, 148, 90, 0.18) !important;
+  padding: clamp(50px, 7vw, 90px) 5vw !important;
+}
+
+.footer-logo {
+  font-family: 'Cinzel', serif !important;
+  color: var(--or) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.35em !important;
+  font-size: clamp(1rem, 2vw, 1.4rem) !important;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-weight: 300 !important;
+  letter-spacing: 2px !important;
+  font-size: 0.52rem !important;
+  border-bottom: 1px solid transparent !important;
+  transition: var(--normal) !important;
+}
+
+.footer-links a:hover {
+  color: var(--or) !important;
+  border-bottom-color: transparent !important;
+}
+
+.footer-copy {
+  color: rgba(255, 255, 255, 0.2) !important;
+  letter-spacing: 0.3em !important;
+  font-weight: 300 !important;
+  font-size: 0.45rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WHATSAPP FLOAT
+   ═══════════════════════════════════════════════════════════════ */
+.whatsapp-float {
+  background: var(--noir-profond) !important;
+  border: 1px solid rgba(184, 148, 90, 0.25) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  transition: var(--normal) !important;
+}
+
+.whatsapp-float:hover {
+  background: var(--or) !important;
+  border-color: var(--or) !important;
+  color: var(--blanc) !important;
+  box-shadow: 0 8px 32px rgba(184, 148, 90, 0.3) !important;
+  transform: translateY(-3px) !important;
+}
+
+.whatsapp-float svg {
+  fill: currentColor !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIQUIDACIÓN — REFINADA (override del estilo urgente)
+   ═══════════════════════════════════════════════════════════════ */
+.liquidacion-badge,
+.badge-liquidacion {
+  background: transparent !important;
+  border: 1px solid rgba(180, 60, 60, 0.5) !important;
+  color: rgba(220, 80, 80, 0.9) !important;
+  font-size: 0.52rem !important;
+  letter-spacing: 2px !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHTBOX — LUXURY
+   ═══════════════════════════════════════════════════════════════ */
+.lightbox-overlay,
+#lightboxOverlay {
+  background: rgba(0, 0, 0, 0.95) !important;
+}
+
+.lightbox-close,
+.lightbox-prev,
+.lightbox-next {
+  color: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: transparent !important;
+  transition: var(--normal) !important;
+}
+
+.lightbox-close:hover,
+.lightbox-prev:hover,
+.lightbox-next:hover {
+  color: var(--or) !important;
+  border-color: var(--or) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALES — MAISON
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay,
+.manifest-overlay,
+#miEspacioModal {
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+.modal-card,
+.manifest-card,
+.espacio-card {
+  background: var(--blanc-casse) !important;
+  border: 1px solid var(--ligne-or) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARRITO — LUXURY
+   ═══════════════════════════════════════════════════════════════ */
+.cart-item {
+  border-bottom: 1px solid var(--ligne) !important;
+  transition: var(--normal) !important;
+}
+
+.cart-item:hover {
+  background: rgba(0, 0, 0, 0.015) !important;
+}
+
+.summary-panel,
+.checkout-panel {
+  background: var(--blanc) !important;
+  border: 1px solid var(--ligne-media) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.stripe-notice {
+  background: rgba(184, 148, 90, 0.05) !important;
+  border-left: 2px solid var(--or) !important;
+}
+
+.stripe-notice strong {
+  color: var(--or) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POPUP EMAIL — LUXURY (enigme-popup.js styles)
+   ═══════════════════════════════════════════════════════════════ */
+#enigmeEmailPopup > div {
+  background: var(--blanc-casse) !important;
+  border: 1px solid rgba(184, 148, 90, 0.25) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COOKIE CONSENT (enigme-core.js)
+   ═══════════════════════════════════════════════════════════════ */
+#enigme-cookie-overlay {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECCIÓN CATEGORÍAS / CATÁLOGO
+   ═══════════════════════════════════════════════════════════════ */
+.catalog-grid,
+.products-grid,
+.category-grid {
+  gap: clamp(16px, 3vw, 28px) !important;
+}
+
+/* ── Título del catálogo ── */
+.catalog-title,
+.gallery-title,
+.section-title {
+  font-family: 'Cinzel', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+  color: var(--blanc) !important;
+}
+
+/* ── Etiquetas de material/colección ── */
+.tag,
+.material-tag,
+.collection-tag {
+  font-size: 0.52rem !important;
+  letter-spacing: 2px !important;
+  font-weight: 300 !important;
+  border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PÁGINA PRODUCTO DETALLE
+   ═══════════════════════════════════════════════════════════════ */
+.product-detail-title {
+  font-family: 'Cinzel', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  color: var(--texte) !important;
+}
+
+.product-manifesto {
+  background: var(--blanc-casse) !important;
+}
+
+.philosophy-band {
+  background: var(--noir-profond) !important;
+  border-top: 1px solid rgba(184, 148, 90, 0.15) !important;
+  border-bottom: 1px solid rgba(184, 148, 90, 0.15) !important;
+}
+
+.philosophy-quote {
+  font-family: 'Cormorant Garamond', serif !important;
+  font-style: italic !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 300 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CERTIFICADO — MAISON
+   ═══════════════════════════════════════════════════════════════ */
+.cert-content {
+  font-family: 'Cormorant Garamond', serif !important;
+}
+
+.cert-seal {
+  filter: drop-shadow(0 4px 24px rgba(184, 148, 90, 0.2)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SOPORTE / CONTACTO
+   ═══════════════════════════════════════════════════════════════ */
+.contact-card {
+  background: var(--blanc) !important;
+  border: 1px solid var(--ligne) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition: var(--normal) !important;
+}
+
+.contact-card:hover {
+  border-color: rgba(184, 148, 90, 0.3) !important;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.07) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTÓN CARRITO BADGE
+   ═══════════════════════════════════════════════════════════════ */
+.cart-badge,
+.count-badge,
+#cartCount,
+#favCount {
+  background: var(--or) !important;
+  color: var(--blanc) !important;
+  font-weight: 600 !important;
+  border-radius: 50% !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VESTIDOS — COMING SOON
+   ═══════════════════════════════════════════════════════════════ */
+.coming-soon-section {
+  background: var(--blanc-casse) !important;
+}
+
+.coming-soon-title {
+  font-family: 'Cinzel', serif !important;
+  color: var(--noir) !important;
+  letter-spacing: 0.2em !important;
+  font-weight: 400 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SELECTS DE TALLA / MATERIAL
+   ═══════════════════════════════════════════════════════════════ */
+.size-selector,
+.material-selector {
+  background: var(--blanc) !important;
+  border: 1px solid var(--ligne-media) !important;
+  border-radius: 0 !important;
+  color: var(--texte) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LÍNEAS DECORATIVAS LUXURY
+   ═══════════════════════════════════════════════════════════════ */
+.luxury-divider,
+.gold-line,
+.separator-line {
+  height: 1px !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--or) 30%,
+    var(--or) 70%,
+    transparent 100%) !important;
+  border: none !important;
+  opacity: 0.5 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR CARRITO (fondo claro)
+   ═══════════════════════════════════════════════════════════════ */
+.navbar .brand-nav {
+  color: var(--noir) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE TWEAKS
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 14px 16px !important;
+  }
+
+  .brand-nav {
+    font-size: 1.1rem !important;
+    letter-spacing: 0.28em !important;
+  }
+
+  .dropdown-content {
+    background: rgba(6, 6, 6, 0.98) !important;
+  }
+
+  .btn-gold,
+  .btn-editorial {
+    padding: 11px 22px !important;
+    font-size: 0.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-nav {
+    font-size: 0.95rem !important;
+    letter-spacing: 0.2em !important;
+  }
+
+  .footer-logo {
+    font-size: 1rem !important;
+    letter-spacing: 0.22em !important;
+  }
+}

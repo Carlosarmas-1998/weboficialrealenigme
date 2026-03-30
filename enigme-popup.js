@@ -36,7 +36,7 @@
           '<button type="submit" id="enigmePopupBtn" style="padding:14px;background:linear-gradient(135deg,#CBAA63,#E8D090);border:none;color:#0A0A0A;font-family:Cinzel,Georgia,serif;font-size:0.8rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-weight:700;margin-top:0;">UNIRME AL CLUB</button>' +
         '</form>' +
         '<p id="enigmePopupMsg" style="display:none;font-size:0.8rem;margin-top:12px;color:#CBAA63;font-family:Montserrat,sans-serif;"></p>' +
-        '<button onclick="document.getElementById(\'enigmeEmailPopup\').style.opacity=\'0\';setTimeout(function(){document.getElementById(\'enigmeEmailPopup\').remove()},400);sessionStorage.setItem(\'enigme_popup_closed\',\'1\');" style="background:none;border:none;color:#999;font-size:0.65rem;cursor:pointer;margin-top:14px;font-family:Montserrat,sans-serif;letter-spacing:0.1em;text-transform:uppercase;text-decoration:underline;">No gracias, seguir navegando</button>' +
+        '<button onclick="document.getElementById(\'enigmeEmailPopup\').style.opacity=\'0\';setTimeout(function(){document.getElementById(\'enigmeEmailPopup\').remove()},400);sessionStorage.setItem(\'enigme_popup_closed\',\'1\');" style="background:none;border:none;color:#999;font-size:0.65rem;cursor:pointer;margin-top:14px;font-family:Montserrat,sans-serif;letter-spacing:0.1em;text-transform:uppercase;text-decoration:underline;">Continuar sin aceptar</button>' +
       '</div>';
 
     document.body.appendChild(overlay);
@@ -63,6 +63,18 @@
         // Save regardless (409 = already exists = fine)
         localStorage.setItem('enigme_subscriber_email', email);
         localStorage.setItem('enigme_discount_10', 'true');
+        // Al unirse al club: acepta cookies, políticas y notificaciones
+        localStorage.setItem('enigme_cookies_accepted', 'true');
+        localStorage.setItem('enigme_cookies_date', new Date().toISOString());
+        localStorage.setItem('enigme_notifications_accepted', 'true');
+        localStorage.setItem('enigme_legal_accepted', 'true');
+        // Solicitar permiso de notificaciones push
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission().catch(function() {});
+        }
+        // Ocultar banner de cookies si existe
+        var cookieBanner = document.getElementById('enigme-cookie-overlay');
+        if (cookieBanner) { cookieBanner.remove(); }
 
         // Send welcome email
         fetch(SB + '/functions/v1/send-email', {

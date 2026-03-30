@@ -202,6 +202,9 @@
   ========================================================== */
 
   function initCookieConsent() {
+    // El popup de email (enigme-popup.js) maneja el consentimiento completo.
+    // Este banner ya no se muestra — todo queda unificado en el popup de suscripción.
+    return;
     var consent = localStorage.getItem("enigme_cookies_accepted");
     if (consent) return; // Already accepted or declined
 
