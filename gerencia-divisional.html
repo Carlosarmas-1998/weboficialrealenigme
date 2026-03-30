@@ -1843,7 +1843,7 @@ async function loadPedidosDiv() {
     if (vendedoraIds.length) {
       for (var vb = 0; vb < vendedoraIds.length; vb += 50) {
         var vBatch = vendedoraIds.slice(vb, vb + 50);
-        var vRes = await api('/rest/v1/vendedoras?id=in.(' + vBatch.join(',') + ')&select=id,nombre,codigo');
+        var vRes = await api('/rest/v1/vendedoras?id=in.(' + vBatch.join(',') + ')&select=id,nombre,codigo,dni,telefono,direccion,sector_id,coordinador_id');
         if (vRes && !vRes.error) vRes.forEach(function(v){ vendedoraMap[v.id] = v; });
       }
     }
@@ -1938,9 +1938,18 @@ async function loadPedidosDiv() {
           html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">';
           html += '<div>';
           html += '<span style="font-weight:600;font-size:.82rem;">' + esc(p.codigo_pedido || '-') + '</span>';
-          if (vendedora) html += ' &mdash; <span style="font-size:.78rem;">' + esc(vendedora.codigo) + ' ' + esc(vendedora.nombre) + '</span>';
-          if (camp) html += ' &mdash; <span style="font-size:.7rem;color:var(--gris);">C' + camp.numero + '</span>';
+          if (camp) html += ' &mdash; <span style="font-size:.7rem;color:var(--gris);">Campaña ' + camp.numero + '</span>';
           html += '</div>';
+          if (vendedora) {
+            html += '<div style="margin-top:6px;padding:8px;background:rgba(203,170,99,0.07);border-left:2px solid var(--dorado);font-size:.75rem;">';
+            html += '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">';
+            html += '<span><strong style="color:var(--dorado);">VENDEDORA:</strong> ' + esc(vendedora.codigo) + ' &mdash; ' + esc(vendedora.nombre) + '</span>';
+            if (vendedora.dni) html += '<span style="color:var(--gris);">DNI: <strong>' + esc(vendedora.dni) + '</strong></span>';
+            if (vendedora.telefono) html += '<span style="color:var(--gris);">Tel: <strong>' + esc(vendedora.telefono) + '</strong></span>';
+            if (vendedora.direccion) html += '<span style="color:var(--gris);">Dir: ' + esc(vendedora.direccion) + '</span>';
+            html += '</div>';
+            html += '</div>';
+          }
           html += '<div style="font-size:.7rem;color:var(--gris);">' + (p.created_at ? p.created_at.split('T')[0] : '-') + '</div>';
           html += '</div>';
           if (p.observaciones) {
